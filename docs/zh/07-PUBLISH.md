@@ -74,3 +74,67 @@ jar **不作为源码树的一部分**（避免二进制进入版本历史），
 ## 7. 许可证
 
 `.gitignore` 与文档均已就绪，但**许可证仍未定**（README 里写着「未定 / TBD by the author」）。私有仓库不受影响；一旦转公开，没有 LICENSE 等于「保留所有权利」。要开源请补一份（MIT / Apache-2.0 / LGPL 等），并在 README 与 `neoforge.mods.toml` 的 `license` 字段同步。
+## 8. 做了更新版之后怎么推
+
+### 8.1 先理解 git 在做什么（回答「会不会覆盖旧版本」）
+
+- 每次 commit 是**一份完整快照**，不是"增量补丁"。`main` 分支永远指向**最新那一份快照**。
+- 所以推更新时，工作树里**同名文件会被新版替换**——这是它的本职，不是"覆盖掉旧版本"。
+  没变的文件不动；本地删掉的文件在提交后也会从仓库里移除。
+- **旧版本不会消失**：每次提交都在历史里，`v0.0.1` 还是一个 tag，Release 上的 jar 也一直在。
+  随时可以看旧代码：GitHub 上切 tag 浏览，或本地 `git checkout v0.0.1`。
+- 真正会毁掉历史的是 `git push --force`（强推）。**不要用它**；要回退就正常 `git revert` 或再提交一次。
+
+### 8.2 日常更新（bug 修复、小改动）
+
+```bash
+# 1) 改完代码，先确认能构建（本机用 .tools\gw.cmd，或双击 一键构建.cmd）
+# 2) 再跑一次静态验收，确保没有回归
+python -X utf8 tools/verify_project.py
+
+# 3) 提交并推送
+git add -A
+git commit -m "fix: 修掉 xxx"
+git push
+```
+
+`git push` 之后，GitHub 上的 `main` 立刻变成这次提交的内容。**不需要**再建 Release——Release 只对应"正式发版"。
+
+### 8.3 正式发一版（例如 v0.0.2）
+
+```bash
+# 1) 改版本号（会影响 jar 名字与 mods.toml 里解析出的版本）
+#    改 gradle.properties：mod_version=0.0.2
+
+# 2) 重新构建，产出 dist\farmstorm-0.0.2+mc1.21.1.jar
+cmd /c ""D:\project_farm\.tools\gw.cmd" build
+
+# 3) 提交 + 打 tag + 推送（tag 一定要一起推，否则 GitHub 上看不到）
+git add -A
+git commit -m "v0.0.2: 本次改了什么"
+git tag v0.0.2
+git push
+git push origin v0.0.2
+
+# 4) 建新 Release 并挂新 jar（旧的 v0.0.1 保持不动）
+gh release create v0.0.2 "dist\farmstorm-0.0.2+mc1.21.1.jar" \
+  --title "农场风云 v0.0.2" --notes "本次改动摘要" --target main --latest
+```
+
+要点：
+- **一个版本一个 tag 一个 Release**。v0.0.2 不会动到 v0.0.1，玩家仍能下到旧版。
+- `dist/` 在 `.gitignore` 里，jar 不进源码树，只挂 Release 附件。
+- 想替换某个 Release 的 jar（例如打错了）用 `gh release upload v0.0.2 <jar> --clobber`，但更推荐直接发新版本号。
+
+### 8.4 本机（DSH 沙箱内）的两个特例
+
+下面两条**只影响在 DSH 会话里执行 git 命令**，你自己在资源管理器/终端里操作不受影响：
+
+1. **TLS**：沙箱内的 Windows Schannel 拿不到凭证，`git push` 会报 `SEC_E_NO_CREDENTIALS`。已在仓库内设置 `git config http.sslBackend openssl` 绕开。
+2. **凭据助手**：沙箱禁止命名管道，git 调 `gh` 取 token 会报 `couldn't create signal pipe`。临时做法是把 token 内联进 URL 用一次：
+   ```powershell
+   $tok = (& "C:\Program Files\GitHub CLI\gh.exe" auth token)
+   git -c credential.helper= push "https://x-access-token:$tok@github.com/redstonepigawa/farmstorm.git" main:main
+   git remote set-url origin https://github.com/redstonepigawa/farmstorm.git   # 用完立刻还原
+   ```
+   在**你自己的终端**里不需要这一步，直接 `git push` 即可（GCM / gh 助手都正常）。

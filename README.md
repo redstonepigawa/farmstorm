@@ -77,11 +77,21 @@ jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.w
 | [`docs/zh/05-PROMPT-MAIN.md`](docs/zh/05-PROMPT-MAIN.md) | [`docs/en/05-PROMPT-MAIN.md`](docs/en/05-PROMPT-MAIN.md) | 主提示词：14 条硬约束 HC-01~HC-14、14 条禁止行为、PDCA 纪律 |
 | [`docs/zh/06-PROMPT-TASKS.md`](docs/zh/06-PROMPT-TASKS.md) | [`docs/en/06-PROMPT-TASKS.md`](docs/en/06-PROMPT-TASKS.md) | 分阶段任务清单：Phase 1~10 各一节，可单独复制投喂 |
 
+### 实施文档 / Implementation documents
+
+| 文件 | 内容 |
+|---|---|
+| [`docs/zh/08-DEV-GUIDE.md`](docs/zh/08-DEV-GUIDE.md) | **开发者手册**：代码地图、三个不可动摇的约束、构建与调试手法、**13 条已踩过的坑对照表**、不要做的事 |
+| [`docs/zh/07-PUBLISH.md`](docs/zh/07-PUBLISH.md) | 发布指南：提交/排除清单、Release 做法、更新与发版流程、本机构建环境适配 |
+| [`.work/PLAN.md`](.work/PLAN.md) | 决策记录 R-01~R-55 + 文档与实现的差异登记（**唯一真相源的补充**） |
+| [`.work/TASK-*.md`](.work) | 各阶段任务书与验收标准 |
+
 ### 工具 / Tools
 
 | 文件 | 用途 |
 |---|---|
-| [`tools/gen_textures.py`](tools/gen_textures.py) | 批量生成材质：原版贴图右下角叠加绿色「+」。21 个映射（15 作物 + 6 种子） |
+| [`tools/gen_textures.py`](tools/gen_textures.py) | 批量生成 91 张材质（原版贴图 + 绿色「+」叠加、转换器四面作物）。`--vanilla-assets` 必须指向 **26.3 客户端 jar** |
+| [`tools/verify_project.py`](tools/verify_project.py) | 静态验收：117 config 键 / 64 注册 ID / 语言键一致性 / 禁令扫描 |
 | [`tools/verify_api.ps1`](tools/verify_api.ps1) | 版本与 API 签名核查：拉真实最新版本号、用 `javap` 验证 4 个不确定签名，输出可直接贴回 §10.2 的 Markdown 表 |
 | [`plan.txt`](plan.txt) | 作者原始设想。**只读，不作为规范依据**——已被上面七份文档取代 |
 

@@ -83,7 +83,7 @@ D:\project_farm\
 | ID | Decision |
 |---|---|
 | D-06 | Friendly determination: v0.0.1 uses vanilla scoreboard teams (Scoreboard Team); at the same time a `TeamResolver` abstraction is extracted so FTB Teams can be plugged in later. |
-| D-07 | Affected targets: trap and turret categories target **non-friendly players** only and do not handle mobs. Sole exception: the Pumpkin Turret keeps interception of projectiles in flight. |
+| D-07 | Affected targets: trap and turret categories target **non-friendly players** only and do not handle mobs. Two exceptions: the Pumpkin Turret keeps interception of projectiles in flight (C-3), and per D-43 it also acquires **hostile mobs (`Monster`)**. |
 | D-08 | Every improved crop has a seed item, in one-to-one correspondence with the vanilla seed form; on harvest the crop and the seed item drop together at vanilla ratios, a self-sufficient loop. |
 | D-09 | Improved crops **no longer have their vanilla uses** (cannot be made into bread, cannot feed animals, do not take part in vanilla recipes). |
 | D-10 | "Plantable" adds no new design in v0.0.1, only the interface and the specification; all 15 crops are naturally plantable because all have a seed form. |

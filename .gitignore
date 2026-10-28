@@ -1,0 +1,26 @@
+# 构建产物与运行目录（不进版本库）
+build/
+run/
+run-*/
+logs/
+.gradle/
+src/generated/resources/.cache/
+dist/
+
+# 本地工具链（含 JDK / Gradle / NeoForge 镜像代理 / java.base 补丁，几百 MB，属于本机环境）
+.tools/
+.scratch/
+
+# 不属于项目的归档：会话转录、崩溃报告（体积大且含本机信息）
+dsh-session-*.zip
+错误报告-*.zip
+
+# 机密：切勿提交
+.token
+*.token
+.env
+
+# IDE
+.idea/
+*.iml
+.vscode/

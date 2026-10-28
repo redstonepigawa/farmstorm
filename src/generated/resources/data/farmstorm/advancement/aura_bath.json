@@ -1,0 +1,27 @@
+{
+  "parent": "farmstorm:first_deploy",
+  "criteria": {
+    "aura_bath": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.aura_bath.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:awakened_pitcher_plant"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.aura_bath.title"
+    }
+  },
+  "requirements": [
+    [
+      "aura_bath"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

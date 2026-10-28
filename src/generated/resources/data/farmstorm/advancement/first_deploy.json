@@ -1,0 +1,83 @@
+{
+  "parent": "farmstorm:root",
+  "criteria": {
+    "placed_awakened_pitcher_plant": {
+      "conditions": {
+        "location": [
+          {
+            "block": "farmstorm:awakened_pitcher_plant",
+            "condition": "minecraft:block_state_property"
+          }
+        ]
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "placed_awakened_torchflower": {
+      "conditions": {
+        "location": [
+          {
+            "block": "farmstorm:awakened_torchflower",
+            "condition": "minecraft:block_state_property"
+          }
+        ]
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "placed_blast_carrot": {
+      "conditions": {
+        "location": [
+          {
+            "block": "farmstorm:blast_carrot",
+            "condition": "minecraft:block_state_property"
+          }
+        ]
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "placed_fang_trap_cactus": {
+      "conditions": {
+        "location": [
+          {
+            "block": "farmstorm:fang_trap_cactus",
+            "condition": "minecraft:block_state_property"
+          }
+        ]
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "placed_pumpkin_turret": {
+      "conditions": {
+        "location": [
+          {
+            "block": "farmstorm:pumpkin_turret",
+            "condition": "minecraft:block_state_property"
+          }
+        ]
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.first_deploy.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:blast_carrot"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.first_deploy.title"
+    }
+  },
+  "requirements": [
+    [
+      "placed_blast_carrot",
+      "placed_pumpkin_turret",
+      "placed_awakened_torchflower",
+      "placed_awakened_pitcher_plant",
+      "placed_fang_trap_cactus"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

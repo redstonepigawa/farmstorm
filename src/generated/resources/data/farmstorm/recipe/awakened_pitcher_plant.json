@@ -1,0 +1,15 @@
+{
+  "type": "farmstorm:converting",
+  "bidirectional": false,
+  "catalyst": {
+    "item": "minecraft:nether_star"
+  },
+  "input": {
+    "item": "minecraft:pitcher_plant"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:awakened_pitcher_plant"
+  },
+  "reverse_xp_cost": 3
+}

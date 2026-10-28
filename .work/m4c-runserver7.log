@@ -1,0 +1,103 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 6 busy and 1 incompatible and 35 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :writeServerLegacyClasspath UP-TO-DATE
+> Task :prepareServerRun UP-TO-DATE
+
+> Task :runServer
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+ERROR StatusConsoleListener Unable to delete file D:\project_farm\run\logs\latest.log: java.nio.file.FileSystemException D:\project_farm\run\logs\latest.log: ��һ����������ʹ�ô��ļ��������޷����ʡ�
+ERROR StatusConsoleListener Unable to delete file D:\project_farm\run\logs\debug.log: java.nio.file.FileSystemException D:\project_farm\run\logs\debug.log: ��һ����������ʹ�ô��ļ��������޷����ʡ�
+[22:47:30] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[22:47:30] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[22:47:30] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[22:47:30] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[22:47:31] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[22:47:31] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[22:47:31] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.1 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[22:47:31] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[22:47:32] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[22:47:32] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[22:47:32] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[22:47:32] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[22:47:38] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[22:47:38] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[22:47:38] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[22:47:38] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[22:47:38] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[22:47:38] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[22:47:38] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[22:47:38] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[22:47:38] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[22:47:38] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[22:47:39] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[22:47:39] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[22:47:39] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[22:47:40] [main/INFO] [minecraft/RecipeManager]: Loaded 1290 recipes
+[22:47:40] [main/INFO] [minecraft/AdvancementTree]: Loaded 1399 advancements
+[22:47:40] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[22:47:41] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.1
+[22:47:41] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[22:47:41] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[22:47:41] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[22:47:41] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25599
+[22:47:41] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using default channel type
+[22:47:41] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[22:47:41] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[22:47:41] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[22:47:41] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[22:47:41] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world-m4c"
+[22:47:48] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[22:47:48] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[22:47:48] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 335 ms
+[22:47:48] [Server thread/INFO] [minecraft/DedicatedServer]: Done (6.801s)! For help, type "help"
+[22:47:48] [Server thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[22:47:48] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS power=4/cap=2：中心实体只掉 2 点血（health=18） （health=18.0）
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS COBBLESTONE_6：圆石（6.0）不破 （state=Block{minecraft:cobblestone}）
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS COBBLESTONE_6：泥土（0.5）破 （state=Block{minecraft:air}）
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE 免疫标签已加载=false 羊毛存活=false
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE 已提交 12 次同 tick 爆炸，等待 deferred=4 日志
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS 授予：等级 1 且组件写入 （level=1 records=[TempEnchantRecord[enchantment=Reference{ResourceKey[minecraft:enchantment / minecraft:fire_aspect]=Enchantment Fire Aspect}, granted=1, previous=0, expireAt=45]]）
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS 组件读写往返一致 （decoded=[TempEnchantRecord[enchantment=Reference{ResourceKey[minecraft:enchantment / minecraft:fire_aspect]=Enchantment Fire Aspect}, granted=1, previous=0, expireAt=45]]）
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS 未到期不撤销 （level=1）
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS 到期后附魔消失且组件被移除 （level=0）
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS 原等级 2 不被降级 （level=2）
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE PASS 到期后原等级 2 保留、记录清空 （level=2）
+[22:47:48] [Server thread/INFO] [farmstorm/]: 爆炸批处理：本 tick 超量，deferred=5 已在 tick 末执行
+[22:47:48] [Server thread/INFO] [farmstorm/]: 爆炸批处理：本 tick 超量，deferred=0 已在 tick 末执行
+[22:47:48] [Server thread/INFO] [farmstorm/]: 爆炸批处理：本 tick 超量，deferred=0 已在 tick 末执行
+[22:47:48] [Server thread/INFO] [farmstorm/]: 爆炸批处理：本 tick 超量，deferred=0 已在 tick 末执行
+[22:47:48] [Server thread/INFO] [farmstorm/]: 爆炸批处理：本 tick 超量，deferred=0 已在 tick 末执行
+[22:47:48] [Server thread/INFO] [farmstorm/]: PROBE 完成，停服
+[22:47:48] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[22:47:48] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[22:47:48] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[22:47:49] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world-m4c]'/minecraft:overworld
+[22:47:49] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world-m4c]'/minecraft:the_nether
+[22:47:49] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world-m4c]'/minecraft:the_end
+[22:47:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world-m4c): All chunks are saved
+[22:47:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[22:47:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[22:47:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+
+BUILD SUCCESSFUL in 27s
+7 actionable tasks: 1 executed, 6 up-to-date

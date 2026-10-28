@@ -1,0 +1,16 @@
+== 1. config：文档 117 键 vs 生成的 toml ==
+  文档口径键数: 117
+  生成 toml 键数: 117
+  [OK]   117 个配置键与文档逐字一致（117 键）
+== 2. 64 个注册 ID 逐字核对（全源码树） ==
+  [OK]   items: 22 个 ID 齐全
+  [OK]   blocks: 20 个 ID 齐全
+  [OK]   block_entity_type: 6 个 ID 齐全
+  [OK]   entity_type: 9 个 ID 齐全
+  已核 registry 对象: 62 / 64
+== 3. 语言文件键集一致 ==
+  [WARN] 语言文件尚未生成（DataGen 前）
+== 4. 禁令扫描 ==
+  [OK]   无 Mixin / TODO / 调试残留 / 空 catch
+
+结论：FAIL 0 项，WARN 1 项

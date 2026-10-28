@@ -1,0 +1,76 @@
+﻿server started, 等待客户端玩家登录（最多 2400 刻）
+join name=Dev uuid=380df991-f603-344c-a090-369bad2a924a dim=minecraft:overworld
+config pumpkin_turret.targetRadius=15（期望 15）
+gamerule mobGriefing=true（破坏方块测试必需 true）
+blast_carrot 方块是否存在=Block{farmstorm:blast_carrot}
+--- step 1/19 setup
+setup 场景就绪：13 块平台 @y=120，玩家 Dev 已切生存并传送到 (0.5,121,-8.5)
+--- step 2/19 slice:place
+slice 场景：瓜片子落点=(0,121,0)，僵尸 hp=20.0 @+2格，村民(友善 NPC) hp=20.0 @-2格
+damage victim=villager type=farmstorm:crop_blast amount=6.00 causing=player:Dev#380df991-f603-344c-a090-369bad2a924a direct=player:Dev#380df991-f603-344c-a090-369bad2a924a victimHpAfter=14.0
+damage victim=zombie type=farmstorm:crop_blast amount=5.90 causing=player:Dev#380df991-f603-344c-a090-369bad2a924a direct=player:Dev#380df991-f603-344c-a090-369bad2a924a victimHpAfter=14.1
+--- step 3/19 slice:check
+PASS 瓜片子·不破坏方块 | 3x3x3 区域变化方块数=0（期望 0；旧规则下这里会破）
+PASS 瓜片子·无方块掉落 | 半径 8 内 ItemEntity=0
+PASS 爆炸伤害敌对生物 | 僵尸 hp=14.096 < 20（来源=player:Dev#380df991-f603-344c-a090-369bad2a924a）
+PASS 爆炸伤害友善 NPC（不分敌我） | 村民 hp=14.0 < 20.0｜alive=true pos=(-1.5, 122.0, 0.5) 场景内村民数=1
+PASS 爆炸伤害归属投掷者 | 僵尸受击来源=player:Dev#380df991-f603-344c-a090-369bad2a924a
+--- step 4/19 ubi:place
+ubi 场景：育碧服务器落点=(24,121,0)，威力=4
+--- step 5/19 ubi:check
+PASS 育碧服务器·破坏方块 | 3x3x3 区域变化方块数=44（期望 > 0）
+PASS 育碧服务器·破块后有掉落物 | 半径 12 内 ItemEntity=3
+--- step 6/19 toxic:place
+toxic 场景：毒育碧服务器落点=(48,121,0)
+--- step 7/19 toxic:check
+PASS 毒育碧服务器·破坏方块 | 3x3x3 区域变化方块数=18（期望 > 0）
+--- step 8/19 grenade:place
+grenade 场景：瓜！落点=(0,121,32)，威力=3，子母弹=4
+--- step 9/19 grenade:check
+PASS 瓜！·破坏方块（破障类） | 3x3x3 区域变化方块数=28（期望 > 0）
+grenade 收尾：子母弹残留=4（子母弹走 NEVER_BREAK，二次爆不破块）
+--- step 10/19 small:place
+damage victim=player type=farmstorm:crop_blast amount=15.00 causing=player:Dev#380df991-f603-344c-a090-369bad2a924a direct=player:Dev#380df991-f603-344c-a090-369bad2a924a victimHpAfter=5.0
+small 场景：LuckyBerryRoller.apply(SMALL_EXPLOSION) 在玩家脚下 (24.5,121.0,32.5)，威力=1
+--- step 11/19 small:check
+PASS 幸运浆果小爆炸·不破坏方块 | 3x3x3 区域变化方块数=0（期望 0）
+PASS 幸运浆果小爆炸·伤到站在原地的食用者 | 玩家 hp=5.0（来源=player:Dev#380df991-f603-344c-a090-369bad2a924a）
+--- step 12/19 carrot:place
+carrot 场景：胡罗贝 @BlockPos{x=48, y=121, z=32} 归属者=[Minecraft]（离线 → 玩家对它是非己方）
+carrot 场景：玩家站在坑位旁（triggerRadius=1），HP=20.0；僵尸 @+2 格
+damage victim=zombie type=farmstorm:crop_blast amount=0.94 causing=<null> direct=<null> victimHpAfter=19.1
+damage victim=player type=farmstorm:crop_blast amount=1.00 causing=<null> direct=<null> victimHpAfter=19.0
+--- step 13/19 carrot:check
+PASS 胡罗贝·触发后方块消失 | 胡罗贝位置方块=Block{minecraft:air}
+PASS 胡罗贝·爆炸不破坏任何别的方块（含自身被炸走） | 3x3x3 区域与「放置胡罗贝之前」逐块一致，变化=[]（before 快照早于放方块，所以这里为空 = 只有胡罗贝自己消失）
+PASS 胡罗贝·原地无掉落物 | 半径 8 内 ItemEntity=0，其中胡罗贝物品=0
+PASS 胡罗贝·玩家背包里也没有胡罗贝 | 背包胡罗贝数=0
+PASS 胡罗贝爆炸伤到旁边僵尸 | 僵尸 hp=19.06
+PASS 胡罗贝爆炸也伤到站在旁边的玩家（不分敌我） | 玩家 hp 20.0 → 19.0
+carrot：玩家 hp 20.0 → 19.0（部署者不在场，来源=<null>）
+--- step 14/19 self:place
+self 场景：玩家站在自己投出的瓜片子落点旁 2 格，HP=20.0
+damage victim=player type=farmstorm:crop_blast amount=6.00 causing=player:Dev#380df991-f603-344c-a090-369bad2a924a direct=player:Dev#380df991-f603-344c-a090-369bad2a924a victimHpAfter=14.0
+--- step 15/19 self:check
+PASS 使用者自伤·投掷者站在爆点旁会掉血 | 玩家 hp 20.0 → 14.0（来源=player:Dev#380df991-f603-344c-a090-369bad2a924a）
+PASS 使用者自伤·同一次爆炸仍然不破块 | 3x3x3 变化方块数=0
+--- step 16/19 turret:place
+turret 场景：man瓜 @BlockPos{x=48, y=121, z=64} 归属者=Dev（在线 → 导弹 owner 应等于放置者）
+turret 场景：僵尸 @(48,121,74) 切比雪夫 10 格（旧默认 5 打不到，新默认 15 应锁定）；玩家(放置者)站 2 格内 hp=20.0
+turret 锁定开火：TurretBullet 在场，owner=player:Dev#380df991-f603-344c-a090-369bad2a924a target=zombie:Zombie#9fa59696-4554-4d0f-906e-40e70c17f88b 位置=BlockPos{x=48, y=121, z=65}
+damage victim=zombie type=farmstorm:void_bolt amount=0.94 causing=player:Dev#380df991-f603-344c-a090-369bad2a924a direct=player:Dev#380df991-f603-344c-a090-369bad2a924a victimHpAfter=19.1
+--- step 17/19 turret:check
+PASS man瓜·锁定切比雪夫 10 格外的敌对生物并开火 | 观测到 TurretBullet=true
+PASS man瓜·命中后僵尸掉血 | 僵尸 hp 20.0 → 19.06
+PASS man瓜·伤害归属放置者 | 僵尸受击来源=player:Dev#380df991-f603-344c-a090-369bad2a924a（期望=player:Dev#380df991-f603-344c-a090-369bad2a924a）
+PASS man瓜·放置者(己方)不被锁定 | 曾锁定玩家=false，玩家 hp=20.0，玩家受击记录=null（应为 null）
+--- step 18/19 turretNeg:place
+turretNeg 场景：鸡(非敌对)@5 格、僵尸@20 格（>15 半径），玩家(放置者)@2 格；观察 90 刻不应开火
+--- step 19/19 turretNeg:check
+PASS man瓜·鸡(动物)不成为目标 | 鸡 hp=4.0 受击记录=null
+PASS man瓜·20 格外的僵尸不成为目标（半径 15 生效） | 僵尸 hp=20.0 受击记录=null（应为 null）
+PASS man瓜·反向炮台 12 格内没有导弹 | TurretBullet 在场=0
+PASS man瓜·炮台从不锁定放置者 | 曾锁定玩家=false
+PASS man瓜·反向场景炮台没破坏地形 | 地形未变
+SUMMARY PASS=28 FAIL=0
+DONE 服务端将在 2 秒后退出

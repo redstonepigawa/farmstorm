@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "farmstorm:block/converter_top",
+    "east": "farmstorm:block/converter_side_carrot",
+    "north": "farmstorm:block/converter_side_wheat",
+    "particle": "farmstorm:block/converter_side_wheat",
+    "south": "farmstorm:block/converter_side_potato",
+    "up": "farmstorm:block/converter_top",
+    "west": "farmstorm:block/converter_side_beetroot"
+  }
+}

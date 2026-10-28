@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:pumpkin"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:pumpkin_turret"
+  },
+  "reverse_xp_cost": 3
+}

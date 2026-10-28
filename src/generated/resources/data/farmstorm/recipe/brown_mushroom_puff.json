@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:brown_mushroom"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:brown_mushroom_puff"
+  },
+  "reverse_xp_cost": 3
+}

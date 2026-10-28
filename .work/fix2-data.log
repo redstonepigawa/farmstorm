@@ -1,0 +1,70 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 14 busy and 15 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava
+> Task :processResources UP-TO-DATE
+> Task :classes
+> Task :downloadAssets UP-TO-DATE
+> Task :writeDataLegacyClasspath UP-TO-DATE
+> Task :prepareDataRun UP-TO-DATE
+
+> Task :runData
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[01:06:36] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgedatadev, --assetIndex, 17, --assetsDir, D:\\project_farm\\.tools\\gradle-home\\caches\\neoformruntime\\assets, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430, --mod, farmstorm, --all, --output, D:\\project_farm\\src\\generated\\resources, --existing, D:\\project_farm\\src\\main\\resources]
+[01:06:36] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[01:06:36] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[01:06:36] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgedatadev
+[01:06:36] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
+[01:06:36] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[01:06:36] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.1 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[01:06:37] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgedatadev' with arguments [--gameDir, ., --assetsDir, D:\project_farm\.tools\gradle-home\caches\neoformruntime\assets, --assetIndex, 17, --mod, farmstorm, --all, --output, D:\\project_farm\\src\\generated\\resources, --existing, D:\\project_farm\\src\\main\\resources]
+[01:06:37] [main/INFO] [ne.ne.ne.da.lo.DatagenModLoader/]: Initializing Data Gatherer for mods [farmstorm]
+[01:06:37] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[01:06:43] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[01:06:43] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[01:06:43] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[01:06:43] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[01:06:43] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[01:06:43] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23189!/assets/.mcassetsroot' uses unexpected schema
+[01:06:43] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23189!/data/.mcassetsroot' uses unexpected schema
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Starting provider: Registries
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Registries finished after 214 ms
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Starting provider: Tags for minecraft:damage_type mod id farmstorm
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Tags for minecraft:damage_type mod id farmstorm finished after 6 ms
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Starting provider: Tags for minecraft:block mod id farmstorm
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Tags for minecraft:block mod id farmstorm finished after 3 ms
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Starting provider: Tags for minecraft:item mod id farmstorm
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Tags for minecraft:item mod id farmstorm finished after 1 ms
+[01:06:43] [main/INFO] [minecraft/DataGenerator]: Starting provider: Block States: farmstorm
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Block States: farmstorm finished after 61 ms
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Starting provider: Item Models: farmstorm
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Item Models: farmstorm finished after 12 ms
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Starting provider: Recipes
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Recipes finished after 6 ms
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Starting provider: Loot Tables
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Loot Tables finished after 25 ms
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Starting provider: Advancements
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Advancements finished after 39 ms
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Starting provider: Languages: zh_cn for mod: farmstorm
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Languages: zh_cn for mod: farmstorm finished after 1 ms
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Starting provider: Languages: en_us for mod: farmstorm
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: Languages: en_us for mod: farmstorm finished after 1 ms
+[01:06:44] [main/INFO] [minecraft/DataGenerator]: All providers took: 381 ms
+[01:06:44] [main/INFO] [minecraft/HashCache]: Caching: total files: 169, old count: 169, new count: 170, removed stale: 0, written: 11
+
+BUILD SUCCESSFUL in 17s
+7 actionable tasks: 2 executed, 5 up-to-date

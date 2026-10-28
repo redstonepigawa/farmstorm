@@ -1,0 +1,97 @@
+[28Oct2026 19:52:13.735] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[28Oct2026 19:52:13.738] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[28Oct2026 19:52:13.738] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[28Oct2026 19:52:13.820] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[28Oct2026 19:52:13.851] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[28Oct2026 19:52:14.124] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[28Oct2026 19:52:14.125] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.1 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[28Oct2026 19:52:14.723] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[28Oct2026 19:52:15.263] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[28Oct2026 19:52:15.300] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[28Oct2026 19:52:15.319] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[28Oct2026 19:52:15.744] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[28Oct2026 19:52:20.022] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28Oct2026 19:52:20.024] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28Oct2026 19:52:20.026] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[28Oct2026 19:52:20.027] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[28Oct2026 19:52:20.028] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28Oct2026 19:52:20.077] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[28Oct2026 19:52:20.110] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[28Oct2026 19:52:20.111] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[28Oct2026 19:52:20.111] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[28Oct2026 19:52:20.112] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[28Oct2026 19:52:20.346] [main/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[28Oct2026 19:52:20.420] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[28Oct2026 19:52:20.420] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[28Oct2026 19:52:21.266] [main/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1311 recipes
+[28Oct2026 19:52:21.398] [main/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1411 advancements
+[28Oct2026 19:52:21.402] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[28Oct2026 19:52:22.271] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting minecraft server version 1.21.1
+[28Oct2026 19:52:22.271] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Loading properties
+[28Oct2026 19:52:22.272] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Default game type: SURVIVAL
+[28Oct2026 19:52:22.272] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[28Oct2026 19:52:22.324] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting Minecraft server on *:25597
+[28Oct2026 19:52:22.369] [Server thread/INFO] [net.minecraft.server.network.ServerConnectionListener/]: Using default channel type
+[28Oct2026 19:52:22.418] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[28Oct2026 19:52:22.419] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: The server will make no attempt to authenticate usernames. Beware.
+[28Oct2026 19:52:22.419] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[28Oct2026 19:52:22.419] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: To change this, set "online-mode" to "true" in the server.properties file.
+[28Oct2026 19:52:22.460] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Preparing level "world-fix7"
+[28Oct2026 19:52:22.609] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[28Oct2026 19:52:22.748] [worldgen/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[28Oct2026 19:52:22.808] [Server thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 199 ms
+[28Oct2026 19:52:22.808] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (0.373s)! For help, type "help"
+[28Oct2026 19:52:22.810] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting remote control listener
+[28Oct2026 19:52:22.811] [Server thread/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Listener started
+[28Oct2026 19:52:22.811] [Server thread/INFO] [net.minecraft.server.rcon.thread.RconThread/]: RCON running on 0.0.0.0:25575
+[28Oct2026 19:52:22.841] [Server thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
+[28Oct2026 19:52:22.846] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[28Oct2026 19:52:22.848] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 puffed_wheat → type=THROWABLE categories=[CONSTRUCTION] canBreakBlocks=false
+[28Oct2026 19:52:22.848] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 blast_carrot → type=DEPLOYABLE categories=[TRAP, DAMAGE] canBreakBlocks=false
+[28Oct2026 19:52:22.848] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 ubi_server → type=THROWABLE categories=[DEMOLITION, DAMAGE] canBreakBlocks=true
+[28Oct2026 19:52:22.848] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 toxic_ubi_server → type=THROWABLE categories=[BUFF, DEMOLITION, DAMAGE] canBreakBlocks=true
+[28Oct2026 19:52:22.849] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 power_beet → type=EDIBLE categories=[BUFF] canBreakBlocks=false
+[28Oct2026 19:52:22.849] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 melon_slice_bomb → type=THROWABLE categories=[DAMAGE, DEMOLITION] canBreakBlocks=true
+[28Oct2026 19:52:22.849] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 melon_grenade → type=THROWABLE categories=[DEMOLITION, DAMAGE] canBreakBlocks=true
+[28Oct2026 19:52:22.849] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 pumpkin_turret → type=DEPLOYABLE categories=[TURRET, DAMAGE] canBreakBlocks=false
+[28Oct2026 19:52:22.849] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 awakened_torchflower → type=DEPLOYABLE categories=[TURRET, BUFF] canBreakBlocks=false
+[28Oct2026 19:52:22.849] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 awakened_pitcher_plant → type=DEPLOYABLE categories=[TURRET, BUFF] canBreakBlocks=false
+[28Oct2026 19:52:22.849] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 fang_trap_cactus → type=DEPLOYABLE categories=[TRAP, DAMAGE] canBreakBlocks=false
+[28Oct2026 19:52:22.850] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 bamboo_firecracker → type=THROWABLE categories=[DAMAGE] canBreakBlocks=false
+[28Oct2026 19:52:22.850] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 red_mushroom_puff → type=THROWABLE categories=[BUFF] canBreakBlocks=false
+[28Oct2026 19:52:22.850] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 brown_mushroom_puff → type=THROWABLE categories=[BUFF] canBreakBlocks=false
+[28Oct2026 19:52:22.850] [Server thread/INFO] [farmstorm/]: FIX7 自检作物 lucky_berry → type=EDIBLE categories=[BUFF] canBreakBlocks=false
+[28Oct2026 19:52:22.851] [Server thread/INFO] [farmstorm/]: FIX7 自检爆规 瓜片子 → 破坏规则（能破方块=true）
+[28Oct2026 19:52:22.851] [Server thread/INFO] [farmstorm/]: FIX7 自检爆规 育碧服务器 → 破坏规则（能破方块=true）
+[28Oct2026 19:52:22.851] [Server thread/INFO] [farmstorm/]: FIX7 自检爆规 毒育碧服务器 → 破坏规则（能破方块=true）
+[28Oct2026 19:52:22.851] [Server thread/INFO] [farmstorm/]: FIX7 自检爆规 瓜！ → 破坏规则（能破方块=true）
+[28Oct2026 19:52:22.851] [Server thread/INFO] [farmstorm/]: FIX7 自检爆规 胡罗贝 → NEVER_BREAK（能破方块=false）
+[28Oct2026 19:52:22.851] [Server thread/INFO] [farmstorm/]: FIX7 自检爆规 幸运浆果小爆炸 → NEVER_BREAK（能破方块=false）
+[28Oct2026 19:52:22.852] [Server thread/INFO] [farmstorm/]: FIX7 自检提示 awakened_torchflower → [tooltip.farmstorm.category.turrettooltip.farmstorm.category_separatortooltip.farmstorm.category.buff]
+[28Oct2026 19:52:22.852] [Server thread/INFO] [farmstorm/]: FIX7 自检提示 toxic_ubi_server → [tooltip.farmstorm.category.bufftooltip.farmstorm.category_separatortooltip.farmstorm.category.demolitiontooltip.farmstorm.category_separatortooltip.farmstorm.category.damage]
+[28Oct2026 19:52:22.852] [Server thread/INFO] [farmstorm/]: FIX7 自检提示 blast_carrot → [tooltip.farmstorm.category.traptooltip.farmstorm.category_separatortooltip.farmstorm.category.damage]
+[28Oct2026 19:52:22.852] [Server thread/INFO] [farmstorm/]: FIX7 配置 sliceResistThreshold=6.0 melonSlicePower=2 ubiPower=4
+[28Oct2026 19:52:23.818] [Server thread/INFO] [farmstorm/]: FIX7 场景 瓜片子 → 泥土立方 BlockPos{x=0, y=200, z=0}~BlockPos{x=6, y=202, z=6}，投掷物在 (3.5,205.0,3.5)
+[28Oct2026 19:52:23.819] [Server thread/INFO] [farmstorm/]: FIX7 场景 育碧服务器 → 泥土立方 BlockPos{x=32, y=200, z=0}~BlockPos{x=38, y=202, z=6}
+[28Oct2026 19:52:23.841] [Server thread/INFO] [farmstorm/]: FIX7 场景 胡罗贝 → 部署方块 BlockPos{x=2, y=203, z=34} 已走 trigger 的爆炸段
+[28Oct2026 19:52:26.805] [Server thread/INFO] [farmstorm/]: FIX7 结果 瓜片子 泥土立方变化方块数=23 爆炸=[center=(2.5,203.5,34.5) rule=NEVER_BREAK toBlow=0, center=(3.5,203.1,3.5) rule=break-enabled toBlow=128, center=(35.5,203.1,3.5) rule=break-enabled toBlow=670, center=(35.5,-60.0,3.5) rule=break-enabled toBlow=667]
+[28Oct2026 19:52:26.805] [Server thread/INFO] [farmstorm/]: FIX7 结果 育碧服务器 泥土立方变化方块数=99
+[28Oct2026 19:52:26.805] [Server thread/INFO] [farmstorm/]: FIX7 结果 胡罗贝 周围立方变化方块数=0 自身方块=Block{minecraft:air}
+[28Oct2026 19:52:26.805] [Server thread/INFO] [farmstorm/]: FIX7 结果 全部爆炸=[center=(2.5,203.5,34.5) rule=NEVER_BREAK toBlow=0, center=(3.5,203.1,3.5) rule=break-enabled toBlow=128, center=(35.5,203.1,3.5) rule=break-enabled toBlow=670, center=(35.5,-60.0,3.5) rule=break-enabled toBlow=667]
+[28Oct2026 19:52:27.355] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[28Oct2026 19:52:27.356] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[28Oct2026 19:52:27.356] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[28Oct2026 19:52:27.413] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world-fix7]'/minecraft:overworld
+[28Oct2026 19:52:27.428] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world-fix7]'/minecraft:the_end
+[28Oct2026 19:52:27.434] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world-fix7]'/minecraft:the_nether
+[28Oct2026 19:52:27.442] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (world-fix7): All chunks are saved
+[28Oct2026 19:52:27.442] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[28Oct2026 19:52:27.442] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[28Oct2026 19:52:27.442] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
+[28Oct2026 19:52:27.466] [Server thread/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Listener stopped

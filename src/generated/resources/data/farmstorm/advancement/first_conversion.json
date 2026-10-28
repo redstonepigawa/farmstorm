@@ -1,0 +1,27 @@
+{
+  "parent": "farmstorm:converter",
+  "criteria": {
+    "first_conversion": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.first_conversion.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:power_beet"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.first_conversion.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_conversion"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

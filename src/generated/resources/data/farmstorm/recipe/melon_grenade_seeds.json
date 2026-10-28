@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:melon_seeds"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:melon_grenade_seeds"
+  },
+  "reverse_xp_cost": 3
+}

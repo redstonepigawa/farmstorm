@@ -1,0 +1,107 @@
+{
+  "parent": "farmstorm:first_conversion",
+  "criteria": {
+    "awakened_pitcher_plant": {
+      "conditions": {
+        "items": [
+          {
+            "items": "farmstorm:awakened_pitcher_plant"
+          },
+          {
+            "items": "farmstorm:awakened_pitcher_plant_pod"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "awakened_torchflower": {
+      "conditions": {
+        "items": [
+          {
+            "items": "farmstorm:awakened_torchflower"
+          },
+          {
+            "items": "farmstorm:awakened_torchflower_seeds"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "melon_grenade": {
+      "conditions": {
+        "items": [
+          {
+            "items": "farmstorm:melon_grenade"
+          },
+          {
+            "items": "farmstorm:melon_grenade_seeds"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "power_beet": {
+      "conditions": {
+        "items": [
+          {
+            "items": "farmstorm:power_beet"
+          },
+          {
+            "items": "farmstorm:power_beet_seeds"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "puffed_wheat": {
+      "conditions": {
+        "items": [
+          {
+            "items": "farmstorm:puffed_wheat"
+          },
+          {
+            "items": "farmstorm:puffed_wheat_seeds"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "pumpkin_turret": {
+      "conditions": {
+        "items": [
+          {
+            "items": "farmstorm:pumpkin_turret"
+          },
+          {
+            "items": "farmstorm:pumpkin_turret_seeds"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.seed_cycle.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:puffed_wheat_seeds"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.seed_cycle.title"
+    }
+  },
+  "requirements": [
+    [
+      "puffed_wheat",
+      "power_beet",
+      "melon_grenade",
+      "pumpkin_turret",
+      "awakened_torchflower",
+      "awakened_pitcher_plant"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

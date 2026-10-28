@@ -1,0 +1,170 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 19 busy and 1 incompatible and 11 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :writeClientLegacyClasspath UP-TO-DATE
+> Task :prepareClientRun
+
+> Task :runClient
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[12:23:40] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.213, --assetIndex, 17, --assetsDir, D:\\project_farm\\.tools\\gradle-home\\caches\\neoformruntime\\assets, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[12:23:40] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[12:23:40] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[12:23:40] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[12:23:40] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[12:23:40] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[12:23:41] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
+[12:23:41] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 5070 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 573.22, NVIDIA Corporation
+[12:23:41] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[12:23:41] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.1 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[12:23:42] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.213, --gameDir, ., --assetsDir, D:\project_farm\.tools\gradle-home\caches\neoformruntime\assets, --assetIndex, 17]
+[12:23:43] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[12:23:43] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[12:23:43] [Datafixer Bootstrap/INFO] [mojang/DataFixerBuilder]: 229 Datafixer optimizations took 394 milliseconds
+[12:23:43] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[12:23:43] [pool-5-thread-1/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[12:23:49] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[12:23:49] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[12:23:49] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[12:23:49] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[12:23:49] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[12:23:49] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23189!/assets/.mcassetsroot' uses unexpected schema
+[12:23:49] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23189!/data/.mcassetsroot' uses unexpected schema
+[12:23:49] [Render thread/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[12:23:49] [Render thread/INFO] [minecraft/Minecraft]: Setting user: Dev
+[12:23:49] [Render thread/INFO] [minecraft/Minecraft]: Backend library: LWJGL version 3.3.3+5
+[12:23:50] [Render thread/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[12:23:50] [Render thread/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[12:23:50] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[12:23:50] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[12:23:50] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[12:23:50] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[12:23:50] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[12:23:51] [Render thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[12:23:51] [Render thread/INFO] [farmstorm/]: 自检 实体渲染器 9/9 → OK
+[12:23:51] [Render thread/INFO] [farmstorm/]: 自检 已注册渲染器的实体 ID：[farmstorm:puffed_wheat, farmstorm:ubi_server, farmstorm:toxic_ubi_server, farmstorm:melon_slice_bomb, farmstorm:melon_grenade, farmstorm:bamboo_firecracker, farmstorm:red_mushroom_puff, farmstorm:brown_mushroom_puff, farmstorm:turret_bullet]
+[12:23:51] [Render thread/INFO] [minecraft/ReloadableResourceManager]: Reloading ResourceManager: vanilla, mod_resources, mod/farmstorm, mod/neoforge
+[12:23:51] [Worker-Main-1/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-15.1.05.hex, loading
+[12:23:51] [Worker-Main-1/INFO] [minecraft/UnihexProvider]: Found unifont_jp_patch-15.1.05.hex, loading
+[12:23:54] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:item.goat_horn.play
+[12:23:54] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[12:23:54] [Render thread/INFO] [mojang/Library]: OpenAL initialized on device OpenAL Soft on 扬声器 (DARKRIM SHADOW)
+[12:23:54] [Render thread/INFO] [minecraft/SoundEngine]: Sound engine started
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[12:23:54] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[12:23:54] [Render thread/WARN] [minecraft/ShaderInstance]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[12:23:55] [Render thread/INFO] [ne.ne.ne.cl.en.an.js.AnimationLoader/]: Loaded 0 entity animations
+[12:23:55] [Render thread/INFO] [farmstorm/]: FIX4 PROBE opening existing world fix4world
+[12:23:56] [Render thread/INFO] [minecraft/RecipeManager]: Loaded 1311 recipes
+[12:23:56] [Render thread/INFO] [minecraft/AdvancementTree]: Loaded 1411 advancements
+[12:23:56] [Render thread/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[12:23:56] [Server thread/INFO] [minecraft/IntegratedServer]: Starting integrated minecraft server version 1.21.1
+[12:23:56] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[12:24:01] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[12:24:01] [progressListener/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[12:24:01] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[12:24:01] [progressListener/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 230 ms
+[12:24:02] [Server thread/INFO] [minecraft/IntegratedServer]: Changing view distance to 12, from 10
+[12:24:02] [Server thread/INFO] [minecraft/IntegratedServer]: Changing simulation distance to 12, from 0
+[12:24:02] [Server thread/INFO] [minecraft/PlayerList]: Dev[local:E:8c6be570] logged in with entity id 1 at (-2.5, 80.0, -3.5)
+[12:24:02] [Server thread/INFO] [minecraft/MinecraftServer]: Dev joined the game
+[12:24:02] [Server thread/INFO] [farmstorm/]: 玩家登录：Dev（380df991-f603-344c-a090-369bad2a924a）
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:lucky_berry
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:awakened_torchflower
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:awakened_pitcher_plant_pod
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:puffed_wheat_seeds
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:awakened_pitcher_plant
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:melon_slice_bomb
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:pumpkin_turret
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:fang_trap_cactus
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:power_beet
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:red_mushroom_puff
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:puffed_wheat
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:toxic_ubi_server
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:blast_carrot
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:power_beet_seeds
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:awakened_torchflower_seeds
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:bamboo_firecracker
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:ubi_server
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:melon_grenade_seeds
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:brown_mushroom_puff
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:pumpkin_turret_seeds
+[12:24:03] [Render thread/WARN] [minecraft/ClientRecipeBook]: Unknown recipe category: farmstorm:converting/farmstorm:melon_grenade
+[12:24:03] [Render thread/INFO] [minecraft/AdvancementTree]: Loaded 2 advancements
+[12:24:03] [Render thread/INFO] [farmstorm/]: FIX4 PROBE in-game, posting server setup
+[12:24:03] [Server thread/INFO] [farmstorm/]: FIX4 PROBE server-setup pos=-3, 79, -4 input=minecraft:wheat x1 catalyst=minecraft:nether_star x2 xp=3 puffedWheat=0 starsInInventory=0
+[12:24:03] [Server thread/INFO] [farmstorm/]: FIX4 PROBE opened ConverterMenu at -3, 79, -4
+[12:24:03] [Render thread/INFO] [farmstorm/]: FIX4 PROBE converter screen ready, slots=39 convertible=true xpCost=3
+[12:24:03] [Render thread/INFO] [farmstorm/]: FIX4 PROBE wrote D:\project_farm\.work\fix4-shots\fix4-gui-shot.png (854x480)
+[12:24:03] [Render thread/INFO] [farmstorm/]: FIX4 PROBE press#1 button bounds=(133,79,160x18) active=true message=Convert
+[12:24:03] [Render thread/INFO] [farmstorm/]: FIX4 PROBE press#1 onPress() -> handleInventoryButtonClick(containerId=1, button=0)
+[12:24:04] [Render thread/INFO] [minecraft/AdvancementTree]: Loaded 13 advancements
+[12:24:04] [Render thread/INFO] [farmstorm/]: FIX4 PROBE wrote D:\project_farm\.work\fix4-shots\fix4-after-convert-shot.png (854x480)
+[12:24:04] [Server thread/INFO] [farmstorm/]: FIX4 PROBE assert#1 PASS | input=<empty> catalyst=minecraft:nether_star x2 xp=0 puffedWheat=1 starsInInventory=0 canConvert=0 xpCost=3
+[12:24:04] [Server thread/INFO] [farmstorm/]: FIX4 PROBE server-setup#2 pos=-3, 79, -4 input=minecraft:torchflower x1 catalyst=minecraft:nether_star x2 xp=3 starsInInventory=0 awakenedTorchflower=0 canConvert=1
+[12:24:04] [Server thread/INFO] [farmstorm/]: FIX4 PROBE opened ConverterMenu at -3, 79, -4
+[12:24:04] [Server thread/INFO] [farmstorm/]: FIX5_PROBE scene placed at BlockPos{x=0, y=80, z=0}
+[12:24:05] [IO-Worker-3/INFO] [farmstorm/]: FIX5_PROBE saved fix5-shot-1-look-north.png (Saved screenshot as fix5-shot-1-look-north.png)
+[12:24:05] [Render thread/INFO] [farmstorm/]: FIX5_PROBE look slot=1 yaw=270.0 pitch=30.0
+[12:24:05] [IO-Worker-3/INFO] [farmstorm/]: FIX5_PROBE saved fix5-shot-2-look-east.png (Saved screenshot as fix5-shot-2-look-east.png)
+[12:24:05] [Render thread/INFO] [farmstorm/]: FIX5_PROBE look slot=2 yaw=0.0 pitch=30.0
+[12:24:06] [IO-Worker-3/INFO] [farmstorm/]: FIX5_PROBE saved fix5-shot-3-look-south.png (Saved screenshot as fix5-shot-3-look-south.png)
+[12:24:06] [Render thread/INFO] [farmstorm/]: FIX5_PROBE look slot=3 yaw=90.0 pitch=30.0
+[12:24:06] [IO-Worker-4/INFO] [farmstorm/]: FIX5_PROBE saved fix5-shot-4-look-west.png (Saved screenshot as fix5-shot-4-look-west.png)
+[12:24:07] [Render thread/INFO] [farmstorm/]: FIX5_PROBE DONE fix5-shot-1-look-north.png,fix5-shot-2-look-east.png,fix5-shot-3-look-south.png,fix5-shot-4-look-west.png
+[12:24:10] [Render thread/INFO] [farmstorm/]: FIX4 PROBE retry setup#2 (screen=null, retry=1)
+[12:24:10] [Server thread/INFO] [farmstorm/]: FIX4 PROBE server-setup#2 pos=0, 79, 0 input=minecraft:torchflower x1 catalyst=minecraft:nether_star x2 xp=3 starsInInventory=0 awakenedTorchflower=0 canConvert=1
+[12:24:10] [Server thread/INFO] [farmstorm/]: FIX4 PROBE opened ConverterMenu at 0, 79, 0
+[12:24:11] [Render thread/INFO] [farmstorm/]: FIX4 PROBE wrote D:\project_farm\.work\fix4-shots\fix4-star-shot.png (854x480)
+[12:24:11] [Render thread/INFO] [farmstorm/]: FIX4 PROBE press#2 button bounds=(133,79,160x18) active=true message=Convert
+[12:24:11] [Render thread/INFO] [farmstorm/]: FIX4 PROBE press#2 onPress() -> handleInventoryButtonClick(containerId=3, button=0)
+[12:24:11] [Render thread/INFO] [minecraft/AdvancementTree]: Loaded 13 advancements
+[12:24:11] [Render thread/INFO] [farmstorm/]: FIX4 PROBE wrote D:\project_farm\.work\fix4-shots\fix4-after-star-shot.png (854x480)
+[12:24:11] [Server thread/INFO] [farmstorm/]: FIX4 PROBE assert#2 PASS | input=<empty> catalyst=minecraft:nether_star x1 xp=0 awakenedTorchflower=1 starsInInventory=0
+[12:24:11] [Render thread/INFO] [farmstorm/]: FIX4 PROBE DONE
+
+> Task :runClient FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':runClient'.
+> Process 'command 'D:\project_farm\.tools\jdk21\bin\java.exe'' finished with non-zero exit value -1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 1m 3s
+7 actionable tasks: 2 executed, 5 up-to-date

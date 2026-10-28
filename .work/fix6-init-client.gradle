@@ -1,0 +1,12 @@
+// FIX-6 客户端 quickPlay：把参数追加进 MDG 生成的 argfile（--args 会被当 devlaunch 主类，用不了）
+gradle.projectsEvaluated {
+    def runClient = rootProject.tasks.findByName('runClient')
+    runClient.doFirst {
+        def argFile = new File(rootProject.projectDir, 'build/moddev/clientRunProgramArgs.txt')
+        def text = argFile.getText('UTF-8')
+        if (!text.contains('--quickPlayMultiplayer')) {
+            argFile.setText(text + '\n# fix6 quickplay\n--quickPlayMultiplayer\n127.0.0.1:25566\n', 'UTF-8')
+        }
+        println "[fix6-init] argfile tail: " + argFile.getText('UTF-8').readLines().findAll { it.trim() }.takeRight(4)
+    }
+}

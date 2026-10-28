@@ -1,0 +1,176 @@
+package com.dashpig.farmstorm.util;
+
+import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.behavior.DeployedKind;
+import com.mojang.serialization.Codec;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.Nullable;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.AttachFace;
+
+/**
+ * 单个改良作物的静态档案（DEC §4 的 15 条，一条一个常量）。
+ * 物品 / 方块 / 实体都用这里的数据，避免同一个注册 ID 在多处各写一份字符串。
+ *
+ * <p>DEC §4 的两列是两个正交维度（DESIGN §2.4），这里是两个独立字段：
+ * <ul>
+ *   <li>{@link #type}：类型（§2.2），单值，来自 DEC §4 的「类型」列；</li>
+ *   <li>{@link #categories}：类别（§2.3），多值集合，来自 DEC §4 的「类别」列。</li>
+ * </ul>
+ * 两者不得互相推导，也不由 {@link DeployedKind} 代替：C-4 的「分类是炮台、实现是光环」正是这种分离。
+ * 方块破坏权限只由 {@link CropCategory#DEMOLITION} 标签决定（见 {@link #canBreakBlocks()}）。
+ */
+public record CropProfile(
+        ResourceLocation id,
+        CropType type,
+        Set<CropCategory> categories,
+        @Nullable ResourceKey<Block> cropBlock,
+        @Nullable ResourceKey<Item> seedItem,
+        @Nullable DeployedKind kind,
+        Set<AttachFace> allowedFaces,
+        int throwStack) {
+
+    /** D-16：投掷型一档。 */
+    public static final int THROWABLE_STACK_TIER = 16;
+    /** D-16：部署型 / 食用型 / 播种物一档。 */
+    public static final int OTHER_STACK_TIER = 64;
+
+    public static final CropProfile PUFFED_WHEAT = throwable("puffed_wheat", "puffed_wheat_crop", "puffed_wheat_seeds",
+            CropCategory.CONSTRUCTION);
+    public static final CropProfile BLAST_CARROT = deployed("blast_carrot", "blast_carrot_crop", "blast_carrot",
+            DeployedKind.BLAST_CARROT, categorySet(CropCategory.TRAP, CropCategory.DAMAGE), AttachFace.FLOOR);
+    public static final CropProfile UBI_SERVER = throwable("ubi_server", "ubi_server_crop", "ubi_server",
+            CropCategory.DEMOLITION, CropCategory.DAMAGE);
+    public static final CropProfile TOXIC_UBI_SERVER = throwable("toxic_ubi_server", "toxic_ubi_server_crop",
+            "toxic_ubi_server", CropCategory.BUFF, CropCategory.DEMOLITION, CropCategory.DAMAGE);
+    public static final CropProfile POWER_BEET = crop("power_beet", "power_beet_crop", "power_beet_seeds",
+            CropCategory.BUFF);
+    /** 瓜片子不可种植（§3.2.3），故作物方块与播种物为空。伤害类见 DEC §4，破障类是作者 2026-10-28 新增。 */
+    public static final CropProfile MELON_SLICE_BOMB = new CropProfile(
+            Farmstorm.id("melon_slice_bomb"), CropType.THROWABLE,
+            categorySet(CropCategory.DAMAGE, CropCategory.DEMOLITION),
+            null, null, null, Set.of(), THROWABLE_STACK_TIER);
+    public static final CropProfile MELON_GRENADE = throwable("melon_grenade", "melon_grenade_stem", "melon_grenade_seeds",
+            CropCategory.DEMOLITION, CropCategory.DAMAGE);
+    public static final CropProfile PUMPKIN_TURRET = deployed("pumpkin_turret", "pumpkin_turret_stem",
+            "pumpkin_turret_seeds", DeployedKind.PUMPKIN_TURRET,
+            categorySet(CropCategory.TURRET, CropCategory.DAMAGE),
+            AttachFace.FLOOR, AttachFace.WALL, AttachFace.CEILING);
+    public static final CropProfile AWAKENED_TORCHFLOWER = deployed("awakened_torchflower", "awakened_torchflower_crop",
+            "awakened_torchflower_seeds", DeployedKind.AWAKENED_TORCHFLOWER,
+            categorySet(CropCategory.TURRET, CropCategory.BUFF), AttachFace.FLOOR);
+    public static final CropProfile AWAKENED_PITCHER_PLANT = deployed("awakened_pitcher_plant",
+            "awakened_pitcher_plant_crop", "awakened_pitcher_plant_pod", DeployedKind.AWAKENED_PITCHER_PLANT,
+            categorySet(CropCategory.TURRET, CropCategory.BUFF), AttachFace.FLOOR);
+    public static final CropProfile FANG_TRAP_CACTUS = deployed("fang_trap_cactus", "fang_trap_cactus_block",
+            "fang_trap_cactus", DeployedKind.FANG_TRAP_CACTUS,
+            categorySet(CropCategory.TRAP, CropCategory.DAMAGE), AttachFace.FLOOR);
+    public static final CropProfile BAMBOO_FIRECRACKER = throwable("bamboo_firecracker", "bamboo_firecracker_stalk",
+            "bamboo_firecracker", CropCategory.DAMAGE);
+    public static final CropProfile RED_MUSHROOM_PUFF = throwable("red_mushroom_puff", "red_mushroom_puff_block",
+            "red_mushroom_puff", CropCategory.BUFF);
+    public static final CropProfile BROWN_MUSHROOM_PUFF = throwable("brown_mushroom_puff", "brown_mushroom_puff_block",
+            "brown_mushroom_puff", CropCategory.BUFF);
+    public static final CropProfile LUCKY_BERRY = crop("lucky_berry", "lucky_berry_bush", "lucky_berry",
+            CropCategory.BUFF);
+
+    /** DEC §4 的 15 条，顺序即 00-DECISIONS §4 的行号。 */
+    public static final List<CropProfile> ALL = List.of(
+            PUFFED_WHEAT, BLAST_CARROT, UBI_SERVER, TOXIC_UBI_SERVER, POWER_BEET,
+            MELON_SLICE_BOMB, MELON_GRENADE, PUMPKIN_TURRET, AWAKENED_TORCHFLOWER, AWAKENED_PITCHER_PLANT,
+            FANG_TRAP_CACTUS, BAMBOO_FIRECRACKER, RED_MUSHROOM_PUFF, BROWN_MUSHROOM_PUFF, LUCKY_BERRY);
+
+    /** D-17：幸运浆果的随机池是「除幸运浆果外的 14 种」。 */
+    public static final List<CropProfile> LUCKY_BERRY_POOL = ALL.stream()
+            .filter(profile -> profile != LUCKY_BERRY)
+            .toList();
+
+    private static final Map<ResourceLocation, CropProfile> BY_ID = ALL.stream()
+            .collect(java.util.stream.Collectors.toUnmodifiableMap(CropProfile::id, profile -> profile));
+
+    public static final Codec<CropProfile> CODEC = Codec.STRING.xmap(CropProfile::byPath, profile -> profile.id().getPath());
+
+    /** 供方块 codec 反解：路径不含命名空间，数据包里只有一个命名空间。 */
+    public static CropProfile byPath(String path) {
+        return byId(Farmstorm.id(path));
+    }
+
+    public static CropProfile byId(ResourceLocation id) {
+        CropProfile profile = BY_ID.get(id);
+        if (profile == null) {
+            throw new IllegalArgumentException("Unknown crop profile: " + id);
+        }
+        return profile;
+    }
+
+    /** 部署方块按 kind 反查档案：5 个方块的行为参数（附着面）只有这一处来源。 */
+    public static CropProfile byKind(DeployedKind kind) {
+        return ALL.stream()
+                .filter(profile -> profile.kind() == kind)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No crop profile for kind " + kind));
+    }
+
+    /** 是否为部署型（5 个）。判据是类型列（§2.2.2），不是类别。 */
+    public boolean isDeployed() {
+        return this.type == CropType.DEPLOYABLE;
+    }
+
+    /** 是否带某个类别标签（DEC §4 的「类别」列）。 */
+    public boolean has(CropCategory category) {
+        return this.categories.contains(category);
+    }
+
+    /** 能否破坏方块：只由 {@link CropCategory#DEMOLITION} 决定，全仓没有第二处判据。 */
+    public boolean canBreakBlocks() {
+        return has(CropCategory.DEMOLITION);
+    }
+
+    /** 物品的注册 ID 与作物档案 ID 同名，注册层直接用它。 */
+    public String path() {
+        return this.id.getPath();
+    }
+
+    private static CropProfile crop(String itemPath, String cropBlockPath, String seedItemPath,
+                                    CropCategory... categories) {
+        return new CropProfile(Farmstorm.id(itemPath), CropType.EDIBLE, categorySet(categories),
+                blockKey(cropBlockPath), itemKey(seedItemPath), null, Set.of(), OTHER_STACK_TIER);
+    }
+
+    private static CropProfile throwable(String itemPath, String cropBlockPath, String seedItemPath,
+                                         CropCategory... categories) {
+        return new CropProfile(Farmstorm.id(itemPath), CropType.THROWABLE, categorySet(categories),
+                blockKey(cropBlockPath), itemKey(seedItemPath), null, Set.of(), THROWABLE_STACK_TIER);
+    }
+
+    private static CropProfile deployed(String itemPath, String cropBlockPath, String seedItemPath, DeployedKind kind,
+                                        Set<CropCategory> categories, AttachFace... faces) {
+        return new CropProfile(Farmstorm.id(itemPath), CropType.DEPLOYABLE, categories,
+                blockKey(cropBlockPath), itemKey(seedItemPath), kind, Set.of(faces), OTHER_STACK_TIER);
+    }
+
+    /**
+     * 类别集合：用 {@link LinkedHashSet} 保序，让 tooltip 与启动自检按 DEC §4 的书写顺序输出。
+     * {@code Set.of} 的迭代顺序由 JVM 哈希盐决定，逐次运行可能不同，不能用来展示。
+     */
+    private static Set<CropCategory> categorySet(CropCategory... categories) {
+        return Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(categories)));
+    }
+
+    private static ResourceKey<Block> blockKey(String path) {
+        return ResourceKey.create(Registries.BLOCK, Farmstorm.id(path));
+    }
+
+    private static ResourceKey<Item> itemKey(String path) {
+        return ResourceKey.create(Registries.ITEM, Farmstorm.id(path));
+    }
+}

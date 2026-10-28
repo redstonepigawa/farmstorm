@@ -1,0 +1,152 @@
+package com.dashpig.farmstorm.registry;
+
+import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.config.FarmstormConfig;
+import com.dashpig.farmstorm.item.DeployableCropItem;
+import com.dashpig.farmstorm.item.FoodCropItem;
+import com.dashpig.farmstorm.item.SeedItem;
+import com.dashpig.farmstorm.item.ThrowableCropItem;
+import com.dashpig.farmstorm.util.CropProfile;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.registries.DeferredRegister;
+
+/**
+ * 22 个物品（TECH §3.1）：15 个作物 + 6 个独立播种物 + 1 个转换器。
+ * 堆叠数按 D-16 分两档，实际数值来自 stack.*（§4.11.5）。
+ */
+public final class FarmstormItems {
+    public static final DeferredRegister.Items REGISTER = DeferredRegister.createItems(Farmstorm.MOD_ID);
+
+    private static final Map<String, DeferredItem<? extends Item>> CROP_ITEMS = new LinkedHashMap<>();
+    private static final List<DeferredItem<SeedItem>> SEED_ITEMS = new ArrayList<>();
+
+    // ---- 15 个作物物品（顺序即 00-DECISIONS §4）----
+    public static final DeferredItem<ThrowableCropItem> PUFFED_WHEAT = cropItem(CropProfile.PUFFED_WHEAT,
+            properties -> new ThrowableCropItem(CropProfile.PUFFED_WHEAT, FarmstormEntityTypes.PUFFED_WHEAT::get, properties));
+    public static final DeferredItem<DeployableCropItem> BLAST_CARROT = cropItem(CropProfile.BLAST_CARROT,
+            properties -> new DeployableCropItem(CropProfile.BLAST_CARROT, FarmstormBlocks.BLAST_CARROT.get(), properties));
+    public static final DeferredItem<ThrowableCropItem> UBI_SERVER = cropItem(CropProfile.UBI_SERVER,
+            properties -> new ThrowableCropItem(CropProfile.UBI_SERVER, FarmstormEntityTypes.UBI_SERVER::get, properties));
+    public static final DeferredItem<ThrowableCropItem> TOXIC_UBI_SERVER = cropItem(CropProfile.TOXIC_UBI_SERVER,
+            properties -> new ThrowableCropItem(CropProfile.TOXIC_UBI_SERVER, FarmstormEntityTypes.TOXIC_UBI_SERVER::get, properties));
+    public static final DeferredItem<FoodCropItem> POWER_BEET = cropItem(CropProfile.POWER_BEET,
+            properties -> new FoodCropItem(CropProfile.POWER_BEET, properties),
+            foodProperties(CropProfile.POWER_BEET, FarmstormConfig.powerBeetNutrition, FarmstormConfig.powerBeetSaturationModifier));
+    public static final DeferredItem<ThrowableCropItem> MELON_SLICE_BOMB = cropItem(CropProfile.MELON_SLICE_BOMB,
+            properties -> new ThrowableCropItem(CropProfile.MELON_SLICE_BOMB, FarmstormEntityTypes.MELON_SLICE_BOMB::get, properties));
+    public static final DeferredItem<ThrowableCropItem> MELON_GRENADE = cropItem(CropProfile.MELON_GRENADE,
+            properties -> new ThrowableCropItem(CropProfile.MELON_GRENADE, FarmstormEntityTypes.MELON_GRENADE::get, properties));
+    public static final DeferredItem<DeployableCropItem> PUMPKIN_TURRET = cropItem(CropProfile.PUMPKIN_TURRET,
+            properties -> new DeployableCropItem(CropProfile.PUMPKIN_TURRET, FarmstormBlocks.PUMPKIN_TURRET.get(), properties));
+    public static final DeferredItem<DeployableCropItem> AWAKENED_TORCHFLOWER = cropItem(CropProfile.AWAKENED_TORCHFLOWER,
+            properties -> new DeployableCropItem(CropProfile.AWAKENED_TORCHFLOWER, FarmstormBlocks.AWAKENED_TORCHFLOWER.get(), properties));
+    public static final DeferredItem<DeployableCropItem> AWAKENED_PITCHER_PLANT = cropItem(CropProfile.AWAKENED_PITCHER_PLANT,
+            properties -> new DeployableCropItem(CropProfile.AWAKENED_PITCHER_PLANT, FarmstormBlocks.AWAKENED_PITCHER_PLANT.get(), properties));
+    public static final DeferredItem<DeployableCropItem> FANG_TRAP_CACTUS = cropItem(CropProfile.FANG_TRAP_CACTUS,
+            properties -> new DeployableCropItem(CropProfile.FANG_TRAP_CACTUS, FarmstormBlocks.FANG_TRAP_CACTUS.get(), properties));
+    public static final DeferredItem<ThrowableCropItem> BAMBOO_FIRECRACKER = cropItem(CropProfile.BAMBOO_FIRECRACKER,
+            properties -> new ThrowableCropItem(CropProfile.BAMBOO_FIRECRACKER, FarmstormEntityTypes.BAMBOO_FIRECRACKER::get, properties));
+    public static final DeferredItem<ThrowableCropItem> RED_MUSHROOM_PUFF = cropItem(CropProfile.RED_MUSHROOM_PUFF,
+            properties -> new ThrowableCropItem(CropProfile.RED_MUSHROOM_PUFF, FarmstormEntityTypes.RED_MUSHROOM_PUFF::get, properties));
+    public static final DeferredItem<ThrowableCropItem> BROWN_MUSHROOM_PUFF = cropItem(CropProfile.BROWN_MUSHROOM_PUFF,
+            properties -> new ThrowableCropItem(CropProfile.BROWN_MUSHROOM_PUFF, FarmstormEntityTypes.BROWN_MUSHROOM_PUFF::get, properties));
+    public static final DeferredItem<FoodCropItem> LUCKY_BERRY = cropItem(CropProfile.LUCKY_BERRY,
+            properties -> new FoodCropItem(CropProfile.LUCKY_BERRY, properties),
+            foodProperties(CropProfile.LUCKY_BERRY, FarmstormConfig.luckyBerryNutrition, FarmstormConfig.luckyBerrySaturationModifier));
+
+    // ---- 6 个独立播种物 ----
+    public static final DeferredItem<SeedItem> PUFFED_WHEAT_SEEDS = seedItem("puffed_wheat_seeds", CropProfile.PUFFED_WHEAT);
+    public static final DeferredItem<SeedItem> POWER_BEET_SEEDS = seedItem("power_beet_seeds", CropProfile.POWER_BEET);
+    public static final DeferredItem<SeedItem> MELON_GRENADE_SEEDS = seedItem("melon_grenade_seeds", CropProfile.MELON_GRENADE);
+    public static final DeferredItem<SeedItem> PUMPKIN_TURRET_SEEDS = seedItem("pumpkin_turret_seeds", CropProfile.PUMPKIN_TURRET);
+    public static final DeferredItem<SeedItem> AWAKENED_TORCHFLOWER_SEEDS =
+            seedItem("awakened_torchflower_seeds", CropProfile.AWAKENED_TORCHFLOWER);
+    public static final DeferredItem<SeedItem> AWAKENED_PITCHER_PLANT_POD =
+            seedItem("awakened_pitcher_plant_pod", CropProfile.AWAKENED_PITCHER_PLANT);
+
+    // ---- 1 个方块物品 ----
+    public static final DeferredItem<BlockItem> CONVERTER = REGISTER.registerItem("converter",
+            properties -> new BlockItem(FarmstormBlocks.CONVERTER.get(), properties), otherProperties());
+
+    private FarmstormItems() {}
+
+    /** 创造标签页内容：作物 → 播种物 → 工具方块（TECH §3.6）。 */
+    public static List<DeferredItem<? extends Item>> creativeTabItems() {
+        List<DeferredItem<? extends Item>> items = new ArrayList<>(CROP_ITEMS.values());
+        items.addAll(SEED_ITEMS);
+        items.add(CONVERTER);
+        return items;
+    }
+
+    /** 作物档案 → 已注册物品，供 Behavioral 层按档案取物品（M3/M4 会用到）。 */
+    public static DeferredItem<? extends Item> forProfile(CropProfile profile) {
+        DeferredItem<? extends Item> item = CROP_ITEMS.get(profile.path());
+        if (item == null) {
+            throw new IllegalStateException("No item registered for crop " + profile.path());
+        }
+        return item;
+    }
+
+    private static <I extends Item> DeferredItem<I> cropItem(CropProfile profile,
+                                                             Function<Item.Properties, ? extends I> factory) {
+        return cropItem(profile, factory, stackProperties(profile));
+    }
+
+    private static <I extends Item> DeferredItem<I> cropItem(CropProfile profile,
+                                                             Function<Item.Properties, ? extends I> factory,
+                                                             Item.Properties properties) {
+        DeferredItem<I> item = REGISTER.registerItem(profile.path(), factory, properties);
+        CROP_ITEMS.put(profile.path(), item);
+        return item;
+    }
+
+    private static DeferredItem<SeedItem> seedItem(String path, CropProfile profile) {
+        DeferredItem<SeedItem> item = REGISTER.registerItem(path,
+                properties -> new SeedItem(profile, cropBlock(profile), properties), otherProperties());
+        SEED_ITEMS.add(item);
+        return item;
+    }
+
+    private static Item.Properties stackProperties(CropProfile profile) {
+        return profile.throwStack() == CropProfile.THROWABLE_STACK_TIER ? throwableProperties() : otherProperties();
+    }
+
+    private static Item.Properties throwableProperties() {
+        return new Item.Properties().stacksTo(FarmstormConfig.registrationInt(FarmstormConfig.stackThrowable));
+    }
+
+    private static Item.Properties otherProperties() {
+        return new Item.Properties().stacksTo(FarmstormConfig.registrationInt(FarmstormConfig.stackOther));
+    }
+
+    private static Item.Properties foodProperties(CropProfile profile, ModConfigSpec.IntValue nutrition,
+                                                  ModConfigSpec.DoubleValue saturation) {
+        FoodProperties food = new FoodProperties.Builder()
+                .nutrition(FarmstormConfig.registrationInt(nutrition))
+                .saturationModifier((float) FarmstormConfig.registrationDouble(saturation))
+                .alwaysEdible()
+                .build();
+        return stackProperties(profile).food(food);
+    }
+
+    private static Block cropBlock(CropProfile profile) {
+        ResourceKey<Block> key = profile.cropBlock();
+        Block block = key == null ? null : BuiltInRegistries.BLOCK.get(key);
+        if (block == null) {
+            throw new IllegalStateException("No crop block registered for " + profile.path());
+        }
+        return block;
+    }
+}

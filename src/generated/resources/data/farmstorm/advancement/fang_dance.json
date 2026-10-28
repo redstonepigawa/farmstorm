@@ -1,0 +1,27 @@
+{
+  "parent": "farmstorm:first_deploy",
+  "criteria": {
+    "fang_dance": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.fang_dance.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:fang_trap_cactus"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.fang_dance.title"
+    }
+  },
+  "requirements": [
+    [
+      "fang_dance"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

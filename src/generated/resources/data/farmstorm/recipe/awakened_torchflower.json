@@ -1,0 +1,15 @@
+{
+  "type": "farmstorm:converting",
+  "bidirectional": false,
+  "catalyst": {
+    "item": "minecraft:nether_star"
+  },
+  "input": {
+    "item": "minecraft:torchflower"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:awakened_torchflower"
+  },
+  "reverse_xp_cost": 3
+}

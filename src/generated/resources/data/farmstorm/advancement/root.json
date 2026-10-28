@@ -1,0 +1,34 @@
+{
+  "criteria": {
+    "has_modified_crop": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#farmstorm:modified_crops"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:textures/block/hay_block_side.png",
+    "description": {
+      "translate": "advancements.farmstorm.root.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:puffed_wheat"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_modified_crop"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

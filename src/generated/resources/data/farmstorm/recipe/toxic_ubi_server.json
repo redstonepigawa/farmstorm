@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:poisonous_potato"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:toxic_ubi_server"
+  },
+  "reverse_xp_cost": 3
+}

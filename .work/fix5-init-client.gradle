@@ -1,0 +1,12 @@
+// FIX-5 客户端截图：把 quickPlay 参数追加进 MDG 生成的 argfile（实测 runClient.args.addAll 会被丢掉）
+gradle.projectsEvaluated {
+    def runClient = rootProject.tasks.findByName('runClient')
+    runClient.doFirst {
+        def argFile = new File(rootProject.projectDir, 'build/moddev/clientRunProgramArgs.txt')
+        def text = argFile.getText('UTF-8')
+        if (!text.contains('--quickPlaySingleplayer')) {
+            argFile.setText(text + '\n# fix5 quickplay\n--quickPlaySingleplayer\nfix5\n', 'UTF-8')
+        }
+        println "[fix5-init] argfile tail: " + argFile.getText('UTF-8').readLines().findAll { it.trim() }.takeRight(4)
+    }
+}

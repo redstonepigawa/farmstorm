@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:potato"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:ubi_server"
+  },
+  "reverse_xp_cost": 3
+}

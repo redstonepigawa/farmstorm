@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:bamboo"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:bamboo_firecracker"
+  },
+  "reverse_xp_cost": 3
+}

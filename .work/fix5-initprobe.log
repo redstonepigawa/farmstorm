@@ -1,0 +1,19 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 18 busy and 1 incompatible and 4 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :fs5ProbeRunClient
+TASK CLASS: net.neoforged.moddevgradle.internal.RunGameTask_Decorated
+ARGPROP allJvmArgs = [-Dfml.modFolders=farmstorm%%D:\project_farm\build\classes\java\main;farmstorm%%D:\project_farm\build\resources\main, -Dfile.encoding=UTF-8, -Duser.country=US, -Duser.language=en, -Duser.variant]
+ARGPROP args = [@D:\\project_farm\\build\\moddev\\clientRunProgramArgs.txt]
+ARGPROP argumentProviders = []
+ARGPROP jvmArgs = [@D:\\project_farm\\build\\moddev\\clientRunVmArgs.txt]
+ARGPROP jvmArgumentProviders = [net.neoforged.moddevgradle.internal.ModFoldersProvider_Decorated@195f9e0b]
+ARGPROP jvmArguments = task ':runClient' property 'jvmArguments'
+
+BUILD SUCCESSFUL in 5s
+1 actionable task: 1 executed

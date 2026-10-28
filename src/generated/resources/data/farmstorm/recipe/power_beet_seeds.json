@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:beetroot_seeds"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:power_beet_seeds"
+  },
+  "reverse_xp_cost": 3
+}

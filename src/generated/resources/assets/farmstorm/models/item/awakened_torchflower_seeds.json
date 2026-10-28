@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "farmstorm:item/awakened_torchflower_seeds"
+  }
+}

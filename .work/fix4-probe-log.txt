@@ -1,0 +1,21 @@
+﻿[28Oct2026 12:23:55.347] [Render thread/INFO] [farmstorm/]: FIX4 PROBE opening existing world fix4world
+[28Oct2026 12:24:03.188] [Render thread/INFO] [farmstorm/]: FIX4 PROBE in-game, posting server setup
+[28Oct2026 12:24:03.198] [Server thread/INFO] [farmstorm/]: FIX4 PROBE server-setup pos=-3, 79, -4 input=minecraft:wheat x1 catalyst=minecraft:nether_star x2 xp=3 puffedWheat=0 starsInInventory=0
+[28Oct2026 12:24:03.204] [Server thread/INFO] [farmstorm/]: FIX4 PROBE opened ConverterMenu at -3, 79, -4
+[28Oct2026 12:24:03.422] [Render thread/INFO] [farmstorm/]: FIX4 PROBE converter screen ready, slots=39 convertible=true xpCost=3
+[28Oct2026 12:24:03.979] [Render thread/INFO] [farmstorm/]: FIX4 PROBE wrote D:\project_farm\.work\fix4-shots\fix4-gui-shot.png (854x480)
+[28Oct2026 12:24:03.983] [Render thread/INFO] [farmstorm/]: FIX4 PROBE press#1 button bounds=(133,79,160x18) active=true message=Convert
+[28Oct2026 12:24:03.983] [Render thread/INFO] [farmstorm/]: FIX4 PROBE press#1 onPress() -> handleInventoryButtonClick(containerId=1, button=0)
+[28Oct2026 12:24:04.462] [Render thread/INFO] [farmstorm/]: FIX4 PROBE wrote D:\project_farm\.work\fix4-shots\fix4-after-convert-shot.png (854x480)
+[28Oct2026 12:24:04.471] [Server thread/INFO] [farmstorm/]: FIX4 PROBE assert#1 PASS | input=<empty> catalyst=minecraft:nether_star x2 xp=0 puffedWheat=1 starsInInventory=0 canConvert=0 xpCost=3
+[28Oct2026 12:24:04.477] [Server thread/INFO] [farmstorm/]: FIX4 PROBE server-setup#2 pos=-3, 79, -4 input=minecraft:torchflower x1 catalyst=minecraft:nether_star x2 xp=3 starsInInventory=0 awakenedTorchflower=0 canConvert=1
+[28Oct2026 12:24:04.480] [Server thread/INFO] [farmstorm/]: FIX4 PROBE opened ConverterMenu at -3, 79, -4
+[28Oct2026 12:24:10.523] [Render thread/INFO] [farmstorm/]: FIX4 PROBE retry setup#2 (screen=null, retry=1)
+[28Oct2026 12:24:10.523] [Server thread/INFO] [farmstorm/]: FIX4 PROBE server-setup#2 pos=0, 79, 0 input=minecraft:torchflower x1 catalyst=minecraft:nether_star x2 xp=3 starsInInventory=0 awakenedTorchflower=0 canConvert=1
+[28Oct2026 12:24:10.525] [Server thread/INFO] [farmstorm/]: FIX4 PROBE opened ConverterMenu at 0, 79, 0
+[28Oct2026 12:24:11.156] [Render thread/INFO] [farmstorm/]: FIX4 PROBE wrote D:\project_farm\.work\fix4-shots\fix4-star-shot.png (854x480)
+[28Oct2026 12:24:11.157] [Render thread/INFO] [farmstorm/]: FIX4 PROBE press#2 button bounds=(133,79,160x18) active=true message=Convert
+[28Oct2026 12:24:11.157] [Render thread/INFO] [farmstorm/]: FIX4 PROBE press#2 onPress() -> handleInventoryButtonClick(containerId=3, button=0)
+[28Oct2026 12:24:11.659] [Render thread/INFO] [farmstorm/]: FIX4 PROBE wrote D:\project_farm\.work\fix4-shots\fix4-after-star-shot.png (854x480)
+[28Oct2026 12:24:11.660] [Server thread/INFO] [farmstorm/]: FIX4 PROBE assert#2 PASS | input=<empty> catalyst=minecraft:nether_star x1 xp=0 awakenedTorchflower=1 starsInInventory=0
+[28Oct2026 12:24:11.671] [Render thread/INFO] [farmstorm/]: FIX4 PROBE DONE

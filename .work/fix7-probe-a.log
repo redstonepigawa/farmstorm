@@ -1,0 +1,37 @@
+﻿Preparing level "world-fix7"
+FIX7 自检作物 puffed_wheat → type=THROWABLE categories=[CONSTRUCTION] canBreakBlocks=false
+FIX7 自检作物 blast_carrot → type=DEPLOYABLE categories=[TRAP, DAMAGE] canBreakBlocks=false
+FIX7 自检作物 ubi_server → type=THROWABLE categories=[DEMOLITION, DAMAGE] canBreakBlocks=true
+FIX7 自检作物 toxic_ubi_server → type=THROWABLE categories=[BUFF, DEMOLITION, DAMAGE] canBreakBlocks=true
+FIX7 自检作物 power_beet → type=EDIBLE categories=[BUFF] canBreakBlocks=false
+FIX7 自检作物 melon_slice_bomb → type=THROWABLE categories=[DAMAGE, DEMOLITION] canBreakBlocks=true
+FIX7 自检作物 melon_grenade → type=THROWABLE categories=[DEMOLITION, DAMAGE] canBreakBlocks=true
+FIX7 自检作物 pumpkin_turret → type=DEPLOYABLE categories=[TURRET, DAMAGE] canBreakBlocks=false
+FIX7 自检作物 awakened_torchflower → type=DEPLOYABLE categories=[TURRET, BUFF] canBreakBlocks=false
+FIX7 自检作物 awakened_pitcher_plant → type=DEPLOYABLE categories=[TURRET, BUFF] canBreakBlocks=false
+FIX7 自检作物 fang_trap_cactus → type=DEPLOYABLE categories=[TRAP, DAMAGE] canBreakBlocks=false
+FIX7 自检作物 bamboo_firecracker → type=THROWABLE categories=[DAMAGE] canBreakBlocks=false
+FIX7 自检作物 red_mushroom_puff → type=THROWABLE categories=[BUFF] canBreakBlocks=false
+FIX7 自检作物 brown_mushroom_puff → type=THROWABLE categories=[BUFF] canBreakBlocks=false
+FIX7 自检作物 lucky_berry → type=EDIBLE categories=[BUFF] canBreakBlocks=false
+FIX7 自检爆规 瓜片子 → 破坏规则（能破方块=true）
+FIX7 自检爆规 育碧服务器 → 破坏规则（能破方块=true）
+FIX7 自检爆规 毒育碧服务器 → 破坏规则（能破方块=true）
+FIX7 自检爆规 瓜！ → 破坏规则（能破方块=true）
+FIX7 自检爆规 胡罗贝 → NEVER_BREAK（能破方块=false）
+FIX7 自检爆规 幸运浆果小爆炸 → NEVER_BREAK（能破方块=false）
+FIX7 自检提示 awakened_torchflower → [tooltip.farmstorm.category.turrettooltip.farmstorm.category_separatortooltip.farmstorm.category.buff]
+FIX7 自检提示 toxic_ubi_server → [tooltip.farmstorm.category.bufftooltip.farmstorm.category_separatortooltip.farmstorm.category.demolitiontooltip.farmstorm.category_separatortooltip.farmstorm.category.damage]
+FIX7 自检提示 blast_carrot → [tooltip.farmstorm.category.traptooltip.farmstorm.category_separatortooltip.farmstorm.category.damage]
+FIX7 配置 sliceResistThreshold=6.0 melonSlicePower=2 ubiPower=4
+FIX7 场景 瓜片子 → 泥土立方 BlockPos{x=0, y=200, z=0}~BlockPos{x=6, y=202, z=6}，投掷物在 (3.5,205.0,3.5)
+FIX7 场景 育碧服务器 → 泥土立方 BlockPos{x=32, y=200, z=0}~BlockPos{x=38, y=202, z=6}
+FIX7 场景 胡罗贝 → 部署方块 BlockPos{x=2, y=203, z=34} 已走 trigger 的爆炸段
+FIX7 结果 瓜片子 泥土立方变化方块数=26 爆炸=[center=(2.5,203.5,34.5) rule=NEVER_BREAK toBlow=0, center=(3.5,203.1,3.5) rule=break-enabled toBlow=129, center=(35.5,203.1,3.5) rule=break-enabled toBlow=687]
+FIX7 结果 育碧服务器 泥土立方变化方块数=102
+FIX7 结果 胡罗贝 周围立方变化方块数=0 自身方块=Block{minecraft:air}
+FIX7 结果 全部爆炸=[center=(2.5,203.5,34.5) rule=NEVER_BREAK toBlow=0, center=(3.5,203.1,3.5) rule=break-enabled toBlow=129, center=(35.5,203.1,3.5) rule=break-enabled toBlow=687]
+Saving chunks for level 'ServerLevel[world-fix7]'/minecraft:overworld
+Saving chunks for level 'ServerLevel[world-fix7]'/minecraft:the_end
+Saving chunks for level 'ServerLevel[world-fix7]'/minecraft:the_nether
+ThreadedAnvilChunkStorage (world-fix7): All chunks are saved

@@ -1,7 +1,7 @@
 # 00 · Decision Record
 
 > This file is the single source of truth for "Farmstorm" v0.0.1. The design document, technical specification, task breakdown and prompts must all agree with this file; where they conflict, this file wins.
-> Source: `plan.txt` (the author's original idea) + 5 rounds of clarification interviews (converged, frontier empty).
+> Source: `plan0.0.1.txt` (the author's original idea) + 5 rounds of clarification interviews (converged, frontier empty).
 
 **Crop name mapping (Chinese → English)**
 
@@ -50,7 +50,7 @@ The short forms 火把花 / 瓶子草 used in this document denote the awakened 
 
 ```
 D:\project_farm\
-├── plan.txt                  作者原始设想（只读，不修改）
+├── plan0.0.1.txt                  作者原始设想（只读，不修改）
 ├── README.md                 总索引（中英双语导航）
 ├── docs\zh\                 中文全套
 │   ├── 00-DECISIONS.md       本文件
@@ -87,7 +87,7 @@ D:\project_farm\
 | D-08 | Every improved crop has a seed item, in one-to-one correspondence with the vanilla seed form; on harvest the crop and the seed item drop together at vanilla ratios, a self-sufficient loop. |
 | D-09 | Improved crops **no longer have their vanilla uses** (cannot be made into bread, cannot feed animals, do not take part in vanilla recipes). |
 | D-10 | "Plantable" adds no new design in v0.0.1, only the interface and the specification; all 15 crops are naturally plantable because all have a seed form. |
-| D-11 | Converter: single-slot GUI + data-driven conversion recipes (custom RecipeType), bidirectional and reversible, 1:1. |
+| D-11 | Converter: single-slot GUI + data-driven conversion recipes (custom RecipeType), bidirectional and reversible, 1:1. (**Superseded by D-47**: three slots + a Convert button; the single-slot GUI and settle-on-take-out are void.) |
 | D-12 | Conversion cost: each conversion deducts **3 experience points** (if insufficient the conversion is refused, levels are never deducted); Torchflower and Pitcher Plant **in the "vanilla → awakened" direction only** additionally consume 1 Nether Star each time, the reverse direction is free. |
 | D-13 | Deployment block breaking: turret-category blocks are fixed at a hard-mine of **10 seconds**; other deployments use normal mining speed. |
 | D-14 | Torchflower / Pitcher Plant: the friendly side can mine and recover them normally, no explosion can destroy them; non-friendly players cannot mine them at all. |
@@ -97,7 +97,7 @@ D:\project_farm\
 | D-18 | Lucky Berry creative mode: the original game mode is recorded and forcibly restored after 90 seconds; if the player logs out midway the effect is cancelled and not written to the save. |
 | D-19 | The explosion resistance threshold of the Melon Slice Bomb and the Melon Grenade is unified as "cannot destroy blocks with explosion resistance ≥ cobblestone (6.0)". |
 | D-20 | Distance metric: traps and turrets use **Chebyshev distance**; aura buffs use **Euclidean radius**. Sole exception: the Fang Trap Cactus trigger uses **Euclidean distance ≤ 3**. |
-| D-21 | All numbers are copied verbatim from `plan.txt`; v0.0.1 does no balance adjustment, but every number must be exposed in config so server owners can tune it. |
+| D-21 | All numbers are copied verbatim from `plan0.0.1.txt`; v0.0.1 does no balance adjustment, but every number must be exposed in config so server owners can tune it. |
 
 ### Engineering
 
@@ -123,6 +123,13 @@ D:\project_farm\
 | D-39 | T-06 adopted: 2 custom damage types — `farmstorm:void_bolt` (turret missile) and `farmstorm:crop_blast` (crop explosion). |
 | D-40 | T-07 adopted: **no Mixin is introduced**. All requirements are met with inheritance + the NeoForge event bus + native extension points. |
 | D-41 | T-08 adopted: temporary enchantments are recorded **on the item** as the DataComponent `farmstorm:temporary_enchantments`, not in persistent player data. |
+| D-42 | The Melon Slice Bomb joins the **Demolition** category: its explosion can destroy blocks, and the threshold stays "explosion resistance ≥ cobblestone (6.0) is not destroyed" (D-19 / C-2 unchanged). Demolition therefore has **4** entries: Ubi Server / Toxic Ubi Server / Melon Grenade / Melon Slice Bomb. |
+| D-43 | The Pumpkin Turret's acquisition radius goes from Chebyshev 5 to **15**; its targets go from "non-friendly players only" to "**non-friendly players + hostile mobs** (vanilla hostile mobs)". Every other turret rule (lock non-friendly only, exclude creative and spectator) is unchanged. |
+| D-44 | Damage dealt by a Pumpkin Turret missile is **attributed to the placer**; when the placer is offline the attribution is empty. |
+| D-45 | Crop explosions **exclude no entity**: teammates, villagers and the user themselves all take damage while standing inside the blast. This **deliberately differs** from vanilla `Explosion` (which excludes the source entity). Trigger judgement still follows D-07. |
+| D-46 | Once triggered, the Blast Carrot **vanishes silently and produces no drop**; its explosion **destroys no block** (including its own). The earlier "it drops its own item" behaviour came from its explosion destroying its own block and then running the loot table, and has been removed at the rule layer. |
+| D-47 | The converter GUI is **three slots + an explicit button**: a Nether Star catalyst slot (Nether Stars only) + an input slot + a read-only preview slot, plus a "Convert" button that triggers settlement. **This supersedes D-11's single-slot description and "single slot, settles on take-out" in DESIGN §3.1.2**. The catalyst is taken from the slot first and falls back to scanning the player's inventory when the slot cannot cover it. |
+| D-48 | Crop classification follows the two **orthogonal dimensions** of DESIGN §2: **Type** (single value: Throwable / Deployable / Edible) and **Category** (a multi-valued set: Trap / Turret / Demolition / Buff / Construction / Damage). "Whether it can destroy blocks" is driven by the **Demolition tag**, not judged separately at each explosion call site. Appearance: **trap deployments are completely invisible in the world**, while **turret and aura categories use vanilla block models**. |
 
 ---
 
@@ -135,7 +142,7 @@ D:\project_farm\
 | 3 | Ubi Server | Potato | `ubi_server` | Same name (itself plantable) | Throwable | Demolition, Damage |
 | 4 | Toxic Ubi Server | Poisonous Potato | `toxic_ubi_server` | Same name (itself plantable) | Throwable | Buff, Demolition, Damage |
 | 5 | Power Beet | Beetroot | `power_beet` | `power_beet_seeds` | Edible | Buff |
-| 6 | Melon Slice Bomb | Melon Slice | `melon_slice_bomb` | None (not plantable) | Throwable | Damage |
+| 6 | Melon Slice Bomb | Melon Slice | `melon_slice_bomb` | None (not plantable) | Throwable | Damage, Demolition |
 | 7 | Melon Grenade | Melon | `melon_grenade` | `melon_grenade_seeds` | Throwable | Demolition, Damage |
 | 8 | Pumpkin Turret | Pumpkin | `pumpkin_turret` | `pumpkin_turret_seeds` | Deployable (top / bottom / side) | Turret, Damage |
 | 9 | Awakened Torchflower | Torchflower | `awakened_torchflower` | `awakened_torchflower_seeds` | Deployable (top) | Turret, Buff |
@@ -153,11 +160,11 @@ Notes:
 
 ---
 
-## 5. Corrections to the text of plan.txt
+## 5. Corrections to the text of plan0.0.1.txt
 
 | ID | Correction | Reason |
 |---|---|---|
-| C-1 | The entry count is **15**, not 16. The Lucky Berry random pool is therefore 14 kinds. | Checked entry by entry against lines 33~156 of plan.txt. |
+| C-1 | The entry count is **15**, not 16. The Lucky Berry random pool is therefore 14 kinds. | Checked entry by entry against lines 33~156 of plan0.0.1.txt. |
 | C-2 | The Melon Slice Bomb's "cannot destroy blocks with explosion resistance ≥ -1" is changed to "≥ cobblestone (6.0)". | The author confirmed it was a typo; aligned with the Melon Grenade. |
 | C-3 | The Pumpkin Turret keeps projectile interception; the other turrets only lock onto players. | Author confirmed; narrows the scope. |
 | C-4 | The Torchflower / Pitcher Plant are classified as "turret" in the plan but have no attack behaviour. The category label is kept; technically they are implemented as an "aura provider (AuraProvider)". | The classification is for players to read; the implementation follows behaviour. |
@@ -174,6 +181,6 @@ Notes:
 
 1. Farmer's Delight crop compatibility.
 2. FTB Teams integration (the interface is already reserved).
-3. New "plantable" crop design (`plan.txt` item 12).
+3. New "plantable" crop design (`plan0.0.1.txt` item 12).
 4. Numerical balance tuning (D-21 already locks the original values).
 5. Custom commands.

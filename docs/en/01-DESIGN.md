@@ -5,7 +5,7 @@
 | Document | 01-DESIGN |
 | Version | v0.0.1 |
 | Status | Final |
-| Upstream | `plan.txt` (the author's original idea), `docs/zh/00-DECISIONS.md` (single source of truth) |
+| Upstream | `plan0.0.1.txt` (the author's original idea), `docs/zh/00-DECISIONS.md` (single source of truth) |
 | Downstream | `02-TECH-SPEC.md`, `03-TASKS.md`, `05-PROMPT-MAIN.md` |
 | Language | Body text in Chinese; code identifiers, registry names and config keys always in English |
 
@@ -35,8 +35,8 @@ The short forms 火把花 / 瓶子草 used in this document denote the awakened 
 
 ## 0. Reading conventions
 
-1. **Number sources**: every gameplay number in this document is copied verbatim from §plan.txt§ and is not balanced in any way (D-21). Any implementation-required parameter not given by §plan.txt§ is registered uniformly in §3.8.6 "numerical completion register" with an identifier. Where the wording of §plan.txt§ conflicts with the decisions, §00-DECISIONS.md§ wins (see appendix A, correction entries C-1~C-5).
-2. **Markup**: §[D-xx]§ means the conclusion comes directly from the decision record; §[C-x]§ means the conclusion comes from a correction of the original §plan.txt§ wording; §[G-x]§ means the value is a completion item.
+1. **Number sources**: every gameplay number in this document is copied verbatim from §plan0.0.1.txt§ and is not balanced in any way (D-21). Any implementation-required parameter not given by §plan0.0.1.txt§ is registered uniformly in §3.8.6 "numerical completion register" with an identifier. Where the wording of §plan0.0.1.txt§ conflicts with the decisions, §00-DECISIONS.md§ wins (see appendix A, correction entries C-1~C-5).
+2. **Markup**: §[D-xx]§ means the conclusion comes directly from the decision record; §[C-x]§ means the conclusion comes from a correction of the original §plan0.0.1.txt§ wording; §[G-x]§ means the value is a completion item.
 3. **Units**: time is always labelled in "seconds" or "game ticks", 1 second = 20 game ticks. Levels are always written "level N"; when stored, `amplifier = N − 1`.
 4. **Server authority**: every check, settlement and state transition happens on the server. The client only renders, draws particles and forwards input (D-23).
 
@@ -54,7 +54,7 @@ Farmstorm re-arms Minecraft's **farm produce** as **PvP items**: the same crop c
 |---|---|---|
 | G1 | Give agricultural output PvP value | All 15 improved crops carry at least one combat-facing category (Damage / Demolition / Trap / Turret / Buff) |
 | G2 | Keep the original "farming" growth curve | Every crop has a seed form; harvesting drops crop and seed together at vanilla ratios, a self-sufficient loop (D-08) |
-| G3 | Let players tell vanilla from improved at a glance | The "Produce Converter" work block + a green "+" badge in the bottom-right corner of the texture (§plan.txt§ lines 6, 8) |
+| G3 | Let players tell vanilla from improved at a glance | The "Produce Converter" work block + a green "+" badge in the bottom-right corner of the texture (§plan0.0.1.txt§ lines 6, 8) |
 | G4 | Make improved crops "no longer vanilla crops" | Improved crops do not inherit vanilla uses: no bread, no animal feed, no vanilla recipes (D-09) |
 | G5 | A readable, extensible team dimension | Friendly determination goes through the `TeamResolver` abstraction; v0.0.1 implements it with scoreboard teams (D-06) |
 | G6 | Server-owner tunable | Every key number goes into NeoForge server config (D-22) |
@@ -71,7 +71,7 @@ The boundary must be expressed by two mutually independent means **at the same t
 
 **(2) Visual layer: a green "+" in the bottom-right corner of the texture**
 
-- Each improved crop's item texture carries a **green** "+" badge overlaid on the **bottom-right corner** (§plan.txt§ line 8).
+- Each improved crop's item texture carries a **green** "+" badge overlaid on the **bottom-right corner** (§plan0.0.1.txt§ line 8).
 - The badge is supplied by the resource pack; size and opacity are generated uniformly by the texture script, and the author reviews the final pixels (D-25).
 - The badge is **added to item textures only**; block forms (deployment blocks, crop blocks) keep the appearance the crop body ought to have and carry no badge — when a player sees a crop in the field they see a crop, not a label.
 - Seed items carry the badge as well, so that "this is an improved seed" is readable in the inventory.
@@ -92,7 +92,7 @@ The boundary must be expressed by two mutually independent means **at the same t
 
 | Term | Definition |
 |---|---|
-| Vanilla crop | The Minecraft vanilla item/block named in the "corresponding vanilla crop" column of the 15 entries in §plan.txt§ |
+| Vanilla crop | The Minecraft vanilla item/block named in the "corresponding vanilla crop" column of the 15 entries in §plan0.0.1.txt§ |
 | Improved crop | The 15 items added by this mod, one-to-one with the 15 vanilla crops |
 | Seed item | The seed form of an improved crop. Some are separate items (e.g. `farmstorm:puffed_wheat_seeds`), some are the crop itself (e.g. `farmstorm:blast_carrot`) |
 | Crop block | The ground block an improved crop grows into after planting (isomorphic to `CropBlock`) |
@@ -153,6 +153,7 @@ Type answers "**how is this item used**". Type is a **single-valued enum** — a
   4. Improved crop blocks **take no part in vanilla recipes** (D-09).
 - **Lifecycle**:
   `seed right-click on a block → crop block spawned (age=0) → random tick growth → mature (age=max) → broken → crop + seed dropped → back to the seed`
+- **Implementation status**: the v0.0.1 implementation uniformly follows the vanilla `CropBlock` rule (**farmland only**); the per-crop soil differences (sand / grass block / low light, etc.) are **not implemented yet** and are listed as a follow-up item. The planned wording above is unchanged; this line only records the current state.
 
 #### 2.2.4 Edible
 
@@ -180,11 +181,11 @@ Category answers "**what does this item do in combat**". Category is a **multi-v
 #### 2.3.2 Turret
 
 - **Formal definition**: a persistent deployment that after placement actively searches for targets periodically and acts on them.
-- **Criteria** (satisfying either is enough): ① it has an explicit attack behaviour (fires an entity, spawns a damage source); ② §plan.txt§ explicitly classifies it as a turret.
+- **Criteria** (satisfying either is enough): ① it has an explicit attack behaviour (fires an entity, spawns a damage source); ② §plan0.0.1.txt§ explicitly classifies it as a turret.
 - **Two implementation paths**:
   - **Attack turret** (AttackTurret): actively acquires targets and attacks, e.g. the Pumpkin Turret.
-  - **Aura turret** (AuraProvider): classified as a turret by §plan.txt§ but with **no attack behaviour whatsoever**; the actual behaviour is periodically granting buffs to the friendly side, e.g. the Awakened Torchflower and the Awakened Pitcher Plant. The category label is kept (for players to read), the implementation goes through `AuraProvider` (C-4).
-- **Hard-mine**: **only the single block `pumpkin_turret`** requires a fixed **10 seconds** (200 ticks) to drop when mined (D-13, D-37, §plan.txt§ line 16); the two aura turrets (Torchflower / Pitcher Plant) are not subject to it and are recovered by the friendly side at vanilla normal speed (D-14, C-8).
+  - **Aura turret** (AuraProvider): classified as a turret by §plan0.0.1.txt§ but with **no attack behaviour whatsoever**; the actual behaviour is periodically granting buffs to the friendly side, e.g. the Awakened Torchflower and the Awakened Pitcher Plant. The category label is kept (for players to read), the implementation goes through `AuraProvider` (C-4).
+- **Hard-mine**: **only the single block `pumpkin_turret`** requires a fixed **10 seconds** (200 ticks) to drop when mined (D-13, D-37, §plan0.0.1.txt§ line 16); the two aura turrets (Torchflower / Pitcher Plant) are not subject to it and are recovered by the friendly side at vanilla normal speed (D-14, C-8).
 - **Distance metric**: Chebyshev for target acquisition (D-20); Euclidean radius for the aura.
 
 #### 2.3.3 Demolition
@@ -192,13 +193,15 @@ Category answers "**what does this item do in combat**". Category is a **multi-v
 - **Formal definition**: a crop capable of **destroying blocks**.
 - **Criteria**: its main effect (e.g. an explosion) can destroy at least one kind of vanilla block under normal game rules.
 - **Note**: demolition does not require "always breaks"; it only requires "has the ability to destroy blocks". For example the Melon Grenade's explosion has an explosion resistance threshold (blocks ≥ cobblestone 6.0 cannot be destroyed), yet it can destroy a large number of blocks and still belongs to demolition.
+- **Entries (4)**: Ubi Server / Toxic Ubi Server / Melon Grenade / Melon Slice Bomb (the fourth is added by D-42).
+- **Driving tag**: "can it break blocks" is decided by this category tag alone (`BlastRule.forCrop(profile, rule)`); no explosion call site judges it on its own (D-48).
 
 #### 2.3.4 Buff
 
 - **Formal definition**: a crop that brings buff / debuff effects to the user or to players in range.
 - **Criteria**: its main effect is "applying a status effect", not dealing direct damage or destroying blocks.
 - **Carriers**: edible, throwable and deployable types can all carry this category.
-- **Name normalization**: line 18 of §plan.txt§ writes this category as "buff类" in its defining text, but the category list on lines 14~20 has no "增益类"; the Lucky Berry entry says "增益类". The whole document is unified as **buff类** (see appendix A, A-3).
+- **Name normalization**: line 18 of §plan0.0.1.txt§ writes this category as "buff类" in its defining text, but the category list on lines 14~20 has no "增益类"; the Lucky Berry entry says "增益类". The whole document is unified as **buff类** (see appendix A, A-3).
 
 #### 2.3.5 Construction
 
@@ -210,7 +213,7 @@ Category answers "**what does this item do in combat**". Category is a **multi-v
 
 - **Formal definition**: a crop that can deal damage to players.
 - **Criteria**: there is an explicit damage source somewhere in its effect chain (explosion, projectile, summoned entity, void damage, etc.).
-- **Note**: damage entries in §plan.txt§ usually also give a **damage cap**; the cap is a hard constraint on "how much health this effect can take at most" and outranks the theoretical damage derived from the explosion power.
+- **Note**: damage entries in §plan0.0.1.txt§ usually also give a **damage cap**; the cap is a hard constraint on "how much health this effect can take at most" and outranks the theoretical damage derived from the explosion power.
 
 ### 2.4 Type and category are two orthogonal dimensions
 
@@ -238,15 +241,15 @@ Notes:
 
 #### 3.1.1 Positioning
 
-The converter is the **only** channel between vanilla crops and improved crops. It is not a crafting recipe but a **work block + single-slot GUI**.
+The converter is the **only** channel between vanilla crops and improved crops. It is not a crafting recipe but a **work block + three-slot GUI**.
 
 #### 3.1.2 Structure
 
 | Item | Specification |
 |---|---|
 | Block ID | `farmstorm:converter` |
-| GUI slot | **Single slot** input, no output slot (the conversion settles on take-out) |
-| Slot constraint | Only accepts items that appear in the "conversion recipe table"; other items are bounced straight back |
+| GUI slot | **Three slots**: Nether Star catalyst slot + input slot + read-only preview slot; a Convert button triggers settlement (D-47) |
+| Slot constraint | The input slot only accepts items that appear in the "conversion recipe table", other items are bounced straight back; the catalyst slot accepts **Nether Stars only** |
 | Recipe carrier | Custom `RecipeType` (`farmstorm:conversion`), JSON data-driven |
 | Recipe direction | Bidirectional 1:1; one recipe declares both A→B and B→A (D-11) |
 | Experience cost | Each conversion deducts **3 experience points** (D-12) |
@@ -315,6 +318,8 @@ The converter is the **only** channel between vanilla crops and improved crops. 
 | 14 | Brown Mushroom Puff | `farmstorm:brown_mushroom_puff_block` | Itself | Brown Mushroom |
 | 15 | Lucky Berry | `farmstorm:lucky_berry_bush` | Itself | Sweet berry bush |
 
+> **Implementation status**: v0.0.1 uniformly follows the vanilla `CropBlock` rule (farmland only); the per-crop soil differences implied by the "vanilla reference" column (sand / grass block / low light, etc.) are **not implemented yet** and are listed as a follow-up item.
+
 #### 3.2.3 Two special mappings
 
 1. **Toxic Ubi Server**: a vanilla poisonous potato is **not a standalone crop block**, it is a random product of the potato crop. This mod therefore registers a crop block and a seed item for it separately ("itself plantable"), detached from the vanilla potato's drop logic. This is the explicit landfall of the "one-to-one" principle where the vanilla structure leaves a gap. **Backed by decision: D-32.**
@@ -357,7 +362,7 @@ Otherwise deployment is refused with failure feedback and **no item consumed**.
 | **Non-floating** (default, `floatOnSupportLost = false`) | On the tick after the support block disappears the deployment block is removed; if config allows, it drops its own item (allowed by default) | Blast Carrot, Fang Trap Cactus |
 
 - The floating check runs on every `neighborChanged` and `onRemove`, **at most once per tick**, to avoid a block update storm.
-- The three "floating" entries are written out word for word in §plan.txt§ as "may float after the support block is destroyed", so this is an entry-level attribute, not a global rule.
+- The three "floating" entries are written out word for word in §plan0.0.1.txt§ as "may float after the support block is destroyed", so this is an entry-level attribute, not a global rule.
 
 #### 3.3.4 Owner record
 
@@ -384,6 +389,16 @@ The `BlockEntity` behind a deployment block persists the following fields:
 
 - The hard-mine of `pumpkin_turret` is implemented by overriding `getDestroyProgress` to return a fixed value, not by relying on block hardness: hardness is affected by tool enchantments and cannot guarantee "a constant 10 seconds". The "non-friendly players cannot mine it" of the Torchflower / Pitcher Plant is likewise implemented by `getDestroyProgress` returning 0, which also takes effect in creative mode (D-36).
 - When broken, **1 unit of its own item** drops outward, aligned with the deployment cost, forming a recovery loop.
+
+#### 3.3.6 Appearance in the world
+
+| Category | Appearance | Rationale |
+|---|---|---|
+| Trap (`blast_carrot` / `fang_trap_cactus`) | **Completely invisible in the world**: the block model carries no elements and keeps only a `particle` texture | A visible trap can simply be spotted and walked around. The *item* icon must not disappear together with the block, so both items keep a normal `item/generated` icon |
+| Turret / aura (`pumpkin_turret` / `awakened_torchflower` / `awakened_pitcher_plant`) | **Vanilla block models**: pumpkin / torchflower / pitcher plant top | The player must be able to see what is deployed and which way it faces |
+
+- Invisibility is an **appearance** property, not a behaviour property: an invisible deployment still occupies its block position, still collides and is still broken per §3.3.5.
+- The deployment block must report `RenderShape.MODEL`; the `BaseEntityBlock` parent defaults to `RenderShape.INVISIBLE`, which would hide even a vanilla block model.
 
 ### 3.4 Throwing system
 
@@ -483,7 +498,7 @@ All throwable settlement runs on the server and is guarded for idempotency by a 
 | Purpose | Metric | Formula | Basis |
 |---|---|---|---|
 | Trap trigger | **Chebyshev** | `max(|dx|, |dy|, |dz|) <= r` | D-20 |
-| Turret target acquisition (Pumpkin Turret) | **Chebyshev** | `max(|dx|, |dy|, |dz|) <= 5` | D-20 |
+| Turret target acquisition (Pumpkin Turret) | **Chebyshev** | `max(|dx|, |dy|, |dz|) <= 15` | D-20, D-43 |
 | Aura (Torchflower / Pitcher Plant) | **Euclidean radius** | `sqrt(dx² + dy² + dz²) <= r` | D-20 |
 | Throwable area effect (mushroom puffs) | **Euclidean radius** | `sqrt(dx² + dy² + dz²) <= 4` | Original wording "radius" |
 | Construction replacement range (Puffed Wheat) | **Cube edge length** | Edge 3 / 5, equivalent to Chebyshev radius 1 / 2 | Original wording "3*3*3 / 5*5*5" |
@@ -552,7 +567,7 @@ The level range is §1 ~ 255§ and the duration range is §0 ~ 72000§ (0 = not 
 | `farmstorm.melon_grenade.horizontalJitter` | 0.3 | 0.0 ~ 8.0 | Upper bound of the random offset on the x/z axes | plan line 86 |
 | `farmstorm.melon_grenade.explosionPower` | 3 | 0 ~ 100 | Explosion power | plan line 86 |
 | `farmstorm.melon_grenade.maxDamage` | 8 | 0 ~ 1000 | Damage cap | plan line 86 |
-| `farmstorm.pumpkin_turret.targetRadius` | 5 | 0 ~ 64 | Chebyshev radius for target acquisition | plan line 95 |
+| `farmstorm.pumpkin_turret.targetRadius` | 15 | 0 ~ 64 | Chebyshev radius for target acquisition | plan line 95; D-43 |
 | `farmstorm.pumpkin_turret.projectileDamage` | 1 | 0 ~ 100 | Void damage points caused by a missile hit | plan line 95 |
 | `farmstorm.pumpkin_turret.knockbackLevel` | 1 | 0 ~ 10 | Knockback level applied on hit | plan line 95 |
 | `farmstorm.pumpkin_turret.fireIntervalTicks` | 60 | 1 ~ 72000 | Fire interval (60 ticks = 3 seconds) | D-28 |
@@ -628,7 +643,7 @@ The level range is §1 ~ 255§ and the duration range is §0 ~ 72000§ (0 = not 
 
 #### 3.8.6 Numerical completion register
 
-Parameters that §plan.txt§ does not give but the implementation must have are all registered here; no already-given number is changed. D-28 ~ D-31 confirmed these completion items one by one, and the confirmed results are written straight back into the corresponding rows below.
+Parameters that §plan0.0.1.txt§ does not give but the implementation must have are all registered here; no already-given number is changed. D-28 ~ D-31 confirmed these completion items one by one, and the confirmed results are written straight back into the corresponding rows below.
 
 | ID | Gap | Chosen value | Note |
 |---|---|---|---|
@@ -639,14 +654,14 @@ Parameters that §plan.txt§ does not give but the implementation must have are 
 | G-5 | Impact offset of the things the Lucky Berry spawns | A random standable block within 2 blocks of the eater, the nearest if none fits | The original says "next to the eater" without an offset amount. D-33 has confirmed |
 | G-6 | Projectile lifetime | 100 ticks | Follows the vanilla projectile lifetime. D-31 has confirmed |
 | G-7 | The concrete number behind "a few particles" | 8 per refresh per player | The original says "a few", a configurable base count is needed. D-31 has confirmed |
-| G-8 | Friendly rule for teamless players | Friendly to itself only (`self`) | §plan.txt§ only defines the case "the deployer belongs to a team". D-31 has confirmed |
+| G-8 | Friendly rule for teamless players | Friendly to itself only (`self`) | §plan0.0.1.txt§ only defines the case "the deployer belongs to a team". D-31 has confirmed |
 | G-9 | Drop rule for a non-floating deployment after it loses its support | Drops its own item | Avoids punishment loss for the player. D-31 has confirmed |
 
 ---
 
 ## 4. Full specification of the 15 improved crops
 
-The template fields match §plan.txt§ lines 22~31, with two rows added per the project specification: "English ID" and "Implementation notes". **The "Function" field copies the wording of §plan.txt§ verbatim, with nothing cut.**
+The template fields match §plan0.0.1.txt§ lines 22~31, with two rows added per the project specification: "English ID" and "Implementation notes". **The "Function" field copies the wording of §plan0.0.1.txt§ verbatim, with nothing cut.**
 
 ---
 
@@ -685,6 +700,7 @@ Item description: Get any closer and it blows up!
 
 - **Attachment position**: **block top** only. Bottom and side are refused outright.
 - **One-shot / persistent**: one-shot. Settles and removes the block on trigger, **dropping no item** (so a one-shot trap cannot be recycled over and over).
+- **After triggering**: the trap **vanishes silently and produces no drop**; its explosion **destroys no block, not even its own** (D-46). The block is removed before the explosion executes, so the loot table never runs.
 - **Trigger distance and metric**: Chebyshev distance ≤ 1, origin the deployment point block position, the checked object being the player's block position. The scan runs on every `BlockEntity#tick` and triggers on the first non-friendly player found.
 - **Breaking conditions**: not a turret, so it breaks at **vanilla mining speed** and drops its own item when broken (D-13). It can be destroyed by explosions.
 - **Stacking**: 64.
@@ -761,8 +777,8 @@ Item name: Melon Slice Bomb
 English ID: `farmstorm:melon_slice_bomb` (no seed item)
 Corresponding vanilla crop: Melon Slice
 Type: Throwable
-Category: Damage
-Function: throw it out and at the impact point produce an explosion with a power of 2 that cannot destroy blocks with an explosion resistance greater than or equal to -1, dealing at most 6 damage
+Category: Damage, Demolition
+Function: throw it out and at the impact point produce an explosion with a power of 2 that cannot destroy blocks with an explosion resistance greater than or equal to -1, dealing at most 6 damage; its explosion **can** destroy blocks, but blocks whose explosion resistance is ≥ cobblestone (6.0) are not destroyed (same threshold as the Melon Grenade, C-2 / D-19)
 Item description: Delicious to the point of exploding
 
 **Implementation notes**
@@ -804,17 +820,18 @@ English ID: `farmstorm:pumpkin_turret` (seed item `farmstorm:pumpkin_turret_seed
 Corresponding vanilla crop: Pumpkin
 Type: Deployable (block top, block bottom. Block side, may float after the support block is destroyed)
 Category: Turret, Damage
-Function: fires shulker missiles at non-friendly players at a Chebyshev distance of 5 from it; on hit the missile deals 1 point of void damage and applies one Knockback 1 effect to that player, directed along the line from that pumpkin to the hit player (do not apply Levitation)
+Function: fires shulker missiles at non-friendly players and hostile mobs at a Chebyshev distance of **15** from it; on hit the missile deals 1 point of void damage and applies one Knockback 1 effect to that target, directed along the line from that pumpkin to the hit target (do not apply Levitation)
 Item description: Kids, I can elbow-launch people now
 
 **Implementation notes**
 
 - **Attachment position**: **all three of top / bottom / side are supported** (all six faces).
 - **One-shot / persistent**: persistent. Acquires a target and fires once every 60 ticks (3 seconds) (D-28).
-- **Trigger distance and metric**: Chebyshev distance ≤ 5, origin the deployment point block position (D-20). Candidates are all non-friendly players in range.
+- **Trigger distance and metric**: Chebyshev distance ≤ 15, origin the deployment point block position (D-20, D-43). Candidates are all non-friendly players **and hostile mobs** (vanilla hostile mobs) in range.
+- **Damage attribution**: damage dealt by a missile is attributed to the Pumpkin Turret's **placer** (D-44); when the placer is offline the attribution is empty.
 - **Breaking conditions**: **fixed hard-mine of 10 seconds (200 ticks)** (D-13, D-37; the only block in the whole mod subject to hard-mine). Drops its own item when broken.
 - **Stacking**: 64.
-- **Notes**: ① The missile entity uses the vanilla `ShulkerBullet`; on hit it applies **1 point of void damage** (a custom damage source with `DamageSource#fellOutOfWorld` semantics) and **Knockback 1**, and **never applies Levitation** — this is the original's explicit negative requirement. ② The knockback direction is the horizontally normalized vector of "the line from the pumpkin to the hit player". ③ Floating: after the support block is destroyed it stays in place and keeps running. ④ **The only turret that keeps projectile interception**: it interacts with **projectiles in flight** crossing its range (C-3); all other turrets lock onto players only (D-07).
+- **Notes**: ① The projectile is a custom entity `farmstorm:turret_bullet` (it reuses the shulker bullet model for rendering, see `02-TECH-SPEC.md` §2 / §4.7); on hit it applies **1 point of void damage** (a custom damage source with `DamageSource#fellOutOfWorld` semantics) and **Knockback 1**, and **never applies Levitation** — this is the original's explicit negative requirement. ② The knockback direction is the horizontally normalized vector of "the line from the pumpkin to the hit player". ③ Floating: after the support block is destroyed it stays in place and keeps running. ④ **The only turret that keeps projectile interception**: it interacts with **projectiles in flight** crossing its range (C-3); all other turrets lock onto players only (D-07).
 
 ---
 
@@ -874,7 +891,7 @@ Item description: The prickliest episode
 
 - **Attachment position**: block top only.
 - **One-shot / persistent**: one-shot. Triggering starts a timer; the block is removed once both fang rings have spawned, dropping no item.
-- **Trigger distance and metric**: **Euclidean distance ≤ 3** — the only exception where §plan.txt§ gives no metric and the decision confirms one (C-5, D-20). Origin the deployment point block position.
+- **Trigger distance and metric**: **Euclidean distance ≤ 3** — the only exception where §plan0.0.1.txt§ gives no metric and the decision confirms one (C-5, D-20). Origin the deployment point block position.
 - **Breaking conditions**: not a turret, so it breaks at vanilla mining speed and drops its own item (D-13).
 - **Stacking**: 64.
 - **Notes**: ① The **time gap between the two rings is deliberately inverted**: the inner ring appears first at 0.2 seconds, the outer ring follows at 0.5 seconds — copied from the original, not "corrected". ② Outer ring radius 2.0 blocks, inner ring radius 1.0 blocks (G-3); the points of each ring are spread evenly around the circle (outer ring quartered, inner ring fifths). ③ Fang entities use the vanilla `EvokerFangs`; damage and knockback follow vanilla. ④ The `triggered` flag is consumed immediately on trigger to prevent repeat triggering.
@@ -967,7 +984,7 @@ Item description: Playing it safe and just farming is boring, isn't it
   3. The 0.1% creative mode branch: record the original game mode → switch to creative → **forcibly restore after 90 seconds (1800 ticks)**; if the player logs out midway the **effect is cancelled and not written to the save** (D-18).
   4. The four effects of the 1.9% branch all last 12000 ticks (600 seconds), at Strength 5 / Resistance 3 / Jump Boost 5 / Speed 2 respectively.
   5. The 3% branch spawns a **charged creeper** (a creeper empowered by lightning), not a normal creeper.
-  6. §plan.txt§ writes this category as "增益类"; it is unified into **buff类** (§2.3.4, appendix A A-3).
+  6. §plan0.0.1.txt§ writes this category as "增益类"; it is unified into **buff类** (§2.3.4, appendix A A-3).
   7. Nutrition 4 / saturation modifier 0.3, the same values as the Power Beet (D-29).
 
 ---
@@ -1180,9 +1197,9 @@ When several effects act on the same block at once, the priority from high to lo
 
 ---
 
-## Appendix A · Register of contradictions and gaps in §plan.txt§ and their resolutions
+## Appendix A · Register of contradictions and gaps in §plan0.0.1.txt§ and their resolutions
 
-| # | Contradiction / gap in §plan.txt§ | Resolution | Basis |
+| # | Contradiction / gap in §plan0.0.1.txt§ | Resolution | Basis |
 |---|---|---|---|
 | A-1 | The total entry count is not stated; it is actually **15** entries (lines 33~156), and was once understood as 16 | Fixed at 15; the Lucky Berry random pool is 14 kinds accordingly | C-1, D-17 |
 | A-2 | The Melon Slice Bomb "cannot destroy blocks with explosion resistance greater than or equal to **-1**", inconsistent with the Melon Grenade's "≥ cobblestone" | Corrected to "≥ cobblestone (6.0)", the two are unified | C-2, D-19 |

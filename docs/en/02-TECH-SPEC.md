@@ -63,8 +63,8 @@ DEC has already converged everything at the gameplay level, but a number of gaps
 | T-02 | For deployable crops (`blast_carrot` / `pumpkin_turret` / `awakened_torchflower` / `awakened_pitcher_plant` / `fang_trap_cactus`) the item is the **BlockItem of the deployed block**; the same item, when used on farmland, instead places its own `_crop` block | DEC §4 stipulates that deployable block IDs share the item IDs; one ItemStack can only be one BlockItem, so "deploy" and "sow" must be split inside `useOn` |
 | T-03 | For torchflower / pitcher plant, "cannot be destroyed by non-own-side players" is implemented by having `Block#getDestroyProgress` return `0.0F` plus a second check in `playerWillDestroy`; it applies to creative-mode players as well | The client must also compute 0 progress, otherwise the player feels "mining for ages and then it suddenly snaps back"; the server still needs the second check to stop packet forgery |
 | T-04 | DEC D-13 "turret-type blocks are fixed at 10 seconds of forced mining" applies only to `pumpkin_turret`; torchflower / pitcher plant follow D-14 "own side may mine normally" | D-14 is more specific than D-13 and names these two explicitly; applying both would make the own side mine for 10 seconds too, contradicting D-14 "mine normally". Arbitration order: a specific clause outranks a generalized clause. **Endorsed by DEC C-8** |
-| T-05 | Puffed Wheat block replacement skips blocks with "blast resistance ≥ 3600000" (bedrock / barrier / command block / end portal frame, etc.) | `plan.txt` only says "3×3×3 including air blocks"; a literal implementation would delete bedrock and barriers and destroy server protection structures. This is a destruction-prevention floor, not a balance adjustment (D-21 only locks gameplay values) |
-| T-06 | Two custom damage types: `farmstorm:void_bolt` (turret missile) and `farmstorm:crop_blast` (crop explosion) | The "void damage" in `plan.txt` cannot be expressed with vanilla `explosion` / `generic`; only an independent type lets the explosion produce the death message "blown up by <X> crop" and attribute the kill correctly |
+| T-05 | Puffed Wheat block replacement skips blocks with "blast resistance ≥ 3600000" (bedrock / barrier / command block / end portal frame, etc.) | `plan0.0.1.txt` only says "3×3×3 including air blocks"; a literal implementation would delete bedrock and barriers and destroy server protection structures. This is a destruction-prevention floor, not a balance adjustment (D-21 only locks gameplay values) |
+| T-06 | Two custom damage types: `farmstorm:void_bolt` (turret missile) and `farmstorm:crop_blast` (crop explosion) | The "void damage" in `plan0.0.1.txt` cannot be expressed with vanilla `explosion` / `generic`; only an independent type lets the explosion produce the death message "blown up by <X> crop" and attribute the kill correctly |
 | T-07 | No Mixin is introduced | Every requirement can be met through inheritance + the NeoForge event bus + native extension points; no Mixin means readable crash logs, the smallest conflict surface with other mods, and no need for `farmstorm.mixins.json` |
 | T-08 | Temporary enchantments are recorded in a **DataComponent** `farmstorm:temporary_enchantments` (enchantment / granted level / original level / expiry tick) rather than in persistent player data | DEC D-15 requires "removed automatically on leaving the range or on expiry, and existing enchantments are not overwritten"; recording it on the item lets it travel with the item, drop, and enter chests, which stops players from stuffing the sword into a chest to bypass reclamation |
 
@@ -213,7 +213,7 @@ src/main/java/com/dashpig/farmstorm/
 │   └── ConverterBlock.java             crop converter block (with the MenuProvider contract)
 ├── blockentity/
 │   ├── DeployedCropBlockEntity.java    deployed-object state machine + behavior dispatch + sync
-│   └── ConverterBlockEntity.java       single-slot container + conversion transaction
+│   └── ConverterBlockEntity.java       two-slot container (input + catalyst) + conversion transaction
 ├── behavior/                           deployed behavior (strategy pattern)
 │   ├── DeployedBehavior.java           top-level behavior interface: lifecycle + tick
 │   ├── TrapBehavior.java               trap: trigger condition
@@ -350,7 +350,7 @@ Namespace is `farmstorm` throughout. Stack sizes follow DEC D-16 (throwable 16, 
 | | `farmstorm:awakened_torchflower` | `DeployedCropBlock` | top face only, may hover, explosion immune |
 | | `farmstorm:awakened_pitcher_plant` | `DeployedCropBlock` | top face only, may hover, explosion immune |
 | | `farmstorm:fang_trap_cactus` | `DeployedCropBlock` | top face only |
-| Functional (1) | `farmstorm:converter` | `ConverterBlock` | single-slot GUI, with facing |
+| Functional (1) | `farmstorm:converter` | `ConverterBlock` | three-slot GUI (catalyst + input + preview, D-47), with facing |
 
 `melon_slice_bomb` has no crop block (DEC §4: not plantable), hence 14 crop blocks rather than 15.
 
@@ -363,7 +363,7 @@ Namespace is `farmstorm` throughout. Stack sizes follow DEC D-16 (throwable 16, 
 | `farmstorm:awakened_torchflower` | `DeployedCropBlockEntity` | |
 | `farmstorm:awakened_pitcher_plant` | `DeployedCropBlockEntity` | |
 | `farmstorm:fang_trap_cactus` | `DeployedCropBlockEntity` | |
-| `farmstorm:converter` | `ConverterBlockEntity` | single-slot container |
+| `farmstorm:converter` | `ConverterBlockEntity` | two-slot container (input + catalyst) |
 
 > Crop blocks (`FarmstormCropBlock`) **do not** use a BlockEntity: all growth state lives in the BlockState, which saves memory and sync bandwidth.
 
@@ -831,13 +831,13 @@ public interface AuraProvider extends DeployedBehavior {
 
 The default `tick` of `AuraProvider` iterates `ServerLevel#players()` (instead of scanning entities with an AABB) — within a 20-block radius the player list is usually in the single digits, which is an order of magnitude cheaper than `getEntitiesOfClass` (§8.1).
 
-**Behavior table of the 5 implementations** (all values come from `plan.txt`; per-item configurability in §4.11):
+**Behavior table of the 5 implementations** (all values come from `plan0.0.1.txt`; per-item configurability in §4.11):
 
 | Implementation | Interface | Judgement geometry | Scan | Behavior highlights |
 |---|---|---|---|---|
 | `BlastCarrotTrap` | `TrapBehavior` | Chebyshev ≤ 1 | 10 ticks | on trigger, `FarmstormExplosion(power=2, cap=7)` + nausea III for 60 ticks to **every player** inside the explosion range (radius = power × 2 = 4 blocks) (plan line 46; no own-side filtering, D-27); then `be.consume()` |
 | `FangTrapCactusTrap` | `TrapBehavior` | Euclidean ≤ 3.0 (DEC C-5) | 10 ticks | after triggering, queues two waves: outer ring 8 fangs, delay 10 ticks (0.5 s); inner ring 5 fangs, delay 4 ticks (0.2 s). The fangs use vanilla `EntityType.EVOKER_FANGS` with owner = the deployer; the geometry takes outer radius 2.0 split evenly into 8 points and inner radius 1.0 split evenly into 5 points (the plan gives no radii); `be.consume()` once both waves are out |
-| `PumpkinTurret` | `TurretBehavior` | Chebyshev ≤ 5 | 10 tick scan, 60 tick firing interval (G-2 / D-28) | target priority: non-own-side player → (when `interceptProjectiles` is true) non-own-side projectile (DEC C-3). Firing spawns a `TurretBullet`; a hit deals 1.0 damage of `farmstorm:void_bolt` + knockback 1.0 along the direction "pumpkin → target", and **grants no levitation** (plan line 95) |
+| `PumpkinTurret` | `TurretBehavior` | Chebyshev ≤ 15 (`pumpkin_turret.targetRadius`) | 10 tick scan, 60 tick firing interval (G-2 / D-28) | target priority: non-own-side player → hostile mob (`Monster`) → (when `interceptProjectiles` is true) non-own-side projectile (DEC C-3, D-43). Firing spawns a `TurretBullet`; a hit deals 1.0 damage of `farmstorm:void_bolt` + knockback 1.0 along the direction "pumpkin → target", and **grants no levitation** (plan line 95) |
 | `TorchflowerAura` | `AuraProvider` | Euclidean 20 | 100 ticks, effect 300 ticks | Strength III / Resistance II / Haste II / Speed I / Water Breathing I / Night Vision I; holding any `#minecraft:swords` item (main hand or off hand) → `TempEnchantHandler.grant(..., FIRE_ASPECT, 1, 300)`; every application plays `ParticleTypes.FLAME` ×8 (`particlesPerRefresh`) |
 | `PitcherPlantAura` | `AuraProvider` | Euclidean 10 | 100 ticks, effect 300 ticks | Regeneration II / Saturation II / Absorption I; iterates `player.getActiveEffects()` and calls `removeEffect` on everything with `MobEffect#getCategory() == MobEffectCategory.HARMFUL`; plays `ParticleTypes.HEART` ×8 (`particlesPerRefresh`) |
 
@@ -901,7 +901,7 @@ protected boolean keepAliveAfterImpact() { return false; }
 | `RedMushroomPuffProjectile` | `farmstorm:red_mushroom_puff` | applies nausea V for 60 ticks + blindness I for 60 ticks to **every player** within radius 4.0 | no explosion, no block damage |
 | `BrownMushroomPuffProjectile` | `farmstorm:brown_mushroom_puff` | applies weakness II for 200 ticks + slowness II for 100 ticks to every player within radius 4.0 | same as above |
 
-**Why the mushroom types do not exclude the own side**: lines 135 / 144 of `plan.txt` say only "every player within 4 blocks of the landing point", and DEC **D-27** states explicitly that the area effects of Blast Carrot and the red / brown mushroom types **do not filter by side, and teammates are hit as well**, while "targets only the non-own-side" from D-07 constrains only the **triggering** of traps and the **target acquisition** of turrets, not one-shot AoE. The implementation therefore calls `level.getEntitiesOfClass(Player.class, aabb, p -> true)` **without** an `isAlly` filter.
+**Why the mushroom types do not exclude the own side**: lines 135 / 144 of `plan0.0.1.txt` say only "every player within 4 blocks of the landing point", and DEC **D-27** states explicitly that the area effects of Blast Carrot and the red / brown mushroom types **do not filter by side, and teammates are hit as well**, while "targets only the non-own-side" from D-07 constrains only the **triggering** of traps and the **target acquisition** of turrets, not one-shot AoE. The implementation therefore calls `level.getEntitiesOfClass(Player.class, aabb, p -> true)` **without** an `isAlly` filter.
 
 **`TurretBullet`** (the missile of the Pumpkin Turret turret):
 
@@ -948,7 +948,7 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
     private @Nullable ConverterRecipe cachedRecipe;      // cleared when RecipeManager reloads
     private int cachedXpCost;
 
-    @Override public int getContainerSize() { return 1; }
+    @Override public int getContainerSize() { return 2; }      // 0 = input, 1 = Nether Star catalyst
     @Override public ItemStack getItem(int slot);
     @Override public ItemStack removeItem(int slot, int amount);
     @Override public void setItem(int slot, ItemStack stack);
@@ -969,7 +969,7 @@ Validation order of `tryConvert` (**the order is the safety property**, DEC D-12
 1. `input` is empty → false.
 2. Forward recipe: `level.getRecipeManager().getRecipeFor(FarmstormRecipes.CONVERTING_TYPE.get(), new SingleRecipeInput(input), level)`; if nothing matches and reverse is allowed, iterate `getAllRecipesFor` and compare `result` against `input` (cached in `cachedRecipe`).
 3. `player.totalExperience >= recipe.xpCost()` (if insufficient, reject outright, **never deduct levels**).
-4. Catalyst: when `recipe.catalyst()` is non-empty, scan the player inventory (including the off hand) to accumulate `catalystCount`, without consuming the item in the main hand itself.
+4. Catalyst: when `recipe.catalyst()` is non-empty, consume it from the **catalyst slot first** (slot 1, Nether Stars only) and, when the slot cannot cover `catalystCount`, fall back to scanning the player inventory (including the off hand), without consuming the item in the main hand itself.
 5. Only after everything passes does state change: `input.shrink(1)` → `player.giveExperiencePoints(-xpCost)` → deduct the catalyst → hand the output to `player.getInventory().placeItemBackInInventory(...)`.
 6. `setChanged()` + `level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS)` to refresh the GUI.
 
@@ -995,9 +995,10 @@ public class ConverterMenu extends AbstractContainerMenu {
 }
 ```
 
-- Slots: 0 = input (`new Slot(container, 0, 80, 35)`), 1 = output preview (`mayPlace = false`, `mayPickup = false`).
+- Slots, by **menu index** (= block-entity slot for the first two): **0 = input** (`new Slot(container, 0, 80, 22)`), **1 = catalyst** (`new Slot(container, 1, 44, 22)`, `mayPlace` accepts Nether Stars only), **2 = read-only preview** (`new Slot(preview, 0, 116, 22)`, `mayPlace = false`, `mayPickup = false`); the player inventory starts at index **3** (3 rows + hotbar).
+- Visual order on the texture is a different thing from the indices: left to right the three slots are catalyst (44) / input (80) / preview (116), all on the same row y = 22.
 - `clickMenuButton(player, 0)` → `container instanceof ConverterBlockEntity be && be.tryConvert((ServerPlayer) player)`.
-- `quickMoveStack`: shift-click moves only between slot 0 and the player inventory.
+- `quickMoveStack`: the preview slot is skipped; shift-click moves between the player inventory and slots 0~1 (input + catalyst).
 
 #### 4.8.4 `ConverterScreen`
 
@@ -1009,7 +1010,8 @@ public class ConverterScreen extends AbstractContainerScreen<ConverterMenu> {
 }
 ```
 
-Registration: on the client, inside `@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)`, listen for `RegisterMenuScreensEvent` → `e.register(FarmstormMenus.CONVERTER.get(), ConverterScreen::new)`. The convert button uses `Button.builder(...)`, and clicking it emits the native `ServerboundContainerButtonClickPacket` — **no custom network packet is added** (§5.4).
+Registration: on the client, inside `@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)`, listen for `RegisterMenuScreensEvent` → `e.register(FarmstormMenus.CONVERTER.get(), ConverterScreen::new)`. - The screen owns exactly one `Button` (**Convert**): clicking it calls `handleInventoryButtonClick(containerId, BUTTON_CONVERT)`; it is greyed out (`active = false`) whenever `canConvert` is false, and the experience cost is drawn at the right-hand end of the title row.
+- The button only emits the native `ServerboundContainerButtonClickPacket` and carries no parameter that could be forged — **no custom network packet is added** (§5.4).
 
 #### 4.8.5 `ConverterRecipe` + `ConverterRecipeSerializer`
 
@@ -1162,6 +1164,7 @@ for each LivingEntity e in level.getEntitiesOfClass(LivingEntity.class, aabb(r*2
     e.push(...)                                        // same knockback as vanilla
 ```
 
+- **Does not exclude the source entity**: the user themselves standing inside the blast takes damage just the same (D-45, **deliberately different** from vanilla `Explosion`, which exempts the source entity). Apart from `Entity#ignoreExplosion` there is no filtering at all — teammates and villagers included.
 - **Attribution**: `damageSource` must carry the `owner` (thrower / deployer), so that kill scoring and the death message (X was blown up by Y) are both correct.
 - **`#farmstorm:explosion_immune`**: "no explosion can destroy it" for Torchflower / Pitcher Plant (D-14) is excluded through `BlastRule.extraBreakable`, implemented as `!state.is(FarmstormTags.EXPLOSION_IMMUNE)`; the tag file is in §6.
 - **Destruction-only type**: when `damageCap <= 0`, `hurtCapped` is skipped (reserved for future destruction-only crops).
@@ -1309,7 +1312,7 @@ explosionPower = 3
 maxDamage = 8
 
 [pumpkin_turret]
-targetRadius = 5               # Chebyshev
+targetRadius = 15              # Chebyshev (D-43)
 projectileDamage = 1           # void damage
 knockbackLevel = 1
 fireIntervalTicks = 60         # G-2 / D-28: one shot every 3 seconds
@@ -1484,6 +1487,52 @@ public final class LuckyBerryRoller {
 
 `LuckyBerryRoller.apply` must be called inside `FoodCropItem#onEaten`, and the whole method body must be wrapped in `if (level instanceof ServerLevel)` — the client must not take part in the roll (§5.3).
 
+### 4.13 The two-dimensional Type / Category model (DEC D-48 / PLAN R-47)
+
+`Type` and `Category` are **two independent fields, not one hierarchy** (DESIGN §2.4). `CropProfile` holds them side by side and derives neither from the other; `DeployedKind` (how a deployment behaviour is implemented) is a third thing and belongs to neither dimension.
+
+```java
+public record CropProfile(
+        ResourceLocation id,
+        CropType type,                    // single value      (§2.2 throwable / deployable / edible)
+        Set<CropCategory> categories,     // multi-valued set  (§2.3 trap / turret / demolition / buff / construction / damage)
+        @Nullable ResourceKey<Block> cropBlock,
+        @Nullable ResourceKey<Item> seedItem,
+        @Nullable DeployedKind kind,      // implementation detail, NOT a third dimension (C-4)
+        Set<AttachFace> allowedFaces,
+        int throwStack) {
+
+    /** Can it destroy blocks: decided by the DEMOLITION tag alone, nowhere else. */
+    public boolean canBreakBlocks() { return has(CropCategory.DEMOLITION); }
+}
+```
+
+- `CropType` = `{THROWABLE, DEPLOYABLE, EDIBLE}`. The "plantable" type of DESIGN §2.2.3 deliberately has **no constant** (D-10): it is a cross-cutting capability that all 15 crops carry, so a constant would only create the pseudo-question "which crop is plantable".
+- `CropCategory` = `{TRAP, TURRET, DEMOLITION, BUFF, CONSTRUCTION, DAMAGE}`, held as a `LinkedHashSet` so that the tooltip and the start-up self-check print in the order DEC §4 writes them.
+- **"Can it destroy blocks" has exactly one criterion**: `BlastRule.forCrop(CropProfile profile, BlastRule whenDemolition)` returns `whenDemolition` only when the profile carries `DEMOLITION`, and `BlastRule.NEVER_BREAK` otherwise. The resistance threshold still comes from the individual call site (the Melon Slice Bomb and the Melon Grenade each read their own config key); the factory only switches destruction on and off (D-48).
+
+**Type / category table of the 15 crops** (copied from DEC §4, with D-42 applied to the Melon Slice Bomb):
+
+| # | Crop | Type | Category |
+|---|---|---|---|
+| 1 | Puffed Wheat | Throwable | Construction |
+| 2 | Blast Carrot | Deployable | Trap, Damage |
+| 3 | Ubi Server | Throwable | Demolition, Damage |
+| 4 | Toxic Ubi Server | Throwable | Buff, Demolition, Damage |
+| 5 | Power Beet | Edible | Buff |
+| 6 | Melon Slice Bomb | Throwable | Damage, Demolition |
+| 7 | Melon Grenade | Throwable | Demolition, Damage |
+| 8 | Pumpkin Turret | Deployable | Turret, Damage |
+| 9 | Awakened Torchflower | Deployable | Turret, Buff |
+| 10 | Awakened Pitcher Plant | Deployable | Turret, Buff |
+| 11 | Fang Trap Cactus | Deployable | Trap, Damage |
+| 12 | Bamboo Firecracker | Throwable | Damage |
+| 13 | Red Mushroom Puff | Throwable | Buff |
+| 14 | Brown Mushroom Puff | Throwable | Buff |
+| 15 | Lucky Berry | Edible | Buff |
+
+Demolition therefore has **4** entries (Ubi Server / Toxic Ubi Server / Melon Grenade / Melon Slice Bomb), and the start-up self-check prints `15 crops: throwable 8 / deployable 5 / edible 2; demolition 4 → OK` (PLAN R-51). A change to this table changes behaviour without touching a single explosion call site; FIX-7's acceptance test showed exactly that (Melon Slice Bomb with the tag: 26 blocks destroyed, without it: 0, with the same six call sites and the same `BlastRule` bytes).
+
 ---
 
 ## 5. Server-Authoritative Architecture
@@ -1566,7 +1615,7 @@ The cost is that purely decorative requests such as "the client can show a count
 | `assets/farmstorm/models/item/*.json` | 22 |
 | `assets/farmstorm/lang/*.json` | 2 |
 | `assets/farmstorm/textures/item/*.png` | 22 |
-| `assets/farmstorm/textures/block/*.png` | 64 |
+| `assets/farmstorm/textures/block/*.png` | 68 |
 | `assets/farmstorm/textures/gui/*.png` | 1 |
 | `data/farmstorm/damage_type/*.json` | 2 |
 | `data/minecraft/tags/damage_type/*.json` | 2 |
@@ -1577,7 +1626,7 @@ The cost is that purely decorative requests such as "the client can show a count
 | `data/farmstorm/tags/item/*.json` | 2 |
 | `data/minecraft/tags/block/mineable/pickaxe.json` | 1 |
 | root: `pack.mcmeta` / `META-INF/neoforge.mods.toml` | 2 |
-| **Total** | **257** (JSON 169 + TOML 1 + PNG 87) |
+| **Total** | **261** (JSON 169 + TOML 1 + PNG 91) |
 
 ### 6.2 assets/farmstorm/blockstates (20)
 
@@ -1639,15 +1688,18 @@ models/item/converter.json               converter (parent = models/block/conver
 
 The item models of the 5 deployable crops **reference the block model directly** (`{"parent": "farmstorm:block/blast_carrot"}`); no extra artwork is drawn.
 
-### 6.5 assets/farmstorm/textures (87 PNG)
+### 6.5 assets/farmstorm/textures (91 PNG)
 
 | Path | Count | Use |
 |---|---|---|
 | `textures/item/<22 ids>.png` | 22 | item icons; the 15 crop icons must carry a **green + in the bottom-right corner** (plan item 8) |
 | `textures/block/<base>_stage{0..3}.png` | 56 | crop textures for the 4 stages (14 crops × 4; the `<base>` rule is in §6.3) |
 | `textures/block/blast_carrot.png` and the other deployed block textures (5 in total) | 5 | appearance of the deployed objects |
-| `textures/block/converter_top.png` / `_side.png` / `_front.png` | 3 | three faces of the converter |
+| `textures/block/converter_top.png` / `converter_side.png` / `converter_front.png` | 3 | kept as-is; the last two are no longer referenced by the block model |
+| `textures/block/converter_side_{wheat,carrot,potato,beetroot}.png` | 4 | working-table side as the base + the matching crop icon; these are the four side faces of the converter model |
 | `textures/gui/converter.png` | 1 | 176×166 GUI background |
+
+> The converter block model gives each of the four sides its own texture: north = wheat / east = carrot / south = potato / west = beetroot, and both up and down use `converter_top`.
 
 > All PNGs are batch-generated as placeholders by `tools/gen_textures.py` and replaced by the author after review (DEC D-25).
 
@@ -1730,11 +1782,13 @@ The item models of the 5 deployable crops **reference the block model directly**
 | 5 | `advancement/seed_cycle.json` | Closed Self-Supply | `farmstorm:first_conversion` | harvest one mature modified crop and pick up both the crop and the seeding item |
 | 6 | `advancement/first_throw.json` | Opening Move | `farmstorm:root` | throw any throwable modified crop |
 | 7 | `advancement/first_deploy.json` | Placing a Stone | `farmstorm:root` | deploy any deployable modified crop |
-| 8 | `advancement/demolition.json` | Unauthorized Wall Removal | `farmstorm:first_throw` | destroy at least 1 block with the explosion of an obstruction-breaking crop |
+| 8 | `advancement/demolition.json` | Unauthorized Wall Removal | `farmstorm:first_throw` | destroy at least 1 block with the explosion of a **Demolition**-category crop |
 | 9 | `advancement/turret_hit.json` | Do Not Stand There | `farmstorm:first_deploy` | be hit once by a Pumpkin Turret missile |
 | 10 | `advancement/aura_bath.json` | Aura Bath | `farmstorm:first_deploy` | receive an aura effect at least once from an Awakened Torchflower / Pitcher Plant |
 | 11 | `advancement/fang_dance.json` | The Spikiest Episode | `farmstorm:first_deploy` | trigger Fang Trap Cactus once |
 | 12 | `advancement/lucky_jackpot.json` | Playing It Safe Is Boring, Right | `farmstorm:root` | eat a Lucky Berry and roll the 0.1% creative-mode branch |
+
+> The Demolition category has **4** entries: Ubi Server / Toxic Ubi Server / Melon Grenade / Melon Slice Bomb (the last one added by D-42).
 
 Conventions (copied from `01-DESIGN.md` §6): all of them use `"frame": "task"`, `"show_toast": true`, `"announce_to_chat": false`; the `background` of `root` is `minecraft:textures/block/hay_block_side.png`.
 
@@ -1754,11 +1808,11 @@ Conventions (copied from `01-DESIGN.md` §6): all of them use `"frame": "task"`,
 | `itemGroup.farmstorm.main` | fixed | 1 | creative tab title |
 | `container.farmstorm.converter` | fixed | 1 | GUI title |
 | `gui.farmstorm.converter.*` | `.convert` / `.xp_cost` / `.no_recipe` / `.need_catalyst` / `.not_enough_xp` / `.reverse` / `.forward` / `.tooltip` | 8 | button and status texts |
-| `tooltip.farmstorm.*` | `.deployed_by` / `.attached_face` / `.floating` / `.team` / `.turret_range` / `.aura_radius` / `.temporary_enchant` / `.cannot_break` / `.trap_armed` / `.type.<kind>` | 10 | additional information of deployed objects and items |
+| `tooltip.farmstorm.*` | `.deployed_by` / `.attached_face` / `.floating` / `.team` / `.turret_range` / `.aura_radius` / `.temporary_enchant` / `.cannot_break` / `.trap_armed` / `.category.{trap,turret,demolition,buff,construction,damage}` / `.category_separator` | 16 | additional information of deployed objects and items; the category label is a multi-valued set, so each category has its own key, and the separator can only come from the language file (D-48) |
 | `death.attack.farmstorm.<message_id>` | matches the `message_id` of the `damage_type` | 4 | `farmstorm.void_bolt` and `farmstorm.crop_blast`, each with a `.player` variant |
 | `advancements.farmstorm.<path>.title` / `.description` | 12 advancements × 2 | 24 | generated by DataGen |
 | `farmstorm.configuration.<group>.<key>` | exactly identical to the TOML key path | 117 | specified via `ModConfigSpec.Builder#translation` |
-| **Total** | | **216** | one copy for Chinese and one for English; the key sets must be exactly identical |
+| **Total** | | **222** | one copy for Chinese and one for English; the key sets must be exactly identical |
 
 ### 7.2 Example entries (zh_cn.json)
 
@@ -1797,9 +1851,13 @@ Conventions (copied from `01-DESIGN.md` §6): all of them use `"frame": "task"`,
   "tooltip.farmstorm.temporary_enchant": "临时附魔（%s 秒后消失）",
   "tooltip.farmstorm.cannot_break": "非己方玩家无法破坏",
   "tooltip.farmstorm.trap_armed": "已布置",
-  "tooltip.farmstorm.type.trap": "陷阱类",
-  "tooltip.farmstorm.type.turret": "炮台类",
-  "tooltip.farmstorm.type.aura": "光环提供者",
+  "tooltip.farmstorm.category.trap": "陷阱类",
+  "tooltip.farmstorm.category.turret": "炮台类",
+  "tooltip.farmstorm.category.demolition": "破障类",
+  "tooltip.farmstorm.category.buff": "buff类",
+  "tooltip.farmstorm.category.construction": "建造类",
+  "tooltip.farmstorm.category.damage": "伤害类",
+  "tooltip.farmstorm.category_separator": "、",
 
   "death.attack.farmstorm.void_bolt": "%1$s 被虚空撕碎",
   "death.attack.farmstorm.void_bolt.player": "%1$s 被 %2$s 的 man瓜 击落",
@@ -1813,7 +1871,7 @@ Conventions (copied from `01-DESIGN.md` §6): all of them use `"frame": "task"`,
 
 ### 7.3 Detailed rules
 
-1. **The Chinese name is copied verbatim from `plan.txt`**, including punctuation and full-width characters such as "？！菇菇！？"; the English name is a semantic naming (DEC D-26).
+1. **The Chinese name is copied verbatim from `plan0.0.1.txt`**, including punctuation and full-width characters such as "？！菇菇！？"; the English name is a semantic naming (DEC D-26).
 2. Crop blocks and crop items **share the same name** (blocks and items belong to different registries, and their lang keys have different prefixes, so there is no conflict).
 3. Death messages use the positional placeholders `%1$s` / `%2$s` (the `.player` variant is selected automatically by the vanilla damage system).
 4. Config keys always go through `farmstorm.configuration.*` and map segment by segment onto the TOML path (`deploy.turretMiningTicks` → `farmstorm.configuration.deploy.turretMiningTicks`), so the automatic GUI of `ModConfigSpec` needs no extra mapping.
@@ -1854,7 +1912,7 @@ Conventions (copied from `01-DESIGN.md` §6): all of them use `"frame": "task"`,
 |---|---|
 | place / break cycles to farm deployed objects | internal constants `DEPLOY_COOLDOWN_TICKS = 5` + `MAX_DEPLOYED_PER_CHUNK = 8` + `MAX_DEPLOYED_PER_PLAYER = 32`; the cooldown resets only after removal, preventing a "place → break immediately → place again" loop from repeatedly triggering drops |
 | farming time through the 10-second turret forced mining | the forced mining progress cannot be accelerated (fixed `1F/200F`) and does not change with tool enchantments |
-| item duping in the converter | single slot + transactional validation (§4.8.2); the input slot accepts no container (`Slot#mayPlace` accepts only items matching a recipe); `quickMoveStack` performs no bulk conversion |
+| item duping in the converter | **two slots (input + catalyst)** + transactional validation (§4.8.2); the input slot accepts no container (`Slot#mayPlace` accepts only items matching a recipe); `quickMoveStack` performs no bulk conversion |
 | the converter swallowing items | `onRemove` → `Containers.dropContents`; nothing drops when the block is moved by a piston (the `movedByPiston` branch) |
 | farming the Lucky Berry RNG | the roll happens only inside `finishUsingItem` on the server; one item can be eaten once (`stack.shrink(1)` is handled by the vanilla food flow) |
 | making creative mode permanent | the 90-second forced restore of D-18 + restore on logout + reconciliation on login (§4.12) |
@@ -1994,7 +2052,7 @@ Numbered `RT-xx` (Risk Technical). Each entry gives: trigger condition → impac
 | all 15 crops appear in the registration summary | pass | §3.1-A table, 15 rows, IDs identical to DEC §4 word for word: `puffed_wheat` / `blast_carrot` / `ubi_server` / `toxic_ubi_server` / `power_beet` / `melon_slice_bomb` / `melon_grenade` / `pumpkin_turret` / `awakened_torchflower` / `awakened_pitcher_plant` / `fang_trap_cactus` / `bamboo_firecracker` / `red_mushroom_puff` / `brown_mushroom_puff` / `lucky_berry` |
 | every registered object has an explicit ID | pass | §3.1–§3.10 list **64 registry objects** in total, each with `farmstorm:<id>`; §3.11 gives the per-registry counts |
 | a "Version Verification" subsection exists at the end with conclusions stated item by item | pass | §10 (7 verified conclusions + 6 "subject to build time" items + 3 rejected claims) |
-| only one file is created | pass | only `docs/zh/02-TECH-SPEC.md` is written; `plan.txt` and `00-DECISIONS.md` are untouched |
+| only one file is created | pass | only `docs/zh/02-TECH-SPEC.md` is written; `plan0.0.1.txt` and `00-DECISIONS.md` are untouched |
 | no complete implementation | pass | the document contains class skeletons and signatures only, with no complete business implementation |
 | written in Chinese, code identifiers in English | pass | — |
 
@@ -2007,7 +2065,7 @@ Numbered `RT-xx` (Risk Technical). Each entry gives: trigger condition → impac
 | D-08 closed sowing loop | T-01 + the loot tables in §6.7 |
 | D-09 takes no part in vanilla uses | §4.3.1 (no vanilla recipe, satisfied inherently) |
 | D-10 the planted type keeps an interface only | T-01 (14 crop blocks, no new gameplay) |
-| D-11 single slot + data-driven + bidirectional | §4.8.2 / §4.8.5 |
+| D-11 + D-47 (D-47 supersedes the single-slot part): data-driven + bidirectional, three slots + button | §4.8.2 ~ §4.8.5 |
 | D-12 3 experience points, nether star one way | §4.11 `[converter]` + the JSON example in §4.8.5 |
 | D-13 turret forced mining 10 seconds | §4.4 break rules table (narrowed to `pumpkin_turret` per T-04) |
 | D-14 Torchflower / Pitcher Plant rules | §4.4 + §8.5 + RT-08 |

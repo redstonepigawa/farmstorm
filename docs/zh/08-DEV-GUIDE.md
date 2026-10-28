@@ -144,7 +144,7 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 
 ## 10. 不要做的事
 
-- ❌ 改 `plan.txt` / `docs/zh/00~02`（只读）。发现文档缺陷 → 写进 `.work/PLAN.md`，由作者裁决
+- ❌ 改 `plan0.0.1.txt` / `docs/zh/00~02`（只读）。发现文档缺陷 → 写进 `.work/PLAN.md`，由作者裁决
 - ❌ 引入 Mixin、新增构建依赖、新增网络包
 - ❌ 新增/改名/删除 config 键（117 封闭）
 - ❌ 在 `registry` 包里写逻辑，或在 `client` 包里做判定

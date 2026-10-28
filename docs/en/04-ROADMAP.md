@@ -1,7 +1,9 @@
 # 04 · Roadmap
 
+> **Document status**: this file is a construction-period historical record of v0.0.1; its numbers and structural descriptions may have been corrected by the implementation. **The implementation baseline is `00-DECISIONS.md`** (see D-42 ~ D-48); the complete list of discrepancies is in `09-IMPL-VS-PLAN.md`.
+
 > Project: Farmstorm · v0.0.1
-> Upstream: `plan.txt` + `docs/zh/00-DECISIONS.md` (D-01 ~ D-41) + `docs/zh/01-DESIGN.md` + `docs/zh/02-TECH-SPEC.md`
+> Upstream: `plan0.0.1.txt` + `docs/zh/00-DECISIONS.md` (D-01 ~ D-41) + `docs/zh/01-DESIGN.md` + `docs/zh/02-TECH-SPEC.md`
 > Sibling: `docs/zh/03-TASKS.md` (59 tasks, 10 phases)
 > This document answers four questions: how many milestones there are, how each milestone counts as complete, which chain determines the schedule, and which risks need a plan prepared in advance. **Phase numbering is fully consistent with `03-TASKS.md`** (Phase 1 ~ Phase 10 → M1 ~ M6).
 
@@ -108,13 +110,13 @@
 
 ### M3 · Throwables Playable (Phase 5)
 
-**Goal**: all 8 throwable crops can be thrown, and their impact effects match `plan.txt` item by item. This is the phase that “delivers 8 behavior implementations in one go”, and the one with the highest parallel gain (6 tasks can proceed at the same time).
+**Goal**: all 8 throwable crops can be thrown, and their impact effects match `plan0.0.1.txt` item by item. This is the phase that “delivers 8 behavior implementations in one go”, and the one with the highest parallel gain (6 tasks can proceed at the same time).
 
 **Phases included**: Phase 5 (Throwables, F-26 ~ F-33).
 
 **Exit criteria**:
 
-1. All 8 throwables can be thrown and hit, and their impact effects match the descriptions on lines 38 / 56 / 72 / 79 / 86 / 93 / 121 / 130 / 139 of `plan.txt`.
+1. All 8 throwables can be thrown and hit, and their impact effects match the descriptions on lines 38 / 56 / 72 / 79 / 86 / 93 / 121 / 130 / 139 of `plan0.0.1.txt`.
 2. Damage caps verified one by one: Blast Carrot 7, Ubi Server (育碧服务器) 2, Toxic Ubi Server (毒育碧服务器) 2, Melon Slice Bomb (瓜片子) 6, Melon Grenade (瓜！) 8.
 3. Puffed Wheat (膨胀麦): a dry impact point replaces 27 blocks with hay blocks, and 125 when water is inside the area; bedrock / barrier / command block are never replaced.
 4. Melon Grenade: after spawning 4 submunitions (`submunition=true`) it explodes immediately, for a total of 5 explosions in the scene.
@@ -245,7 +247,7 @@ F-01 Build Baseline 1.5
 |---|---|---|
 | **M1** | Take all 22 items from the creative tab; place the 14 crop blocks and the 5 deployed blocks (the look is there, the behavior is an empty shell); try the two custom damage types' death messages with `/damage` | Visual check of the creative tab + `/setblock` one by one + `/damage` returning success |
 | **M2** | Plant a blast carrot and blow a teammate into the air; place a pumpkin turret and watch it fire on its own and knock people flying; step on the cactus and eat two rings of fangs; stand under the torchflower for 6 buffs and notice the extra Fire Aspect on the sword; blow the torchflower up with TNT and find it will not break | Real test on a two-player server + count fangs with F3+B + `/effect` readings + `/data get` on the component |
-| **M3** | Throw the 8 throwables like grenades: stack a hay wall, blow up stone, drop a poison cloud, rain 140 ticks of wind charges, and feed a whole area's worth of players Nausea and Slowness together | One round each single-player and two-player, compared value by value with `plan.txt`; damage caps checked against health readings |
+| **M3** | Throw the 8 throwables like grenades: stack a hay wall, blow up stone, drop a poison cloud, rain 140 ticks of wind charges, and feed a whole area's worth of players Nausea and Slowness together | One round each single-player and two-player, compared value by value with `plan0.0.1.txt`; damage caps checked against health readings |
 | **M4** | Take a backpack of wheat to the converter, convert it to puffed wheat and back again; eat a Power Beet and be buffed for 30 seconds; chew a Lucky Berry and gamble on the 0.1% creative branch, then kill the game process and come back to find the mode already restored | Converter GUI test + `/effect` readings + force-triggering each config tier + `kill -9` reproduction |
 | **M5** | Play a complete session: plant the modified crops, get both the crop and the seeds at harvest, unlock the 12 advancements one by one (the hidden one included), a fully Chinese UI with no missing glyphs, and a green plus in the bottom-right corner of the item icons | One complete save playthrough + `/advancement` checks + language file diff + visual check of the icons |
 | **M6** | The server owner drops the jar into a dedicated server and players can join with only the mod itself installed; ticks do not collapse in a base with 10 auras + 8 players; nobody is stuck in creative mode after a crash and restart | Dedicated server deployment + `/debug profile` + crash-and-restart regression |
@@ -294,7 +296,7 @@ Tick each item before release; if any single item is unmet, the version number s
 - [ ] **DoD-04 Creative tab**: the `farmstorm:main` tab holds all 22 items in the correct order.
 - [ ] **DoD-05 Planting loop**: all 14 crops can be planted, and a mature harvest drops both the crop and the sowing item (the melon slice is unplantable by design).
 - [ ] **DoD-06 Conversion loop**: the 21 recipes work in both directions; insufficient XP is rejected without deducting levels; the torchflower / pitcher plant are forward-only and consume 1 nether star.
-- [ ] **DoD-07 Throwable behavior**: the 8 throwables' impact effects and damage caps match `plan.txt` item by item.
+- [ ] **DoD-07 Throwable behavior**: the 8 throwables' impact effects and damage caps match `plan0.0.1.txt` item by item.
 - [ ] **DoD-08 Deployable behavior**: the 5 deployables' trigger / targeting / aura behavior matches item by item, and creative-mode players are not targeted by traps.
 - [ ] **DoD-09 Breaking rules**: `pumpkin_turret` takes a fixed 10 seconds; the torchflower / pitcher plant give non-allies zero progress, cannot be destroyed by any explosion, and are recoverable by allies at normal speed (D-14 / D-37 / C-8 rulings).
 - [ ] **DoD-10 Temporary enchantments**: granted on entering an aura, revoked on leaving or expiry, the original level is never downgraded, and nothing remains after the item is destroyed.
@@ -302,7 +304,7 @@ Tick each item before release; if any single item is unmet, the version number s
 - [ ] **DoD-12 Advancements**: all 12 advancements unlock, 1 of them hidden (C-7).
 - [ ] **DoD-13 Language**: `zh_cn.json` and `en_us.json` have identical key sets, 216 keys in total; no key is displayed raw in game.
 - [ ] **DoD-14 Resources**: 257 `runData` artifacts (JSON 169 + TOML 1 + PNG 87); the 15 crop icons carry a green plus in the bottom-right corner; no purple-black blocks.
-- [ ] **DoD-15 Config**: all 117 keys are generated in `config/farmstorm-server.toml`, with default values matching the originals in `plan.txt` item by item.
+- [ ] **DoD-15 Config**: all 117 keys are generated in `config/farmstorm-server.toml`, with default values matching the originals in `plan0.0.1.txt` item by item.
 - [ ] **DoD-16 Server authority**: 0 custom network packets; the owner is read only from server context; the client takes part in no adjudication.
 - [ ] **DoD-17 Performance**: single tick < 1 ms in the 10-auras + 8-players scene; no spike with 8 deployables in one chunk.
 - [ ] **DoD-18 Delivery cleanliness**: the repository has no mixin config and no placeholder marker (grep hits 0); the Phase numbering, task counts and workload numbers in `03-TASKS.md` and `04-ROADMAP.md` agree with each other.

@@ -1,11 +1,13 @@
 # 06 · Phased Task List (Task Prompt)
 
+> **Document status**: this file is a construction-period historical record of v0.0.1; its numbers and structural descriptions may have been corrected by the implementation. **The implementation baseline is `00-DECISIONS.md`** (see D-42 ~ D-48); the complete list of discrepancies is in `09-IMPL-VS-PLAN.md`.
+
 | Item | Value |
 |---|---|
 | Document ID | 06-PROMPT-TASKS |
 | Version | v0.0.1 |
 | Audience | The person feeding the coding agent + the CLI coding agent being fed (Claude Code / Codex class) |
-| Upstream | `plan.txt`, `docs/zh/00-DECISIONS.md` (single source of truth), `01-DESIGN.md`, `02-TECH-SPEC.md`, `03-TASKS.md` |
+| Upstream | `plan0.0.1.txt`, `docs/zh/00-DECISIONS.md` (single source of truth), `01-DESIGN.md`, `02-TECH-SPEC.md`, `03-TASKS.md` |
 | Peer | `05-PROMPT-MAIN.md` (the resident main prompt; this file does **not** repeat its HC-01~HC-14, N-01~N-14) |
 | Loading method | Feed once per phase: the full text of `05-PROMPT-MAIN.md` + the matching section of this file |
 | Contents | 10 phases / 59 tasks (F-01 ~ F-59); task IDs and titles align with `03-TASKS.md` verbatim |
@@ -46,7 +48,7 @@
 Three rules:
 
 1. This file does not restate the hard constraints; it cites their IDs only. When you see "HC-xx", "N-xx", or "RT-xx", go back to 05 or TECH for the original text — do not interpret from memory.
-2. On conflict, 05's hard constraints win (05 §0's adjudication order: DEC > TECH > DESIGN > plan.txt > this file).
+2. On conflict, 05's hard constraints win (05 §0's adjudication order: DEC > TECH > DESIGN > plan0.0.1.txt > this file).
 3. This file's acceptance criteria only tighten within 05 §6's definition of done; they never invent new deliverables.
 
 ### 0.2 How to Feed It
@@ -67,7 +69,7 @@ All three gates must be green to pass; missing one is handled as "not done":
 
 1. **Exit criteria**: every item of this section's "Phase exit criteria" can be pointed to command output, a `/data get` read-back, file content, or a log line. "Implemented but not verified" does not pass.
 2. **Task coverage**: every F-xx in the task list has identifiable evidence; when the agent skipped one, require it to be made up per 05 §5.5 — do not fill it in yourself.
-3. **Repository state**: `./gradlew build` is green; `git status` shows only files inside this section's boundary; `plan.txt` and the upstream documents are untouched (HC-06).
+3. **Repository state**: `./gradlew build` is green; `git status` shows only files inside this section's boundary; `plan0.0.1.txt` and the upstream documents are untouched (HC-06).
 
 Order of handling when a phase fails: first have it self-check per 05 §5.4 → if that still fails, copy the failing acceptance items back into the task prompt and dispatch once more → only after two failures, redo it in a new session, naming in the hand-off which item it is stuck on.
 
@@ -102,7 +104,7 @@ Order of handling when a phase fails: first have it self-check per 05 §5.4 → 
 | Phase 2 | Full Registry Layer | 8 | F-06 ~ F-13 | Phase 1 | all 22 creative-tab items present, 19 blocks `/setblock`-able, 9 entities `/summon`-able, 5 of the 6 BlockEntityTypes registered |
 | Phase 3 | Explosions and Global Events | 5 | F-14 ~ F-18 | Phase 1 (in practice it needs F-09/F-12/F-13 from Phase 2) | one `FarmstormExplosion` can "destroy per the rules + cap per entity + report the right death cause", 12 explosions in the same tick are spread over 2 ticks, Torchflower survives TNT |
 | Phase 4 | Deployment Behavior | 7 | F-19 ~ F-25 | Phase 2, Phase 3 | Blast Carrot (胡罗贝) self-destructs, the cactus emits two rings of fangs, Pumpkin Turret (man瓜) fires, both auras apply effects, the per-chunk and per-player caps take effect |
-| Phase 5 | Throwables | 8 | F-26 ~ F-33 | Phase 2, Phase 3 | all 8 throwables can be thrown and produce the impact effects described in `plan.txt`, damage stays within the caps, creative mode consumes nothing |
+| Phase 5 | Throwables | 8 | F-26 ~ F-33 | Phase 2, Phase 3 | all 8 throwables can be thrown and produce the impact effects described in `plan0.0.1.txt`, damage stays within the caps, creative mode consumes nothing |
 | Phase 6 | Converter | 6 | F-34 ~ F-39 | Phase 2 | one wheat conversion yields Puffed Wheat (膨胀麦) and deducts 3 XP points, the reverse conversion works, insufficient XP is rejected without deducting levels, all 5 converter objects are registered |
 | Phase 7 | Edible Type and Lucky Berry | 4 | F-40 ~ F-43 | Phase 3, Phase 6 | Power Beet (甜菜！) grants 4 buffs; all 8 tiers of Lucky Berry (幸运浆果) can be force-triggered; the creative-mode branch leaves no residue after a crash |
 | Phase 8 | Data-Driven Content | 5 | F-44 ~ F-48 | Phase 2, Phase 6 | 21 recipes convert both ways, 20 loot tables accept `/loot give`, 4 tags can be tested, 12 advancements unlock, `/reload` never hits a stale recipe |
@@ -124,7 +126,7 @@ Reading notes:
 
 ### 2.1 Must Already Be Ready Before Feeding
 
-- The repository contains only `plan.txt` and the `docs/zh/00~04` documents, with **no Java source at all** (05 §2.1, item 5).
+- The repository contains only `plan0.0.1.txt` and the `docs/zh/00~04` documents, with **no Java source at all** (05 §2.1, item 5).
 - This machine can run `./gradlew`, JDK 21 is available, and it can reach the network to fetch ModDevGradle and NeoForge 21.1.213.
 - It is confirmed that **no** `*.mixins.json` and no `@Mixin` exist in the repository (HC-04).
 
@@ -148,7 +150,7 @@ Make an empty mod with nothing registered yet run on all four ends under ModDevG
 - [ ] `config/farmstorm-server.toml` is generated with exactly **58** keys (this phase requires only 58; the 51 crop-specific keys and the 8 probability keys are appended in Phases 4/5/6/7, and F-56 reviews the final 117).
 - [ ] The assertion output of `Farmstorm.id("converter")` appears in the log.
 - [ ] All 8 `DeferredRegister`s are registered on the mod bus, and the `registry/` package contains no logic code at all.
-- [ ] `git status` shows only `build.gradle`, `gradle.properties`, `settings.gradle`, `gradle/wrapper/`, `src/main/resources/META-INF/neoforge.mods.toml`, `src/main/resources/pack.mcmeta`, and `src/main/java/com/dashpig/farmstorm/**`; the upstream documents and `plan.txt` are unchanged.
+- [ ] `git status` shows only `build.gradle`, `gradle.properties`, `settings.gradle`, `gradle/wrapper/`, `src/main/resources/META-INF/neoforge.mods.toml`, `src/main/resources/pack.mcmeta`, and `src/main/java/com/dashpig/farmstorm/**`; the upstream documents and `plan0.0.1.txt` are unchanged.
 
 ### 2.5 Common Failure Points
 
@@ -346,7 +348,7 @@ Implement the impact effects of the 8 throwable crops one by one, and unify the 
 
 ### 6.4 Phase Exit Criteria
 
-- [ ] All 8 throwables can be thrown, and their impact effects match `plan.txt` item by item (lines 33~156 of `plan.txt` are the only original text).
+- [ ] All 8 throwables can be thrown, and their impact effects match `plan0.0.1.txt` item by item (lines 33~156 of `plan0.0.1.txt` are the only original text).
 - [ ] Every damage cap holds: Ubi Server ≤ 2, Melon Slice Bomb ≤ 6, Melon Grenade ≤ 8, Blast Carrot ≤ 7.
 - [ ] The resistance threshold is unified as "≥ cobblestone 6.0 is not destroyed" (D-19 / C-2), the thresholds are read from `explosion.sliceResistThreshold` / `explosion.grenadeResistThreshold`, and `6.0F` is not hard-coded (RT-09).
 - [ ] Impact branching exists only in the base class: no subclass under `entity/thrown/` implements `onHitBlock` / `onHitEntity` itself.
@@ -538,7 +540,7 @@ Fill in the 20 blockstates, 62 block models, 22 item models, 87 textures, 216 la
 | F-49 | Blockstates and block models | Generate 20 blockstates and 62 block models with DataGen | ① `runData` generates 20 `blockstates/*.json` and 62 `models/block/*.json`; ② each of the 14 crops has all 4 stage variants (`age` 0 ~ 3); ③ the blockstates of the 5 deployment blocks cover `face × facing × floating` and the floating variant reuses the same model |
 | F-50 | Item models | Generate 22 item models with DataGen | ① 22 `models/item/*.json`; ② the 5 deployable item models point their `parent` at `farmstorm:block/<id>`; ③ none of the 22 creative-tab icons is a purple-black block |
 | F-51 | Texture generation script | Produce the 87 placeholder PNGs in bulk with a script, and add a green plus in the bottom-right corner of the 15 crop icons | ① one run produces 22 `textures/item`, 64 `textures/block`, and 1 `textures/gui`; ② the 15 crop item icons have a green plus in the bottom-right corner (visual check per image + a 16×16 size assertion); ③ repeated runs are idempotent (identical md5 across two runs) |
-| F-52 | Language files, 216 keys | Generate language files whose key sets are identical across Chinese and English | ① the key set diff between `zh_cn.json` and `en_us.json` is empty; ② the key count is 216 (22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 10 tooltip + 4 death + 24 advancement + 117 config); ③ the Chinese names match `plan.txt` verbatim (full-width punctuation included); ④ no `item.farmstorm.*` key displays raw in game |
+| F-52 | Language files, 216 keys | Generate language files whose key sets are identical across Chinese and English | ① the key set diff between `zh_cn.json` and `en_us.json` is empty; ② the key count is 216 (22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 10 tooltip + 4 death + 24 advancement + 117 config); ③ the Chinese names match `plan0.0.1.txt` verbatim (full-width punctuation included); ④ no `item.farmstorm.*` key displays raw in game |
 | F-53 | DataGen assembly and output verification | Hook the 7 providers onto `GatherDataEvent` and verify the total output count and its breakdown | ① `./gradlew runData` generates the full set of outputs under `src/generated/resources` in one go; ② the total is 257 (JSON 169 + TOML 1 + PNG 87), which is +6 over the old figure 251; ③ there is no trace of hand edits to `src/generated` (a second run produces an empty diff) |
 | F-54 | Turret missile rendering | Make the missile visible on the client, reusing the shulker bullet model | ① the client can see the missile and its shape matches the shulker bullet; ② its orientation follows its velocity; ③ `runServer` loads no client rendering class (no `NoClassDefFoundError`) |
 

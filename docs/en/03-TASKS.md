@@ -1,7 +1,9 @@
 # 03 · Task Breakdown
 
+> **Document status**: this file is a construction-period historical record of v0.0.1; its numbers and structural descriptions may have been corrected by the implementation. **The implementation baseline is `00-DECISIONS.md`** (see D-42 ~ D-48); the complete list of discrepancies is in `09-IMPL-VS-PLAN.md`.
+
 > Project: Farmstorm · v0.0.1
-> Basis: `plan.txt` + `docs/zh/00-DECISIONS.md` (D-01 ~ D-41) + `docs/zh/01-DESIGN.md` + `docs/zh/02-TECH-SPEC.md`
+> Basis: `plan0.0.1.txt` + `docs/zh/00-DECISIONS.md` (D-01 ~ D-41) + `docs/zh/01-DESIGN.md` + `docs/zh/02-TECH-SPEC.md`
 > This file breaks the technical spec into tasks that can each be committed and verified independently. **Phase numbering is fully consistent with the milestone split in `04-ROADMAP.md`** (Phase 1 ~ Phase 10 → M1 ~ M6).
 > **59** tasks in total; they cover the **64 registered objects** of `02-TECH-SPEC.md §3`, with **0** left uncovered (item-by-item mapping in §14).
 
@@ -207,7 +209,7 @@ Phase exit criteria: blast carrot self-detonates, the fang-trap cactus (仙人�
 
 Phase goal: implement the impact effects of the 8 throwable crops one by one, and unify lifecycle, hit dispatching and the creative-mode rule.
 
-Phase exit criteria: all 8 throwables can be thrown and produce the impact-point effects described in plan.txt, damage never exceeds the cap, and creative mode consumes nothing.
+Phase exit criteria: all 8 throwables can be thrown and produce the impact-point effects described in plan0.0.1.txt, damage never exceeds the cap, and creative mode consumes nothing.
 
 | ID | Title | Goal | Files / Classes | Depends on | Acceptance criteria | Complexity |
 |---|---|---|---|---|---|---|
@@ -281,7 +283,7 @@ Phase exit criteria: `./gradlew runData` goes through in one run, with 257 artif
 | F-49 | Blockstates and Block Models | Generate 20 blockstates and 62 block models with DataGen | `datagen/FarmstormDataGen.java`, `datagen/ModBlockStateProvider.java` | F-06, F-09, F-38 | ① `runData` generates 20 `blockstates/*.json` and 62 `models/block/*.json`; ② each of the 14 crops has all 4 stage variants (age 0 ~ 3); ③ the blockstates of the 5 deployed blocks cover face × facing × floating, and the floating variants reuse the same model | L |
 | F-50 | Item Models | Generate 22 item models with DataGen | `datagen/ModItemModelProvider.java` | F-08 | ① 22 `models/item/*.json`; ② the 5 deployable item models have `parent` pointing at `farmstorm:block/<id>`; ③ none of the 22 creative-tab icons is a purple-black block | S |
 | F-51 | Texture Generation Script | Produce 87 placeholder PNGs in bulk with a script, adding a green plus in the bottom-right corner of the 15 crop icons | `tools/gen_textures.py` | F-02 | ① one run produces 22 files in `textures/item`, 64 in `textures/block`, 1 in `textures/gui`; ② the 15 crop item icons have a green plus in the bottom-right corner (visual check per image + a 16×16 size assertion); ③ repeated runs are idempotent (md5 identical across two runs) | M |
-| F-52 | Language Files 216 Keys | Generate Chinese and English language files whose key sets match exactly | `datagen/ModLangProvider.java` | F-08, F-47, F-05 | ① the key-set diff between `zh_cn.json` and `en_us.json` is empty; ② the key count is 216 (22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 10 tooltip + 4 death + 24 advancement + 117 config); ③ Chinese names match `plan.txt` verbatim (full-width punctuation included); ④ no `item.farmstorm.*` is displayed raw in game | M |
+| F-52 | Language Files 216 Keys | Generate Chinese and English language files whose key sets match exactly | `datagen/ModLangProvider.java` | F-08, F-47, F-05 | ① the key-set diff between `zh_cn.json` and `en_us.json` is empty; ② the key count is 216 (22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 10 tooltip + 4 death + 24 advancement + 117 config); ③ Chinese names match `plan0.0.1.txt` verbatim (full-width punctuation included); ④ no `item.farmstorm.*` is displayed raw in game | M |
 | F-53 | DataGen Assembly and Artifact Check | Hook the 7 providers into `GatherDataEvent`, and reconcile the total artifact count with the manifest | `datagen/FarmstormDataGen.java`, `event/FarmstormModEvents.java` | F-44, F-45, F-46, F-47, F-49, F-50, F-52 | ① one `./gradlew runData` generates the full artifact set under `src/generated/resources`; ② the artifact total is 257 (JSON 169 + TOML 1 + PNG 87), which is +6 over the pre-C-7 figure of 251 (12 advancements replacing 6; `02-TECH-SPEC.md §6.1` has been synced to 257); ③ there is no trace of hand-editing `src/generated` (a second run leaves an empty diff) | M |
 | F-54 | Turret Missile Rendering | Make the missile visible on the client, reusing the shulker bullet model | `client/render/TurretBulletRenderer.java`, `client/FarmstormClient.java` | F-07, F-22 | ① the missile is visible on the client and looks identical to a shulker bullet; ② its orientation follows its velocity; ③ `runServer` does not load client render classes (no `NoClassDefFoundError`) | S |
 

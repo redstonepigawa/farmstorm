@@ -3,7 +3,7 @@ r"""「农场风云 / Farmstorm」材质生成器（F-51 / TECH §6.5 的 87 张
 
 产出的 91 张材质（DEC D-25 的占位稿，作者审校后可替换）：
   1. textures/item/<22 个 id>.png            —— 15 个作物 + 6 个播种物 + 转换器，16x16；
-     15 个作物与 6 个播种物图标右下角叠绿色「+」（plan.txt 第 8 条，区分原版与改良）；转换器图标不加；
+     15 个作物与 6 个播种物图标右下角叠绿色「+」（plan0.0.1.txt 第 8 条，区分原版与改良）；转换器图标不加；
   2. textures/block/<base>_stage{0..3}.png   —— 14 个作物 × 4 阶段 = 56 张，16x16；
      <base> 取法见 TECH §6.3：作物方块 ID 去掉末尾的 _crop / _stem / _stalk / _block / _bush；
   3. textures/block/<id>.png                 —— 5 个部署方块 + converter_{top,side,front}
@@ -195,7 +195,7 @@ ICONS: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
     ("converter", "转换器", (("item", "converter"), ("block", "crafting_table_front"))),
 )
 
-# 转换器不是改良作物，图标不加「+」（plan.txt 第 8 条只要求改良作物）。
+# 转换器不是改良作物，图标不加「+」（plan0.0.1.txt 第 8 条只要求改良作物）。
 NO_PLUS_ICONS = frozenset({"converter"})
 
 # --- 14 个作物 × 4 阶段（方块 ID 去掉后缀后的 <base>）---

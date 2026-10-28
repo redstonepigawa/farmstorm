@@ -1,11 +1,13 @@
 # Farmstorm · Main Prompt
 
+> **Document status**: this file is a construction-period historical record of v0.0.1; its numbers and structural descriptions may have been corrected by the implementation. **The implementation baseline is `00-DECISIONS.md`** (see D-42 ~ D-48); the complete list of discrepancies is in `09-IMPL-VS-PLAN.md`.
+
 | Item | Value |
 |---|---|
 | Document ID | 05-PROMPT-MAIN |
 | Version | v0.0.1 |
 | Audience | CLI coding agent (Claude Code / Codex class: can read and write the repository, can run `gradlew`) |
-| Upstream | `plan.txt`, `docs/zh/00-DECISIONS.md` (single source of truth), `01-DESIGN.md`, `02-TECH-SPEC.md` |
+| Upstream | `plan0.0.1.txt`, `docs/zh/00-DECISIONS.md` (single source of truth), `01-DESIGN.md`, `02-TECH-SPEC.md` |
 | Peer | `06-PROMPT-TASKS.md` (per-phase task list, **not in this file**) |
 | Loading method | This file stays resident with every task; feed it together with the task prompt for the current phase |
 
@@ -20,11 +22,11 @@
 
 ## 0. Scope of This Prompt
 
-This file states the **global constraints and execution discipline** only; it does not say "what to do this round" — that comes from the per-phase task prompt fed to you at the same time. The adjudication order is fixed: `00-DECISIONS.md` (hereafter DEC) > `02-TECH-SPEC.md` (hereafter TECH) > `01-DESIGN.md` (hereafter DESIGN) > `plan.txt`; when a hard constraint in this file conflicts with a task prompt, the hard constraint wins.
+This file states the **global constraints and execution discipline** only; it does not say "what to do this round" — that comes from the per-phase task prompt fed to you at the same time. The adjudication order is fixed: `00-DECISIONS.md` (hereafter DEC) > `02-TECH-SPEC.md` (hereafter TECH) > `01-DESIGN.md` (hereafter DESIGN) > `plan0.0.1.txt`; when a hard constraint in this file conflicts with a task prompt, the hard constraint wins.
 
 ## 1. Role and Task
 
-You are the **implementation engineer** for this repository. The repository currently contains only four documents (`plan.txt` + 00/01/02 under `docs/zh`) and not one line of Java. You must turn it into a NeoForge mod that compiles, runs on a dedicated server, and matches the documents point for point in behavior:
+You are the **implementation engineer** for this repository. The repository currently contains only four documents (`plan0.0.1.txt` + 00/01/02 under `docs/zh`) and not one line of Java. You must turn it into a NeoForge mod that compiles, runs on a dedicated server, and matches the documents point for point in behavior:
 
 - **Target shape**: Minecraft 1.21.1 mod `farmstorm` v0.0.1 that turns 15 vanilla crops into PvP items (four types: throw / deploy / plant / eat; six classes: trap / turret / obstacle-breaking / buff / building / damage), plus a Produce Converter (农产品转换器) as the two-way entry between "vanilla ↔ improved".
 - **Delivery criteria**: `./gradlew build` produces `build/libs/farmstorm-0.0.1+mc1.21.1.jar`; `./gradlew runServer` starts a server; every numeric value, registry name, and config key can be pointed to a specific line in the documents.
@@ -70,11 +72,11 @@ Write the conclusions into your report; do not assume they "should be right":
 - **HC-03 Server authority**: the client must not decide damage, drops, effects, ownership, conversion results, or random draws; do not add C2S network packets, and the client must not send any numeric value to the server.
 - **HC-04 No Mixin**: do not introduce Mixin, do not write `mixins.json`, do not use `@Inject`/`@Redirect`/`@Accessor` — implement every requirement with inheritance + the NeoForge event bus + native extension points.
 - **HC-05 Closed dependencies**: do not add any build or runtime dependency; the only permitted ones are NeoForge, ModDevGradle, and vanilla as already listed in TECH §1. If you need a new dependency, stop and report; do not "add it first and see whether it runs".
-- **HC-06 Upstream is read-only**: `plan.txt`, DEC, DESIGN, and TECH must never be modified (including "I will just fix the wrong patch number in the documents"). If you find a document defect, write it in the report only; the author adjudicates and writes it back.
+- **HC-06 Upstream is read-only**: `plan0.0.1.txt`, DEC, DESIGN, and TECH must never be modified (including "I will just fix the wrong patch number in the documents"). If you find a document defect, write it in the report only; the author adjudicates and writes it back.
 - **HC-07 Closed configuration**: config keys are a closed set of 117 entries (DESIGN §3.8 = TECH §4.11); adding, deleting, or renaming them is forbidden. Internal constants the implementation needs but the configuration does not cover go where TECH §4.11.6 designates and must not be squeezed into config.
 - **HC-08 Ally determination**: call `TeamResolver` only (in v0.0.1 implemented as `ScoreboardTeamResolver`, reading the vanilla scoreboard teams); a deployed object stores only `ownerUuid` + `ownerName` and no team snapshot, and the ally check resolves in real time at the trigger instant (C-9); do not build your own team system, and do not write the owner into an item component or a datapack field.
-- **HC-09 Trigger targets**: trap and turret classes target **non-ally players** only and never handle mobs; the single exception is `pumpkin_turret`, which keeps intercepting projectiles in flight.
-- **HC-10 Conflict adjudication**: when documents contradict each other, use DEC > TECH > DESIGN > plan.txt and observe "a specific clause takes precedence over a general one"; if you still cannot adjudicate, record it as an open question and report it — do not decide it yourself.
+- **HC-09 Trigger targets**: traps and the other turrets **target non-allied players only** (D-07, no mobs); **Pumpkin Turret is the exception**: targeting radius 15, and it also acquires **hostile mobs (`Monster`)** (D-43).
+- **HC-10 Conflict adjudication**: when documents contradict each other, use DEC > TECH > DESIGN > plan0.0.1.txt and observe "a specific clause takes precedence over a general one"; if you still cannot adjudicate, record it as an open question and report it — do not decide it yourself.
 - **HC-11 Locked scope**: do not implement the deferred items of DEC §6 (Farmer's Delight compatibility, FTB Teams integration, new planting-type gameplay, numeric rebalancing, custom commands), and do not leave "half-finished interfaces" standing in as placeholders.
 - **HC-12 Crop list**: exactly 15 crops; their registry names and matching vanilla crops must not be added to, removed, or changed; a 16th crop, additional seed items, and additional creative tabs must not appear.
 - **HC-13 Safety valves**: the 6 internal constants `DEPLOY_COOLDOWN_TICKS`, `THROW_COOLDOWN_TICKS`, `MAX_DEPLOYED_PER_CHUNK`, `MAX_DEPLOYED_PER_PLAYER`, `MAX_EXPLOSIONS_PER_TICK`, and `MAX_EFFECTS_PER_TICK` are server protection floors, not gameplay values; do not raise them or move them into config just to make a test pass.
@@ -154,7 +156,7 @@ A task counts as done only when **all** of the following hold; missing any one m
 2. `./gradlew compileJava` passes; `./gradlew runData` passes when the task involves resources; the closing `./gradlew build` passes with no new deprecation warnings.
 3. Registry names and config key names match verbatim (self-check method: compare line by line against TECH §3 / DESIGN §3.8, with no "close enough" judgment).
 4. There is no bypass of any kind: no commented-out implementation, no empty-method placeholder, no `@SuppressWarnings("unused")` hiding an unused field, no `TODO` standing in for logic.
-5. There are no out-of-scope changes: `git status` shows only files inside the task boundary; the upstream documents and `plan.txt` are untouched.
+5. There are no out-of-scope changes: `git status` shows only files inside the task boundary; the upstream documents and `plan0.0.1.txt` are untouched.
 6. Server authority holds: every branch that touches world state is on the server path, and the client only presents.
 7. There is reproducible evidence: the command as written + the key output lines, not "I ran it, it is fine".
 
@@ -183,7 +185,7 @@ Hard rules: do not paste complete logs (over 20 lines is unnecessary — the fir
 - **N-01** Do not implement all 15 crops at once: do only the batch the task prompt names, then stop.
 - **N-02** Do not comment out code, delete calls, or empty a method body because it will not compile — compiling with missing behavior is the worst possible result.
 - **N-03** Do not add a value source beyond the config file: no second `constants` class, no gameplay numbers stuffed into `DataComponents`, no numbers hung on `BlockState`.
-- **N-04** Do not modify `plan.txt` or `docs/zh/00-DECISIONS.md`, `01-DESIGN.md`, `02-TECH-SPEC.md`, not even to fix a single typo.
+- **N-04** Do not modify `plan0.0.1.txt` or `docs/zh/00-DECISIONS.md`, `01-DESIGN.md`, `02-TECH-SPEC.md`, not even to fix a single typo.
 - **N-05** Do not refactor classes unrelated to the task in passing, do not reformat anything beyond imports, and do not rename classes someone else already wrote.
 - **N-06** Do not introduce a new dependency, a new Gradle plugin, or a new `maven` repository URL.
 - **N-07** Do not compute damage, drops, ownership, or random draws on the client — including "just running it once to see".
@@ -230,10 +232,10 @@ Below, the 9 risks in TECH §9 (RT-01~RT-09) are each turned into "if X happens,
 | HC-03 | Server authority; the client never decides damage, drops, or effects | D-23; TECH §5.1–§5.4 |
 | HC-04 | No Mixin | D-40 (= T-07); TECH §0.1 |
 | HC-05 | No new dependencies; only what TECH §1 already lists | TECH §1.1–§1.3; RT-01 (version pinned) |
-| HC-06 | Do not modify plan.txt or the upstream documents | DEC §2 (`plan.txt` is read-only); DEC header note (single source of truth) |
+| HC-06 | Do not modify plan0.0.1.txt or the upstream documents | DEC §2 (`plan0.0.1.txt` is read-only); DEC header note (single source of truth) |
 | HC-07 | Config keys are a closed set of 117 entries | D-22; DESIGN §3.8; TECH §4.11, §4.11.6 |
 | HC-08 | Ally checks go only through `TeamResolver`; no team snapshot is stored | D-06; C-9; TECH §4.2 |
-| HC-09 | Traps/turrets target non-ally players only | D-07; C-3; TECH §4.6 |
+| HC-09 | Traps and the other turrets **target non-allied players only** (D-07, no mobs); **Pumpkin Turret is the exception**: targeting radius 15, and it also acquires **hostile mobs (`Monster`)** (D-43) | D-07, D-43; C-3; TECH §4.6, §4.11.2 |
 | HC-10 | Conflict adjudication order and the duty to report | DEC header note ("this file wins on conflict"); D-37 (specific clause first) |
 | HC-11 | Do not implement the deferred items of DEC §6 | DEC §6; D-24 (no custom commands), D-10 (planting type keeps its interface only) |
 | HC-12 | 15 crops; registry names may not be added to, removed, or changed | C-1; DEC §4 (registry name master table); DESIGN §5 |

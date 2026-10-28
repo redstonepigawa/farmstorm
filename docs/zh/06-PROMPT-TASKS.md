@@ -1,11 +1,13 @@
 # 06 · 分阶段任务清单（Task Prompt）
 
+> **文档状态**：本文件是 v0.0.1 施工期的历史记录，其中的数值与结构描述可能已被实现修正。**实现口径以 00-DECISIONS.md 为准**（见 D-42~D-48），完整差异清单见 09-IMPL-VS-PLAN.md。
+
 | 项 | 值 |
 |---|---|
 | 文档编号 | 06-PROMPT-TASKS |
 | 版本 | v0.0.1 |
 | 读者 | 投喂编码代理的人 + 被投喂的 CLI 编码代理（Claude Code / Codex 一类） |
-| 上游 | `plan.txt`、`docs/zh/00-DECISIONS.md`（唯一真相源）、`01-DESIGN.md`、`02-TECH-SPEC.md`、`03-TASKS.md` |
+| 上游 | `plan0.0.1.txt`、`docs/zh/00-DECISIONS.md`（唯一真相源）、`01-DESIGN.md`、`02-TECH-SPEC.md`、`03-TASKS.md` |
 | 同级 | `05-PROMPT-MAIN.md`（常驻主提示词；本文件**不重复**其 HC-01~HC-14、N-01~N-14） |
 | 装载方式 | 每个 Phase 投喂一次：`05-PROMPT-MAIN.md` 全文 + 本文件对应的那一节 |
 | 内容 | 10 个 Phase / 59 个任务（F-01 ~ F-59），任务 ID 与标题逐字对齐 `03-TASKS.md` |
@@ -24,7 +26,7 @@
 三条规矩：
 
 1. 本文件不重写硬约束，只引用编号。看到「HC-xx」「N-xx」「RT-xx」就回 05 或 TECH 查原文，不要凭记忆理解。
-2. 两者冲突时以 05 的硬约束为准（05 §0 的裁决顺序：DEC > TECH > DESIGN > plan.txt > 本文件）。
+2. 两者冲突时以 05 的硬约束为准（05 §0 的裁决顺序：DEC > TECH > DESIGN > plan0.0.1.txt > 本文件）。
 3. 本文件的验收判据只在 05 §6 的完成定义之内收紧，不额外发明新的交付物。
 
 ### 0.2 怎么投喂
@@ -45,7 +47,7 @@
 
 1. **出口判据**：本节「本阶段出口判据」每一条都能指到命令输出、`/data get` 回读、文件内容或日志行。说「实现了但没验」不算过。
 2. **任务覆盖**：任务清单里每个 F-xx 都有一份可指认的证据；代理漏做时按 05 §5.5 要求回补，不要自己补。
-3. **仓库状态**：`./gradlew build` 绿；`git status` 只出现本节边界内的文件；`plan.txt` 与上游文档未被触碰（HC-06）。
+3. **仓库状态**：`./gradlew build` 绿；`git status` 只出现本节边界内的文件；`plan0.0.1.txt` 与上游文档未被触碰（HC-06）。
 
 阶段失败时的处理顺序：先让它按 05 §5.4 自查 → 仍不过就把未通过的验收项抄回任务书重派一次 → 两次不过才换新会话重做，并在交接语里点名卡在哪一条。
 
@@ -80,7 +82,7 @@
 | Phase 2 | 注册层全量 | 8 | F-06 ~ F-13 | Phase 1 | 创造栏 22 物品齐全、19 个方块可 `/setblock`、9 个实体可 `/summon`、6 个 BlockEntityType 中 5 个已注册 |
 | Phase 3 | 爆炸与全局事件 | 5 | F-14 ~ F-18 | Phase 1（实操需 Phase 2 的 F-09/F-12/F-13） | 一次 `FarmstormExplosion` 能「按规则破坏 + 逐实体封顶 + 死因正确」，同 tick 12 次爆炸摊到 2 个 tick，火把花在 TNT 下存活 |
 | Phase 4 | 部署行为 | 7 | F-19 ~ F-25 | Phase 2、Phase 3 | 胡罗贝自爆、仙人掌出两圈尖牙、man瓜开火、两种光环上 effect、单区块与单玩家上限生效 |
-| Phase 5 | 投掷物 | 8 | F-26 ~ F-33 | Phase 2、Phase 3 | 8 种投掷物全部可投出并产生 `plan.txt` 描述的落点效果，伤害不超上限，创造模式不消耗 |
+| Phase 5 | 投掷物 | 8 | F-26 ~ F-33 | Phase 2、Phase 3 | 8 种投掷物全部可投出并产生 `plan0.0.1.txt` 描述的落点效果，伤害不超上限，创造模式不消耗 |
 | Phase 6 | 转换器 | 6 | F-34 ~ F-39 | Phase 2 | 小麦一次转换得膨胀麦并扣 3 点经验、反向可转回、经验不足被拒绝且不扣等级、5 个转换器对象全部入册 |
 | Phase 7 | 食用型与幸运浆果 | 4 | F-40 ~ F-43 | Phase 3、Phase 6 | 甜菜！给 4 个增益；幸运浆果 8 档全部可被强制触发；创造模式分支崩溃后不残留 |
 | Phase 8 | 数据驱动内容 | 5 | F-44 ~ F-48 | Phase 2、Phase 6 | 21 条配方可正反转换、20 张战利品表可 `/loot give`、4 个标签可判定、12 条进度可解锁、`/reload` 不命中过期配方 |
@@ -102,7 +104,7 @@
 
 ### 2.1 投喂前必须已就绪
 
-- 仓库里只有 `plan.txt` 与 `docs/zh/00~04` 文档，**没有任何 Java 源码**（05 §2.1 第 5 条）。
+- 仓库里只有 `plan0.0.1.txt` 与 `docs/zh/00~04` 文档，**没有任何 Java 源码**（05 §2.1 第 5 条）。
 - 本机能跑 `./gradlew`，JDK 21 可用，能联网拉取 ModDevGradle 与 NeoForge 21.1.213。
 - 已确认仓库内**不存在** `*.mixins.json` 与 `@Mixin`（HC-04）。
 
@@ -126,7 +128,7 @@
 - [ ] `config/farmstorm-server.toml` 生成且键数恰为 **58**（本阶段只要求 58；51 个作物专属键与 8 个概率键随 Phase 4/5/6/7 追加，最终 117 由 F-56 复核）。
 - [ ] `Farmstorm.id("converter")` 的断言输出出现在日志里。
 - [ ] 8 个 `DeferredRegister` 全部已注册到 mod 总线，且 `registry/` 包里没有任何逻辑代码。
-- [ ] `git status` 只出现 `build.gradle`、`gradle.properties`、`settings.gradle`、`gradle/wrapper/`、`src/main/resources/META-INF/neoforge.mods.toml`、`src/main/resources/pack.mcmeta` 与 `src/main/java/com/dashpig/farmstorm/**`；上游文档与 `plan.txt` 未变。
+- [ ] `git status` 只出现 `build.gradle`、`gradle.properties`、`settings.gradle`、`gradle/wrapper/`、`src/main/resources/META-INF/neoforge.mods.toml`、`src/main/resources/pack.mcmeta` 与 `src/main/java/com/dashpig/farmstorm/**`；上游文档与 `plan0.0.1.txt` 未变。
 
 ### 2.5 常见翻车点
 
@@ -324,7 +326,7 @@
 
 ### 6.4 本阶段出口判据
 
-- [ ] 8 种投掷物全部可投出，落点效果与 `plan.txt` 描述逐条对得上（`plan.txt` 第 33~156 行是唯一原文）。
+- [ ] 8 种投掷物全部可投出，落点效果与 `plan0.0.1.txt` 描述逐条对得上（`plan0.0.1.txt` 第 33~156 行是唯一原文）。
 - [ ] 每条伤害上限都成立：育碧 ≤ 2、瓜片子 ≤ 6、瓜！≤ 8、胡罗贝 ≤ 7。
 - [ ] 抗性阈值统一为「≥ 圆石 6.0 不破」（D-19 / C-2），且阈值从 `explosion.sliceResistThreshold` / `explosion.grenadeResistThreshold` 读，不硬编码 `6.0F`（RT-09）。
 - [ ] 命中分流只在基类：`entity/thrown/` 下没有子类自己实现 `onHitBlock` / `onHitEntity`。
@@ -516,7 +518,7 @@
 | F-49 | 方块状态与方块模型 | 用 DataGen 生成 20 个 blockstate 与 62 个方块模型 | ① `runData` 生成 `blockstates/*.json` 20 个、`models/block/*.json` 62 个；② 14 个作物各 4 阶段（`age` 0 ~ 3）变体齐全；③ 5 个部署方块的 blockstate 覆盖 `face × facing × floating` 且悬空复用同一模型 |
 | F-50 | 物品模型 | 用 DataGen 生成 22 个物品模型 | ① `models/item/*.json` 22 个；② 5 个部署型物品模型 `parent` 指向 `farmstorm:block/<id>`；③ 创造栏 22 个图标均非紫黑方块 |
 | F-51 | 材质生成脚本 | 用脚本批量产出 87 个占位 PNG，并给 15 个作物图标加右下角绿色加号 | ① 一次运行产出 `textures/item` 22 张、`textures/block` 64 张、`textures/gui` 1 张；② 15 个作物物品图标右下角有绿色加号（逐张目测 + 尺寸断言 16×16）；③ 重复运行结果幂等（两次运行 md5 一致） |
-| F-52 | 语言文件 216 键 | 生成中英两套键集完全一致的语言文件 | ① `zh_cn.json` 与 `en_us.json` 键集合 diff 为空；② 键数 216（22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 10 tooltip + 4 death + 24 advancement + 117 config）；③ 中文名与 `plan.txt` 逐字一致（含全角标点）；④ 游戏内无 `item.farmstorm.*` 原样显示 |
+| F-52 | 语言文件 216 键 | 生成中英两套键集完全一致的语言文件 | ① `zh_cn.json` 与 `en_us.json` 键集合 diff 为空；② 键数 216（22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 10 tooltip + 4 death + 24 advancement + 117 config）；③ 中文名与 `plan0.0.1.txt` 逐字一致（含全角标点）；④ 游戏内无 `item.farmstorm.*` 原样显示 |
 | F-53 | DataGen 总装与产物核对 | 把 7 个 provider 挂到 `GatherDataEvent`，并核对产物总数与清单 | ① `./gradlew runData` 一次生成 `src/generated/resources` 全量产物；② 产物总数 257（JSON 169 + TOML 1 + PNG 87），与旧口径 251 相比 +6；③ 无手改 `src/generated` 的痕迹（再次运行 diff 为空） |
 | F-54 | 炮台导弹渲染 | 让导弹在客户端可见并复用潜影贝导弹模型 | ① 客户端可见导弹且外形与潜影贝导弹一致；② 朝向随速度变化；③ `runServer` 不加载客户端渲染类（无 `NoClassDefFoundError`） |
 

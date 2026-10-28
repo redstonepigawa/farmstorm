@@ -25,8 +25,8 @@ DEC 已把玩法层面收敛完毕，但工程层面仍有若干空白，本文�
 | T-02 | 部署型作物（`blast_carrot` / `pumpkin_turret` / `awakened_torchflower` / `awakened_pitcher_plant` / `fang_trap_cactus`）的物品是**部署方块的 BlockItem**；同一个物品在「对着耕地使用」时改为放置自己的 `_crop` 方块 | DEC §4 规定部署型方块 ID 与物品 ID 同名；一个 ItemStack 只能是一种 BlockItem，因此「部署」与「播种」必须在 `useOn` 内分流 |
 | T-03 | 火把花 / 瓶子草的「不能被非己方玩家破坏」由 `Block#getDestroyProgress` 返回 `0.0F` + `playerWillDestroy` 二次校验实现；对创造模式玩家同样生效 | 客户端也要算出 0 进度才不会出现「挖了半天突然回弹」的体感；服务端仍需二次校验防改包 |
 | T-04 | DEC D-13「炮台类固定硬挖 10 秒」只作用于 `pumpkin_turret`；火把花 / 瓶子草按 D-14「己方可正常挖取」执行 | D-14 比 D-13 更具体且点名了这两者；两条同时生效会导致己方也要挖 10 秒，与 D-14「正常挖取」矛盾。裁决顺序：具体条款优先于泛化条款。**已由 DEC C-8 背书** |
-| T-05 | 膨胀麦的方块替换跳过「爆炸抗性 ≥ 3600000」的方块（基岩 / 屏障 / 命令方块 / 末地传送门框架等） | `plan.txt` 只说「3×3×3 包括空气方块」，字面执行会删掉基岩与屏障，破坏服务器保护结构。这是防破坏底线，不构成平衡调整（D-21 只锁玩法数值） |
-| T-06 | 自定义伤害类型 2 个：`farmstorm:void_bolt`（炮台导弹）、`farmstorm:crop_blast`（作物爆炸） | `plan.txt` 的「虚空伤害」无法用原版 `explosion` / `generic` 表达；爆炸用独立类型才能给出「被 X 的作物炸飞」的死亡信息并正确归属击杀 |
+| T-05 | 膨胀麦的方块替换跳过「爆炸抗性 ≥ 3600000」的方块（基岩 / 屏障 / 命令方块 / 末地传送门框架等） | `plan0.0.1.txt` 只说「3×3×3 包括空气方块」，字面执行会删掉基岩与屏障，破坏服务器保护结构。这是防破坏底线，不构成平衡调整（D-21 只锁玩法数值） |
+| T-06 | 自定义伤害类型 2 个：`farmstorm:void_bolt`（炮台导弹）、`farmstorm:crop_blast`（作物爆炸） | `plan0.0.1.txt` 的「虚空伤害」无法用原版 `explosion` / `generic` 表达；爆炸用独立类型才能给出「被 X 的作物炸飞」的死亡信息并正确归属击杀 |
 | T-07 | 不引入 Mixin | 全部需求都能通过继承 + NeoForge 事件总线 + 原生扩展点完成；无 Mixin 意味着崩溃日志可读、与其他模组冲突面最小、无需 `farmstorm.mixins.json` |
 | T-08 | 临时附魔用 **DataComponent** `farmstorm:temporary_enchantments` 记录（附魔 / 授予等级 / 原等级 / 到期 tick），不用玩家持久数据 | DEC D-15 要求「离开范围或到期自动移除，保留原有附魔不被覆盖」；记录在物品上可随物品移动、掉落、进入箱子，避免玩家把剑塞箱子里绕过回收 |
 
@@ -793,13 +793,13 @@ public interface AuraProvider extends DeployedBehavior {
 
 `AuraProvider` 的默认 `tick` 遍历 `ServerLevel#players()`（而不是 AABB 扫描实体）——20 格半径下玩家列表通常只有个位数，比 `getEntitiesOfClass` 便宜一个量级（§8.1）。
 
-**5 个实现的行为表**（数值全部来自 `plan.txt`，逐条可配见 §4.11）：
+**5 个实现的行为表**（数值全部来自 `plan0.0.1.txt`，逐条可配见 §4.11）：
 
 | 实现 | 接口 | 判定几何 | 扫描 | 行为要点 |
 |---|---|---|---|---|
 | `BlastCarrotTrap` | `TrapBehavior` | 切比雪夫 ≤ 1 | 10 tick | 触发即 `FarmstormExplosion(power=2, cap=7)` + 对爆炸范围内（半径 = power × 2 = 4 格）**所有玩家**施加反胃 III 60 tick（plan 第 46 行；不筛敌我，D-27）；随后 `be.consume()` |
 | `FangTrapCactusTrap` | `TrapBehavior` | 欧氏 ≤ 3.0（DEC C-5） | 10 tick | 触发后压入两波：外圈 8 个、延迟 10 tick（0.5 s）；内圈 5 个、延迟 4 tick（0.2 s）。尖牙用原版 `EntityType.EVOKER_FANGS`，owner = 部署者；几何取外圈半径 2.0 均分 8 点、内圈半径 1.0 均分 5 点（plan 未给半径）；两波出完 `be.consume()` |
-| `PumpkinTurret` | `TurretBehavior` | 切比雪夫 ≤ 5 | 10 tick 扫描，开火间隔 60 tick（G-2 / D-28） | 目标优先级：非己方玩家 →（`interceptProjectiles` 为真时）非己方投掷物（DEC C-3）。开火生成 `TurretBullet`，命中造成 `farmstorm:void_bolt` 1.0 伤害 + 沿「南瓜 → 目标」方向击退 1.0，**不给漂浮**（plan 第 95 行） |
+| `PumpkinTurret` | `TurretBehavior` | 切比雪夫 ≤ **15**（`pumpkin_turret.targetRadius`） | 10 tick 扫描，开火间隔 60 tick（G-2 / D-28） | 目标优先级：非己方玩家与**敌对生物**（原版 `Monster`，两者按切比雪夫距离取最近者，平手判给玩家；D-43）→（`interceptProjectiles` 为真时）非己方投掷物（DEC C-3）。开火生成 `TurretBullet`，命中造成 `farmstorm:void_bolt` 1.0 伤害 + 沿「南瓜 → 目标」方向击退 1.0，**不给漂浮**（plan 第 95 行） |
 | `TorchflowerAura` | `AuraProvider` | 欧氏 20 | 100 tick，效果 300 tick | 力量 III / 抗性 II / 急迫 II / 速度 I / 水下呼吸 I / 夜视 I；手持（主手或副手）任意 `#minecraft:swords` → `TempEnchantHandler.grant(..., FIRE_ASPECT, 1, 300)`；每次施加播 `ParticleTypes.FLAME` ×8（`particlesPerRefresh`） |
 | `PitcherPlantAura` | `AuraProvider` | 欧氏 10 | 100 tick，效果 300 tick | 生命回复 II / 饱和 II / 伤害吸收 I；遍历 `player.getActiveEffects()`，对 `MobEffect#getCategory() == MobEffectCategory.HARMFUL` 的全 `removeEffect`；播 `ParticleTypes.HEART` ×8（`particlesPerRefresh`） |
 
@@ -863,7 +863,7 @@ protected boolean keepAliveAfterImpact() { return false; }
 | `RedMushroomPuffProjectile` | `farmstorm:red_mushroom_puff` | 对半径 4.0 内**所有玩家**施加反胃 V 60 tick + 失明 I 60 tick | 无爆炸，无方块伤害 |
 | `BrownMushroomPuffProjectile` | `farmstorm:brown_mushroom_puff` | 对半径 4.0 内所有玩家施加虚弱 II 200 tick + 缓慢 II 100 tick | 同上 |
 
-**为什么蘑菇类不排除己方**：`plan.txt` 第 135 / 144 行只写「落点半径 4 格内所有玩家」，DEC **D-27** 已明确「胡罗贝、红/棕菇菇类的范围效果**不筛敌我**，队友同样中招」，且 D-07 的「只针对非己方」只限定陷阱的**触发**与炮台的**索敌**，不覆盖一次性 AoE。实现上因此调用 `level.getEntitiesOfClass(Player.class, aabb, p -> true)`，**不带** `isAlly` 过滤。
+**为什么蘑菇类不排除己方**：`plan0.0.1.txt` 第 135 / 144 行只写「落点半径 4 格内所有玩家」，DEC **D-27** 已明确「胡罗贝、红/棕菇菇类的范围效果**不筛敌我**，队友同样中招」，且 D-07 的「只针对非己方」只限定陷阱的**触发**与炮台的**索敌**，不覆盖一次性 AoE。实现上因此调用 `level.getEntitiesOfClass(Player.class, aabb, p -> true)`，**不带** `isAlly` 过滤。
 
 **`TurretBullet`**（man瓜 炮台的导弹）：
 
@@ -910,7 +910,8 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
     private @Nullable ConverterRecipe cachedRecipe;      // RecipeManager 重载时清空
     private int cachedXpCost;
 
-    @Override public int getContainerSize() { return 1; }
+    private ItemStack catalyst = ItemStack.EMPTY;          // 槽位 1：只收下界之星
+    @Override public int getContainerSize() { return 2; }  // 0 = 输入  1 = 下界之星催化剂（D-47）
     @Override public ItemStack getItem(int slot);
     @Override public ItemStack removeItem(int slot, int amount);
     @Override public void setItem(int slot, ItemStack stack);
@@ -931,7 +932,7 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
 1. `input` 为空 → false。
 2. 正向配方：`level.getRecipeManager().getRecipeFor(FarmstormRecipes.CONVERTING_TYPE.get(), new SingleRecipeInput(input), level)`；未命中且允许反向时，遍历 `getAllRecipesFor` 比对 `result` 与 `input`（缓存到 `cachedRecipe`）。
 3. `player.totalExperience >= recipe.xpCost()`（不足直接拒绝，**绝不扣等级**）。
-4. 催化剂：`recipe.catalyst()` 非空时，扫描玩家背包（含副手）凑够 `catalystCount`，不消耗主手物品本身。
+4. 催化剂：`recipe.catalyst()` 非空时，**优先从催化剂槽（槽位 1）扣**，不足时回退扫玩家背包（含副手）凑够 `catalystCount`，不消耗主手物品本身（D-47）。
 5. 全部通过后才动状态：`input.shrink(1)` → `player.giveExperiencePoints(-xpCost)` → 扣除催化剂 → 产出交给 `player.getInventory().placeItemBackInInventory(...)`。
 6. `setChanged()` + `level.sendBlockUpdated(pos, state, state, Block.UPDATE_CLIENTS)` 刷新 GUI。
 
@@ -957,7 +958,7 @@ public class ConverterMenu extends AbstractContainerMenu {
 }
 ```
 
-- 槽位：0 = 输入（`new Slot(container, 0, 80, 35)`），1 = 输出预览（`mayPlace = false`、`mayPickup = false`）。
+- 槽位：0 = 输入（`new Slot(container, 0, 80, 22)`）／1 = 催化剂（`mayPlace` 只接受下界之星）／2 = 只读预览（`mayPlace = false`、`mayPickup = false`，内容由服务端 `broadcastChanges` 刷新）；玩家背包槽从 **3** 起（D-47）。视觉顺序与索引顺序不同：屏幕从左到右是「催化剂 (44,22) / 输入 (80,22) / 预览 (116,22)」，而菜单索引是**输入在前**。
 - `clickMenuButton(player, 0)` → `container instanceof ConverterBlockEntity be && be.tryConvert((ServerPlayer) player)`。
 - `quickMoveStack`：Shift 点击只处理 0 ↔ 玩家背包。
 
@@ -971,7 +972,7 @@ public class ConverterScreen extends AbstractContainerScreen<ConverterMenu> {
 }
 ```
 
-注册：客户端 `@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)` 里监听 `RegisterMenuScreensEvent` → `e.register(FarmstormMenus.CONVERTER.get(), ConverterScreen::new)`。转换按钮用 `Button.builder(...)`，点击发出原生 `ServerboundContainerButtonClickPacket`——**不新增自定义网络包**（§5.4）。
+注册：客户端 `@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)` 里监听 `RegisterMenuScreensEvent` → `e.register(FarmstormMenus.CONVERTER.get(), ConverterScreen::new)`。转换按钮用 `Button.builder(...)`（`ConverterScreen` 含一个 `Button`），点击走 `handleInventoryButtonClick(containerId, BUTTON_CONVERT)`，发出原生 `ServerboundContainerButtonClickPacket`——**不新增自定义网络包**（§5.4）；不可转换时按钮置灰（`active = canConvert`），标题行右侧显示经验成本（D-47）。
 
 #### 4.8.5 `ConverterRecipe` + `ConverterRecipeSerializer`
 
@@ -1126,6 +1127,7 @@ for each LivingEntity e in level.getEntitiesOfClass(LivingEntity.class, aabb(r*2
 
 - **归属**：`damageSource` 必须带 `owner`（投掷者 / 部署者），这样击杀记分与死亡信息（「X 被 Y 炸飞」）都正确。
 - **`#farmstorm:explosion_immune`**：火把花 / 瓶子草「任何爆炸都无法破坏」（D-14）通过 `BlastRule.extraBreakable` 排除，实现为 `!state.is(FarmstormTags.EXPLOSION_IMMUNE)`，tag 文件见 §6。
+- **不排除源实体**：`hurtCapped` 遍历的是全部 `LivingEntity`，**不排除源实体**——使用者本人站在范围内同样受伤（D-45，与原版 `Explosion` 刻意不同）；除 `Entity#ignoreExplosion` 外没有任何过滤。
 - **纯破坏型**：`damageCap <= 0` 时跳过 `hurtCapped`（预留给未来的纯破坏作物）。
 
 ### 4.10 `TempEnchantHandler`（DEC D-15）
@@ -1271,7 +1273,7 @@ explosionPower = 3
 maxDamage = 8
 
 [pumpkin_turret]
-targetRadius = 5               # 切比雪夫
+targetRadius = 15              # 切比雪夫
 projectileDamage = 1           # 虚空伤害
 knockbackLevel = 1
 fireIntervalTicks = 60         # G-2 / D-28：3 秒一发
@@ -1446,6 +1448,34 @@ public final class LuckyBerryRoller {
 
 `LuckyBerryRoller.apply` 必须在 `FoodCropItem#onEaten` 里调用，且整个方法体包在 `if (level instanceof ServerLevel)` 内——客户端不得参与抽取（§5.3）。
 
+### 4.13 型与类的两维模型（D-48 / R-47）
+
+`CropType`（**单值**）与 `Set<CropCategory>`（**多值集合**）是两个**独立字段**，同时挂在 `CropProfile` 上，互不推导：型回答「怎么用」，类回答「在战斗里干什么」。`DeployedKind` 保持为「部署行为怎么实现」，不并入任何一维（C-4 的「分类是炮台、实现是光环」正是这种情况）。
+
+- `CropType`：`THROWABLE` / `DEPLOYABLE` / `EDIBLE` 三个常量。§2.2.3 的「种植型」刻意没有常量——它是横切能力（D-10），给它一个值只会制造「哪种作物是种植型」的伪问题。
+- `CropCategory`：`TRAP` / `TURRET` / `DEMOLITION` / `BUFF` / `CONSTRUCTION` / `DAMAGE` 六个常量，由 `CropProfile` 用 `Set` 持有。序列化名即 lang 键后缀（`tooltip.farmstorm.category.<name>`）。
+- **能否破坏方块**的唯一判据是 `BlastRule.forCrop(profile, 破坏规则)`：它读 `profile.canBreakBlocks()`（等价于「含 `DEMOLITION` 标签」），不含该标签即返回 `NEVER_BREAK`。6 个爆炸调用点一律走它，**不在调用点单独判断**；FIX-7 的验收就是「只改瓜片子这一行标签，破坏方块数 26 → 0 → 23」来证明行为真由标签驱动（R-48）。
+
+| # | 作物 | 型（`CropType`） | 类（`Set<CropCategory>`） |
+|---|---|---|---|
+| 1 | 膨胀麦 | 投掷型 | 建造类 |
+| 2 | 胡罗贝 | 部署型 | 陷阱类、伤害类 |
+| 3 | 育碧服务器 | 投掷型 | 破障类、伤害类 |
+| 4 | 毒育碧服务器 | 投掷型 | buff类、破障类、伤害类 |
+| 5 | 甜菜！ | 食用型 | buff类 |
+| 6 | 瓜片子 | 投掷型 | 伤害类、破障类（D-42） |
+| 7 | 瓜！ | 投掷型 | 破障类、伤害类 |
+| 8 | man瓜 | 部署型 | 炮台类、伤害类 |
+| 9 | 激活的火把花 | 部署型 | 炮台类、增益类 |
+| 10 | 激活的瓶子草 | 部署型 | 炮台类、增益类 |
+| 11 | 赢过输过没死过 | 部署型 | 陷阱类、伤害类 |
+| 12 | 爆竹 | 投掷型 | 伤害类 |
+| 13 | ？！菇菇！？ | 投掷型 | buff类 |
+| 14 | ？！棕色菇菇色棕！？ | 投掷型 | buff类 |
+| 15 | 幸运浆果 | 食用型 | buff类 |
+
+统计（启动自检会打印同一行，数字一变就说明这张表被动过，R-51）：型 = 投掷型 8 / 部署型 5 / 食用型 2；破障类 4 种（育碧服务器 / 毒育碧服务器 / 瓜！ / 瓜片子）。
+
 ---
 
 ## 5. 服务端权威架构
@@ -1528,7 +1558,7 @@ public final class LuckyBerryRoller {
 | `assets/farmstorm/models/item/*.json` | 22 |
 | `assets/farmstorm/lang/*.json` | 2 |
 | `assets/farmstorm/textures/item/*.png` | 22 |
-| `assets/farmstorm/textures/block/*.png` | 64 |
+| `assets/farmstorm/textures/block/*.png` | 68 |
 | `assets/farmstorm/textures/gui/*.png` | 1 |
 | `data/farmstorm/damage_type/*.json` | 2 |
 | `data/minecraft/tags/damage_type/*.json` | 2 |
@@ -1539,7 +1569,7 @@ public final class LuckyBerryRoller {
 | `data/farmstorm/tags/item/*.json` | 2 |
 | `data/minecraft/tags/block/mineable/pickaxe.json` | 1 |
 | 根：`pack.mcmeta` / `META-INF/neoforge.mods.toml` | 2 |
-| **合计** | **257**（JSON 169 + TOML 1 + PNG 87） |
+| **合计** | **261**（JSON 169 + TOML 1 + PNG 91） |
 
 ### 6.2 assets/farmstorm/blockstates（20）
 
@@ -1601,14 +1631,15 @@ models/item/converter.json               转换器（父模型 = models/block/co
 
 5 个部署型作物的物品模型**直接引用方块模型**（`{"parent": "farmstorm:block/blast_carrot"}`），不额外画图。
 
-### 6.5 assets/farmstorm/textures（87 PNG）
+### 6.5 assets/farmstorm/textures（91 PNG）
 
 | 路径 | 数量 | 用途 |
 |---|---|---|
 | `textures/item/<22 个 id>.png` | 22 | 物品图标；15 个作物图标必须在**右下角加绿色 +**（plan 第 8 条） |
 | `textures/block/<base>_stage{0..3}.png` | 56 | 作物 4 阶段贴图（14 作物 × 4；`<base>` 规则见 §6.3） |
 | `textures/block/blast_carrot.png` 等 5 个部署方块贴图 | 5 | 部署物外观 |
-| `textures/block/converter_top.png` / `_side.png` / `_front.png` | 3 | 转换器三面 |
+| `textures/block/converter_top.png` / `_side.png` / `_front.png` | 3 | 转换器贴图（`_side` / `_front` 模型已不引用，保留待用） |
+| `textures/block/converter_side_{wheat,carrot,potato,beetroot}.png` | 4 | 转换器四面工作台侧面：north=小麦 / east=胡萝卜 / south=马铃薯 / west=甜菜根；up/down=`converter_top`（D-47） |
 | `textures/gui/converter.png` | 1 | 176×166 GUI 背景 |
 
 > 全部 PNG 由 `tools/gen_textures.py` 批量生成占位稿，作者审校后替换（DEC D-25）。
@@ -1698,6 +1729,8 @@ models/item/converter.json               转换器（父模型 = models/block/co
 | 11 | `advancement/fang_dance.json` | 最扎人的一集 | `farmstorm:first_deploy` | 触发一次「赢过输过没死过」 |
 | 12 | `advancement/lucky_jackpot.json` | 老实发育，很枯燥吧 | `farmstorm:root` | 食用幸运浆果并抽中 0.1% 的创造模式分支 |
 
+破障类含**瓜片子**（D-42）：`demolition` 的判据是「本模组的爆炸至少破坏 1 个方块」，不区分是哪个破障类作物引爆的。
+
 约定（照抄 `01-DESIGN.md` §6）：全部 `"frame": "task"`、`"show_toast": true`、`"announce_to_chat": false`；`root` 的 `background` 用 `minecraft:textures/block/hay_block_side.png`。
 
 **实现补充（技术侧）**：进度树共两级（`root` → 6 个子节点；`converter → first_conversion → nether_star_toll / seed_cycle`、`first_throw → demolition`、`first_deploy → turret_hit / aura_bath / fang_dance`）。其中 #1 / #2 / #3 / #5 / #6 / #7 可用原版 `criteria`（`inventory_changed` / `placed_block` / `impossible`+`recipe` 组合）直接表达；#4 / #8 / #9 / #10 / #11 没有对应的原版统计项，统一用 `minecraft:impossible` 触发器 + 服务端 `ServerPlayer#getAdvancements().award(...)` 授予——**判定仍在服务端**（DESIGN §6 约定），不新增指令（D-24）。
@@ -1716,11 +1749,11 @@ models/item/converter.json               转换器（父模型 = models/block/co
 | `itemGroup.farmstorm.main` | 固定 | 1 | 创造标签页标题 |
 | `container.farmstorm.converter` | 固定 | 1 | GUI 标题 |
 | `gui.farmstorm.converter.*` | `.convert` / `.xp_cost` / `.no_recipe` / `.need_catalyst` / `.not_enough_xp` / `.reverse` / `.forward` / `.tooltip` | 8 | 按钮与状态文本 |
-| `tooltip.farmstorm.*` | `.deployed_by` / `.attached_face` / `.floating` / `.team` / `.turret_range` / `.aura_radius` / `.temporary_enchant` / `.cannot_break` / `.trap_armed` / `.type.<kind>` | 10 | 部署物与物品的附加信息 |
+| `tooltip.farmstorm.*` | `.deployed_by` / `.attached_face` / `.floating` / `.team` / `.turret_range` / `.aura_radius` / `.temporary_enchant` / `.cannot_break` / `.trap_armed` / `.category.{trap,turret,demolition,buff,construction,damage}` / `.category_separator` | 16 | 部署物与物品的附加信息；`.type.<kind>` 的 3 个键已删除，改由 6 个类别键 + 1 个分隔符承担（D-48、R-49） |
 | `death.attack.farmstorm.<message_id>` | 对应 `damage_type` 的 `message_id` | 4 | `farmstorm.void_bolt` 与 `farmstorm.crop_blast`，各含 `.player` 变体 |
 | `advancements.farmstorm.<path>.title` / `.description` | 12 个进度 × 2 | 24 | DataGen 生成 |
 | `farmstorm.configuration.<group>.<key>` | 与 TOML 键路径完全一致 | 117 | `ModConfigSpec.Builder#translation` 指定 |
-| **合计** | | **216** | 中英各一份，键集必须完全一致 |
+| **合计** | | **222** | 中英各一份，键集必须完全一致 |
 
 ### 7.2 示例条目（zh_cn.json）
 
@@ -1775,7 +1808,7 @@ models/item/converter.json               转换器（父模型 = models/block/co
 
 ### 7.3 规范细则
 
-1. **中文名照抄 `plan.txt`**，包括「？！菇菇！？」这类标点与全角字符；英文语义命名（DEC D-26）。
+1. **中文名照抄 `plan0.0.1.txt`**，包括「？！菇菇！？」这类标点与全角字符；英文语义命名（DEC D-26）。
 2. 作物方块与作物物品**同名**（block 与 item 分属不同 registry，lang 键也分属不同前缀，不冲突）。
 3. 死亡信息用 `%1$s` / `%2$s` 位置占位符（`.player` 变体由原版伤害系统自动选用）。
 4. 配置项一律走 `farmstorm.configuration.*`，与 TOML 路径逐段对应（`deploy.turretMiningTicks` → `farmstorm.configuration.deploy.turretMiningTicks`），这样 `ModConfigSpec` 的自动 GUI 不需要额外映射。
@@ -1816,7 +1849,7 @@ models/item/converter.json               转换器（父模型 = models/block/co
 |---|---|
 | 放置/拆卸循环刷部署物 | 内部常量 `DEPLOY_COOLDOWN_TICKS = 5` + `MAX_DEPLOYED_PER_CHUNK = 8` + `MAX_DEPLOYED_PER_PLAYER = 32`；拆卸后冷却才归零，避免「放→立刻拆→再放」循环触发掉落 |
 | 靠炮台硬挖 10 秒刷时间 | 硬挖进度不可加速（固定 `1F/200F`），也不因工具附魔变化 |
-| 转换器刷物品 | 单槽位 + 事务化校验（§4.8.2）；输入槽不接受容器（`Slot#mayPlace` 只接受能匹配配方的物品）；`quickMoveStack` 不做批量转换 |
+| 转换器刷物品 | **双槽位（输入 + 催化剂）+ 事务化校验**（§4.8.2）；输入槽不接受容器（`Slot#mayPlace` 只接受能匹配配方的物品）；`quickMoveStack` 不做批量转换 |
 | 转换器吞物品 | `onRemove` → `Containers.dropContents`；方块被活塞推动时不掉（`movedByPiston` 分支） |
 | 幸运浆果 RNG 刷 | 抽取只在服务端 `finishUsingItem` 里发生；一个物品只能吃一次（`stack.shrink(1)` 由原版食物流程处理） |
 | 创造模式永久化 | D-18 的 90 秒硬还原 + 下线即还原 + 登录对账（§4.12） |
@@ -1956,7 +1989,7 @@ models/item/converter.json               转换器（父模型 = models/block/co
 | 15 个作物全部出现在注册总表 | 通过 | §3.1-A 表格 15 行，ID 与 DEC §4 逐字一致：`puffed_wheat` / `blast_carrot` / `ubi_server` / `toxic_ubi_server` / `power_beet` / `melon_slice_bomb` / `melon_grenade` / `pumpkin_turret` / `awakened_torchflower` / `awakened_pitcher_plant` / `fang_trap_cactus` / `bamboo_firecracker` / `red_mushroom_puff` / `brown_mushroom_puff` / `lucky_berry` |
 | 每个注册对象都有明确 ID | 通过 | §3.1–§3.10 共 **64 个 registry 对象**，每个都有 `farmstorm:<id>`；§3.11 给出分 registry 计数 |
 | 末尾有「版本核查」小节并逐项写明结论 | 通过 | §10（含 7 项核实结论 + 6 项「以构建时为准」+ 3 条反例） |
-| 只创建一个文件 | 通过 | 仅写 `docs/zh/02-TECH-SPEC.md`；`plan.txt` 与 `00-DECISIONS.md` 未改动 |
+| 只创建一个文件 | 通过 | 仅写 `docs/zh/02-TECH-SPEC.md`；`plan0.0.1.txt` 与 `00-DECISIONS.md` 未改动 |
 | 不实现完整代码 | 通过 | 全文只有类骨架与签名，无完整业务实现 |
 | 中文撰写、代码标识符英文 | 通过 | — |
 

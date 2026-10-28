@@ -1,7 +1,9 @@
 # 03 · 任务拆分（Task Breakdown）
 
+> **文档状态**：本文件是 v0.0.1 施工期的历史记录，其中的数值与结构描述可能已被实现修正。**实现口径以 00-DECISIONS.md 为准**（见 D-42~D-48），完整差异清单见 09-IMPL-VS-PLAN.md。
+
 > 项目：农场风云 / Farmstorm · v0.0.1
-> 依据：`plan.txt` + `docs/zh/00-DECISIONS.md`（D-01 ~ D-41）+ `docs/zh/01-DESIGN.md` + `docs/zh/02-TECH-SPEC.md`
+> 依据：`plan0.0.1.txt` + `docs/zh/00-DECISIONS.md`（D-01 ~ D-41）+ `docs/zh/01-DESIGN.md` + `docs/zh/02-TECH-SPEC.md`
 > 本文件把技术规格拆成「一次可独立提交、可独立验证」的任务。**Phase 编号与 `04-ROADMAP.md` 的里程碑划分完全一致**（Phase 1 ~ Phase 10 → M1 ~ M6）。
 > 任务总数 **59**；覆盖 `02-TECH-SPEC.md §3` 的 **64 个注册对象**，未覆盖 **0** 个（逐条对照见 §14）。
 
@@ -187,7 +189,7 @@ F-01 构建基线
 
 阶段目标：把 8 种投掷型作物的命中效果逐个实现，并统一生命周期、命中分流与创造模式口径。
 
-阶段出口判据：8 种投掷物全部可投出并产生 plan.txt 描述的落点效果，伤害不超上限，创造模式不消耗。
+阶段出口判据：8 种投掷物全部可投出并产生 plan0.0.1.txt 描述的落点效果，伤害不超上限，创造模式不消耗。
 
 | ID | 标题 | 目标 | 涉及文件 / 类 | 依赖 | 验收标准 | 复杂度 |
 |---|---|---|---|---|---|---|
@@ -261,7 +263,7 @@ F-01 构建基线
 | F-49 | 方块状态与方块模型 | 用 DataGen 生成 20 个 blockstate 与 62 个方块模型 | `datagen/FarmstormDataGen.java`、`datagen/ModBlockStateProvider.java` | F-06、F-09、F-38 | ① `runData` 生成 `blockstates/*.json` 20 个、`models/block/*.json` 62 个；② 14 个作物各 4 阶段（age 0 ~ 3）变体齐全；③ 5 个部署方块的 blockstate 覆盖 face × facing × floating 且悬空复用同一模型 | L |
 | F-50 | 物品模型 | 用 DataGen 生成 22 个物品模型 | `datagen/ModItemModelProvider.java` | F-08 | ① `models/item/*.json` 22 个；② 5 个部署型物品模型 `parent` 指向 `farmstorm:block/<id>`；③ 创造栏 22 个图标均非紫黑方块 | S |
 | F-51 | 材质生成脚本 | 用脚本批量产出 87 个占位 PNG，并给 15 个作物图标加右下角绿色加号 | `tools/gen_textures.py` | F-02 | ① 一次运行产出 `textures/item` 22 张、`textures/block` 64 张、`textures/gui` 1 张；② 15 个作物物品图标右下角有绿色加号（逐张目测 + 尺寸断言 16×16）；③ 重复运行结果幂等（两次运行 md5 一致） | M |
-| F-52 | 语言文件 216 键 | 生成中英两套键集完全一致的语言文件 | `datagen/ModLangProvider.java` | F-08、F-47、F-05 | ① `zh_cn.json` 与 `en_us.json` 键集合 diff 为空；② 键数 216（22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 10 tooltip + 4 death + 24 advancement + 117 config）；③ 中文名与 `plan.txt` 逐字一致（含全角标点）；④ 游戏内无 `item.farmstorm.*` 原样显示 | M |
+| F-52 | 语言文件 216 键 | 生成中英两套键集完全一致的语言文件 | `datagen/ModLangProvider.java` | F-08、F-47、F-05 | ① `zh_cn.json` 与 `en_us.json` 键集合 diff 为空；② 键数 216（22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 10 tooltip + 4 death + 24 advancement + 117 config）；③ 中文名与 `plan0.0.1.txt` 逐字一致（含全角标点）；④ 游戏内无 `item.farmstorm.*` 原样显示 | M |
 | F-53 | DataGen 总装与产物核对 | 把 7 个 provider 挂到 `GatherDataEvent`，并核对产物总数与清单 | `datagen/FarmstormDataGen.java`、`event/FarmstormModEvents.java` | F-44、F-45、F-46、F-47、F-49、F-50、F-52 | ① `./gradlew runData` 一次生成 `src/generated/resources` 全量产物；② 产物总数 257（JSON 169 + TOML 1 + PNG 87），与 C-7 修正前的旧口径 251 相比 +6（进度 12 条替代 6 条；`02-TECH-SPEC.md §6.1` 已同步为 257）；③ 无手改 `src/generated` 的痕迹（再次运行 diff 为空） | M |
 | F-54 | 炮台导弹渲染 | 让导弹在客户端可见并复用潜影贝导弹模型 | `client/render/TurretBulletRenderer.java`、`client/FarmstormClient.java` | F-07、F-22 | ① 客户端可见导弹且外形与潜影贝导弹一致；② 朝向随速度变化；③ `runServer` 不加载客户端渲染类（无 `NoClassDefFoundError`） | S |
 

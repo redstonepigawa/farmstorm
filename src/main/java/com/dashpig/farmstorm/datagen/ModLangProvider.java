@@ -19,7 +19,7 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 一个作物要能同时显示「炮台类、buff类」；再加一个 {@code tooltip.farmstorm.category_separator}
  * 让中英各自用自己的分隔符（「、」/ 「, 」）。218 - 3 + 6 + 1 = 222。
  *
- * <p>中文名逐字照抄 plan.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
+ * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
  * 117 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
  * 该 TOML 由 {@code FarmstormConfig} 的真实 spec 写出，可做机械比对。
  */

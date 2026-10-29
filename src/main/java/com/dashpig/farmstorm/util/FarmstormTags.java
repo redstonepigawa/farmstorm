@@ -8,7 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 /**
- * 4 个 tag key（TECH §2 datagen 一节）。
+ * 6 个 tag key（TECH §2 datagen 一节：v0.0.1 的 5 个 + v0.0.2 的 1 个）。
  * 只在这里声明 key，内容由 DataGen Provider 生成，代码不写死成员。
  */
 public final class FarmstormTags {
@@ -31,6 +31,9 @@ public final class FarmstormTags {
 
     /** 6 个独立播种物 + 4 个自身即播种物的作物。 */
     public static final TagKey<Item> SEEDS = item("seeds");
+
+    /** 转换器可作燃料的物品（D-52）：19 条作物档案对应物品 + 原版农作物。内容属 datagen，本表不含成员。 */
+    public static final TagKey<Item> CONVERTER_FUEL = item("converter_fuel");
 
     private static TagKey<Block> block(String path) {
         return TagKey.create(Registries.BLOCK, Farmstorm.id(path));

@@ -15,7 +15,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 20 个方块（TECH §3.2）：14 个作物 + 5 个部署 + 1 个转换器。
+ * 22 个方块（TECH §2.2）：14 个作物 + 6 个部署 + 1 个转换器 + 1 个压缩干草块。
  * 14 个作物方块共用一个类且不注册 BlockItem（D-34 / T-01）。
  */
 public final class FarmstormBlocks {
@@ -37,7 +37,7 @@ public final class FarmstormBlocks {
     public static final DeferredBlock<FarmstormCropBlock> BROWN_MUSHROOM_PUFF_BLOCK = crop(CropProfile.BROWN_MUSHROOM_PUFF);
     public static final DeferredBlock<FarmstormCropBlock> LUCKY_BERRY_BUSH = crop(CropProfile.LUCKY_BERRY);
 
-    // ---- 5 个部署方块（kind / 悬空 / 固定硬挖 / 爆炸免疫）----
+    // ---- 6 个部署方块（kind / 悬空 / 固定硬挖 / 爆炸免疫）----
     public static final DeferredBlock<DeployedCropBlock> BLAST_CARROT = deployed(CropProfile.BLAST_CARROT, false, false, false);
     public static final DeferredBlock<DeployedCropBlock> PUMPKIN_TURRET = deployed(CropProfile.PUMPKIN_TURRET, true, true, false);
     public static final DeferredBlock<DeployedCropBlock> AWAKENED_TORCHFLOWER =
@@ -46,10 +46,22 @@ public final class FarmstormBlocks {
             deployed(CropProfile.AWAKENED_PITCHER_PLANT, true, false, true);
     public static final DeferredBlock<DeployedCropBlock> FANG_TRAP_CACTUS =
             deployed(CropProfile.FANG_TRAP_CACTUS, false, false, false);
+    /** D-68：陷阱口径与尖牙仙人掌逐项一致；与它共用同一个 BlockEntityType（RT-04）。 */
+    public static final DeferredBlock<DeployedCropBlock> ZANGIEF_CANE =
+            deployed(CropProfile.ZANGIEF_CANE, false, false, false);
 
     // ---- 1 个功能方块 ----
     public static final DeferredBlock<ConverterBlock> CONVERTER = REGISTER.registerBlock("converter", ConverterBlock::new,
             BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3.5F).requiresCorrectToolForDrops());
+
+    // ---- 1 个建材方块（D-57：硬度照远古残骸 30.0，抗性照圆石 6.0，六面同材质不可旋转）----
+    public static final DeferredBlock<Block> COMPRESSED_HAY_BLOCK = REGISTER.registerBlock("compressed_hay_block",
+            Block::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_BROWN)
+                    .strength(30.0F, 6.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.GRASS));
 
     private FarmstormBlocks() {}
 

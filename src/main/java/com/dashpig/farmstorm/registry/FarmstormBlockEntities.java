@@ -29,9 +29,11 @@ public final class FarmstormBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DeployedCropBlockEntity>> AWAKENED_PITCHER_PLANT =
             REGISTER.register("awakened_pitcher_plant", () -> BlockEntityType.Builder
                     .of(DeployedCropBlockEntity::new, FarmstormBlocks.AWAKENED_PITCHER_PLANT.get()).build(null));
+    /** 一个 type 收两个方块：ZANGIEF_CANE 与 FANG_TRAP_CACTUS 共用它（代码侧靠 {@link #deployedOf} 分流）。 */
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DeployedCropBlockEntity>> FANG_TRAP_CACTUS =
             REGISTER.register("fang_trap_cactus", () -> BlockEntityType.Builder
-                    .of(DeployedCropBlockEntity::new, FarmstormBlocks.FANG_TRAP_CACTUS.get()).build(null));
+                    .of(DeployedCropBlockEntity::new, FarmstormBlocks.FANG_TRAP_CACTUS.get(),
+                            FarmstormBlocks.ZANGIEF_CANE.get()).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ConverterBlockEntity>> CONVERTER =
             REGISTER.register("converter", () -> BlockEntityType.Builder
                     .of(ConverterBlockEntity::new, FarmstormBlocks.CONVERTER.get()).build(null));

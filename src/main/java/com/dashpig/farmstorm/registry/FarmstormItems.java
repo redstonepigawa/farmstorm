@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.config.FarmstormConfig;
+import com.dashpig.farmstorm.entity.ThrownCropEntity;
 import com.dashpig.farmstorm.item.DeployableCropItem;
 import com.dashpig.farmstorm.item.FoodCropItem;
 import com.dashpig.farmstorm.item.SeedItem;
@@ -12,8 +13,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -23,7 +26,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 22 个物品（TECH §3.1）：15 个作物 + 6 个独立播种物 + 1 个转换器。
+ * 27 个物品（TECH §2.2）：19 个作物 + 6 个独立播种物 + 2 个方块物品（转换器 / 压缩干草块）。
  * 堆叠数按 D-16 分两档，实际数值来自 stack.*（§4.11.5）。
  */
 public final class FarmstormItems {
@@ -66,6 +69,18 @@ public final class FarmstormItems {
             properties -> new FoodCropItem(CropProfile.LUCKY_BERRY, properties),
             foodProperties(CropProfile.LUCKY_BERRY, FarmstormConfig.luckyBerryNutrition, FarmstormConfig.luckyBerrySaturationModifier));
 
+    // ---- v0.0.2 新增的 4 条（TECH §2.2 #1–#4）；三条不可种植的作物因此都没有种子物品（D-51）----
+    public static final DeferredItem<ThrowableCropItem> MOLOTOV = cropItem(CropProfile.MOLOTOV,
+            properties -> new ThrowableCropItem(CropProfile.MOLOTOV, projectile(CropProfile.MOLOTOV), properties));
+    public static final DeferredItem<DeployableCropItem> ZANGIEF_CANE = cropItem(CropProfile.ZANGIEF_CANE,
+            properties -> new DeployableCropItem(CropProfile.ZANGIEF_CANE, FarmstormBlocks.ZANGIEF_CANE.get(), properties));
+    /** 营养值与饱和度属 F-77（读 wild_apple.nutrition / wild_apple.saturationModifier），本任务只注册物品本体。 */
+    public static final DeferredItem<FoodCropItem> WILD_APPLE = cropItem(CropProfile.WILD_APPLE,
+            properties -> new FoodCropItem(CropProfile.WILD_APPLE, properties));
+    public static final DeferredItem<ThrowableCropItem> COMPRESSED_PUFFED_WHEAT = cropItem(CropProfile.COMPRESSED_PUFFED_WHEAT,
+            properties -> new ThrowableCropItem(CropProfile.COMPRESSED_PUFFED_WHEAT,
+                    projectile(CropProfile.COMPRESSED_PUFFED_WHEAT), properties));
+
     // ---- 6 个独立播种物 ----
     public static final DeferredItem<SeedItem> PUFFED_WHEAT_SEEDS = seedItem("puffed_wheat_seeds", CropProfile.PUFFED_WHEAT);
     public static final DeferredItem<SeedItem> POWER_BEET_SEEDS = seedItem("power_beet_seeds", CropProfile.POWER_BEET);
@@ -76,9 +91,12 @@ public final class FarmstormItems {
     public static final DeferredItem<SeedItem> AWAKENED_PITCHER_PLANT_POD =
             seedItem("awakened_pitcher_plant_pod", CropProfile.AWAKENED_PITCHER_PLANT);
 
-    // ---- 1 个方块物品 ----
+    // ---- 2 个方块物品 ----
     public static final DeferredItem<BlockItem> CONVERTER = REGISTER.registerItem("converter",
             properties -> new BlockItem(FarmstormBlocks.CONVERTER.get(), properties), otherProperties());
+    /** DESIGN §3.4：方块物品沿用原版 64 上限，不纳入 stack.throwable。 */
+    public static final DeferredItem<BlockItem> COMPRESSED_HAY_BLOCK = REGISTER.registerItem("compressed_hay_block",
+            properties -> new BlockItem(FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(), properties), otherProperties());
 
     private FarmstormItems() {}
 
@@ -87,6 +105,7 @@ public final class FarmstormItems {
         List<DeferredItem<? extends Item>> items = new ArrayList<>(CROP_ITEMS.values());
         items.addAll(SEED_ITEMS);
         items.add(CONVERTER);
+        items.add(COMPRESSED_HAY_BLOCK);
         return items;
     }
 
@@ -97,6 +116,26 @@ public final class FarmstormItems {
             throw new IllegalStateException("No item registered for crop " + profile.path());
         }
         return item;
+    }
+
+    /**
+     * 投掷物实体与作物物品同名（TECH §2.2 #1/#4 ↔ #8/#9）。entity_types 由 F-66 注册，
+     * 这里按注册 ID 懒取，与 {@code ThrownCropEntity#getDefaultItem()} 同一条路数：只在真正投掷时查一次。
+     */
+    private static Supplier<EntityType<? extends ThrownCropEntity>> projectile(CropProfile profile) {
+        return () -> {
+            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(profile.id());
+            if (!profile.id().equals(BuiltInRegistries.ENTITY_TYPE.getKey(type))) {
+                throw new IllegalStateException("No projectile entity type registered for " + profile.path());
+            }
+            return thrownProjectile(type);
+        };
+    }
+
+    /** 注册 ID 已对得上；注册工厂把类型界定在 ThrownCropEntity，因此这一次转型是恒成立的。 */
+    @SuppressWarnings("unchecked")
+    private static EntityType<? extends ThrownCropEntity> thrownProjectile(EntityType<?> type) {
+        return (EntityType<? extends ThrownCropEntity>) type;
     }
 
     private static <I extends Item> DeferredItem<I> cropItem(CropProfile profile,

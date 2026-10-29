@@ -1,7 +1,8 @@
 # tools/convert_media.ps1 -- v0.0.2 audio + effect-icon pipeline (D-53 / D-66 / RT-14)
 #
 # Converts the three out-of-repository source assets into what a Minecraft jar can actually load:
-#   Animals.mp3            -> assets/farmstorm/sounds/wild_hunter_loop.ogg     (mono, 64 kbps Ogg Vorbis)
+#   Animals_from_3m04s.mp3 -> assets/farmstorm/sounds/wild_hunter_loop.ogg     (mono, 64 kbps Ogg Vorbis)
+#     (作者于 2026-10-29 指定改用 3 分 04 秒起的那段剪辑，47.14 s；旧的整体版 Animals.mp3 不再作为源)
 #   SF6 clip .mp3          -> assets/farmstorm/sounds/zangief_piledriver.ogg   (mono, 64 kbps Ogg Vorbis)
 #   effect icon .jpg       -> assets/farmstorm/textures/mob_effect/wild_hunter.png (18x18 PNG, centre-cropped)
 #
@@ -29,7 +30,7 @@ param(
     [switch] $CheckOnly,
     [switch] $Force,
     [string] $OutRoot = "src/main/resources",
-    [string] $Animals = "C:\Users\DASHpig\Downloads\Animals.mp3",
+    [string] $Animals = "D:\dsh\default\Animals_from_3m04s.mp3",
     [string] $Sfx     = "D:\dsh\default\sf6_audio\out\BV1qu411W7ha_846-850.mp3",
     [string] $Icon    = "C:\Users\DASHpig\Desktop\e91bb6997d8e24cda1f596267c41da97500924726.jpg"
 )

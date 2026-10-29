@@ -24,7 +24,9 @@
 - **缓解**：严格 `pushPose`/`popPose`；复用主渲染的变换矩阵；先距离剔除再提交；验收看截图 + 帧时间对比（同一场景开/关对比）。
 - **归属**：F-7x（剪影簇）
 
-### A-3 · 输入锁（D-60 / RT-13）—— **文档自己标了未验证**
+### A-3 · 输入锁（D-60 / RT-13）—— ✅ **已定论，见 `.work/FINDING-RT13-INPUT-LOCK.md`**
+
+> 结论：无 Mixin 可行，但**文档写的 `InputEvent.Key` 取消方案不成立**（该事件不可取消、且触发在 `KeyMapping.click` 之后）。正确做法是「抽干 `consumeClick()`」，并补 `CalculatePlayerTurnEvent` 锁视角；F11/F2/F3/ESC 拦不住，属已知限制。下面保留原始风险描述供对照。
 - **危险**：`InputEvent.Key` 与 `KeyMapping` 的**先后顺序在 1.21.1 未实测**，快捷栏 1–9 可能拦不住；攻击/使用走 `InteractionKeyMappingTriggered`，但鼠标左键**长按持续挖掘**是另一条路径；"只留 ESC"必须真的留（否则玩家以为游戏卡死）。
 - **早期信号**：锁定期间还能换物品 / 还能挖方块 / 按 ESC 无反应。
 - **缓解**：开工时**第一件事**写最小复现——锁定状态下逐键手测 WASD / 空格 / shift / 1–9 / 滚轮 / 左键点按 / 左键长按 / 右键 / E / Q / ESC，并把结果写成一张表存档。拦不住的那一路改挂更靠前的钩子（`ScreenEvent.KeyPressed`）。

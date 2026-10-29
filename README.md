@@ -212,9 +212,9 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force   # 绕过执�
 
 输出一张 Markdown 表（核查项 / 结果 / 出处 / 置信度），直接贴进中英两版 §10.2。网络失败、缺 `build.gradle`、缺 JDK 三种情况各自隔离，不会中断。
 
-### 2. 材质 —— ✅ 已生成（87 张）
+### 2. 材质 —— ✅ 已生成（91 张）
 
-`tools/gen_textures.py` 已重写成一条生产线，直接吃客户端 jar（不解包），产出 **87 张 PNG**：22 item + 56 作物阶段 + 8 方块 + 1 GUI。
+`tools/gen_textures.py` 已重写成一条生产线，直接吃客户端 jar（不解包），产出 **91 张 PNG**：22 item + 56 作物阶段 + 12 方块（含 4 张转换器侧面作物贴图）+ 1 GUI。
 
 ```bash
 python -X utf8 tools/gen_textures.py --list
@@ -307,6 +307,35 @@ Seven additions on top of a frozen v0.0.1: the converter finally gets a crafting
 
 ---
 
+## 素材来源与非商业声明 / Asset provenance
+
+本项目**不是全部原创**：下列素材取自第三方，**版权归各自权利人**，本项目不对其主张任何权利。
+
+| 产物 | 来源 | 处理 |
+|---|---|---|
+| `sounds/wild_hunter_loop.ogg` | `Animals.mp3`（非原创音乐） | 转 mono / 64 kbps Ogg Vorbis，作「狂 野 猎 人」状态期间循环播放 |
+| `sounds/zangief_piledriver.ogg` | SF6 视频片段 `BV1qu411W7ha`（846–850 段） | 同上，作桑吉尔蔗触发音 |
+| `textures/mob_effect/wild_hunter.png` | 作者提供的桌面 JPG | 居中裁切缩放为 18×18 PNG |
+
+### 使用条件（务必照此分发）
+
+1. **非商业**：不得将上述素材或其转换产物用于任何商业用途。
+2. **署名**：转载、二次分发本模组时，必须连同本表一并保留。
+3. **范围**：这条限制**只针对上述三个素材**；模组自身的代码与自绘素材另按 `## 许可 / License` 一节处理。
+4. **可移除**：若权利人提出异议，维护者会移除对应素材并发布替代版本；发现问题的请联系仓库维护者。
+
+### 已知风险（维护者注）
+
+本仓库目前是**私有**的，上述素材属非商业自用范围。**若将来转为公开仓库**，即使仍然非商业，第三方音乐与游戏音效的再分发在这类项目的惯例中仍存在被投诉的可能。
+
+转公开前建议二选一：
+- **替换**：换成 CC0 / 原创音源（推荐，一次性解决）；
+- **保留 + 声明**：保持本节的署名与非商业条款，并接受随时可能需要撤下的风险。
+
+> 本节由 `docs/zh/10-DECISIONS-0.0.2.md` 的 D-66 要求（「README 与 Release 说明里必须注明来源与非商业自用」）。**发布 Release 时必须把这节内容复制进 Release 说明**，因为 jar 一旦分发就无法补正说明。
+
+---
+
 ## 许可 / License
 
-未定 / TBD by the author.
+未定 / TBD by the author。

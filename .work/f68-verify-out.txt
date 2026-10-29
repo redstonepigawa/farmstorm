@@ -1,0 +1,98 @@
+RCON connected 127.0.0.1:25610
+> forceload add 96 96 104 104
+    "Marked chunk [6, 6] in Overworld to be force loaded\n"
+> gamerule doDaylightCycle false
+    "Gamerule doDaylightCycle is now set to: false\n"
+> time set noon
+    "Set the time to 6000\n"
+> kill @e[type=farmstorm:puffed_wheat]
+    "No entity was found\n"
+> kill @e[type=farmstorm:compressed_puffed_wheat]
+    "No entity was found\n"
+> kill @e[type=item]
+    "No entity was found\n"
+    [pad] fill stone -> "Successfully filled 405 block(s)\n" | fill air -> "No blocks were filled\n"
+    [pre] 清场后基线 hay=0 compressed=0（必须都为 0）
+
+===== A. 干态：同一坐标先投膨胀麦、再投压缩膨胀麦 =====
+    [pad] fill stone -> "No blocks were filled\n" | fill air -> "No blocks were filled\n"
+> execute if block 100 9 100 minecraft:stone
+    "Test passed\n"
+    baseline hay / compressed: 0 / 0
+> summon farmstorm:puffed_wheat 100.5 12.0 100.5 {Motion:[0.0d,0.0d,0.0d]}
+    "Summoned new Puffed Wheat\n"
+    entity gone after 631 ms
+    [A1] 膨胀麦写入 minecraft:hay_block 格数 = 27
+    [A1] 同区域 farmstorm:compressed_hay_block 格数 = 0
+    [A1 item] /execute if entity @e[type=item] -> "Test failed\n"
+    [pad] fill stone -> "Successfully filled 18 block(s)\n" | fill air -> "Successfully filled 9 block(s)\n"
+> summon farmstorm:compressed_puffed_wheat 100.5 12.0 100.5 {Motion:[0.0d,0.0d,0.0d]}
+    "Summoned new entity.farmstorm.compressed_puffed_wheat\n"
+    entity gone after 816 ms
+    [A2] 压缩膨胀麦写入 farmstorm:compressed_hay_block 格数 = 27
+    [A2] 同区域 minecraft:hay_block 格数 = 0
+    [A2 item] /execute if entity @e[type=item] -> "Test failed\n"
+    [A] 位置集合完全相同 = true（27 vs 27）
+    [A] 无掉落物（两次投掷后 item 实体均为 0）= true
+    [A] 膨胀麦 27 格坐标: 100,10,100 100,10,101 100,10,99 100,8,100 100,8,101 100,8,99 100,9,100 100,9,101 100,9,99 101,10,100 101,10,101 101,10,99 101,8,100 101,8,101 101,8,99 101,9,100 101,9,101 101,9,99 99,10,100 99,10,101 99,10,99 99,8,100 99,8,101 99,8,99 99,9,100 99,9,101 99,9,99
+    [A] 压缩   27 格坐标: 100,10,100 100,10,101 100,10,99 100,8,100 100,8,101 100,8,99 100,9,100 100,9,101 100,9,99 101,10,100 101,10,101 101,10,99 101,8,100 101,8,101 101,8,99 101,9,100 101,9,101 101,9,99 99,10,100 99,10,101 99,10,99 99,8,100 99,8,101 99,8,99 99,9,100 99,9,101 99,9,99
+
+===== B. 湿态：干态立方体内有水源 ⇒ 边长 5 =====
+    [pad] fill stone -> "Successfully filled 18 block(s)\n" | fill air -> "Successfully filled 9 block(s)\n"
+> setblock 101 8 100 minecraft:water
+    "Changed the block at 101, 8, 100\n"
+> execute if block 101 8 100 minecraft:water
+    "Test passed\n"
+    baseline hay / compressed: 0 / 0
+> summon farmstorm:puffed_wheat 100.5 12.0 100.5 {Motion:[0.0d,0.0d,0.0d]}
+    "Summoned new Puffed Wheat\n"
+    entity gone after 612 ms
+    [B1] 膨胀麦（遇水）minecraft:hay_block 格数 = 125
+    [B1 item] /execute if entity @e[type=item] -> "Test failed\n"
+    [pad] fill stone -> "Successfully filled 75 block(s)\n" | fill air -> "Successfully filled 50 block(s)\n"
+> setblock 101 8 100 minecraft:water
+    "Changed the block at 101, 8, 100\n"
+> summon farmstorm:compressed_puffed_wheat 100.5 12.0 100.5 {Motion:[0.0d,0.0d,0.0d]}
+    "Summoned new entity.farmstorm.compressed_puffed_wheat\n"
+    entity gone after 817 ms
+    [B2] 压缩膨胀麦（遇水）farmstorm:compressed_hay_block 格数 = 125
+    [B2] 同区域 minecraft:hay_block 格数 = 0
+    [B2 item] /execute if entity @e[type=item] -> "Test failed\n"
+    [B] 位置集合完全相同 = true（125 vs 125）
+    [B] 无掉落物 = true
+    [B] 膨胀麦 125 格坐标: 100,10,100 100,10,101 100,10,102 100,10,98 100,10,99 100,11,100 100,11,101 100,11,102 100,11,98 100,11,99 100,7,100 100,7,101 100,7,102 100,7,98 100,7,99 100,8,100 100,8,101 100,8,102 100,8,98 100,8,99 100,9,100 100,9,101 100,9,102 100,9,98 100,9,99 101,10,100 101,10,101 101,10,102 101,10,98 101,10,99 101,11,100 101,11,101 101,11,102 101,11,98 101,11,99 101,7,100 101,7,101 101,7,102 101,7,98 101,7,99 101,8,100 101,8,101 101,8,102 101,8,98 101,8,99 101,9,100 101,9,101 101,9,102 101,9,98 101,9,99 102,10,100 102,10,101 102,10,102 102,10,98 102,10,99 102,11,100 102,11,101 102,11,102 102,11,98 102,11,99 102,7,100 102,7,101 102,7,102 102,7,98 102,7,99 102,8,100 102,8,101 102,8,102 102,8,98 102,8,99 102,9,100 102,9,101 102,9,102 102,9,98 102,9,99 98,10,100 98,10,101 98,10,102 98,10,98 98,10,99 98,11,100 98,11,101 98,11,102 98,11,98 98,11,99 98,7,100 98,7,101 98,7,102 98,7,98 98,7,99 98,8,100 98,8,101 98,8,102 98,8,98 98,8,99 98,9,100 98,9,101 98,9,102 98,9,98 98,9,99 99,10,100 99,10,101 99,10,102 99,10,98 99,10,99 99,11,100 99,11,101 99,11,102 99,11,98 99,11,99 99,7,100 99,7,101 99,7,102 99,7,98 99,7,99 99,8,100 99,8,101 99,8,102 99,8,98 99,8,99 99,9,100 99,9,101 99,9,102 99,9,98 99,9,99
+    [B] 压缩   125 格坐标: 100,10,100 100,10,101 100,10,102 100,10,98 100,10,99 100,11,100 100,11,101 100,11,102 100,11,98 100,11,99 100,7,100 100,7,101 100,7,102 100,7,98 100,7,99 100,8,100 100,8,101 100,8,102 100,8,98 100,8,99 100,9,100 100,9,101 100,9,102 100,9,98 100,9,99 101,10,100 101,10,101 101,10,102 101,10,98 101,10,99 101,11,100 101,11,101 101,11,102 101,11,98 101,11,99 101,7,100 101,7,101 101,7,102 101,7,98 101,7,99 101,8,100 101,8,101 101,8,102 101,8,98 101,8,99 101,9,100 101,9,101 101,9,102 101,9,98 101,9,99 102,10,100 102,10,101 102,10,102 102,10,98 102,10,99 102,11,100 102,11,101 102,11,102 102,11,98 102,11,99 102,7,100 102,7,101 102,7,102 102,7,98 102,7,99 102,8,100 102,8,101 102,8,102 102,8,98 102,8,99 102,9,100 102,9,101 102,9,102 102,9,98 102,9,99 98,10,100 98,10,101 98,10,102 98,10,98 98,10,99 98,11,100 98,11,101 98,11,102 98,11,98 98,11,99 98,7,100 98,7,101 98,7,102 98,7,98 98,7,99 98,8,100 98,8,101 98,8,102 98,8,98 98,8,99 98,9,100 98,9,101 98,9,102 98,9,98 98,9,99 99,10,100 99,10,101 99,10,102 99,10,98 99,10,99 99,11,100 99,11,101 99,11,102 99,11,98 99,11,99 99,7,100 99,7,101 99,7,102 99,7,98 99,7,99 99,8,100 99,8,101 99,8,102 99,8,98 99,8,99 99,9,100 99,9,101 99,9,102 99,9,98 99,9,99
+
+===== C. 抗性底线：minecraft:bedrock（3.6e6）逐格跳过不写 =====
+    [pad] fill stone -> "Successfully filled 75 block(s)\n" | fill air -> "Successfully filled 50 block(s)\n"
+    [C] 基岩 (99,8,99) 仍为 bedrock = true
+    [C] 基岩 (99,8,101) 仍为 bedrock = true
+    [C] 基岩 (99,10,99) 仍为 bedrock = true
+    [C] 基岩 (99,10,101) 仍为 bedrock = true
+    [C] 基岩 (101,8,99) 仍为 bedrock = true
+    [C] 基岩 (101,8,101) 仍为 bedrock = true
+    [C] 基岩 (101,10,99) 仍为 bedrock = true
+    [C] 基岩 (101,10,101) 仍为 bedrock = true
+    [C] 基岩 (101,9,100) 仍为 bedrock = true
+> summon farmstorm:compressed_puffed_wheat 100.5 12.0 100.5 {Motion:[0.0d,0.0d,0.0d]}
+    "Summoned new entity.farmstorm.compressed_puffed_wheat\n"
+    entity gone after 818 ms
+    [C] 投掷后 9 格基岩逐格 /execute if block minecraft:bedrock = [true,true,true,true,true,true,true,true,true]
+    [C] 全为真 = true
+    [C] 同一 3x3x3 立方体内被写成 compressed_hay_block 的格数 = 18（期望 27-9=18）
+    [C] 残留 hay_block 格数 = 0
+    [C item] /execute if entity @e[type=item] -> "Test failed\n"
+    [C] 无掉落物 = true
+
+===== D. 运行期类关系（同一份循环） =====
+> forceload remove 96 96 104 104
+    "Unmarked chunk [6, 6] in Overworld for force loading\n"
+> kill @e[type=farmstorm:puffed_wheat]
+    "No entity was found\n"
+> kill @e[type=farmstorm:compressed_puffed_wheat]
+    "No entity was found\n"
+
+===== 汇总 =====
+A 干态: hay 27 / compressed 27 / 集合相同 true
+B 湿态: hay 125 / compressed 125 / 集合相同 true
+C 基岩: 9 格全真 true / 写入 18 / 残留 hay 0

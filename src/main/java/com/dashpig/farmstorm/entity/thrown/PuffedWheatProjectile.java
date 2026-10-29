@@ -81,6 +81,14 @@ public class PuffedWheatProjectile extends ThrownCropEntity {
     }
 
     /**
+     * 写入的方块，本类的唯一可变点。D-77：压缩膨胀麦只覆写这个方法，
+     * 落点反推 / 水源判定 / 写入循环 / 抗性底线全部沿用父类那一份，不存在第二份。
+     */
+    protected BlockState fillBlock() {
+        return Blocks.HAY_BLOCK.defaultBlockState();
+    }
+
+    /**
      * 写满边长 edge 的立方体；D-38 / T-05 的防破坏底线（抗性 ≥ 3.6e6）之外的方块一律覆盖。
      *
      * <p>抗性读「方块自身」的爆炸抗性而不是 context 敏感版本：DESIGN §7.11 明确膨胀麦是「写入」而非爆炸，
@@ -88,9 +96,9 @@ public class PuffedWheatProjectile extends ThrownCropEntity {
      * NeoForge 给无参版本标了 {@code @Deprecated}（指向 context 版本），此处刻意留在内禀口径上。
      */
     @SuppressWarnings("deprecation")
-    private static void fillHay(ServerLevel level, BlockPos center, int edge) {
+    private void fillHay(ServerLevel level, BlockPos center, int edge) {
         int radius = edge / 2;
-        BlockState hay = Blocks.HAY_BLOCK.defaultBlockState();
+        BlockState hay = this.fillBlock();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dy = -radius; dy <= radius; dy++) {
                 for (int dz = -radius; dz <= radius; dz++) {

@@ -1,0 +1,27 @@
+{
+  "parent": "farmstorm:first_deploy",
+  "criteria": {
+    "zangief_hit": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.zangief_hit.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:zangief_cane"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.zangief_hit.title"
+    }
+  },
+  "requirements": [
+    [
+      "zangief_hit"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

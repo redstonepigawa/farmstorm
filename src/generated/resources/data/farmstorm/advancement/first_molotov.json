@@ -1,0 +1,27 @@
+{
+  "parent": "farmstorm:first_throw",
+  "criteria": {
+    "first_molotov": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.first_molotov.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:molotov"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.first_molotov.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_molotov"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

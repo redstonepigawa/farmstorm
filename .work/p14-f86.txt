@@ -1,0 +1,22 @@
+# Lane B / Phase 14 验收 · 场景 f86-setblock · 2026-10-29T09:43:15.778Z
+## F-86 验收 1 · /setblock 返回成功
+> fill 96 6 96 160 12 160 minecraft:air
+    | No blocks were filled
+> setblock 100 6 100 farmstorm:zangief_cane
+    | Changed the block at 100, 6, 100
+  [PASS] setblock 返回成功
+> execute if block 100 6 100 farmstorm:zangief_cane
+    | Test passed
+  [PASS] 方块确实是 farmstorm:zangief_cane
+> data get block 100 6 100
+    | 100, 6, 100 has the following block data: {detached: 0b, fuseTicks: 0, pendingWaves: [], placedGameTime: 0L, x: 100, y: 6, z: 100, id: "farmstorm:fang_trap_cactus"}
+  [FAIL] 方块实体已创建（data get block 可读） :: 100, 6, 100 has the following block data: {detached: 0b, fuseTicks: 0, pendingWaves: [], placedGameTime: 0L, x: 100, y: 6, z: 100, id: "farmstorm:fang_trap_cactus"}
+> tp @p 102.5 6.0 100.5
+    | Teleported Dev to 102.500000, 6.000000, 100.500000
+  (等待 60 刻：t 6087 → 6147，实过 60 刻)
+  [PASS] 2 格外站 60 刻：陷阱仍在（未误触发）
+  ↑ 这段等待同时是 F-86 验收 3 的扫描读数来源（latest.log 的 桑吉尔蔗 扫描 行）
+> setblock 100 6 100 minecraft:air
+    | Changed the block at 100, 6, 100
+
+== 本场景 FAIL 1 项 ==

@@ -1,0 +1,21 @@
+# Lane B / Phase 14 验收 · 场景 f90-kill · 2026-10-29T10:08:58.253Z
+## F-90 验收 4 · 相位 2 中 /kill @p 后重生
+  (清场：第 1 次 effect clear 后无残留效果)
+> setblock 100 6 100 farmstorm:zangief_cane
+    | Changed the block at 100, 6, 100
+  (放置：Changed the block at 100, 6, 100)
+> tp @p 100.5 6.0 100.5
+    | Teleported Dev to 100.500000, 6.000000, 100.500000
+  (第 33 次轮询：已进入相位 2)
+  [PASS] kill 前已进入相位 2（amplifier 2）
+  (kill 前效果：fs:zangief_piledriver amp=2 dur=100)
+> kill @p
+    | Killed Dev
+  (等待 12 刻：t 33068 → 33081，实过 13 刻)
+  [PASS] 重生后无 zangief_piledriver（无（Found no elements matching active_effects））
+  [PASS] 重生后无 levitation（无（Found no elements matching active_effects））
+> data get entity @p Motion
+    | Dev has the following entity data: [0.0d, -0.0784000015258789d, 0.0d]
+  [PASS] 重生后水平速度 ≈ 0
+
+== 本场景 PASS ==

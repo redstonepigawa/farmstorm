@@ -1,0 +1,10 @@
+# Lane B / Phase 14 验收 · 场景 f87-axis2 · 2026-10-29T10:01:16.388Z
+## F-87 验收 1 下半 · 同轴 2 格不触发
+  (清场：第 1 次 effect clear 后无残留效果)
+> tp @p 112.5 6.0 110.5
+    | Teleported Dev to 112.500000, 6.000000, 110.500000
+  (等待 40 刻：t 24486 → 24528，实过 42 刻)
+  [PASS] 2 格外（欧氏 2.06）不触发
+  [PASS] 玩家身上没有 zangief_piledriver（无（Found no elements matching active_effects））
+
+== 本场景 PASS ==

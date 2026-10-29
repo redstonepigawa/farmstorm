@@ -1,0 +1,16 @@
+# Lane B / Phase 14 验收 · 场景 f87-nodrop · 2026-10-29T10:00:48.008Z
+## F-87 验收 4 · 触发不自毁掉落（A-08）
+> execute if entity @e[type=item]
+    | Test failed
+  (触发前掉落物：Test failed)
+> tp @p 100.5 6.0 100.5
+    | Teleported Dev to 100.500000, 6.000000, 100.500000
+  (等待 15 刻：t 23917 → 23934，实过 17 刻)
+> execute if block 100 6 100 minecraft:air
+    | Test passed
+  [PASS] 触发后方块消失
+> execute if entity @e[type=item]
+    | Test failed
+  [PASS] 触发后掉落物 = 0
+
+== 本场景 PASS ==

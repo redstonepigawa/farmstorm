@@ -1,0 +1,17 @@
+# Lane B / Phase 14 验收 · 场景 f87-ally · 2026-10-29T10:00:40.766Z
+## F-87 验收 3 之三 · 同队玩家不触发（D-71 / C-9 实时解析）
+> data merge block 150 6 150 {ownerUuid:[I;1,2,3,4],ownerName:"LaneAOwner"}
+    | Modified block data of 150, 6, 150
+> data get block 150 6 150 ownerName
+    | 150, 6, 150 has the following block data: "LaneAOwner"
+  [PASS] 归属已写入方块实体
+> tp @p 150.5 6.0 150.5
+    | Teleported Dev to 150.500000, 6.000000, 150.500000
+  (等待 40 刻：t 23772 → 23815，实过 43 刻)
+  [PASS] 同队玩家站在方块里不触发（归属者与目标同在 red）
+  (等待 20 刻：t 23815 → 23836，实过 21 刻)
+> execute if block 150 6 150 minecraft:air
+    | Test passed
+  [PASS] 反向对照：归属者换到 blue（与目标不同队）后触发
+
+== 本场景 PASS ==

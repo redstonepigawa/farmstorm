@@ -1,0 +1,16 @@
+# Lane B / Phase 14 验收 · 场景 f87-diagonal · 2026-10-29T10:01:19.498Z
+## F-87 验收 2 · 对角 1.4 / 1.4 不触发（D-73 球形口径）
+  (清场：第 1 次 effect clear 后无残留效果)
+> tp @p 121.9 6.0 121.9
+    | Teleported Dev to 121.900000, 6.000000, 121.900000
+  (等待 40 刻：t 24548 → 24590，实过 42 刻)
+  [PASS] 对角 1.4/1.4（欧氏 2.04，切比雪夫 1 会误判）不触发
+  [PASS] 玩家身上没有 zangief_piledriver（无（Found no elements matching active_effects））
+> tp @p 131.5 6.0 130.5
+    | Teleported Dev to 131.500000, 6.000000, 130.500000
+  (等待 12 刻：t 24590 → 24603，实过 13 刻)
+> execute if block 130 6 130 minecraft:air
+    | Test passed
+  [PASS] 对照：相邻方块中心（欧氏 1.12）触发
+
+== 本场景 PASS ==

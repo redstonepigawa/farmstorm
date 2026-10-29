@@ -1,0 +1,125 @@
+# Lane B / Phase 14 验收 · 场景 timeline-2high · 2026-10-29T10:39:53.602Z
+## 相位时间轴 · 陷阱 (110,8,110)
+  (清场：第 1 次 effect clear 后无残留效果)
+> fill 109 6 109 111 7 111 minecraft:stone
+    | Successfully filled 18 block(s)
+> setblock 110 8 110 farmstorm:zangief_cane
+    | Changed the block at 110, 8, 110
+  (陷阱放置核对：Test passed)
+> tp @p 110.5 8.0 110.5
+    | Teleported Dev to 110.500000, 8.000000, 110.500000
+  t=  0 (62215)  Y=8.000  piledriver=无  levitation=无
+  t=  1 (62216)  Y=8.000  piledriver=无  levitation=无
+  t=  2 (62217)  Y=8.000  piledriver=无  levitation=无
+  t=  3 (62218)  Y=8.000  piledriver=无  levitation=无
+  t=  4 (62219)  Y=8.000  piledriver=无  levitation=无
+  t=  5 (62220)  Y=8.000  piledriver=无  levitation=无
+  t=  6 (62221)  Y=8.000  piledriver=无  levitation=无
+  t=  7 (62222)  Y=8.000  piledriver=amp=0 dur=14  levitation=无
+  t=  8 (62223)  Y=8.000  piledriver=amp=0 dur=13  levitation=无
+  t=  9 (62224)  Y=8.000  piledriver=amp=0 dur=12  levitation=无
+  t=  9 (62224)  Y=8.000  piledriver=amp=0 dur=12  levitation=无
+  t= 10 (62225)  Y=8.000  piledriver=amp=0 dur=11  levitation=无
+  t= 11 (62226)  Y=8.000  piledriver=amp=0 dur=10  levitation=无
+  t= 12 (62227)  Y=8.000  piledriver=amp=0 dur=9  levitation=无
+  t= 13 (62228)  Y=8.000  piledriver=amp=0 dur=8  levitation=无
+  t= 14 (62229)  Y=8.000  piledriver=amp=0 dur=7  levitation=无
+  t= 15 (62230)  Y=8.000  piledriver=amp=0 dur=6  levitation=无
+  t= 16 (62231)  Y=8.000  piledriver=amp=0 dur=5  levitation=无
+  t= 17 (62232)  Y=8.000  piledriver=amp=0 dur=4  levitation=无
+  t= 18 (62233)  Y=8.000  piledriver=amp=0 dur=3  levitation=无
+  t= 19 (62234)  Y=8.000  piledriver=amp=0 dur=2  levitation=无
+  t= 20 (62235)  Y=8.000  piledriver=amp=0 dur=1  levitation=无
+  t= 20 (62235)  Y=8.000  piledriver=amp=0 dur=1  levitation=无
+  t= 21 (62236)  Y=8.000  piledriver=amp=1 dur=21  levitation=amp=6 dur=20
+  t= 22 (62237)  Y=8.000  piledriver=amp=1 dur=20  levitation=amp=6 dur=19
+  t= 23 (62238)  Y=8.069  piledriver=amp=1 dur=19  levitation=amp=6 dur=18
+  t= 24 (62239)  Y=8.191  piledriver=amp=1 dur=18  levitation=amp=6 dur=17
+  t= 25 (62240)  Y=8.356  piledriver=amp=1 dur=17  levitation=amp=6 dur=16
+  t= 26 (62241)  Y=8.553  piledriver=amp=1 dur=16  levitation=amp=6 dur=15
+  t= 27 (62242)  Y=8.777  piledriver=amp=1 dur=15  levitation=amp=6 dur=14
+  t= 28 (62243)  Y=9.021  piledriver=amp=1 dur=14  levitation=amp=6 dur=13
+  t= 29 (62244)  Y=9.280  piledriver=amp=1 dur=13  levitation=amp=6 dur=12
+  t= 30 (62245)  Y=9.553  piledriver=amp=1 dur=12  levitation=amp=6 dur=11
+  t= 30 (62245)  Y=9.835  piledriver=amp=1 dur=11  levitation=amp=6 dur=10
+  t= 31 (62246)  Y=9.835  piledriver=amp=1 dur=11  levitation=amp=6 dur=10
+  t= 32 (62247)  Y=10.124  piledriver=amp=1 dur=10  levitation=amp=6 dur=9
+  t= 33 (62248)  Y=10.420  piledriver=amp=1 dur=9  levitation=amp=6 dur=8
+  t= 34 (62249)  Y=10.721  piledriver=amp=1 dur=8  levitation=amp=6 dur=7
+  t= 35 (62250)  Y=11.025  piledriver=amp=1 dur=7  levitation=amp=6 dur=6
+  t= 36 (62251)  Y=11.332  piledriver=amp=1 dur=6  levitation=amp=6 dur=5
+  t= 37 (62252)  Y=11.641  piledriver=amp=1 dur=5  levitation=amp=6 dur=4
+  t= 38 (62253)  Y=11.952  piledriver=amp=1 dur=4  levitation=amp=6 dur=3
+  t= 39 (62254)  Y=12.265  piledriver=amp=1 dur=3  levitation=amp=6 dur=2
+  t= 40 (62255)  Y=12.578  piledriver=amp=1 dur=2  levitation=amp=6 dur=1
+  t= 41 (62256)  Y=12.893  piledriver=amp=2 dur=100  levitation=无
+  t= 41 (62256)  Y=13.208  piledriver=amp=2 dur=100  levitation=无
+  t= 42 (62257)  Y=13.208  piledriver=amp=2 dur=99  levitation=无
+  t= 43 (62258)  Y=13.068  piledriver=amp=2 dur=98  levitation=无
+  t= 44 (62259)  Y=12.939  piledriver=amp=2 dur=97  levitation=无
+  t= 45 (62260)  Y=12.809  piledriver=amp=2 dur=96  levitation=无
+  t= 46 (62261)  Y=12.679  piledriver=amp=2 dur=95  levitation=无
+  t= 47 (62262)  Y=12.549  piledriver=amp=2 dur=94  levitation=无
+  t= 48 (62263)  Y=12.419  piledriver=amp=2 dur=93  levitation=无
+  t= 49 (62264)  Y=12.289  piledriver=amp=2 dur=92  levitation=无
+  t= 50 (62265)  Y=12.160  piledriver=amp=2 dur=91  levitation=无
+  t= 51 (62266)  Y=12.030  piledriver=amp=2 dur=90  levitation=无
+  t= 51 (62266)  Y=11.900  piledriver=amp=2 dur=89  levitation=无
+  t= 52 (62267)  Y=11.770  piledriver=amp=2 dur=89  levitation=无
+  t= 53 (62268)  Y=11.770  piledriver=amp=2 dur=88  levitation=无
+  t= 54 (62269)  Y=11.640  piledriver=amp=2 dur=87  levitation=无
+  t= 55 (62270)  Y=11.510  piledriver=amp=2 dur=86  levitation=无
+  t= 56 (62271)  Y=11.380  piledriver=amp=2 dur=85  levitation=无
+  t= 57 (62272)  Y=11.250  piledriver=amp=2 dur=84  levitation=无
+  t= 58 (62273)  Y=11.120  piledriver=amp=2 dur=83  levitation=无
+  t= 59 (62274)  Y=10.990  piledriver=amp=2 dur=82  levitation=无
+  t= 60 (62275)  Y=10.860  piledriver=amp=2 dur=81  levitation=无
+  t= 61 (62276)  Y=10.730  piledriver=amp=2 dur=80  levitation=无
+  t= 62 (62277)  Y=10.600  piledriver=amp=2 dur=79  levitation=无
+  t= 62 (62277)  Y=10.470  piledriver=amp=2 dur=79  levitation=无
+  t= 63 (62278)  Y=10.340  piledriver=amp=2 dur=78  levitation=无
+  t= 64 (62279)  Y=10.340  piledriver=amp=2 dur=77  levitation=无
+  t= 65 (62280)  Y=10.210  piledriver=amp=2 dur=76  levitation=无
+  t= 66 (62281)  Y=10.080  piledriver=amp=2 dur=75  levitation=无
+  t= 67 (62282)  Y=9.950  piledriver=amp=2 dur=74  levitation=无
+  t= 68 (62283)  Y=9.820  piledriver=amp=2 dur=73  levitation=无
+  t= 69 (62284)  Y=9.690  piledriver=amp=2 dur=72  levitation=无
+  t= 70 (62285)  Y=9.560  piledriver=amp=2 dur=71  levitation=无
+  t= 71 (62286)  Y=9.430  piledriver=amp=2 dur=70  levitation=无
+  t= 72 (62287)  Y=9.300  piledriver=amp=2 dur=69  levitation=无
+  t= 72 (62287)  Y=9.170  piledriver=amp=2 dur=69  levitation=无
+  t= 73 (62288)  Y=9.040  piledriver=amp=2 dur=68  levitation=无
+  t= 74 (62289)  Y=9.040  piledriver=amp=2 dur=67  levitation=无
+  t= 75 (62290)  Y=8.910  piledriver=amp=2 dur=66  levitation=无
+  t= 76 (62291)  Y=8.780  piledriver=amp=2 dur=65  levitation=无
+  t= 77 (62292)  Y=8.650  piledriver=amp=2 dur=64  levitation=无
+  t= 78 (62293)  Y=8.520  piledriver=amp=2 dur=63  levitation=无
+  t= 79 (62294)  Y=8.390  piledriver=amp=2 dur=62  levitation=无
+  t= 80 (62295)  Y=8.260  piledriver=amp=2 dur=61  levitation=无
+  t= 81 (62296)  Y=8.130  piledriver=amp=2 dur=60  levitation=无
+  t= 82 (62297)  Y=8.130  piledriver=amp=2 dur=59  levitation=无
+  t= 83 (62298)  Y=8.000  piledriver=无  levitation=无
+  t= 83 (62298)  Y=8.000  piledriver=无  levitation=无
+  t= 84 (62299)  Y=8.000  piledriver=无  levitation=无
+  t= 85 (62300)  Y=8.000  piledriver=无  levitation=无
+  t= 86 (62301)  Y=8.000  piledriver=无  levitation=无
+  t= 87 (62302)  Y=8.000  piledriver=无  levitation=无
+  t= 88 (62303)  Y=8.000  piledriver=无  levitation=无
+  t= 89 (62304)  Y=8.000  piledriver=无  levitation=无
+  t= 90 (62305)  Y=8.000  piledriver=无  levitation=无
+  t= 91 (62306)  Y=8.000  piledriver=无  levitation=无
+  t= 92 (62307)  Y=8.000  piledriver=无  levitation=无
+  t= 93 (62308)  Y=8.000  piledriver=无  levitation=无
+  t= 93 (62308)  Y=8.000  piledriver=无  levitation=无
+  t= 94 (62309)  Y=8.000  piledriver=无  levitation=无
+  t= 95 (62310)  Y=8.000  piledriver=无  levitation=无
+  t= 96 (62311)  Y=8.000  piledriver=无  levitation=无
+  t= 97 (62312)  Y=8.000  piledriver=无  levitation=无
+  t= 98 (62313)  Y=8.000  piledriver=无  levitation=无
+  t= 99 (62314)  Y=8.000  piledriver=无  levitation=无
+  t=100 (62315)  Y=8.000  piledriver=无  levitation=无
+  [PASS] 时间轴里出现过 farmstorm:zangief_piledriver
+  [PASS] 时间轴里出现过 minecraft:levitation（相位 1）
+  [PASS] 采样结束时陷阱方块已消失
+
+== 本场景 PASS ==

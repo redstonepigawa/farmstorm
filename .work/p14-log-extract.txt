@@ -1,0 +1,75 @@
+# 服务端日志摘录（D:/project_farm/run-p14/logs/latest.log）—— Phase 14 最终一轮
+[29Oct2026 18:36:45.564] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[29Oct2026 18:36:45.564] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[29Oct2026 18:36:45.564] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[29Oct2026 18:36:45.565] [modloading-worker-0/INFO] [farmstorm/]: 自检 注册对象 77 个：items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1 → OK
+[29Oct2026 18:36:48.385] [Server thread/INFO] [farmstorm/]: 自检 部署行为 BLAST_CARROT → BlastCarrotTrap
+[29Oct2026 18:36:48.386] [Server thread/INFO] [farmstorm/]: 自检 部署行为 FANG_TRAP_CACTUS → FangTrapCactusTrap
+[29Oct2026 18:36:48.386] [Server thread/INFO] [farmstorm/]: 自检 部署行为 PUMPKIN_TURRET → PumpkinTurret
+[29Oct2026 18:36:48.386] [Server thread/INFO] [farmstorm/]: 自检 部署行为 AWAKENED_TORCHFLOWER → TorchflowerAura
+[29Oct2026 18:36:48.386] [Server thread/INFO] [farmstorm/]: 自检 部署行为 AWAKENED_PITCHER_PLANT → PitcherPlantAura
+[29Oct2026 18:36:48.387] [Server thread/INFO] [farmstorm/]: 自检 部署行为 ZANGIEF_CANE → ZangiefCaneTrap
+[29Oct2026 18:38:50.403] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=60944 玩家 Dev 距离 0.50
+[29Oct2026 18:38:50.406] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=60944 玩家 Dev duration=15
+[29Oct2026 18:38:50.407] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=60944 玩家 Dev 中心距 0.50
+[29Oct2026 18:38:51.089] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=60958 玩家 Dev duration=21
+[29Oct2026 18:38:52.089] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=60978 玩家 Dev duration=100
+[29Oct2026 18:38:54.188] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 落地耗时 42 刻（目标 40）
+[29Oct2026 18:38:54.188] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束 t=61020 玩家 Dev
+[29Oct2026 18:39:17.888] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=61494 玩家 Dev 距离 0.71
+[29Oct2026 18:39:17.889] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=61494 玩家 Dev duration=15
+[29Oct2026 18:39:17.889] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=61494 玩家 Dev 中心距 0.71
+[29Oct2026 18:39:18.588] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=61508 玩家 Dev duration=21
+[29Oct2026 18:39:19.587] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=61528 玩家 Dev duration=100
+[29Oct2026 18:39:21.689] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 落地耗时 42 刻（目标 40）
+[29Oct2026 18:39:21.689] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束 t=61570 玩家 Dev
+[29Oct2026 18:39:24.288] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=61622 玩家 Dev 距离 1.03
+[29Oct2026 18:39:24.289] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=61622 玩家 Dev duration=15
+[29Oct2026 18:39:24.289] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=61622 玩家 Dev 中心距 1.03
+[29Oct2026 18:39:24.988] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=61636 玩家 Dev duration=21
+[29Oct2026 18:39:25.989] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=61656 玩家 Dev duration=100
+[29Oct2026 18:39:28.088] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 落地耗时 42 刻（目标 40）
+[29Oct2026 18:39:28.088] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束 t=61698 玩家 Dev
+[29Oct2026 18:39:30.188] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=61740 玩家 Dev 距离 0.79
+[29Oct2026 18:39:30.189] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=61740 玩家 Dev duration=15
+[29Oct2026 18:39:30.189] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=61740 玩家 Dev 中心距 0.79
+[29Oct2026 18:39:30.887] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=61754 玩家 Dev duration=21
+[29Oct2026 18:39:31.887] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=61774 玩家 Dev duration=100
+[29Oct2026 18:39:33.038] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 落地耗时 23 刻（目标 40）
+[29Oct2026 18:39:33.039] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束 t=61797 玩家 Dev
+[29Oct2026 18:39:54.288] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=62222 玩家 Dev 距离 0.87
+[29Oct2026 18:39:54.288] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=62222 玩家 Dev duration=15
+[29Oct2026 18:39:54.289] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=62222 玩家 Dev 中心距 0.87
+[29Oct2026 18:39:54.988] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=62236 玩家 Dev duration=21
+[29Oct2026 18:39:55.988] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=62256 玩家 Dev duration=100
+[29Oct2026 18:39:58.088] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 落地耗时 42 刻（目标 40）
+[29Oct2026 18:39:58.088] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束 t=62298 玩家 Dev
+[29Oct2026 18:40:00.188] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=62340 玩家 Dev 距离 0.55
+[29Oct2026 18:40:00.188] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=62340 玩家 Dev duration=15
+[29Oct2026 18:40:00.188] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=62340 玩家 Dev 中心距 0.55
+[29Oct2026 18:40:00.888] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=62354 玩家 Dev duration=21
+[29Oct2026 18:40:01.888] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=62374 玩家 Dev duration=100
+[29Oct2026 18:40:03.989] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 落地耗时 42 刻（目标 40）
+[29Oct2026 18:40:03.989] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束 t=62416 玩家 Dev
+[29Oct2026 18:40:10.888] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=62554 玩家 Dev 距离 0.51
+[29Oct2026 18:40:10.888] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=62554 玩家 Dev duration=15
+[29Oct2026 18:40:10.888] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=62554 玩家 Dev 中心距 0.51
+[29Oct2026 18:40:11.587] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=62568 玩家 Dev duration=21
+[29Oct2026 18:40:12.588] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=62588 玩家 Dev duration=100
+[29Oct2026 18:40:12.600] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束（死亡）玩家 Dev
+[29Oct2026 18:40:14.787] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=62632 玩家 Dev 距离 0.55
+[29Oct2026 18:40:14.787] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=62632 玩家 Dev duration=15
+[29Oct2026 18:40:14.788] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=62632 玩家 Dev 中心距 0.55
+[29Oct2026 18:40:15.488] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=62646 玩家 Dev duration=21
+[29Oct2026 18:40:16.489] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=62666 玩家 Dev duration=100
+[29Oct2026 18:40:16.535] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束（死亡）玩家 Dev
+[29Oct2026 18:40:18.688] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 扫描 t=62710 玩家 Dev 距离 0.55
+[29Oct2026 18:40:18.689] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 0 t=62710 玩家 Dev duration=15
+[29Oct2026 18:40:18.689] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 触发 t=62710 玩家 Dev 中心距 0.55
+[29Oct2026 18:40:19.389] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 1 t=62724 玩家 Dev duration=21
+[29Oct2026 18:40:20.388] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 相位 2 t=62744 玩家 Dev duration=100
+[29Oct2026 18:40:20.403] [Server thread/INFO] [farmstorm/]: 桑吉尔蔗 结束（死亡）玩家 Dev
+
+# 客户端日志摘录（D:/project_farm/.work/p14-client8.log）
+
+# 客户端日志摘录（D:/project_farm/.work/p14-client10.log）

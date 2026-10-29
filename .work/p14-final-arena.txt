@@ -1,0 +1,24 @@
+# Lane B / Phase 14 验收 · 场景 arena · 2026-10-29T10:28:49.850Z
+## 测试台与清场基线
+> forceload add 96 96 160 160
+    | No chunks were marked for force loading
+> fill 96 5 96 160 5 160 minecraft:stone
+    | No blocks were filled
+> fill 96 6 96 160 12 160 minecraft:air
+    | No blocks were filled
+> gamerule doDaylightCycle false
+    | Gamerule doDaylightCycle is now set to: false
+> gamerule randomTickSpeed 0
+    | Gamerule randomTickSpeed is now set to: 0
+> gamerule doMobSpawning false
+    | Gamerule doMobSpawning is now set to: false
+  (清场：第 1 次 effect clear 后无残留效果)
+> tp @p 100.5 6.0 100.5
+    | Teleported Dev to 100.500000, 6.000000, 100.500000
+  (等待 5 刻：t 53208 → 53214，实过 6 刻)
+> execute if entity @e[type=item]
+    | Test failed
+  [PASS] 基线：场上有 0 个掉落物
+  [PASS] 基线：100/6/100 无残留陷阱
+
+== 本场景 PASS ==

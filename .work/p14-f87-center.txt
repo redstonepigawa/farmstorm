@@ -1,0 +1,14 @@
+# Lane B / Phase 14 验收 · 场景 f87-center · 2026-10-29T10:01:01.711Z
+## F-87 验收 1 上半 · 中心距 0.5 触发
+> tp @p 100.5 6.0 100.5
+    | Teleported Dev to 100.500000, 6.000000, 100.500000
+  (第 7 次轮询：方块已消失)
+> execute if block 100 6 100 minecraft:air
+    | Test passed
+  [PASS] 触发后方块消失
+    | 效果：fs:zangief_piledriver amp=0 dur=14
+  [PASS] 玩家身上出现 farmstorm:zangief_piledriver
+  [PASS] amplifier = 0（相位 0）
+  [PASS] 相位 0 剩余时长落在 14 刻窗口内（14）
+
+== 本场景 PASS ==

@@ -184,9 +184,9 @@ public final class FarmstormConfig {
 
     public static ModConfigSpec.DoubleValue zangiefCaneTriggerRadius;
     public static ModConfigSpec.IntValue zangiefCaneStageDelayTicks;
-    public static ModConfigSpec.IntValue zangiefCaneLevitationLevel;
-    public static ModConfigSpec.IntValue zangiefCaneLevitationDurationTicks;
-    public static ModConfigSpec.IntValue zangiefCaneFallTicks;
+    public static ModConfigSpec.IntValue zangiefCaneRiseHeightBlocks;
+    public static ModConfigSpec.IntValue zangiefCaneRiseTicks;
+    public static ModConfigSpec.IntValue zangiefCaneSpinDelayTicks;
     public static ModConfigSpec.DoubleValue zangiefCaneSpinDegreesPerTick;
 
     // ---- 烘焙快照 ----
@@ -757,18 +757,18 @@ public final class FarmstormConfig {
         zangiefCaneTriggerRadius = b.comment("D-73：触发球半径（球形欧氏距离）")
                 .translation(tr("zangief_cane.triggerRadius"))
                 .defineInRange("triggerRadius", 1.5, 0.0, 8.0);
-        zangiefCaneStageDelayTicks = b.comment("D-69：相位 0（已倒转、等待漂浮）的时长")
+        zangiefCaneStageDelayTicks = b.comment("相位 0（已倒转、等待升高）的时长")
                 .translation(tr("zangief_cane.stageDelayTicks"))
                 .defineInRange("stageDelayTicks", 14, 0, 200);
-        zangiefCaneLevitationLevel = b.comment("D-69：漂浮等级；amplifier = 等级 − 1 = 6")
-                .translation(tr("zangief_cane.levitationLevel"))
-                .defineInRange("levitationLevel", 7, 1, 255);
-        zangiefCaneLevitationDurationTicks = b.comment("D-69：漂浮时长 = 相位 1 时长")
-                .translation(tr("zangief_cane.levitationDurationTicks"))
-                .defineInRange("levitationDurationTicks", 20, 0, 72000);
-        zangiefCaneFallTicks = b.comment("相位 2 目标落地时长（刻）；服务端逐刻伺服向下速度以落在该时长内（A-03）")
-                .translation(tr("zangief_cane.fallTicks"))
-                .defineInRange("fallTicks", 40, 1, 200);
+        zangiefCaneRiseHeightBlocks = b.comment("相位 1 把玩家向上抬多少格（默认 16 ⇒ 实测抬升约 15 格；最后 1 刻的伺服速度差是固定损耗）")
+                .translation(tr("zangief_cane.riseHeightBlocks"))
+                .defineInRange("riseHeightBlocks", 16, 1, 64);
+        zangiefCaneRiseTicks = b.comment("相位 1 用多少刻抬完（默认 15 刻 = 约 1 格/刻）")
+                .translation(tr("zangief_cane.riseTicks"))
+                .defineInRange("riseTicks", 15, 1, 200);
+        zangiefCaneSpinDelayTicks = b.comment("视角自转开始前的倒转时长（刻）；客户端的相机按同一默认值镜像（§4.4 降级口径）")
+                .translation(tr("zangief_cane.spinDelayTicks"))
+                .defineInRange("spinDelayTicks", 4, 0, 40);
         zangiefCaneSpinDegreesPerTick = b.comment("D-70：相位 2 水平自转（72 × 20 = 1440 度/秒，方向固定逆时针）")
                 .translation(tr("zangief_cane.spinDegreesPerTick"))
                 .defineInRange("spinDegreesPerTick", 72.0, 0.0, 360.0);

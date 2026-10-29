@@ -26,6 +26,13 @@ public final class ZangiefClientState {
      */
     public static final float DEFAULT_SPIN_DEGREES_PER_TICK = 72.0F;
 
+    /**
+     * 自转起始延迟的 config 默认值镜像（{@code zangief_cane.spinDelayTicks} 默认 4，§4.4 降级口径）。
+     * <p>计时基准是**相位 2 的进入时刻**（作者口径「视角旋转从上下倒转 4 tick 后开始」——倒转本身就发生在相位 2），
+     * 不是效果生效时刻：那样会在还没开始下坠时就先转起来。
+     */
+    public static final int DEFAULT_SPIN_DELAY_TICKS = 4;
+
     /** 硬切换（先摘再加）那一 tick 客户端可能读到 null，相位号容忍 2 刻（§5.4 / RT-15）。 */
     private static final int PHASE_MISSING_TOLERANCE_TICKS = 2;
 
@@ -44,6 +51,9 @@ public final class ZangiefClientState {
     /** 本段相位 2 已累加的刻数，只用于收尾时打一行可核对的读数（F-91 验收 2）。 */
     private static int spinTicks;
 
+    /** 进入相位 2 以来的刻数：决定「倒转先走几刻、之后才开始自转」。 */
+    private static int fallingTicks;
+
     private ZangiefClientState() {}
 
     @SubscribeEvent
@@ -58,6 +68,7 @@ public final class ZangiefClientState {
                 logSpinFinished();
                 phase = -1;
                 accumulatedDegrees = 0.0F;
+                fallingTicks = 0;
             }
             return;
         }
@@ -72,13 +83,20 @@ public final class ZangiefClientState {
             return;
         }
         if (next != phase) {
-            logSpinFinished();
+            // 只有「进入相位 2」才算自转的起点：倒转从这一刻开始并保持到结束，自转在 spinDelayTicks 刻后才加入。
+            if (next == ZangiefPiledriverEffect.PHASE_FALLING) {
+                accumulatedDegrees = 0.0F;
+                fallingTicks = 0;
+                spinTicks = 0;
+            }
             phase = next;
-            accumulatedDegrees = 0.0F;                 // 换相位就重置自转（D-70 只在相位 2 自转）
         }
         if (phase == ZangiefPiledriverEffect.PHASE_FALLING) {
-            accumulatedDegrees += DEFAULT_SPIN_DEGREES_PER_TICK;
-            spinTicks++;
+            fallingTicks++;
+            if (fallingTicks > DEFAULT_SPIN_DELAY_TICKS) {
+                accumulatedDegrees += DEFAULT_SPIN_DEGREES_PER_TICK;
+                spinTicks++;
+            }
         }
     }
 
@@ -97,9 +115,20 @@ public final class ZangiefClientState {
         return active;
     }
 
-    /** 只有相位 2 自转（D-70：从漂浮结束到落地）。 */
-    public static boolean spinning() {
+    /**
+     * 上下倒转：**从相位 2 开始一直保持到结束**（作者口径：倒转是打桩机的核心观感，不随自转取消）。
+     */
+    public static boolean inverted() {
         return active && phase == ZangiefPiledriverEffect.PHASE_FALLING;
+    }
+
+    /**
+     * yaw 自转：进入相位 2 后第 {@link #DEFAULT_SPIN_DELAY_TICKS} 刻起开始，一直转到效果结束。
+     * （作者口径「视角旋转从视角上下倒转 4 tick 后开始直到结束」；计时基准是相位 2 进入时刻。）
+     */
+    public static boolean spinning() {
+        return active && phase == ZangiefPiledriverEffect.PHASE_FALLING
+                && fallingTicks > DEFAULT_SPIN_DELAY_TICKS;
     }
 
     /** 相位 2 累计自转角（度），供相机 yaw 叠加；只读快照，不写回玩家真实朝向。 */

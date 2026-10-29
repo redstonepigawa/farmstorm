@@ -71,7 +71,9 @@ public final class ZangiefCaneTrap implements TrapBehavior {
         if (deployer != null) {
             FarmstormAdvancements.award(deployer, "zangief_hit");
         }
-        level.playSound(null, pos, FarmstormSounds.ZANGIEF_PILEDRIVER.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+        // 作者改版：音效**以被触发的玩家为声源**（原先是 pos 上的「无来源实体」按位置播）。
+        // 这样声音跟着人走，抬升/坠落时不会被留在原方块位置。
+        level.playSound(null, player, FarmstormSounds.ZANGIEF_PILEDRIVER.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         Farmstorm.LOGGER.info(String.format(Locale.ROOT, "桑吉尔蔗 触发 t=%d 玩家 %s 中心距 %.2f",
                 level.getGameTime(), player.getGameProfile().getName(), distance));
         be.consume();

@@ -307,9 +307,11 @@ public final class ModLangProvider extends LanguageProvider {
         config(entries, "wild_hunter.loopSoundRange", "循环音的可听距离（格）", "Looping sound audible range (blocks)");
         config(entries, "zangief_cane.triggerRadius", "触发球半径（格）", "Trigger sphere radius (blocks)");
         config(entries, "zangief_cane.stageDelayTicks", "相位 0 的等待刻数", "Ticks spent in phase 0");
-        config(entries, "zangief_cane.levitationLevel", "漂浮等级（1 = I 级）", "Levitation level (1 = level I)");
-        config(entries, "zangief_cane.levitationDurationTicks", "漂浮时长（tick）", "Levitation duration (ticks)");
-        config(entries, "zangief_cane.fallTicks", "相位 2 的目标落地时长（tick）", "Target landing duration of phase 2 (ticks)");
+        // 作者实测改版：相位 1 由「漂浮」改成「快速升高」、相位 2 由「伺服下坠」改成「自然坠落 + 摔伤」；
+        // 键**只改名不增删**，config 键总数仍是 139。
+        config(entries, "zangief_cane.riseHeightBlocks", "相位 1 向上抬升的高度（格）", "Height (blocks) the player is lifted in phase 1");
+        config(entries, "zangief_cane.riseTicks", "相位 1 抬完所用的刻数", "Ticks used to lift the player in phase 1");
+        config(entries, "zangief_cane.spinDelayTicks", "视角自转开始前的倒转时长（刻）", "Ticks of upside-down before the spin starts");
         config(entries, "zangief_cane.spinDegreesPerTick", "水平自转速度（度/刻）", "Horizontal spin speed (degrees/tick)");
         return List.copyOf(entries);
     }

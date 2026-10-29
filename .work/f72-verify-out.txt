@@ -1,0 +1,131 @@
+### RCON 已连接 127.0.0.1:25612
+
+## 0. 清场与基线
+> forceload add 96 96 112 112
+    "Marked 4 chunks in Overworld from [6, 6] to [7, 7] to be force loaded\n"
+> fill 96 96 96 112 112 112 minecraft:air
+    "No blocks were filled\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> execute if block 104 100 100 minecraft:air
+    "Test passed\n"
+  [PASS] 清场基线：104,100,100 为空
+
+## B. 验收 2-a：4 个膨胀麦放在 9 格的四角（0/2/6/8）→ 应得 1 个压缩膨胀麦
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 104 100 100 minecraft:air
+    "Could not set the block\n"
+> setblock 104 100 100 minecraft:crafter[crafting=true]
+    "Changed the block at 104, 100, 100\n"
+> data get block 104 100 100
+    "104, 100, 100 has the following block data: {crafting_ticks_remaining: 0, triggered: 0, x: 104, disabled_slots: [I;], y: 100, Items: [{count: 1, Slot: 0b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 2b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 6b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 8b, id: \"farmstorm:puffed_wheat\"}], z: 100, id: \"minecraft:crafter\"}\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 105 100 100 minecraft:redstone_block
+    "Changed the block at 105, 100, 100\n"
+> setblock 105 100 100 minecraft:air
+    "Changed the block at 105, 100, 100\n"
+> data get entity @e[type=minecraft:item,limit=1]
+    "item.farmstorm.compressed_puffed_wheat has the following entity data: {Motion: [-0.011358452179738701d, -0.3769650276718665d, -0.22038899239924373d], Health: 5s, Invulnerable: 0b, Air: 300s, OnGround: 0b, PortalCooldown: 0, Rotation: [103.87f, 0.0f], FallDistance: 2.3024297f, Item: {count: 1, id: \"farmstorm:compressed_puffed_wheat\"}, Pos: [104.29897278053183d, 98.36105074255141d, 95.89945213992839d], PickupDelay: 0s, Fire: -1s, UUID: [I; 1658320874, 872432107, -1339139778, -1671406128], Lifespan: 6000, Age: 15s}\n"
+> execute if data entity @e[type=minecraft:item,limit=1] Item{id:"farmstorm:compressed_puffed_wheat"}
+    "Test passed, count: 1\n"
+  [PASS] B：产出 item 实体 id = farmstorm:compressed_puffed_wheat
+> execute if data entity @e[type=minecraft:item,limit=1] Item{count:1}
+    "Test passed, count: 1\n"
+  [PASS] B：产出数量 = 1
+
+## C. 验收 2-b：4 个膨胀麦换一组位置（1/3/5/7，无序也成立）→ 应得 1 个压缩膨胀麦
+> kill @e[type=minecraft:item]
+    "Killed item.farmstorm.compressed_puffed_wheat\n"
+> setblock 108 100 100 minecraft:air
+    "Could not set the block\n"
+> setblock 108 100 100 minecraft:crafter[crafting=true]
+    "Changed the block at 108, 100, 100\n"
+> data get block 108 100 100
+    "108, 100, 100 has the following block data: {crafting_ticks_remaining: 0, triggered: 0, x: 108, disabled_slots: [I;], y: 100, Items: [{count: 1, Slot: 1b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 3b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 5b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 7b, id: \"farmstorm:puffed_wheat\"}], z: 100, id: \"minecraft:crafter\"}\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 109 100 100 minecraft:redstone_block
+    "Changed the block at 109, 100, 100\n"
+> setblock 109 100 100 minecraft:air
+    "Changed the block at 109, 100, 100\n"
+> data get entity @e[type=minecraft:item,limit=1]
+    "item.farmstorm.compressed_puffed_wheat has the following entity data: {Motion: [-0.02283334996949649d, -0.5083508641321715d, -0.15521798822979754d], Health: 5s, Invulnerable: 0b, Air: 300s, OnGround: 0b, PortalCooldown: 0, Rotation: [280.0197f, 0.0f], FallDistance: 4.308028f, Item: {count: 1, id: \"farmstorm:compressed_puffed_wheat\"}, Pos: [107.93158094427245d, 96.48147011309044d, 95.9359650502717d], PickupDelay: 0s, Fire: -1s, UUID: [I; 25868662, -2138550536, -1297127014, 1099923239], Lifespan: 6000, Age: 20s}\n"
+> execute if data entity @e[type=minecraft:item,limit=1] Item{id:"farmstorm:compressed_puffed_wheat"}
+    "Test passed, count: 1\n"
+  [PASS] C：产出 item 实体 id = farmstorm:compressed_puffed_wheat
+> execute if data entity @e[type=minecraft:item,limit=1] Item{count:1}
+    "Test passed, count: 1\n"
+  [PASS] C：产出数量 = 1
+
+## D. 验收 3-a：只放 3 个膨胀麦 → 无产物
+> kill @e[type=minecraft:item]
+    "Killed item.farmstorm.compressed_puffed_wheat\n"
+> setblock 100 100 100 minecraft:air
+    "Could not set the block\n"
+> setblock 100 100 100 minecraft:crafter[crafting=true]
+    "Changed the block at 100, 100, 100\n"
+> data get block 100 100 100
+    "100, 100, 100 has the following block data: {crafting_ticks_remaining: 0, triggered: 0, x: 100, disabled_slots: [I;], y: 100, Items: [{count: 1, Slot: 0b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 4b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 8b, id: \"farmstorm:puffed_wheat\"}], z: 100, id: \"minecraft:crafter\"}\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 101 100 100 minecraft:redstone_block
+    "Changed the block at 101, 100, 100\n"
+> setblock 101 100 100 minecraft:air
+    "Changed the block at 101, 100, 100\n"
+> data get entity @e[type=minecraft:item,limit=1]
+    "No entity was found\n"
+> execute if entity @e[type=minecraft:item]
+    "Test failed\n"
+  [PASS] D：无任何 item 实体
+
+## E. 验收 3-b：放 5 个膨胀麦 → 无产物
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 112 100 100 minecraft:air
+    "Could not set the block\n"
+> setblock 112 100 100 minecraft:crafter[crafting=true]
+    "Changed the block at 112, 100, 100\n"
+> data get block 112 100 100
+    "112, 100, 100 has the following block data: {crafting_ticks_remaining: 0, triggered: 0, x: 112, disabled_slots: [I;], y: 100, Items: [{count: 1, Slot: 0b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 1b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 3b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 4b, id: \"farmstorm:puffed_wheat\"}, {count: 1, Slot: 8b, id: \"farmstorm:puffed_wheat\"}], z: 100, id: \"minecraft:crafter\"}\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 113 100 100 minecraft:redstone_block
+    "Changed the block at 113, 100, 100\n"
+> setblock 113 100 100 minecraft:air
+    "Changed the block at 113, 100, 100\n"
+> data get entity @e[type=minecraft:item,limit=1]
+    "No entity was found\n"
+> execute if entity @e[type=minecraft:item]
+    "Test failed\n"
+  [PASS] E：无任何 item 实体
+
+## F. 附加：4 个膨胀麦堆在同一格（container.4 一叠 4 个）→ 无产物
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 104 100 104 minecraft:air
+    "Could not set the block\n"
+> setblock 104 100 104 minecraft:crafter[crafting=true]
+    "Changed the block at 104, 100, 104\n"
+> item replace block 104 100 104 container.4 with farmstorm:puffed_wheat 4
+    "Replaced a slot at 104, 100, 104 with [Puffed Wheat]\n"
+> data get block 104 100 104
+    "104, 100, 104 has the following block data: {crafting_ticks_remaining: 0, triggered: 0, x: 104, disabled_slots: [I;], y: 100, Items: [{count: 4, Slot: 4b, id: \"farmstorm:puffed_wheat\"}], z: 104, id: \"minecraft:crafter\"}\n"
+> setblock 105 100 104 minecraft:redstone_block
+    "Changed the block at 105, 100, 104\n"
+> setblock 105 100 104 minecraft:air
+    "Changed the block at 105, 100, 104\n"
+> data get entity @e[type=minecraft:item,limit=1]
+    "No entity was found\n"
+> execute if entity @e[type=minecraft:item]
+    "Test failed\n"
+  [PASS] F：无任何 item 实体
+
+## G. 收尾：清场
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> fill 96 96 96 112 112 112 minecraft:air
+    "Successfully filled 5 block(s)\n"
+
+### 全部断言通过 (0 FAIL)

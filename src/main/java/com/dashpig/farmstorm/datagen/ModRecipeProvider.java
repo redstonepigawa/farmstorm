@@ -13,6 +13,7 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +24,8 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 /**
- * 21 条农产品转换配方（TECH §6.7 / D-11 / D-12）+ 1 条转换器合成配方（D-52 / F-71）。
+ * 21 条农产品转换配方（TECH §6.7 / D-11 / D-12）+ 1 条转换器合成配方（D-52 / F-71）
+ * + 1 条压缩膨胀麦无序合成配方（D-67 / F-72）。
  *
  * <p>转换配方全部共用自定义类型 {@code farmstorm:converting}，字段口径见 {@link ConverterRecipe} 的
  * 7 个分量。一条双向配方同时覆盖「原版 → 改良」与「改良 → 原版」（D-11）；
@@ -55,6 +57,8 @@ public final class ModRecipeProvider extends RecipeProvider {
     protected void buildRecipes(RecipeOutput recipeOutput) {
         // 转换器没有配方就拿不到，21 条转换配方也无从用起（D-52：本条是首条合成配方）
         converter(recipeOutput);
+        // 压缩膨胀麦是二级合成物，原料就是膨胀麦（D-67）：先给出获得途径，转换配方表照旧不动
+        compressedPuffedWheat(recipeOutput);
         // 1-8：作物本体双向
         twoWay(recipeOutput, "puffed_wheat", Items.WHEAT, FarmstormItems.PUFFED_WHEAT);
         twoWay(recipeOutput, "blast_carrot", Items.CARROT, FarmstormItems.BLAST_CARROT);
@@ -102,6 +106,22 @@ public final class ModRecipeProvider extends RecipeProvider {
                 .pattern("FFF")
                 .unlockedBy("has_converter_fuel", has(FarmstormTags.CONVERTER_FUEL))
                 .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("converter"));
+    }
+
+    /**
+     * D-67 / DESIGN §2.4：无序合成，任意位置 4 个 {@code farmstorm:puffed_wheat} → 1 个
+     * {@code farmstorm:compressed_puffed_wheat}。
+     *
+     * <p>四份同物品原料逐个 {@code requires}，落盘就是 4 组同一物品的 {@code ingredients}；
+     * 判定按「恰好 4 个」走，同一个格子堆 4 个或放 3 / 5 个都不匹配。
+     *
+     * <p>同样剥掉配方解锁进度（{@link #recipeWithoutAdvancement}）：本 Provider 只产配方 JSON。
+     */
+    private static void compressedPuffedWheat(RecipeOutput recipeOutput) {
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, FarmstormItems.COMPRESSED_PUFFED_WHEAT.get())
+                .requires(FarmstormItems.PUFFED_WHEAT.get(), 4)
+                .unlockedBy("has_puffed_wheat", has(FarmstormItems.PUFFED_WHEAT.get()))
+                .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("compressed_puffed_wheat"));
     }
 
     /**

@@ -130,10 +130,44 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 
 **服务端**：`gw.cmd runServer -PfsRunDir=run-xxx` → 起好后用 RCON 下命令（`run-xxx/server.properties` 里开 `enable-rcon`）。验收世界状态用 `execute if block ...`，比读日志可靠。
 
-**客户端**（渲染/界面问题只能这样验证）：`gw.cmd runClient -PfsRunDir=run-xxx`。进世界有两种办法，注意 `--quickPlaySingleplayer` 在本仓库**不生效**（会卡在无障碍引导页）：
-- 连本机服务端：init script 往 `build/moddev/clientRunProgramArgs.txt` 追加 `--quickPlayMultiplayer 127.0.0.1:25565`（**不要用 `--args`**，会被 devlaunch 当主类）；
-- 进存档：临时客户端钩子调 `Minecraft#createWorldOpenFlows().openWorld(...)`；
-- 截图：`Screenshot.takeScreenshot(...)`，产出图能直接看，别用"应该没问题"结案。
+**客户端**（渲染/界面问题只能这样验证）：`gw.cmd runClient -PfsRunDir=run-xxx`。
+
+#### ⚠️ 先记住这条：主菜单不写日志，**别把静默当卡死**
+
+客户端初始化到 `Loaded 0 entity animations` 之后就**不再输出任何日志**——那不是卡住，是**已经停在标题画面**了。
+v0.0.2 施工期有两次因此误判「客户端进不去世界」，各浪费了半小时。判定方法只有两种：
+
+```powershell
+# 1) 看窗口标题：在主菜单是 "Minecraft NeoForge* 1.21.1"，进世界后会变成 "… - Multiplayer (3rd-party Server)"
+Get-Process java | Where-Object { $_.MainWindowTitle } | Select-Object Id, MainWindowTitle
+
+# 2) jstack 在本仓库被沙箱拒绝（"拒绝访问"），不要指望线程栈。
+```
+
+#### 进世界的正确做法（已实测，2026-10-29）
+
+1. **先起一台服务端**，记下端口（`run-xxx/server.properties` 的 `server-port`，`online-mode=false`）。
+2. 用 init script 把 quickPlay 参数塞进 MDG 生成的 argfile——`.work/client-quickplay.gradle` 就是现成的：
+
+   ```powershell
+   $env:FS_QUICKPLAY_PORT = "25608"
+   cmd /c ""D:\project_farm\.tools\gw.cmd" runClient -PfsRunDir=run-client `
+        --init-script "D:\project_farm\.work\client-quickplay.gradle" --console=plain"
+   ```
+
+   **不要用 `--args`**（会被 devlaunch 当主类吃掉）；参数只能写进 `build/moddev/clientRunProgramArgs.txt`，
+   而该文件由 MDG 每次生成，所以必须在 `runClient.doFirst` 里追加。跑完记得把那一段清掉，否则污染下一个人。
+3. 成功的标志（客户端与服务端各一行）：
+
+   ```
+   [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to 127.0.0.1, 25608
+   [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+   ```
+
+4. `--quickPlaySingleplayer` 在本仓库**不生效**（会卡在无障碍引导页，需 `options.txt` 里 `onboardAccessibility:false`）；进存档只能靠临时钩子调 `Minecraft#createWorldOpenFlows().openWorld(...)`。
+5. 截图：`Screenshot.takeScreenshot(...)`，产出图能直接看，别用「应该没问题」结案。
+
+> 一次完整往返（起服 → 客户端进世界 → 截图 → 关掉）约 3 分钟。**收尾务必 kill 客户端 java，并在服务端侧 `stop`**——留下进程会让下一个任务的 `runserver.lock` 或端口冲突。
 
 **临时探针规则**：验证完必须删干净——源码、`build/classes`、jar 三处都不能留 `*Probe*`；日志里不要留高频 `LOGGER.info`。
 

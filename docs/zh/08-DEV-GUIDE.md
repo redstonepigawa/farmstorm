@@ -188,8 +188,10 @@ Get-Process java | Where-Object { $_.MainWindowTitle } | Select-Object Id, MainW
 
 | 现象 | 原因 | 处置 |
 |---|---|---|
-| 客户端日志 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3 | 自定义配方类型 `farmstorm:converting` 没有对应的配方书分类 | **只影响配方书的分组显示**，不影响配方可用性与转换器本身；登记进 README 的已知限制，F-99 出口验收一并处理（V-63） |
 | 相位 2 期间鼠标转视角只降速、不锁死 | `CalculatePlayerTurnEvent#setMouseSensitivity(0)` 后系数仍为 0.2（慢约 15.6 倍），无 Mixin 归不了零 | 已知限制，验收按「转速降至约 1/15.6」记（V-31） |
+| 1×1 石柱构型的相位 2 落地时长偏短（约 23 刻） | 漂浮段的横向漂移把玩家挪出柱顶，下坠中途被自己站的柱子截住；≥3×3 台面是 40 ± 2 刻 | 真实几何结果，不作缺陷；验收用的「高台」指 ≥3×3 台面（V-46） |
+
+> `Unknown recipe category: farmstorm:convert`（`WARN ClientRecipeBook` ×3）**已由 `client/ConverterRecipeBookCategory` 修掉**（走 `RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder`，V-67），**不再列为已知限制**。
 
 ## 9. 提交与发版
 

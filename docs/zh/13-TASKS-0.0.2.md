@@ -611,7 +611,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 #### F-99 · 四项计数核对、三模式回归与打包
 
-> **已知外观缺陷**：客户端日志 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3——自定义配方类型 `farmstorm:converting` 没有配方书分类，**只影响配方书分组**。本轮不修，写进 README 的「已知限制」，在本任务出口验收时一并确认（V-63）。
+> **已修（V-67）**：自定义配方类型 `farmstorm:converting` 通过 `RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder` 注册配方书分类（`client/ConverterRecipeBookCategory`），客户端不再报 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert`。出口验收时确认日志不再出现该 WARN；README 的「已知限制」里也不列它。
 
 - **复杂度**：L ｜ **折算人日**：3.0
 - **依赖**：F-75、F-85、F-93、F-94、F-96、F-97

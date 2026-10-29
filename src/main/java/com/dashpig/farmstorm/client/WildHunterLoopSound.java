@@ -40,11 +40,20 @@ public final class WildHunterLoopSound extends AbstractTickableSoundInstance {
         this.relative = self;
         this.selfSourced = self;
         Farmstorm.LOGGER.info("狂野猎人 循环音 实例 {} relative={}", owner.getScoreboardName(), self);
-        // 距离衰减交给音频引擎（sounds.json 已声明 attenuation_distance: 16），不再每刻手写 volume。
-        this.attenuation = SoundInstance.Attenuation.LINEAR;
         this.volume = 1.0F;
         this.pitch = 1.0F;
-        syncPosition();
+        if (self) {
+            // relative 声源的坐标是**相对听者的偏移**，不是世界坐标：必须归零，
+            // 且不能再叠 LINEAR 衰减，否则源被丢到几百格外 → 增益归零 → 完全没声音。
+            this.attenuation = SoundInstance.Attenuation.NONE;
+            this.x = 0.0;
+            this.y = 0.0;
+            this.z = 0.0;
+        } else {
+            // 别人的光环：世界坐标 + 引擎按 sounds.json 的 attenuation_distance: 16 衰减。
+            this.attenuation = SoundInstance.Attenuation.LINEAR;
+            syncPosition();
+        }
     }
 
     /** 每客户端刻：给效果在身的玩家各维持一条实例，并按 16 格衰减算音量。 */

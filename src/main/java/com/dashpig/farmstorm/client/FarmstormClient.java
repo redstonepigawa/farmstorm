@@ -14,6 +14,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
@@ -69,6 +71,21 @@ public final class FarmstormClient {
     @SubscribeEvent
     public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
         WildHunterClientHooks.onRenderLivingPost(event);
+    }
+
+    /**
+     * 剪影要在灰度**之后**画，否则会被后处理一起灰掉（V-57）。
+     * 灰度由原版 PostChain 在世界渲染结束后执行（{@code GameRenderer:1027}），所以：
+     * 世界阶段只负责**捕获**投影/相机/modelview（AFTER_ENTITIES），真正重画发生在 GUI 阶段。
+     */
+    @SubscribeEvent
+    public static void onRenderStage(RenderLevelStageEvent event) {
+        WildHunterOutline.onRenderStage(event);
+    }
+
+    @SubscribeEvent
+    public static void onRenderGuiPre(RenderGuiEvent.Pre event) {
+        WildHunterOutline.onRenderGuiPre();
     }
 
     /**

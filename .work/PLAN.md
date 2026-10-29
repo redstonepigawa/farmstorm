@@ -194,3 +194,12 @@ DESIGN §7.6 L1053 原文：陷阱与炮台只锁定**非己方且非创造模�
 | R-55 | 蘑菇落地特效用 `ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, r,g,b)` | **采纳**（1.21.1 已无 `EntityEffectParticleOption`）。红 `0xC03030`×32 + SMOKE×12、棕 `0x8B5A2B`×28 + SMOKE×10，扩散半径复用各自 `radius` config（改半径特效随动），粒子数为内部常量，**未新增 config 键**（117 保持）。 |
 
 **教训登记**：FIX-6 的探针日志里其实已经写着「胡罗贝 0.94 / 1.00」伤害，调度者当时按「伤害生效」放行，没有拿它跟 `maxDamage = 7` 核对——同一个数字既是「生效」的证据也是「退化」的证据。今后所有伤害类验收必须**同时给出实测值与 config 上限的比对**。
+## 20. v0.0.2 施工期裁决（2026-10-29 起）
+
+> 0.0.2 的决策记录是 `docs/zh/10-DECISIONS-0.0.2.md`（D-49~D-79）与 `13-TASKS-0.0.2.md` §0.4（A-01~A-09）。
+> 本节只记**这二者没有覆盖、施工时新冒出来**的问题。累积几条后再统一回写文档，避免每发现一条就动一轮中英同步。
+
+| 编号 | 冲突 | 裁决 |
+|---|---|---|
+| V-01 | `12-TECH §3.1` 要求 `ZANGIEF_CANE` 档案的 `kind = DeployedKind.ZANGIEF_CANE`，但该枚举值是 **F-63** 的交付物，而 F-63 依赖 F-62 —— F-62 施工时该值不存在，引用即编译不过 | **F-62 先留 `kind = null`**（`CropProfile` 的 `kind` 本就是 `@Nullable`，`melon_slice_bomb` 是先例），并在常量 javadoc 写明「待 F-63 回填」；`type` 仍是 `DEPLOYABLE`，故自检「部署型 6」不受影响。**F-63 必须同时回填 `CropProfile.ZANGIEF_CANE` 的 `kind` 字段**——否则 F-65 注册部署方块时 `DeployedCropBlock:60` 的 `byKind(...)` 会抛 `IllegalArgumentException`（已核实该调用链）。 |
+| V-02 | `LUCKY_BERRY_POOL` 在 F-62 就变成 16 条，含 `molotov` / `zangief_cane`，但这两件的物品要到 **F-65** 才注册 | **接受这个过渡窗口**（F-62 → F-65 之间没有可分发的产物）。`LuckyBerryRoller:176` 的 `FarmstormItems.forProfile(profile).get()` 在 F-65 之前若被掷中会抛异常。**F-65 的验收追加一条**：16 条池逐项 `forProfile(p).get()` 不抛异常，且掷一次幸运浆果的「生成随机作物」分支能正常产出。 |

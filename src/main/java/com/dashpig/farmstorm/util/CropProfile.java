@@ -83,15 +83,43 @@ public record CropProfile(
     public static final CropProfile LUCKY_BERRY = crop("lucky_berry", "lucky_berry_bush", "lucky_berry",
             CropCategory.BUFF);
 
-    /** DEC §4 的 15 条，顺序即 00-DECISIONS §4 的行号。 */
+    /** D-51：莫洛托夫不可种植，作物方块与播种物为空（先例瓜片子）；撒火与撒岩浆块都是写世界，故 DAMAGE + CONSTRUCTION。 */
+    public static final CropProfile MOLOTOV = new CropProfile(
+            Farmstorm.id("molotov"), CropType.THROWABLE,
+            categorySet(CropCategory.DAMAGE, CropCategory.CONSTRUCTION),
+            null, null, null, Set.of(), THROWABLE_STACK_TIER);
+    /**
+     * D-51：桑吉尔蔗不可种植，作物方块与播种物为空；纯 TRAP，没有 DAMAGE 标签。
+     * kind 暂为 null：{@code DeployedKind.ZANGIEF_CANE} 由 F-63 加入；F-63 必须回填本字段，
+     * 否则 F-65 的 {@link #byKind(DeployedKind)} 会抛 {@code IllegalArgumentException}。
+     */
+    public static final CropProfile ZANGIEF_CANE = new CropProfile(
+            Farmstorm.id("zangief_cane"), CropType.DEPLOYABLE,
+            categorySet(CropCategory.TRAP),
+            null, null, null, Set.of(AttachFace.FLOOR), OTHER_STACK_TIER);
+    /** D-51：狂野苹果不可种植，作物方块与播种物为空；食用型、纯 BUFF。 */
+    public static final CropProfile WILD_APPLE = new CropProfile(
+            Farmstorm.id("wild_apple"), CropType.EDIBLE,
+            categorySet(CropCategory.BUFF),
+            null, null, null, Set.of(), OTHER_STACK_TIER);
+    /** D-56：压缩膨胀麦是「二级合成物」而非改良农作物，作物方块与播种物为空；纯 CONSTRUCTION。 */
+    public static final CropProfile COMPRESSED_PUFFED_WHEAT = new CropProfile(
+            Farmstorm.id("compressed_puffed_wheat"), CropType.THROWABLE,
+            categorySet(CropCategory.CONSTRUCTION),
+            null, null, null, Set.of(), THROWABLE_STACK_TIER);
+
+    /** DEC §4 的 19 条，顺序即 00-DECISIONS §4 的行号。 */
     public static final List<CropProfile> ALL = List.of(
             PUFFED_WHEAT, BLAST_CARROT, UBI_SERVER, TOXIC_UBI_SERVER, POWER_BEET,
             MELON_SLICE_BOMB, MELON_GRENADE, PUMPKIN_TURRET, AWAKENED_TORCHFLOWER, AWAKENED_PITCHER_PLANT,
-            FANG_TRAP_CACTUS, BAMBOO_FIRECRACKER, RED_MUSHROOM_PUFF, BROWN_MUSHROOM_PUFF, LUCKY_BERRY);
+            FANG_TRAP_CACTUS, BAMBOO_FIRECRACKER, RED_MUSHROOM_PUFF, BROWN_MUSHROOM_PUFF, LUCKY_BERRY,
+            MOLOTOV, ZANGIEF_CANE, WILD_APPLE, COMPRESSED_PUFFED_WHEAT);
 
-    /** D-17：幸运浆果的随机池是「除幸运浆果外的 14 种」。 */
+    /** D-55 + D-56：19 条里排除 lucky_berry、wild_apple、compressed_puffed_wheat → 16 条。 */
     public static final List<CropProfile> LUCKY_BERRY_POOL = ALL.stream()
             .filter(profile -> profile != LUCKY_BERRY)
+            .filter(profile -> profile != WILD_APPLE)
+            .filter(profile -> profile != COMPRESSED_PUFFED_WHEAT)
             .toList();
 
     private static final Map<ResourceLocation, CropProfile> BY_ID = ALL.stream()

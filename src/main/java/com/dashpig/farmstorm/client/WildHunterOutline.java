@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.client;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.client.Minecraft;
@@ -49,6 +50,19 @@ public final class WildHunterOutline {
 
     private WildHunterOutline() {}
 
+    /**
+     * 只把**模型本体那一类**的 RenderType 换成红色单色类型，其余原样放行。
+     * <p>必须按顶点格式过滤：拴绳（{@code RenderType.LEASH}）用
+     * {@code DefaultVertexFormat.POSITION_COLOR_LIGHTMAP}，没有 UV0/UV1/Normal；
+     * 把它塞进 entity 格式的缓冲区会在 {@code BufferBuilder.endLastVertex} 抛
+     * {@code IllegalStateException: Missing elements in vertex}，客户端直接崩（v0.0.2 实测崩过两次）。
+     */
+    private static MultiBufferSource shellSource(MultiBufferSource buffers) {
+        return type -> type.format() == DefaultVertexFormat.NEW_ENTITY
+                ? buffers.getBuffer(RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE))
+                : buffers.getBuffer(type);
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
         if (rendering || !WildHunterClientState.active()) {
@@ -76,7 +90,7 @@ public final class WildHunterOutline {
         }
         LivingEntityRenderer renderer = (LivingEntityRenderer) event.getRenderer();
         PoseStack poseStack = event.getPoseStack();
-        MultiBufferSource shell = type -> buffers.getBuffer(RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE));
+        MultiBufferSource shell = shellSource(buffers);
         float yaw = Mth.lerp(event.getPartialTick(), entity.yRotO, entity.getYRot());
         rendering = true;
         try {
@@ -141,8 +155,7 @@ public final class WildHunterOutline {
                 poseStack.scale(OUTLINE_SCALE, OUTLINE_SCALE, OUTLINE_SCALE);
                 LivingEntityRenderer renderer =
                         (LivingEntityRenderer) minecraft.getEntityRenderDispatcher().getRenderer(entity);
-                MultiBufferSource shell =
-                        type -> buffers.getBuffer(RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE));
+                MultiBufferSource shell = shellSource(buffers);
                 float yaw = Mth.lerp(capturedPartialTick, entity.yRotO, entity.getYRot());
                 renderer.render(entity, yaw, capturedPartialTick, poseStack, shell, LightTexture.FULL_BRIGHT);
             }

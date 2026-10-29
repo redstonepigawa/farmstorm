@@ -41,14 +41,14 @@ BRIEF §4.2 requires this document to produce three mutually consistent numbers.
 
 | Inventory | Subsection | Inventory rows | BRIEF §4.1 existing stock | New total |
 |---|---|---|---|---|
-| New resource files | §7.2 | **36** | 262 | **298** |
-| New language file keys | §7.3 | **39** | 222 | **261** |
+| New resource files | §7.2 | **36** | 262 | **302** |
+| New language file keys | §7.3 | **39** | 222 | **263** |
 | New config keys | §8.1 | **22** | 117 | **139** |
 
 Two hard checks (pinned from both sides by `runData` and by the startup log during implementation):
 
-- The number of new `farmstorm.configuration.*` language keys, **22**, equals the number of table rows in §8.1, **22**; the key sets of `zh_cn` and `en_us` must be character-for-character equal (`222 + 39 = 261`, both files 261).
-- Total resource files = 262 before the migration + 36 = **298**; split by category = JSON 169+24=193, PNG 91+8=99, OGG 0+2=2, GLSL 0+2=2, TOML 1, `pack.mcmeta` 1 → 193+99+2+2+1+1 = 298.
+- The number of new `farmstorm.configuration.*` language keys, **22**, equals the number of table rows in §8.1, **22**; the key sets of `zh_cn` and `en_us` must be character-for-character equal (`222 + 39 = 263`, both files 263).
+- Total resource files = **265** before the migration + 37 = **302**; split by category = JSON 169+26=195, PNG 92+8=100, OGG 2, GLSL 0+3=3, TOML 1, `pack.mcmeta` 1 → 195+100+2+3+1+1 = 302. The §7.2 list has 40 rows and **all 40 have landed** (the 3 advancements were delivered by F-98); 3 rows (2 `.ogg` files + `textures/mob_effect/wild_hunter.png`) were already in the repository at the 0.0.2 baseline, so `git diff` shows +37.
 
 ### 0.4 Numeric conventions (copied from BRIEF §4)
 
@@ -94,7 +94,7 @@ D-50 only stipulates "route it through a hidden MobEffect" and does not name whi
 
 | Intrusive effect | MobEffect that carries it | Criterion | Basis |
 |---|---|---|---|
-| Full-screen grayscale (including GUI) | `farmstorm:wild_hunter` | on whenever the effect is present | D-61 + `plan0.0.2.txt` line 40 |
+| World-only grayscale (the HUD keeps its original colours) | `farmstorm:wild_hunter` | on whenever the effect is present | D-61 (scope changed by V-56) + `plan0.0.2.txt` line 40 |
 | Red silhouette | `farmstorm:wild_hunter` | on whenever the effect is present | D-62 + same as above |
 | Camera flip / spin / input lock | `farmstorm:zangief_piledriver` | amplifier 0/1/2, all three phases are inside the lock window | D-59 / D-60 / D-70 + `plan0.0.2.txt` line 29 |
 
@@ -253,7 +253,7 @@ Every class gets five items: **responsibility / key methods / which config keys 
 | `ZangiefCaneTrap` | **new** | `TrapBehavior` implementation: spherical 1.5-block trigger | none |
 | `ZangiefPiledriverController` | **new** | server-side three-phase state machine | none |
 | `WildHunterCombat` | **new** | server-side target re-check, damage and knockback, kill extension | none |
-| `GrayscalePass` | **new** | client full-screen grayscale pass | none |
+| `GrayscalePass` | **new** | client world-only grayscale (vanilla `PostChain`, HUD excluded) | none |
 | `WildHunterOutline` | **new** | client red silhouette | none |
 | `InputLockHandler` | **new** | client input lock (5 events) | none |
 | `ZangiefCameraController` | **new** | client render-layer angles (roll / pitch / yaw) | none |
@@ -493,12 +493,12 @@ public class MolotovProjectile extends ThrownCropEntity {
 
 **The criteria of `scatter` (fixed one by one, so that implementation does not invent its own)**:
 
-1. Candidate set = the cells of `BlockPos.betweenClosed(center.offset(-r,-r,-r), center.offset(r,r,r))` that satisfy `center.distSqr(pos) <= r*r` (`r = molotov.effectRadius`, default 4.0 blocks → about 268 cells inside the sphere).
+1. Candidate set = the cells of `BlockPos.betweenClosed(center.offset(-r,-r,-r), center.offset(r,r,r))` that satisfy `center.distSqr(pos) <= r*r` (`r = molotov.effectRadius`, default 4.0 blocks → **257** cells inside the sphere). **The sphere centre is the integer block holding the landing point** (the value returned by `landingBlock`), and the distance is computed on integer offsets as `dx²+dy²+dz² ≤ r²`, never from the exact `landingVec` coordinate — otherwise 'how many cells are inside the sphere' has no definition (same wording in `11-DESIGN-0.0.2.md` §5.6).
 2. "The top surface of the cell touches air" = `level.getBlockState(pos).isSolidRender(...)` is true **and** `level.getBlockState(pos.above()).isAir()` is true. **Added by this document**: only "solid + air above" counts; pass-through blocks (grass, snow layers) are not accepted, which avoids the visual error of "placing fire on the grass of a block" instead of "placing fire on top of the grass block".
 3. Every candidate cell rolls **independently**: `float roll = level.random.nextFloat() * 100.0F; if (roll < fireChance) place fire else place magma block`. `fireChance = molotov.fireChance` (default 85.0 %) → the remaining 15 % is automatically magma block, a second key is not needed.
-4. The write position = **the air cell above** (`pos.above()`), always `level.setBlock(target, state, Block.UPDATE_ALL)`.
+4. The write position = **the air cell above** (`pos.above()`), always `level.setBlock(target, state, Block.UPDATE_CLIENTS)`. **Why not `UPDATE_ALL`**: `LevelChunk#setBlockState:283` calls `onPlace` **unconditionally** (gated only on `!isClientSide`), so fire still ticks and spreads; `markAndNotifyBlock:269` is what gates the neighbour update (`blockUpdated`) on `flags & 1`, and `UPDATE_CLIENTS` skips exactly that, avoiding redstone / fluid / gravity chains triggered by magma blocks or fire. `updateNeighbourShapes` still runs (shape updates when a support disappears), which is what we want.
 5. Nothing is replaced and nothing is destroyed: not one byte of `pos` itself is touched; the original block drops nothing and emits no particle.
-6. The write ceiling of a single throw = the number of candidate cells in the sphere (≈268), with no separate circuit breaker — 268 `setBlock` calls in the same tick is an acceptable magnitude (compare v0.0.1's Puffed Wheat wet state, 5×5×5 = 125 per throw).
+6. The write ceiling of a single throw = the number of candidate cells in the sphere (257), with no separate circuit breaker — 257 `setBlock` calls in the same tick is an acceptable magnitude (compare v0.0.1's Puffed Wheat wet state, 5×5×5 = 125 per throw).
 
 **Why a power-0 explosion**: D-58's original text is "the landing point triggers a power-0 explosion, and that explosion serves only as the landing-point trigger". At power 0 the vanilla damage formula degenerates (radius 0, no entity enters), and `damageCap = 0` skips our damage section outright — **two** no-ops; at the same time the `ExplosionEvent.Start` hook is preserved, so land-claim / protection mods still get a chance to veto it (consistent with v0.0.1's `FarmstormExplosion#detonate`).
 
@@ -675,7 +675,7 @@ How to verify during implementation: the log line `桑吉尔蔗 落地耗时 {} 
 
 | Method | Rule | Basis |
 |---|---|---|
-| `selectTarget(ServerPlayer)` | candidates = `LivingEntity` within `wild_hunter.searchRadius` (5.0 blocks) of the player as sphere center, with an angle of at most `wild_hunter.searchAngleDegrees` (30.0°) to the view direction; exclude self, same-team players (`player.isAlliedTo(other)`), spectators | D-64 |
+| `resolveTarget(Player)` | candidates = `LivingEntity` within `wild_hunter.searchRadius` (5.0 blocks) of the player as sphere center, with an angle of at most `wild_hunter.searchAngleDegrees` (30.0°) to the view direction; exclude self, same-team players (`player.isAlliedTo(other)`), spectators | D-64 |
 | Ordering | smallest angle first; on equal angles the nearer one (`Comparator.comparingDouble(angle).thenComparingDouble(distSqr)`) | D-64 |
 | `onSwing(ServerPlayer)` | hooking `PlayerInteractEvent.LeftClickEmpty` is not enough (that covers empty swings only); the real entry is the server-side handling path of `ServerboundSwingPacket` ⇒ re-check the target at the **server-side settlement point** of `PlayerEvent` / the vanilla attack flow; on a hit, settle damage with the player's own attack power | D-65 + BRIEF §7.6 |
 | Knockback | on a successful hit, call `target.knockback(0.4, dx, dz)` with the vanilla default strength; no custom value | D-75 |
@@ -684,7 +684,7 @@ How to verify during implementation: the log line `桑吉尔蔗 落地耗时 {} 
 
 **How the "attack damage" item lands**: D-75 only says knockback uses the vanilla default strength and gives no extra damage number. The rule here: **the attraction itself deals no damage**; damage comes from the player's own ordinary attack (through vanilla `Player#attack`), so no key such as `wild_hunter.attackDamage` is needed. The `attackDamageBonusPercent` attribute (+40 %) is provided by the `MobEffect` of §3.5 and is a bonus of the effect itself, unrelated to the attraction.
 
-**Key point: the server computes independently and does not listen to the client**. BRIEF §7.6's original text is "the client, when 'the attack key is pressed locally + the player has the effect + a legal target is computed locally', immediately gives velocity toward the target, and the server, on receiving `ServerboundSwingPacket`, independently runs the same deterministic algorithm to compute the target and settle damage and knockback". "The same" means: there is **only one copy** of the `selectTarget` code, and both client and server call it, except that the client copy runs on `ClientLevel` (it must be generic over `Level` or take a `LivingEntity` list; `ServerLevel` must not be hard-coded).
+**Key point: the server computes independently and does not listen to the client**. BRIEF §7.6's original text is "the client, when 'the attack key is pressed locally + the player has the effect + a legal target is computed locally', immediately gives velocity toward the target, and the server, on receiving `ServerboundSwingPacket`, independently runs the same deterministic algorithm to compute the target and settle damage and knockback". "The same" means: there is **only one copy** of the `resolveTarget` code, and both client and server call it, except that the client copy runs on `ClientLevel` (it must be generic over `Level` or take a `LivingEntity` list; `ServerLevel` must not be hard-coded).
 
 **Which config keys it reads**: `wild_hunter.searchRadius`, `wild_hunter.searchAngleDegrees`, `wild_hunter.killExtensionTicks`, `wild_hunter.killHealPoints`, `wild_hunter.dashTicks`.
 **Which registry objects it writes**: none.
@@ -695,7 +695,7 @@ Client code lives only under the `client/` package and **must** enter through th
 
 | Class | Responsibility | Key methods / mount point | Which config keys it reads | Which registry objects it writes |
 |---|---|---|---|---|
-| `GrayscalePass` | full-screen grayscale (including GUI) | `RegisterShadersEvent` registers the `ShaderInstance`; `RenderGuiEvent.Post` runs the pass | none | none |
+| `GrayscalePass` | world-only grayscale (the HUD keeps its original colours) | `GameRenderer#loadEffect` / `shutdownEffect` load the vanilla `PostChain`, switched per client tick according to whether the effect is present | none | none |
 | `WildHunterOutline` | red silhouette | `RenderLivingEvent.Post` → `getModel().renderToBuffer(...)` | none | none |
 | `InputLockHandler` | keyboard and mouse lock (ESC only) | 5 events, see §4.3 | none | none |
 | `ZangiefCameraController` | render-layer roll / pitch / yaw | `ViewportEvent.ComputeCameraAngles` | `zangief_cane.spinDegreesPerTick` (used only for the spin accumulator; **the client cannot read the server config, see the degradation rule in §4.4**) | none |
@@ -752,41 +752,43 @@ This section expands BRIEF §7.1–§7.3 into an implementable plan. **Not a sin
 
 The shared premise of all three (not written in BRIEF, derived in §0.6): **the source of state is always the effect on the player itself**. The client does not ask the server, does not cache server messages and adds no packet.
 
-### 4.1 Grayscale (D-61, full screen including GUI) → RT-10
+### 4.1 Grayscale (D-61 as settled by V-56: world-only grayscale, the HUD keeps its original colours) → RT-10
 
 **Trigger condition**: `farmstorm:wild_hunter` is present on the local player (§0.6). The "present / absent" of the effect is decided by the `MobEffectInstance` delivered by vanilla `ClientboundUpdateMobEffectPacket`, read once per tick by the client.
 
-**Preferred option (not to be swapped)**:
+**Preferred option (settled after V-48 / V-49 / V-55 / V-56)**:
 
-1. In `RegisterShadersEvent` (mod bus), register a custom `ShaderInstance` whose program lives in `assets/farmstorm/shaders/core/grayscale.json + grayscale.vsh + grayscale.fsh`.
-2. In `RenderGuiEvent.Post`, run one full-screen pass against `Minecraft.getInstance().getMainRenderTarget()`.
+1. **Go through the vanilla `PostChain`**: `Minecraft#gameRenderer#loadEffect(Farmstorm.id("shaders/post/grayscale.json"))` to load, `shutdownEffect()` to unload. Target management, attribute binding and ping-pong are all handled by the framework; this mod touches no GL state.
+2. Switch once per client tick according to "is the effect present" (`ClientTickEvent.Post` → `GrayscalePass.tick()`), and **shut down only the chain we loaded ourselves**: when `gameRenderer.currentEffect()` is non-null (the vanilla creeper / spider chain is running) we do not steal it.
+3. The chain has exactly two passes: `farmstorm:grayscale` (`minecraft:main` → `swap`) and `blit` (`swap` → `minecraft:main`); the program declaration lives in `shaders/program/grayscale.json` (vertex `minecraft:blit` + fragment `farmstorm:grayscale`).
 
-Why `RenderGuiEvent.Post` (BRIEF §7.1, verbatim): it fires after the GUI and before the frame goes to the screen, so one pass covers both the world and the GUI at once, satisfying D-61's "full-screen grayscale, not just a faded world".
+**Why the "hand-written screen-filling pass inside `RenderGuiEvent.Post`" option was dropped** (the original BRIEF §7.1 plan):
+
+- Binding a target and then sampling **the render target you are writing to** gives undefined read/write feedback — the measured symptom in v0.0.2 was exactly "grey at the wrong moment" (the frame right after `/effect clear` turned dark and grey again).
+- Making it work requires blitting to a temporary RT first and then sampling, i.e. hand-writing the whole GL state and the target lifecycle; with the official `PostChain` the framework covers all of it.
+- The price is stated in the next item: `PostChain.process()` runs at `GameRenderer:1027` (after `renderLevel`) and before GUI rendering (`GameRenderer:1073`), so it greys **the world only, not the HUD**. D-61 therefore changed scope per V-56 to "world-only grayscale, the HUD keeps its original colours"; including the GUI would mean taking over the framebuffer, which is out of scope for this version in the same way D-50 is.
 
 ```java
-// client/render/GrayscalePass.java (skeleton; signatures per 1.21.1)
-private static ShaderInstance shader;                       // assigned in RegisterShadersEvent
+// client/GrayscalePass.java (skeleton; signatures per 1.21.1)
+private static final ResourceLocation EFFECT = Farmstorm.id("shaders/post/grayscale.json");
+private static boolean loaded;                              // shut down only the chain we loaded
 
-@SubscribeEvent
-public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
-    event.registerShader(new ShaderInstance(event.getResourceProvider(),
-            Farmstorm.id("grayscale"), DefaultVertexFormat.POSITION_TEX), s -> shader = s);
-}
-
-@SubscribeEvent
-public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-    if (!WildHunterClientState.active() || shader == null) return;   // outside the effect: zero cost, not even the target is touched
-    Minecraft mc = Minecraft.getInstance();
-    RenderTarget main = mc.getMainRenderTarget();
-    main.bindWrite(true);                                            // switch to the main target
-    RenderSystem.setShader(() -> shader);
-    RenderSystem.setShaderTexture(0, main.getColorTextureId());      // sample the previous frame's own result
-    blitFullScreenQuad();                                            // draw one screen-filling quad
-    mc.getMainRenderTarget().bindWrite(true);                        // restore
+public static void tick() {
+    Minecraft minecraft = Minecraft.getInstance();
+    boolean wanted = WildHunterClientState.active();
+    if (wanted && !loaded) {
+        if (minecraft.gameRenderer.currentEffect() == null) {   // do not steal the vanilla creeper / spider chain
+            minecraft.gameRenderer.loadEffect(EFFECT);
+            loaded = true;
+        }
+    } else if (!wanted && loaded) {
+        minecraft.gameRenderer.shutdownEffect();
+        loaded = false;
+    }
 }
 ```
 
-**Why the pass must return on the very first line when `active()` is false**: grayscale is an "abnormal state", not a permanent post-process. In the normal state it must cost nothing; otherwise every frame of every player runs a wasted full-screen pass, which is a server-wide frame-rate tax. `active()` is a client snapshot (see below), not a live effect query.
+**Why the switch must do nothing on the very first line when `active()` is false**: grayscale is an "abnormal state", not a permanent post-process. In the normal state it must cost nothing; otherwise every frame of every player pays for a wasted pass, which is a server-wide frame-rate tax. `active()` is a client snapshot (see below), not a live effect query.
 
 **What `WildHunterClientState` is**: `client/WildHunterClientState.java`, the client's state cache class. It has exactly one job — compute the few `wild_hunter` quantities that are "shared across subsystems and unreadable from the server config" once, so that the three hooks of §4.1 / §4.2 / §4.6 can read them directly:
 
@@ -798,21 +800,23 @@ public static void onRenderGuiPost(RenderGuiEvent.Post event) {
 
 Why mirror instead of reading the config: `FarmstormConfig` is `ModConfig.Type.SERVER`, readable by the client in single-player but not on a dedicated server. So `wild_hunter.highlightRadius` (§8.1 #15) and `wild_hunter.loopSoundRange` (§8.1 #16) are always returned by this class as **mirror constants** on the client, the same rule as the degradation convention of §4.4: changing a config default requires changing the mirror in step, otherwise the client lags (registered as a known deviation, not fixed — fixing it needs a new packet, violating D-50).
 
-**Resources and the two mounting forms**:
+**Resources and which file actually runs**:
 
 | File | Form | Who uses it | Note |
 |---|---|---|---|
-| `shaders/core/grayscale.json` | program declaration of the `ShaderInstance` | **preferred** (this section) | the json named by BRIEF §7.1 |
-| `shaders/core/grayscale.vsh` / `grayscale.fsh` | GLSL source | shared by both forms | BRIEF §3.2's "2 GLSL" are exactly these two files |
-| `post_effect/grayscale.json` | `PostChain` declaration | **the RT-10 degradation branch** | the +1 registered by BRIEF §3.2; uses the same pair of GLSL files, only the mounting differs |
+| `shaders/post/grayscale.json` | `PostChain` declaration (a `targets` array + two passes) | **the only one loaded at runtime** | this is what `GameRenderer#loadEffect` reads; `targets` must be an **array** (`PostChain.load:63` accepts nothing else), an object form is skipped wholesale and reports `Output target … does not exist` |
+| `shaders/program/grayscale.json` | shader program declaration (vertex `minecraft:blit`, fragment `farmstorm:grayscale`) | loaded at runtime by `PostChain` | 1.21 layout: program declarations live under `shaders/program/`, GLSL still under `shaders/core/` |
+| `shaders/core/grayscale.fsh` (+ the identical `shaders/program/grayscale.fsh`) | GLSL fragment shader: luminance from `0.299 / 0.587 / 0.114`, written back as `vec4(vec3(luminance), color.a)` | runtime (this is the branch the `fragment` names) | maps to the "2 GLSL" of BRIEF §3.2; the only difference between the two copies is the sampler name (`Sampler0` / `DiffuseSampler`), so change the luminance formula in both |
+| `shaders/core/grayscale.json` / `grayscale.vsh` | declaration and vertex shader of the earlier "`RegisterShadersEvent` + custom `ShaderInstance`" plan | **not loaded today** (`PostChain` uses `shaders/program/` + the vanilla `minecraft:blit`) | harmless to keep, but do not change only this pair and assume it took effect |
+| `post_effect/grayscale.json` | the new-style `post_effect` declaration | **RT-10's reserved mount point, no loader today** | NeoForge 21.1.213 ships only the vanilla `PostChain` / `PostPass`; the `post_effect/` directory has no registration entry point. The file is kept (it does not break the resource count) but **must not carry comments** — strict JSON, and `//` makes a future loader fail (V-49) |
 
-**Pending verification (BRIEF §7.1, verbatim)**: whether switching the render target during `RenderGuiEvent.Post` conflicts with other mods' GUI post-processing.
+**RT-10 conclusion (closed)**: the original "hand-written screen-filling pass in `RenderGuiEvent.Post`" plan is dropped in favour of the vanilla `PostChain` above. Three facts landed:
 
-- **How to verify**: install a mod that does GUI post-processing (or temporarily run your own pass a second time inside `RenderGuiEvent.Post`) → enter the effect → watch for "screen fully black / only half the screen gray / another mod's HUD disappears". At the same time look for GL errors such as `GL_INVALID_OPERATION` in the log (unrelated to `-Dmixin.debug`; read the `[Render thread/ERROR]` lines of `latest.log` directly).
-- **Verdict**: any of the above symptoms means "they fight"; take the degradation branch below.
-- **Degradation branch (given by BRIEF §7.1)**: run one world grayscale pass in the AFTER stage of `RenderLevelStageEvent` (after the world stage, before the GUI; the exact constant name is **pending verification, attached to RT-10**) plus one pass over the GUI region only in `RenderGuiEvent.Post`. The GLSL of the two passes is identical; only the mount point and the viewport change. If the world stage step does not hold either, fade the world only and register "the GUI is not grayed" as a degradation in the Release notes.
-- **RT attribution**: this pending item is attached to **RT-10** (the mount point of the full-screen grayscale post-process does not hold).
-- **There is one more API pending verification (attached to RT-01)**: whether the signature `RegisterShadersEvent#registerShader(ShaderInstance, Consumer<ShaderInstance>)` and the three-argument constructor `ShaderInstance(ResourceManager, ResourceLocation, VertexFormat)` still hold on 1.21.1 (1.21 changed the shader loading path, and `shaders/core/*.json` and `post_effect/*.json` now coexist). If the three-argument constructor does not hold, use a utility method of `Shaders` or switch to `PostChain` (§7.2 #15 in §6 already lists that resource, so no file has to be added when degrading).
+1. A hand-written pass would have to blit into a temporary RT and then sample, and would have to `bindWrite` the main target itself — `RenderTarget` is an **abstract class** in 1.21.1 and the usable implementation is `com.mojang.blaze3d.pipeline.TextureTarget` (copying the `RenderTarget` skeleton simply does not compile, V-49).
+2. The vanilla `PostChain` allocates targets by name, so no read/write feedback exists; `targets` written as an array is enough.
+3. Greying the world only is decided by where `process()` runs (`GameRenderer:1027` < GUI `GameRenderer:1073`), not by a config option — recorded in D-61 per V-56.
+
+**RT-01 note**: the `RegisterShadersEvent` / three-argument `ShaderInstance` API is no longer a dependency of this module (after switching to `PostChain` we register no custom `ShaderInstance`).
 
 **Forbidden (BRIEF §7.1, verbatim)**: counterfeiting grayscale with fog color or texture replacement. D-61 wants true grayscale — "fog color" only fades distance and "texture replacement" only changes block faces; neither can change the GUI, and neither can change entities or particles.
 
@@ -822,29 +826,60 @@ Why mirror instead of reading the config: `FarmstormConfig` is `ModConfig.Type.S
 
 **Preferred option (not to be swapped)**:
 
-1. Subscribe to `RenderLivingEvent.Post`.
-2. Take `LivingEntityRenderer#getModel()`.
-3. Draw it a second time with `Model#renderToBuffer` using `RenderType.entityTranslucentEmissive(whiteTexture)`.
-4. With `RenderSystem.setShaderColor(1.0F, 0.15F, 0.15F, 0.45F)`.
-5. The white 1×1 texture lives at `assets/farmstorm/textures/misc/white.png`.
-
+1. **Filter the `MultiBufferSource` by vertex format** instead of replacing it unconditionally: only `type.format() == DefaultVertexFormat.NEW_ENTITY` (body and armour layers) is swapped for `RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE)`, everything else is passed through with `buffers.getBuffer(type)`. A leash (`RenderType.LEASH`) uses `DefaultVertexFormat.POSITION_COLOR_LIGHTMAP` (position / colour / light only, no UV0 / UV1 / Normal); forcing it into an entity-format buffer throws `IllegalStateException: Missing elements in vertex` in `BufferBuilder.endLastVertex` and **kills the client outright** (measured twice in v0.0.2: `EntityRenderer.renderLeash` → the silhouette hook). Both call sites share one `shellSource(...)`.
+2. **Bake the colour into the texture**: `textures/misc/wild_hunter_red.png` is 1×1 RGBA **(255, 38, 38, 115)**, i.e. D-62's `(1, 0.15, 0.15)` with 0.45 alpha. `entityTranslucentEmissive`'s shader **deliberately ignores ColorModulator** (that is what emissive means), so `RenderSystem.setShaderColor` has no effect.
+3. **Redraw through `LivingEntityRenderer#render(...)`** (not `EntityRenderDispatcher#render`): the transform chain is executed by the renderer itself, so the geometry necessarily coincides with the body; scale by `1.008` to avoid z-fighting; keep a `rendering` re-entrancy guard, otherwise the inner `render` fires `RenderLivingEvent` again and recurses forever.
+4. **`RenderLivingEvent.Post` fires after `popPose()`** (`LivingEntityRenderer:137/139`), so the pose stack handed to the event is no longer the model frame — either `pushPose()` / `scale(...)` yourself, or build a fresh `PoseStack`.
+5. **Draw the silhouette after grayscale**: the chain runs at the end of the world pass (`GameRenderer:1027`), so a silhouette drawn in the world stage is greyed with the world. Do it in two stages — capture the projection / modelview / camera / `partialTick` in `RenderLevelStageEvent.Stage.AFTER_ENTITIES`, then in `RenderGuiEvent.Pre` restore those three, use a **fresh** `PoseStack` that only does a world translation (the camera rotation is already in the modelview; multiplying it a second time applies the rotation twice and draws the silhouette in the wrong place), and `endBatch()` after the loop.
 ```java
+// client/WildHunterOutline.java (skeleton; signatures per 1.21.1)
+// ① filter by vertex format: only the entity format is swapped for the red emissive type
+private static MultiBufferSource shellSource(MultiBufferSource buffers) {
+    return type -> type.format() == DefaultVertexFormat.NEW_ENTITY
+            ? buffers.getBuffer(RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE))
+            : buffers.getBuffer(type);
+}
+
+// ② the world stage only captures state (projection / modelview / camera are still correct at AFTER_ENTITIES)
 @SubscribeEvent
-public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
-    if (!WildHunterClientState.active()) return;
-    LivingEntity entity = event.getEntity();
-    LocalPlayer self = Minecraft.getInstance().player;
-    if (entity == self || entity.isSpectator() || self.isAlliedTo(entity)) return;
-    if (self.distanceToSqr(entity) > sq(WildHunterClientState.highlightRadius())) return;  // D-62: highlightRadius, default 64.0 blocks
-    if (!self.hasLineOfSight(entity)) return;                        // D-62: no block occlusion
-    var model = event.getRenderer().getModel();
-    var buffer = event.getMultiBufferSource().getBuffer(
-            RenderType.entityTranslucentEmissive(WHITE_TEXTURE));
-    RenderSystem.setShaderColor(1.0F, 0.15F, 0.15F, 0.45F);
-    model.renderToBuffer(event.getPoseStack(), buffer, event.getPackedLight(), OverlayTexture.NO_OVERLAY, -1);
-    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);            // must be reset, or later entities are tinted red
+public static void onRenderStage(RenderLevelStageEvent event) {
+    if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
+    capturedProjection = new Matrix4f(RenderSystem.getProjectionMatrix());
+    capturedModelView  = new Matrix4f(RenderSystem.getModelViewMatrix());
+    capturedCamera     = event.getCamera();
+}
+
+// ③ the real redraw happens in the GUI stage (after grayscale), with a fresh PoseStack doing only a world translation
+@SubscribeEvent
+public static void onRenderGuiPre() {
+    if (!WildHunterClientState.active() || capturedCamera == null) return;
+    RenderSystem.setProjectionMatrix(capturedProjection, VertexSorting.DISTANCE_TO_ORIGIN);
+    RenderSystem.getModelViewStack().set(capturedModelView);          // camera rotation is already in the modelview
+    for (LivingEntity entity : targets()) {
+        PoseStack poseStack = new PoseStack();
+        poseStack.translate(entity.getX() - cam.x, entity.getY() - cam.y, entity.getZ() - cam.z);
+        poseStack.scale(1.008F, 1.008F, 1.008F);                      // avoid z-fighting with the body
+        renderer.render(entity, yaw, partialTick, poseStack, shellSource(buffers), LightTexture.FULL_BRIGHT);
+    }
+    buffers.endBatch();   // submit once, not per entity
 }
 ```
+
+**Why "let the renderer draw it again" instead of replaying the transform chain (V-52)**: replaying is a dead end — `LivingEntityRenderer#scale(entity, poseStack, partialTick)` is **protected**, and every renderer has its own translate / scale before drawing the model; copying that means duplicating every subclass and missing one whenever it changes. The approach is to wrap `renderer.render(...)` in a `MultiBufferSource` layer (swapping the requested `RenderType` for a flat colour type) and call it again: **the transform chain is executed by the renderer itself, so the geometry necessarily coincides**. The price is that `render()` fires `RenderLivingEvent` again internally, so the `rendering` re-entrancy guard is **required, not a safety net**.
+
+**Three details that must be copied verbatim (V-50, miss one and the silhouette is wrong)**:
+
+| Detail | Vanilla source | What goes wrong without it |
+|---|---|---|
+| `poseStack.scale(-1, -1, 1)` before drawing the model | `LivingEntityRenderer:101` | the red model is **upside down and mirrored** |
+| `poseStack.translate(0, -1.501, 0)` before drawing the model | `LivingEntityRenderer:103` | the red model **floats 1.5 blocks above the ground** |
+| light `LightTexture.FULL_BRIGHT` | — (BRIEF §7.2's "visible at any brightness") | the silhouette dims in the dark, i.e. only visible in daylight |
+
+The first two are easy to miss because `RenderLivingEvent.Post` fires **after** `poseStack.popPose()` (`:137`) at `:139` — the pose stack handed to the event is no longer the model frame. Letting the renderer redraw brings both transforms back automatically; if you redraw in the world stage yourself, you **must** add them back.
+
+**Metric trap (V-50, methodology)**: an indicator such as "maximum red in the centre region" also holds when the model is **upside down and floating** — it only proves "there is red", not "it looks right". Silhouette acceptance must include a **human look at the picture** (the outline hugs the body and the feet stand on the ground); indicators only catch the degenerate "nothing was drawn" case.
+
+**Why the redraw sits in the GUI stage (V-57)**: grayscale is a **world-level** post-process that runs after world rendering, so a red layer drawn in the world stage is greyed with it. The world stage therefore only captures state (`AFTER_ENTITIES`) and the real redraw happens in `RenderGuiEvent.Pre` (after grayscale). `RenderLevelStageEvent.Stage.AFTER_LEVEL` (`GameRenderer:1273`) sits **before** grayscale and cannot be used.
 
 **Filter rules one by one** (D-62 + the exclusions of D-64):
 
@@ -866,7 +901,7 @@ public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
 | Pending item | How to verify | Verdict |
 |---|---|---|
 | availability and cost of `hasLineOfSight` on a client-side entity | stand once behind a wall and once in front of it, and check that silhouettes are drawn only for creatures in front; also run `/debug profile` to read tick and frame times | a silhouette behind the wall means unusable, and it must fall back to "distance + coarse line-of-sight sampling" |
-| whether the alpha of `setShaderColor` (0.45) takes effect on `entityTranslucentEmissive` | set the alpha to 0.0 once and to 1.0 once and compare | no change at either extreme means the alpha does not take effect; use the `RenderType`'s own translucency or a vertex color instead |
+| whether the colour can be added via `setShaderColor` (the BRIEF §7.2 draft) | enter the effect and check whether the silhouette is red | **disproved**: `entityTranslucentEmissive`'s shader ignores ColorModulator, so `setShaderColor` does nothing → bake RGBA(255,38,38,115) into `wild_hunter_red.png` (V-60) |
 | frame time with many entities | 30 creatures on screen with the effect on | a frame-time increase above 3 ms counts as unacceptable and requires a "at most 32 per frame" circuit breaker |
 
 **Performance guardrail (added by this document)**: draw at most **32** entities per frame (nearest first); the rest are not drawn. Reason: `renderToBuffer` redraws the whole model, it is not a cheap outline pass, and a large brawl inside the default 64-block radius can hold hundreds of creatures.
@@ -886,7 +921,7 @@ public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
 | Attack / use / **held left button mining** | `InputEvent.InteractionKeyMappingTriggered` | `event.setCanceled(true)` as the second net. `continueAttack` also fires it every tick, so it **does** stop continuous mining |
 | Hotbar 1–9 / Q / E / F / F5 | **`InputEvent.Key` + drain `consumeClick()`** | The event is **not cancellable** (`InputEvent.java:214` does not implement `ICancellableEvent`) and fires **after** `KeyMapping.set/click` (`KeyboardHandler.java:483-484` → `:485`). But `handleKeybinds()` only consumes in the tick (`Minecraft.java:1837` → `:1944`), so **draining the matching `KeyMapping.consumeClick()` inside the event is equivalent to blocking** |
 | Scroll-wheel hotbar switch | `InputEvent.MouseScrollingEvent` | cancel |
-| **Mouse look** | **`CalculatePlayerTurnEvent`** | `event.setMouseSensitivity(0)` (`ClientHooks.java:368`; the setter is `CalculatePlayerTurnEvent.java:46`). **The only Mixin-free way to lock the view** |
+| **Mouse look** | **`CalculatePlayerTurnEvent`** | `event.setMouseSensitivity(0)` (`ClientHooks.java:368`; the event method is at `CalculatePlayerTurnEvent.java:46`). **This is the only Mixin-free way to touch the view, but it is not a real lock**: in `MouseHandler#turnPlayer` `d2 = sens × 0.6 + 0.2`, so a sensitivity of 0 still leaves a factor of **0.2**, roughly **15.6× slower than the default 0.5 rather than 0** — without Mixin it cannot be zeroed, and it is registered as a known limitation (V-31) |
 | Inventory / chat | `ScreenEvent.Opening` | let only `PauseScreen` through; for the rest `setNewScreen(null)` or cancel |
 
 ```java
@@ -976,10 +1011,10 @@ In MC the player position is client-authoritative to begin with (the server only
 
 | # | Where | What happens | Basis |
 |---|---|---|---|
-| 1 | client | attack key pressed locally + `wild_hunter` on the player + local `selectTarget` yields a legal target | BRIEF §7.6 |
+| 1 | client | attack key pressed locally + `wild_hunter` on the player + local `resolveTarget` yields a legal target | BRIEF §7.6 |
 | 2 | client | immediately give velocity toward the target: `setDeltaMovement(dir.normalize().scale(dist / dashTicks))`, crossing in `dashTicks = 3` ticks | D-65 |
 | 3 | client | send `ServerboundSwingPacket` as usual (the vanilla attack flow already does, no extra packet needed) | §9 |
-| 4 | server | on receiving the swing, run the **same** `selectTarget` to compute the target independently; do nothing if it is not legal | BRIEF §7.6 |
+| 4 | server | on receiving the swing, run the **same** `resolveTarget` to compute the target independently; do nothing if it is not legal | BRIEF §7.6 |
 | 5 | server | if legal, settle damage (the player's own attack power) and knockback (D-75's vanilla default strength) | D-75 |
 | 6 | server | **send no displacement** (do not send `ClientboundSetEntityMotionPacket` to correct the player) | avoid "being pulled back" |
 
@@ -1166,7 +1201,7 @@ All three source files must be converted before they enter `src/main/resources` 
 
 | # | Source path (absolute) | Size / form | Purpose | Target path |
 |---|---|---|---|---|
-| 1 | `C:\Users\DASHpig\Downloads\Animals.mp3` | mp3 audio | Wild Hunter looping sound | `assets/farmstorm/sounds/wild_hunter_loop.ogg` |
+| 1 | `D:\dsh\default\Animals_from_3m04s.mp3` | mp3 audio (the clip from 3m04s on, **47.14 s**, chosen by the author) | Wild Hunter looping sound | `assets/farmstorm/sounds/wild_hunter_loop.ogg` |
 | 2 | `D:\dsh\default\sf6_audio\out\BV1qu411W7ha_846-850.mp3` | mp3 audio (SF6 excerpt) | Zangief Cane trigger sound | `assets/farmstorm/sounds/zangief_piledriver.ogg` |
 | 3 | `C:\Users\DASHpig\Desktop\e91bb6997d8e24cda1f596267c41da97500924726.jpg` | desktop JPG | Wild Hunter effect icon | `assets/farmstorm/textures/mob_effect/wild_hunter.png` |
 
@@ -1295,7 +1330,9 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 ### 6.6 The 1×1 white texture
 
-`assets/farmstorm/textures/misc/white.png`: 1×1, all white, RGBA (255,255,255,255). Specified by BRIEF §7.2. The silhouette takes its red from `setShaderColor`, so the texture itself must be pure white — otherwise the colors multiply and go muddy.
+`assets/farmstorm/textures/misc/wild_hunter_red.png`: 1×1, RGBA (255, 38, 38, 115), i.e. D-62's `(1, 0.15, 0.15)` times 0.45 alpha. The BRIEF §7.2 draft asked for a pure white texture plus `setShaderColor`, but `entityTranslucentEmissive`'s shader **deliberately ignores ColorModulator**, so the colour must come from the texture itself (V-60) — hence a red texture is generated directly and `setShaderColor` is dropped, which also removes the "forgot to reset it and tinted later entities red" trap.
+
+**Generator output and the repository may differ by colour-level hand tuning** (V-65): the SHA256 of `item/bamboo_firecracker.png` and `item/compressed_puffed_wheat.png` does not match what today's `gen_textures.py` produces; a pixel-by-pixel comparison shows identical shape and alpha, with the difference only in colour / brightness (for the former, all 165 differing pixels lie in the `alpha=0` region, invisible to the eye). This is judged to be deliberate hand tuning from v0.0.1 — **do not roll it back or regenerate**; compare image by image before re-running the generator.
 
 ### 6.7 Pipeline order and evidence
 
@@ -1320,21 +1357,21 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 | Category | v0.0.1 | Delta | v0.0.2 |
 |---|---|---|---|
-| `.json` | 169 | +24 | **193** |
+| `.json` | 169 | +26 | **195** |
 | `.png` | 91 | +8 | **99** |
-| `.ogg` | 0 | +2 | **2** |
-| `.glsl` (`.vsh` + `.fsh`) | 0 | +2 | **2** |
+| `.ogg` | 2 | +0 | **2** |
+| `.glsl` (`.vsh` + `.fsh`) | 0 | +3 | **3** |
 | `.toml` (`neoforge.mods.toml`) | 1 | +0 | **1** |
 | `pack.mcmeta` | 1 | +0 | **1** |
-| **Total** | **262** | **+36** | **298** |
+| **Total** | **265** | **+37** | **302** |
 
 Counting reminder (BRIEF §4.1): the 11 extension-less files under `src/generated/resources/.cache` are DataGen caches — **they do not enter the jar and are not counted**. The 2 language-file `.json`s are already included in the 169 (their content changes, their file count does not).
 
-### 7.2 Itemized inventory of new resource files (**36 rows**)
+### 7.2 Itemized inventory of new resource files (**40 rows**)
 
-The "Line" column: `hand-written` = written by hand into `src/main/resources` with an editor; `DataGen` = generated by a Provider into `src/generated/resources`; `script` = produced by the conversion scripts of §6.
+"Pipeline" column: `hand-written` = written directly under `src/main/resources`; `DataGen` = generated by a provider into `src/generated/resources`; `script` = produced by the conversion scripts of §6.
 
-| # | Path (relative to `src/{main,generated}/resources`) | Category | Line | Purpose | Basis |
+| # | Path (relative to `src/{main,generated}/resources`) | Category | Pipeline | Purpose | Basis |
 |---|---|---|---|---|---|
 | 1 | `assets/farmstorm/textures/item/molotov.png` | PNG 16×16 | script | Molotov item icon | §2.2 |
 | 2 | `assets/farmstorm/textures/item/zangief_cane.png` | PNG 16×16 | script | Zangief Cane item icon (invisible in the world, the icon is independent, D-68) | D-68 |
@@ -1342,54 +1379,56 @@ The "Line" column: `hand-written` = written by hand into `src/main/resources` wi
 | 4 | `assets/farmstorm/textures/item/compressed_puffed_wheat.png` | PNG 16×16 | script | Compressed Puffed Wheat item icon | D-56 |
 | 5 | `assets/farmstorm/textures/block/compressed_hay_block.png` | PNG 16×16 grayscale | script | Compressed hay block six-face texture (grayscale hay block side) | D-57 / §6.5 |
 | 6 | `assets/farmstorm/textures/block/zangief_cane.png` | PNG 16×16 | script | The trap block's `textures.particle` (invisible in the world, D-68) | D-68 |
-| 7 | `assets/farmstorm/textures/misc/white.png` | PNG 1×1 | script | base texture of the red silhouette | BRIEF §7.2 |
-| 8 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` | PNG 18×18 | script | Wild Hunter effect icon | D-53 / D-66 |
-| 9 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` | OGG mono 64k | script | the looping sound itself | D-53 / D-76 |
-| 10 | `assets/farmstorm/sounds/zangief_piledriver.ogg` | OGG mono 64k | script | the Zangief Cane trigger sound itself | D-53 / D-66 |
-| 11 | `assets/farmstorm/sounds.json` | JSON | hand-written | 2 sound event definitions | D-76 / §6.3 |
-| 12 | `assets/farmstorm/shaders/core/grayscale.json` | JSON | hand-written | program declaration of the grayscale `ShaderInstance` | BRIEF §7.1 |
-| 13 | `assets/farmstorm/shaders/core/grayscale.vsh` | GLSL | hand-written | full-screen quad vertex shader | BRIEF §7.1 / §3.2 |
-| 14 | `assets/farmstorm/shaders/core/grayscale.fsh` | GLSL | hand-written | grayscale fragment shader (`dot(rgb, luma coefficients)`) | BRIEF §7.1 / §3.2 |
-| 15 | `assets/farmstorm/post_effect/grayscale.json` | JSON | hand-written | grayscale post-effect declaration (the `PostChain` mount of the RT-10 degradation branch) | BRIEF §3.2 |
-| 16 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | single-variant `cube_all` | D-57 |
-| 17 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | all variants of `face`×`facing`×`floating` → empty model | D-68 |
-| 18 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | six-face single-texture model | D-57 |
-| 19 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | empty model (only `textures.particle`) | D-68 |
-| 20 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | `item/generated` + layer0 | §2.2 |
-| 21 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | `item/generated` (does not reference the block model) | D-68 |
-| 22 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | `item/generated` | §2.2 |
-| 23 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | `item/generated` | D-56 |
-| 24 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | `parent = farmstorm:block/compressed_hay_block` | D-57 |
-| 25 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | converter crafting: center `minecraft:crafting_table` + eight `#farmstorm:converter_fuel` | D-52 |
-| 26 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | shapeless: 4 `puffed_wheat` → 1 `compressed_puffed_wheat` | D-67 |
-| 27 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:crimson_fungus` ⇄ `molotov`, bidirectional, experience 3, no catalyst | same shape as D-54 |
-| 28 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:sugar_cane` ⇄ `zangief_cane`, bidirectional, experience 3 | same shape as D-54 |
-| 29 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:golden_apple` ⇄ `wild_apple`, bidirectional, experience 3 | D-54 |
-| 30 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | advancement: throw a Molotov for the first time | D-63 |
-| 31 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | advancement: Zangief Cane hits for the first time | D-63 |
-| 32 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | advancement: obtain the Wild Hunter effect for the first time | D-63 |
-| 33 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | drops itself (`requiresCorrectToolForDrops` makes it drop nothing bare-handed) | D-57 |
-| 34 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | deployed-block conventions: `survives_explosion` + drops itself | same shape as the 5 existing ones |
-| 35 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | new item tag: vanilla crops + the items of the 19 profiles that can act as crops | D-52 |
-| 36 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | new: `compressed_hay_block` needs a diamond pickaxe | D-57 |
+| 7 | `assets/farmstorm/textures/misc/white.png` | PNG 1×1 | script | 1×1 pure white texture (the base texture of the BRIEF §7.2 draft; the silhouette now uses the red one, the file is kept) | BRIEF §7.2 |
+| 8 | `assets/farmstorm/textures/misc/wild_hunter_red.png` | PNG 1×1 | script | red silhouette texture, RGBA(255,38,38,115), the colour is baked into the texture (V-60) | BRIEF §7.2 + V-60 |
+| 9 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` | PNG 18×18 | script | Wild Hunter effect icon | D-53 / D-66 |
+| 10 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` | OGG mono 64k | script | the looping sound itself | D-53 / D-76 |
+| 11 | `assets/farmstorm/sounds/zangief_piledriver.ogg` | OGG mono 64k | script | the Zangief Cane trigger sound itself | D-53 / D-66 |
+| 12 | `assets/farmstorm/sounds.json` | JSON | hand-written | 2 sound event definitions | D-76 / §6.3 |
+| 13 | `assets/farmstorm/shaders/core/grayscale.json` | JSON | hand-written | program declaration of the grayscale `ShaderInstance` | BRIEF §7.1 |
+| 14 | `assets/farmstorm/shaders/core/grayscale.vsh` | GLSL | hand-written | the earlier plan's screen-filling quad vertex shader (not loaded today; `PostChain` uses the vanilla `minecraft:blit`) | BRIEF §7.1 / §3.2 |
+| 15 | `assets/farmstorm/shaders/core/grayscale.fsh` | GLSL | hand-written | grayscale fragment shader (`dot(rgb, luma coefficients)`) | BRIEF §7.1 / §3.2 |
+| 16 | `assets/farmstorm/shaders/post/grayscale.json` | JSON | hand-written | grayscale `PostChain` declaration (loaded at runtime by `GameRenderer#loadEffect`; `targets` must be an array) | V-56 / V-49 |
+| 17 | `assets/farmstorm/shaders/program/grayscale.json` | JSON | hand-written | grayscale shader program declaration (vertex `minecraft:blit` + fragment `farmstorm:grayscale`) | V-56 |
+| 18 | `assets/farmstorm/shaders/program/grayscale.fsh` | GLSL | hand-written | same content as `core/grayscale.fsh` (a different sampler name), kept as a spare | V-56 |
+| 19 | `assets/farmstorm/post_effect/grayscale.json` | JSON | hand-written | grayscale post-effect declaration (the `PostChain` mount of the RT-10 degradation branch) | BRIEF §3.2 |
+| 20 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | single-variant `cube_all` | D-57 |
+| 21 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | all variants of `face`×`facing`×`floating` → empty model | D-68 |
+| 22 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | six-face single-texture model | D-57 |
+| 23 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | empty model (only `textures.particle`) | D-68 |
+| 24 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | `item/generated` + layer0 | §2.2 |
+| 25 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | `item/generated` (does not reference the block model) | D-68 |
+| 26 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | `item/generated` | §2.2 |
+| 27 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | `item/generated` | D-56 |
+| 28 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | `parent = farmstorm:block/compressed_hay_block` | D-57 |
+| 29 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | converter crafting: center `minecraft:crafting_table` + eight `#farmstorm:converter_fuel` | D-52 |
+| 30 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | shapeless: 4 `puffed_wheat` → 1 `compressed_puffed_wheat` | D-67 |
+| 31 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:crimson_fungus` ⇄ `molotov`, bidirectional, experience 3, no catalyst | same shape as D-54 |
+| 32 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:sugar_cane` ⇄ `zangief_cane`, bidirectional, experience 3 | same shape as D-54 |
+| 33 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:golden_apple` ⇄ `wild_apple`, bidirectional, experience 3 | D-54 |
+| 34 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | advancement: throw a Molotov for the first time | D-63 |
+| 35 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | advancement: Zangief Cane hits for the first time | D-63 |
+| 36 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | advancement: obtain the Wild Hunter effect for the first time | D-63 |
+| 37 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | drops itself (`requiresCorrectToolForDrops` makes it drop nothing bare-handed) | D-57 |
+| 38 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | deployed-block conventions: `survives_explosion` + drops itself | same shape as the 5 existing ones |
+| 39 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | new item tag: vanilla crops + the items of the 19 profiles that can act as crops | D-52 |
+| 40 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | new: `compressed_hay_block` needs a diamond pickaxe | D-57 |
 
-Column mapping (this section is a file inventory, not a key table): **Path** ↔ key name; **Category** ↔ default value (including file dimensions, e.g. `PNG 16×16`); **Line** ↔ range (who produces the file, can it be re-run); **Purpose** ↔ purpose; **Basis** ↔ the D number it rests on.
+Column mapping (this section is a file list, not a key table): **file path** ↔ key name; **category** ↔ default value (including file size, e.g. `PNG 16×16`); **pipeline** ↔ scope (who produces the file, whether it can be re-run); **purpose** ↔ purpose; **basis** ↔ the D number.
 
-**Row count check**: `36` rows; by category, PNG 8 (#1–#8) + OGG 2 (#9–#10) + JSON 24 (#11–#12, #15–#36) + GLSL 2 (#13–#14) → see the table below. #11–#36 is 26 slots = 24 JSON + 2 GLSL, consistent with the category counts.
+**Row count**: this table has `40` rows (the measured repository after V-49 / V-56 / V-60) and **all 40 have landed** (the 3 advancements were delivered by F-98). 3 of them (2 `.ogg` files and `textures/mob_effect/wild_hunter.png`) were already in the repository at the 0.0.2 baseline commit, so "new since the baseline" is 37 files (the `git diff` view) while the total is 265 + 37 = **302**.
 
-| Category | Row numbers | Count |
+| Category | Rows | Count |
 |---|---|---|
-| PNG | #1–#8 | 8 |
-| OGG | #9–#10 | 2 |
-| JSON | #11–#12, #15–#36 | 24 |
-| GLSL | #13–#14 | 2 |
-| **Total** | — | **36** |
+| PNG | #1–#9 | 9 |
+| OGG | #10–#11 | 2 |
+| JSON | #12, #13, #16, #17, #19–#40 | 26 |
+| GLSL | #14, #15, #18 | 3 |
+| **Total** | — | **40** |
 
-**Append-only changes (produce no new file and are not counted in the 36)**: `data/minecraft/tags/block/mineable/pickaxe.json` gains `compressed_hay_block`; `data/farmstorm/tags/block/deployed_crops.json` gains `zangief_cane`; `data/farmstorm/tags/item/modified_crops.json` gains 4 entries; `assets/farmstorm/lang/{zh_cn,en_us}.json` gain 39 entries (§7.3); the 12 existing advancement files are untouched.
+### 7.3 Itemized inventory of new language file keys (**41 rows**)
 
-### 7.3 Itemized inventory of new language file keys (**39 rows**)
-
-The key set is written out column by column from the same `ENTRIES` table of `ModLangProvider`, so the keys of `zh_cn` and `en_us` are equal by construction. `222 + 39 = 261`, and both must be **261**.
+The key set is written out column by column from the same `ENTRIES` table of `ModLangProvider`, so the keys of `zh_cn` and `en_us` are equal by construction. `222 + 39 = 263`, and both must be **263**.
 
 | # | Key | `zh_cn` | `en_us` | Basis |
 |---|---|---|---|---|
@@ -1432,10 +1471,12 @@ The key set is written out column by column from the same `ENTRIES` table of `Mo
 | 37 | `farmstorm.configuration.zangief_cane.levitationDurationTicks` | 漂浮时长（tick） | Levitation duration (ticks) | §8.1 #20 |
 | 38 | `farmstorm.configuration.zangief_cane.fallTicks` | 相位 2 的目标落地时长（tick） | Target landing duration of phase 2 (ticks) | §8.1 #21 |
 | 39 | `farmstorm.configuration.zangief_cane.spinDegreesPerTick` | 水平自转速度（度/刻） | Horizontal spin speed (degrees/tick) | §8.1 #22 |
+| 40 | `entity.farmstorm.molotov` | 莫洛托夫！ | Molotov | V-64 (the original table missed these two; without them `/summon` feedback and death messages show bare keys) |
+| 41 | `entity.farmstorm.compressed_puffed_wheat` | 压缩膨胀麦 | Compressed Puffed Wheat | V-64 |
 
 Column mapping: **Key** ↔ key name; **the `zh_cn` / `en_us` columns** ↔ values (a language file has no "range"; the two texts cross-check each other); **Category** is given by the key prefix (`item.` / `block.` / `effect.` / `subtitles.` / `advancements.` / `farmstorm.configuration.`); **Basis** is the last column.
 
-**Row count check**: `39` rows = items 5 (#1–#5) + blocks 2 (#6–#7) + effects 2 (#8–#9) + subtitles 2 (#10–#11) + advancements 6 (#12–#17) + config 22 (#18–#39). `222 + 39 = 261`.
+**Row count check**: `39` rows = items 5 (#1–#5) + blocks 2 (#6–#7) + effects 2 (#8–#9) + subtitles 2 (#10–#11) + advancements 6 (#12–#17) + config 22 (#18–#39). `222 + 39 = 263`.
 
 **The two categories that are not added, with the reasons stated**:
 
@@ -1448,10 +1489,10 @@ Column mapping: **Key** ↔ key name; **the `zh_cn` / `en_us` columns** ↔ valu
 
 | Number | How to check | Expectation |
 |---|---|---|
-| resources 298 | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources \| Where-Object Name -ne '.cache' \| Measure-Object`, then subtract the 11 files under `.cache` | 298 |
-| JSON 193 | same, but count `.json` only | 193 |
-| PNG 99 | count `.png` only | 99 |
-| language keys 261 | `python -c "import json;print(len(json.load(open('…/zh_cn.json'))))"`, and the same for `en_us` | both 261 |
+| resources 302 | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources \| Where-Object Name -ne '.cache' \| Measure-Object`, then subtract the 11 files under `.cache` | 302 |
+| JSON 195 | same, but count `.json` only | 193 |
+| PNG 100 | count `.png` only | 99 |
+| language keys 263 | `python -c "import json;print(len(json.load(open('…/zh_cn.json'))))"`, and the same for `en_us` | both 263 |
 | the two key sets are equal | same, but compare `set(a) == set(b)` | `True` |
 
 ---
@@ -1547,7 +1588,7 @@ spinDegreesPerTick = 72.0          # D-70: 1440 degrees/second ÷ 20
 | new `farmstorm.configuration.*` language keys | **22** | #18–#39 of §7.3, corresponding one by one to #1–#22 of §8.1 |
 | the two are equal | `22 == 22` | `ModLangProvider` writes both files column by column from the same `ENTRIES` table, so the key sets are equal by construction |
 | new total | **139** | `117 + 22` |
-| new total of language keys | **261** | `222 + 39` (22 of them config) |
+| new total of language keys | **263** | `222 + 39` (22 of them config) |
 
 The mechanical comparison during implementation: the number of leaf nodes in `run/config/farmstorm-server.toml` must be **139**, and the number of keys in `zh_cn.json` carrying the `farmstorm.configuration.` prefix must also be **139**. If the two numbers differ, some keys were not generated.
 
@@ -1588,7 +1629,7 @@ v0.0.1's C-6 is "0 custom network packets"; among the 13 new registry objects of
 | 8 | the three attribute bonuses (+30 % movement speed / +30 % attack speed / +40 % damage) | `MobEffect#addAttributeModifiers` | no packet needed | vanilla also runs that method on the client (`LivingEntity#onEffectAdded` is symmetric on both sides), so the client attribute table matches the server |
 | 9 | the Zangief Cane trigger sound | `level.playSound(null, pos, …)` | `ClientboundSoundPacket` | position + event + volume + pitch, one-shot |
 | 10 | the Wild Hunter looping sound | client-side hand-written `SoundInstance` (D-76) | **zero packets** | the lifetime of the sound == the lifetime of the effect, and the client can infer from #6 whether it should play |
-| 11 | the fire / magma blocks at the Molotov landing point | `level.setBlock(target, state, UPDATE_ALL)` | `ClientboundBlockUpdatePacket` | one chunk-level update packet per changed cell (vanilla merges consecutive updates within a chunk automatically) |
+| 11 | the fire / magma blocks at the Molotov landing point | `level.setBlock(target, state, UPDATE_CLIENTS)` | `ClientboundBlockUpdatePacket` | one chunk-level update packet per changed cell (vanilla merges consecutive updates within a chunk automatically) |
 | 12 | the visual of the Molotov explosion | `finalizeExplosion` of `FarmstormExplosion#detonate` | `ClientboundExplodePacket` + `ClientboundLevelParticlesPacket` | the two-piece vanilla explosion set; at power 0 the former carries only position and sound |
 | 13 | the projectile entity appearing in the world | `level.addFreshEntity(projectile)` | `ClientboundAddEntityPacket` | the vanilla entity spawn flow |
 | 14 | the trap block vanishing silently | `server.removeBlock(pos, false)` + `levelEvent(PARTICLES_DESTROY_BLOCK)` inside `be.consume()` | `ClientboundBlockUpdatePacket` + `ClientboundLevelEventPacket` | the latter is exactly vanilla's block-destroy particle event, so no particle packet has to be sent by hand |
@@ -1644,13 +1685,13 @@ The numbering continues from RT-09 of `02-TECH-SPEC.md` §9. **Seven entries, co
 
 | ID | Risk | Trigger condition | Primary mitigation | Backstop | How to verify during implementation |
 |---|---|---|---|---|---|
-| **RT-10** | the mount point of the full-screen grayscale post-process does not hold | switching the render target in `RenderGuiEvent.Post` fights other mods' GUI post-processing: a fully black screen, only half the screen grayed, another mod's HUD gone; or the `ShaderInstance` registered in `RegisterShadersEvent` fails to compile | split into two passes, world + GUI (the AFTER stage of `RenderLevelStageEvent` + `RenderGuiEvent.Post`); if that still fails, fade the world only and register the degradation in the Release notes | world only + state "the GUI is not grayed" in the Release notes; if even the world pass does not hold, D-61 degrades to "fade the world only" and is registered as a known defect | ① after entering the effect, check whether the whole screen is gray (the title bar and the inventory must be gray too); ② install another mod that does GUI post-processing and check whether the two break each other; ③ check whether `[Render thread/ERROR]` lines in `latest.log` show GL or shader compile errors; ④ record the frame-time difference before and after (F3) |
-| **RT-11** | silhouette redraw recursion or frame drops | calling `EntityRenderDispatcher#render` by mistake inside `RenderLivingEvent`, causing recursion; or too many entities on screen blowing up the frame time; or `hasLineOfSight` being unavailable on the client | use `getModel().renderToBuffer` rather than a dispatcher redraw; draw only within ≤64 blocks and with line of sight | at most 32 per frame (nearest first); if that still fails, draw only the subset "distance ≤ 16 blocks" and state it in the Release notes | ① 30 creatures on screen with the effect on, check for a freeze or a frame drop > 3 ms; ② stand once in front of and once behind a wall and confirm no silhouette behind the wall; ③ confirm no silhouette beyond 65 blocks; ④ check the log for `StackOverflowError` |
+| **RT-10** | the mount point of world-only grayscale (**closed**: now the vanilla `PostChain`, see "RT-10 conclusion" in §4.1) | a hand-written pass samples the render target it is writing to (`SL:1027`-style read/write feedback, V-48), or the `post_effect/` directory is mistaken for a load point (no loader in 21.1.213, V-49) | go through the vanilla `PostChain` (`GameRenderer#loadEffect`): world greyed, HUD in its original colours (V-56) | - | ① after entering the effect, the **world** is grey (blocks / entities / particles) while the HUD keeps its colours — that is the expectation (V-56); ② install another GUI post-processing mod on the same screen and see whether they break each other; ③ look for GL or `Could not load program` errors under `[Render thread/ERROR]`; ④ record the frame-time difference (F3) before and after |
+| **RT-11** | silhouette recursion, frame drops, or a **vertex-format mismatch that kills the client** | `EntityRenderDispatcher#render` called inside `RenderLivingEvent` (recursion); or `MultiBufferSource` replaced unconditionally (a leash uses `POSITION_COLOR_LIGHTMAP`; forced into an entity buffer it throws `Missing elements in vertex` — measured twice, V-58); or too many mobs on screen; or `hasLineOfSight` unusable on the client | redraw with `LivingEntityRenderer#render(...)` plus a re-entrancy guard; **filter `MultiBufferSource` by `type.format() == DefaultVertexFormat.NEW_ENTITY`**; only draw within ≤64 blocks and with line of sight | at most 32 per frame (nearest first); if still too slow, draw only the subset within 16 blocks and state it in the Release notes | ① 30 mobs on screen with the effect on — check for a freeze or > 3 ms frame-time growth; ② stand in front of / behind a wall and confirm no silhouette behind it; ③ confirm nothing is drawn beyond 65 blocks; ④ check the log for `StackOverflowError`; ⑤ bring a leashed mob into view and confirm `Missing elements in vertex` does not appear |
 | **RT-12** | the driver of the dash displacement is misjudged, the player does not move or is pulled back | `setDeltaMovement` on the server does not produce a client displacement on `ServerPlayer`; or the client-predicted displacement is judged "moving too fast" by the server's movement validation and pulled back | client prediction + server decision; the alternative is a per-tick teleport | switch to the alternative: the server `teleportTo` ≤ 1 block per tick with collision detection; on switching, append a decision record to §4.5 | ① print a `setDeltaMovement` log line and see whether the client is displaced; ② while dashing, check `latest.log` for `moved too quickly!` / `moved wrongly!`; ③ dash at a wall and confirm the player stops in front of it without phasing through; ④ when the target is fully occupied by blocks, confirm no attraction happens |
 | **RT-13** | input interception has a gap and some key still penetrates | the relative order of `InputEvent.Key` and `KeyMapping` lets 1–9 through (settled by D-79: the event is not cancellable, so its clicks are drained instead); or some GUI opening path does not go through `ScreenEvent.Opening` | all seven mechanisms (D-79); during implementation test key by key once and keep the record | re-hook the leaking path to an earlier hook (e.g. add `ScreenEvent.KeyPressed`); if it still leaks, register "this key cannot be locked" in the Release notes | test key by key and fill the table: W/A/S/D/space/Shift/left button/right button/1–9/wheel up/wheel down/E/T/`/`/ESC, 21 items in total, recording "blocked / penetrated" for each; ESC must stay usable |
 | **RT-14** | ffmpeg is not on PATH, or another machine / build has no ffmpeg with libvorbis, so the audio cannot be produced | `Get-Command ffmpeg` the script finds no usable ffmpeg — on this machine the 7.1 essentials build at `D:\dsh\default\sf6_audio\tools\ffmpeg.exe` is **usable**, while Trae CN's 6.1.1 has **no libvorbis** and is not; or the `attenuation_distance` of `sounds.json` does not mean "audible distance" on 1.21.1 | the conversion script errors out and exits when ffmpeg is missing or has no libvorbis; the audio task is scheduled first in the resource phase, so it fails early and is found early; the tool is in place and measured working (`tools/convert_media.ps1`) | pass the correct absolute `-Ffmpeg` path; on another machine, follow the guidance the script prints and use a build carrying libvorbis | ① without `-Ffmpeg` and with nothing on PATH, `-CheckOnly` must print the installation guidance and exit 1, while a usable path must report the environment as usable and exit 0; ② after a real run, check with `ffprobe` that channels = 1 and bitrate ≈ 64 kbps; ③ listen once each at 8 / 16 / 17 / 32 blocks in game; ④ use `jar tf` to confirm both `.ogg` files are inside the jar |
 | **RT-15** | the hidden MobEffect is disturbed by other mods' effect-clearing logic | a third-party mod's "clear all negative effects" (`/effect clear`, a potion, a command) strips `zangief_piledriver` early while the client stays at phase 2: the screen stays flipped forever and the keys stay locked forever | the client self-checks every tick whether "the phase effect is still there" and resets itself if not | the symmetric self-check on the server: `ACTIVE` has a record but `getEffect` is empty ⇒ `finish` + `warn`, no re-apply | ① `/effect give @s farmstorm:zangief_piledriver 10 2 false` and watch the screen flip + input lock + spin; ② after `/effect clear @s` everything must reset within 100 ms, with the log showing "state reset (effect cleared externally)"; ③ log on every phase switch and check whether the client reads `null` (the 1-tick gap of the hard switch) |
-| **RT-16** | full-screen grayscale is incompatible with shader mods (Oculus/Iris etc.) | with a shader mod installed, the grayscale pass conflicts with the shader's framebuffer chain: a fully black screen, shaders stop working, or grayscale only affects one layer before the final composite | registered in the documentation as a known incompatibility; no runtime detection | list Oculus / Iris in the "known incompatibilities" section of the Release notes and the README; no version probing, no automatic degradation | ① install Iris + any shader pack, enter the effect and check whether the screen goes black or the shaders break; ② with no shader pack installed, go back to step ① of RT-10 and confirm it is normal; ③ register it once in `12-TECH` and in this entry, and never re-check |
+| **RT-16** | world-only grayscale is incompatible with shader mods (Oculus/Iris etc.) | with a shader mod installed, the grayscale `PostChain` conflicts with the shader's framebuffer chain: the screen goes black, shaders stop working, or grayscale only applies to the layer before the final composite | registered in the docs as a known incompatibility, no runtime probing | list Oculus / Iris in the "known incompatibilities" section of the Release notes and README; no version probing, no automatic degradation | ① install Iris plus any shader pack and check whether the screen goes black or the shader breaks; ② without a shader pack, repeat step ① of RT-10 to confirm normal behaviour; ③ register it once in `12-TECH` and in this row, and do not revisit |
 
 **The list of seven IDs**: RT-10, RT-11, RT-12, RT-13, RT-14, RT-15, RT-16 (consecutive, no gap, no merge).
 
@@ -1690,8 +1731,8 @@ Every item can be decided by one **concrete action**; "looks fine" is not accept
 | 14 | the Wild Hunter dash goes through the server re-check | with the effect on, attack a creature within 5 blocks and 30° once; then attack one outside 30° once | the former is attracted and takes damage and knockback; the latter is a normal attack with no attraction; `latest.log` shows no `moved too quickly!` (if it appears, tune `dashTicks` per RT-12) |
 | 15 | kill extension has no cap | with the effect on, kill 6 creatures in a row, reading the remaining effect duration each time | every "expiry moment" moves +8 seconds and health +10 points; it is still active after 6 kills (no cap on the number of kills) |
 | 16 | 139 config keys, equal on both sides | count the leaf nodes of `run/config/farmstorm-server.toml`; count the keys with the `farmstorm.configuration.` prefix in `zh_cn.json` | both numbers are **139** (117 + 22); the 22 new key names match §8.1 character for character, and match the sole inventory of BRIEF §8 column by column |
-| 17 | 298 resource files, categories consistent | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources` minus the 11 under `.cache` | total **298**; JSON **193**, PNG **99**, OGG **2**, GLSL **2**, TOML 1, `pack.mcmeta` 1 |
-| 18 | 261 language keys, Chinese and English equal | after `ModLangProvider` runs, compare the key sets of the two `.json` files | both **261** keys (222 + 39); `set(zh) == set(en)` is `True`; among them `tooltip.farmstorm.*` is still **16** entries (nothing wrongly added) |
+| 17 | 302 resource files, categories consistent | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources` minus the 11 under `.cache` | total **302**; JSON **193**, PNG **99**, OGG **2**, GLSL **2**, TOML 1, `pack.mcmeta` 1 |
+| 18 | 263 language keys, Chinese and English equal | after `ModLangProvider` runs, compare the key sets of the two `.json` files | both **263** keys (222 + 39); `set(zh) == set(en)` is `True`; among them `tooltip.farmstorm.*` is still **16** entries (nothing wrongly added) |
 | 19 | the three new advancements unlock | respectively: throw a Molotov / land a Zangief Cane on a player / obtain the Wild Hunter effect | each advancement pops a toast once; `/advancement` shows `farmstorm:first_molotov`, `farmstorm:zangief_hit`, `farmstorm:first_wild_hunter` |
 | 20 | the shape and count of the 5 new recipes | craft the converter at the crafting table (center crafting table + eight crops); place 4 Puffed Wheat shapeless; convert molotov / zangief_cane / wild_apple once each in the converter | the converter yields 1; 4 Puffed Wheat yield 1 Compressed Puffed Wheat; each of the three conversions costs 3 experience points and works in both directions (golden apple ⇄ Wild Apple, once each way) |
 | 21 | 0 custom network packets | `grep -r "CustomPacketPayload" src/main/java` | **0 matches** (v0.0.1 was also 0; v0.0.2 must not introduce the first one) |

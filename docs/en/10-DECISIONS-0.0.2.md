@@ -146,7 +146,7 @@ The number range of this group is D-59 ~ D-77. The main line is the three intrus
 | Subsystem | Decisions involved | Technical landing point |
 |---|---|---|
 | Screen takeover (camera) | D-59, D-70 | `ViewportEvent.ComputeCameraAngles`, render-layer angles only |
-| Full-screen grayscale | D-61 | one full-screen pass in `RenderGuiEvent.Post` |
+| World-only grayscale (the HUD keeps its original colours) | D-61 | vanilla `PostChain` (`GameRenderer#loadEffect`), run at the end of the world pass |
 | Red silhouette | D-62 | redraw of the model in `RenderLivingEvent.Post` |
 | Input lock | D-60 | five events, each covering one segment (**revised by D-79 to seven mechanisms**) |
 | Wild Hunter target acquisition and displacement | D-64, D-65 | client-side prediction + server-side ruling |
@@ -170,19 +170,19 @@ The number range of this group is D-59 ~ D-77. The main line is the three intrus
 - **Rationale**: the only reason given in the source text is 'locking ESC out would make players think the game has frozen', so ESC must always pass. Technically five events each cover one segment (movement/jump/sneak, attack/use, hotbar 1–9, scroll wheel, inventory/chat), and missing one leaks. This entry is the review object of RT-13.
 - **Where it lands**: `client/FarmstormClient.java` (`MovementInputUpdateEvent`, `InputEvent.InteractionKeyMappingTriggered`, `InputEvent.Key`, `InputEvent.MouseScrollingEvent`, `ScreenEvent.Opening`); the input lock section and RT-13 of `12-TECH-0.0.2.md`.
 
-#### D-61 · Black and white includes the GUI
+#### D-61 · Black and white (world-only grayscale, the HUD keeps its original colours)
 
 - **ID**: D-61
-- **Decision**: the grayscale post-processing acts on the whole-world rendering **and** on the GUI layer; it is a full-screen grayscale, not a fade of the world alone.
-- **Rationale**: fading the world alone would leave a coloured inventory bar and health bar, and the player would see at a glance that 'only the world changed colour', a look too far from the vanilla Blindness effect. The preferred mount point `RenderGuiEvent.Post` sits after the GUI and before the screen, so a single pass naturally covers world and GUI at once, which satisfies this entry exactly.
-- **Where it lands**: `assets/farmstorm/shaders/core/grayscale.fsh` + `assets/farmstorm/post_effect/grayscale.json` (post_effect +1, plus 2 GLSL); the grayscale section and RT-10 of `12-TECH-0.0.2.md` (faking grayscale with fog colour or a texture swap is forbidden).
+- **Decision**: the grayscale post-processing acts on the **whole world rendering** (blocks, entities, particles) while the **HUD / GUI keeps its original colours**. The first draft asked for the GUI to be greyed as well; v0.0.2 changed that scope per V-56.
+- **Rationale**: the first draft argued that fading the world alone would leave a coloured inventory and health bar. The only mechanism that actually lands is the vanilla `PostChain`: its `process()` runs at `GameRenderer:1027` (after `renderLevel`) and before GUI rendering (`GameRenderer:1073`), so it naturally greys the world only. Including the GUI would mean taking over the framebuffer and hand-writing target management, which in v0.0.2 produced exactly the 'grey at the wrong moment' symptom (V-48); on top of that the `post_effect/` directory has no loader in NeoForge 21.1.213 (V-49). The world pass already covers the body of the effect, so per V-56 the 'HUD keeps its colours' scope is accepted.
+- **Where it lands**: `assets/farmstorm/shaders/post/grayscale.json` (the `PostChain` itself) + `shaders/program/grayscale.json` + `shaders/core/grayscale.fsh`; `client/GrayscalePass.java` (`GameRenderer#loadEffect` / `shutdownEffect`); `assets/farmstorm/post_effect/grayscale.json` is kept as RT-10's reserved mount point (no loader today, not part of the running pipeline); the grayscale section and RT-10 of `12-TECH-0.0.2.md` (faking grayscale with fog colour or a texture swap is forbidden).
 
 #### D-62 · The red highlight draws only what is visible
 
 - **ID**: D-62
 - **Decision**: a red silhouette is drawn only for mobs that are **visible in line of sight** (not occluded by a block) and at a distance of **≤ 64 blocks**. The player itself and same-team players are excluded. No through-wall drawing.
-- **Rationale**: a through-wall highlight marks 'enemies you cannot see' as well, which is far stronger than the vanilla Glowing effect; 64 blocks is the distance cap given by the source text, and together they form the strength cap. Excluding the player itself and same-team players follows D-06's ally scope. Technically the redraw must use `getModel().renderToBuffer` and not `EntityRenderDispatcher#render`, otherwise it recursively fires its own event.
-- **Where it lands**: `client/FarmstormClient.java` (`RenderLivingEvent.Post` + `player.hasLineOfSight` + distance check); `assets/farmstorm/textures/misc/white.png`; the silhouette section and RT-11 of `12-TECH-0.0.2.md`.
+- **Rationale**: a through-wall highlight marks 'enemies you cannot see' as well, which is far stronger than the vanilla Glowing effect; 64 blocks is the distance cap given by the source text, and together they form the strength cap. Excluding the player itself and same-team players follows D-06's ally scope. Technically the redraw must go through `LivingEntityRenderer#render(...)` with a re-entrancy guard, never `EntityRenderDispatcher#render`, otherwise it recursively fires its own event; `MultiBufferSource` must also be filtered by vertex format, otherwise a leash (`POSITION_COLOR_LIGHTMAP`) crashes the client outright (V-58).
+- **Where it lands**: `client/FarmstormClient.java` (`RenderLivingEvent.Post` + `player.hasLineOfSight` + distance check); `assets/farmstorm/textures/misc/wild_hunter_red.png` (the colour is baked into the texture, V-60); the silhouette section and RT-11 of `12-TECH-0.0.2.md`.
 
 #### D-63 · 3 new advancements
 
@@ -464,7 +464,7 @@ The following 11 items are this version's exclusion list; encountering any one o
 3. **No Mixin**: all three intrusive effects go through NeoForge events and native extension points (D-40).
 4. **No change to any existing v0.0.1 number or recipe**: any field of the 15 existing `CropProfile`s, the default value of any existing config key, the existing 21 conversion recipes and the existing 12 advancements are untouched throughout (build fact card §3.4).
 5. **No change to the comparison logic of the demolition threshold**: `resistance < maxResistance` in `BlastRule.canBreak()` is not touched, and neither are the default values of `grenadeResistThreshold` and `sliceResistThreshold`; D-78 clarifies threshold attribution and the wording of the documents, not a change of implementation (§5.3, §5.5).
-6. **No shader-mod compatibility detection**: the conflict of full-screen grayscale with post-processing mods such as Oculus / Iris is registered only as a known incompatibility; no runtime probing is written and no degradation branch is added (RT-16).
+6. **No shader-mod compatibility detection**: the conflict of world-only grayscale (vanilla `PostChain`) with post-processing mods such as Oculus / Iris is registered only as a known incompatibility; no runtime probing is written and no degradation branch is added (RT-16).
 7. **No rotatable pillar for the Compressed Hay Block**: the same texture on six faces, no axis variant (D-57).
 8. **No new damage types**: `damage_types` +0, still D-39's two, `farmstorm:void_bolt` and `farmstorm:crop_blast`; the Molotov deals no damage (D-58).
 9. **No new registration categories**: `block_entities`, `menu types`, `recipe type` / `serializer`, `data components` and the creative tab are all +0 in build fact card §3.2 (`zangief_cane` reuses the existing `DeployedCropBlockEntity`, the conversion recipes reuse `ConverterRecipe`).

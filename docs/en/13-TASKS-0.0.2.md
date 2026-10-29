@@ -3,7 +3,7 @@
 > Project: Farmstorm · v0.0.2
 > Basis: `.work/v002-BRIEF.md` (finalized conventions) + `docs/zh/10-DECISIONS-0.0.2.md` (D-49 ~ D-79) + `docs/zh/11-DESIGN-0.0.2.md` (design specs of the 7 new features) + `docs/zh/12-TECH-0.0.2.md` (registered objects / class design / resources / config list)
 > This file breaks the 12-TECH spec into **40** tasks that can each be committed and verified independently, numbered **F-60 ~ F-99**, continuing from F-59 of `03-TASKS.md`. Phase 11 ~ Phase 15 map one-to-one onto M7 ~ M11 of `04-ROADMAP.md`.
-> Coverage: 13 new registered objects, 22 new config keys, 36 new resource files, 11 data entries (5 recipes + 3 advancements + 1 item tag + 2 spots in vanilla tags); 0 uncovered (item-by-item mapping in §9).
+> Coverage: 13 new registered objects, 22 new config keys, 40 resource deliverables, 11 data entries (5 recipes + 3 advancements + 1 item tag + 2 spots in vanilla tags); 0 uncovered (item-by-item mapping in §9).
 > This file only reads upstream: it does not modify `03-TASKS.md`, `04-ROADMAP.md`, documents `10` / `11` / `12`, `.work/v002-BRIEF.md` or `src/`.
 
 ---
@@ -101,14 +101,14 @@ F-60 Build baseline 0.5
     ├─ F-78 targeting 1.5
     │   ├─ F-79 dash 3.0
     │   └─ F-80 recheck and settlement 1.5 ── F-81 kill extension 0.5
-    ├─ F-82 full-screen grayscale 3.0
+    ├─ F-82 world-only grayscale 3.0
     ├─ F-83 outline 1.5
     └─ F-84 loop sound 1.5 ── F-94 audio pipeline 3.0
 Convergence layer (Phase exits and the final acceptance; each node appears once, prerequisites item by item in the “Depends on” field of the task block):
 F-75 Phase 12 exit 0.5   ← Molotov, the compressed items and the 5 recipes
 F-85 Phase 13 exit 0.5   ← the seven Wild Hunter abilities
 F-93 Phase 14 exit 0.5   ← the three phases and the input lock
-F-98 three advancements 0.5 ── F-97 language 39 keys 0.5 ── F-99 four-count cross-check + regression + packaging 3.0
+F-98 three advancements 0.5 ── F-97 language 41 keys 0.5 ── F-99 four-count cross-check + regression + packaging 3.0
 ```
 
 Only the chains that decide the total duration are drawn. **Each task appears exactly once in the tree, and a node's parent on the tree is always one of the tasks listed in that node's “Depends on” field**; prerequisites not drawn in the tree follow the “Depends on” field of each task block. `F-97` hangs under `F-98` (`F-98` is the prerequisite listed in its “Depends on” field), and `F-99`'s prerequisites are every node above.
@@ -196,7 +196,7 @@ Phase exit criteria: `.tools\gw.cmd build` exits with code 0; all four startup-l
 - **Deliverables**: `effect/WildHunterEffect.java` (visible, with an icon, attach and detach of three attribute modifiers), `effect/ZangiefPiledriverEffect.java` (hidden, amplifier as the phase number), `registry/FarmstormMobEffects.java`, `registry/FarmstormSounds.java`, `Farmstorm.java` (attach the two `REGISTER`s)
 - **Acceptance**:
   1. `/effect give @s farmstorm:wild_hunter 10` succeeds and an effect icon appears in the HUD; `/effect give @s farmstorm:zangief_piledriver 10 2` succeeds with no icon in the HUD and no description in the inventory (`12-TECH-0.0.2.md §3.6`).
-  2. In `/data get entity @s ActiveEffects`, `farmstorm:zangief_piledriver` has `amplifier` **2** and `show_icon` **false** (the phase channel of D-50 holds).
+  2. In `/data get entity @s active_effects`, `farmstorm:zangief_piledriver` has `amplifier` **2** and `show_icon` **false** (the phase channel of D-50 holds).
   3. `/playsound farmstorm:zangief_piledriver master @s ~ ~ ~ 1 1` and `/playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1` both succeed, and both events are visible in the `/playsound` completion list (`12-TECH-0.0.2.md §11 #6`).
   4. The dedicated-server startup log has no `NoClassDefFoundError` (both effect classes and both registration classes sit on the common side and do not depend on `Dist.CLIENT`).
 
@@ -273,7 +273,7 @@ Phase exit criteria: a crafting table yields a converter → the converter conve
   2. Nothing is placed above a block whose `isSolidRender` is false (a slab / a snow layer) (`12-TECH-0.0.2.md §3.7` criterion 2).
   3. Over 20 throws in a row, `岩浆块 / (火 + 岩浆块)` falls in the **10 %–20 %** range (the rough check of 85 : 15); the three numbers in the log can be added up directly as a cross-check.
   4. After setting `molotov.effectRadius` to `1.0` and throwing again, `候选 {N}` in the log shrinks markedly (the radius really reads config).
-  5. A single throw completes within one tick and the server log has no `Can't keep up` line (a ceiling of about 268 `setBlock` calls).
+  5. A single throw completes within one tick and the server log has no `Can't keep up` line (a ceiling of about 257 `setBlock` calls).
 
 #### F-71 · Converter Crafting Recipe and the `converter_fuel` Tag
 
@@ -303,7 +303,7 @@ Phase exit criteria: a crafting table yields a converter → the converter conve
 - **Deliverables**: three `ConverterRecipe`s in `datagen/ModRecipeProvider.java` (`minecraft:crimson_fungus` ⇄ `farmstorm:molotov`; `minecraft:sugar_cane` ⇄ `farmstorm:zangief_cane`; `minecraft:golden_apple` ⇄ `farmstorm:wild_apple`), bidirectional, experience cost read from the existing key (default 3), no catalyst; the artifacts `data/farmstorm/recipe/molotov.json`, `zangief_cane.json`, `wild_apple.json`
 - **Acceptance**:
   1. All three JSONs have `type` `farmstorm:converting`, `bidirectional` `true` and `experience` 3.
-  2. In the converter GUI, golden apple → Wild Apple succeeds once in each direction; `/xp query @s levels` drops by 3 both times.
+  2. In the converter GUI, golden apple → Wild Apple succeeds once in each direction; `/xp query @s points` drops by 3 both times and `/xp query @s levels` stays unchanged.
   3. The converting recipes (`farmstorm:converting`) under `src/generated/resources/data/farmstorm/recipe/` number **24** in total (21 + 3, `BRIEF §4`).
   4. Not one of the 21 existing converting recipes or the default of the conversion-cost key changed (`git diff` contains added lines only).
 
@@ -334,7 +334,7 @@ Phase subtotal: **9 tasks, 10.5 person-days** (S 3 / M 6 / L 0).
 
 ## 5. Phase 13 · Wild Hunter (F-76 ~ F-85)
 
-Phase goal: land two of the three invasive effects (full-screen grayscale D-61, red outline D-62) together with the whole Wild Hunter gameplay (attributes, targeting, dash, damage knockback, kill extension, loop sound, the Wild Apple entry point).
+Phase goal: land two of the three invasive effects (world-only grayscale D-61, red outline D-62) together with the whole Wild Hunter gameplay (attributes, targeting, dash, damage knockback, kill extension, loop sound, the Wild Apple entry point).
 
 Phase exit criteria: within 700 ticks of eating one Wild Apple — the three attribute readings are queryable, an attack on a creature within 5 blocks and 30° snaps the player onto it, the effect survives 6 kills in a row, the whole screen is black and white including the GUI, visible creatures carry a red outline, and the loop sound follows; after `/effect clear` all seven reset.
 
@@ -344,7 +344,7 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 - **Depends on**: F-61, F-64
 - **Deliverables**: `WildHunterEffect#addAttributeModifiers` / `#removeAttributeModifiers` (three fixed `ResourceLocation` constants + `ADD_MULTIPLIED_TOTAL`), reading `wild_hunter.speedBonusPercent` 30.0 / `attackSpeedBonusPercent` 30.0 / `attackDamageBonusPercent` 40.0
 - **Acceptance**:
-  1. After eating a Wild Apple, F3 reads `Speed` +30 %, `Attack Speed` +30 % and `Attack Damage` +40 % (matching the config defaults item by item).
+  1. After eating a Wild Apple, run `/attribute @s minecraft:generic.movement_speed get`, `minecraft:generic.attack_speed get` and `minecraft:generic.attack_damage get` (**the F3 panel does not show attribute values**, V-61): +30 % / +30 % / +40 %, matching the config defaults item by item.
   2. After `/effect clear @s farmstorm:wild_hunter` the three readings return to baseline (the id is fixed, so the modifiers come off).
   3. After setting `wild_hunter.attackDamageBonusPercent` to `100.0` and re-entering the save, F3's damage reading doubles; after setting it back to 40.0 it recovers.
 
@@ -354,8 +354,8 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 - **Depends on**: F-65, F-76
 - **Deliverables**: the `FoodProperties` of `wild_apple` in `registry/FarmstormItems.java` (nutrition reads `wild_apple.nutrition` 4, saturation modifier reads `wild_apple.saturationModifier` 1.2) + applying `farmstorm:wild_hunter` after eating (duration reads `wild_hunter.durationTicks` 700, ruling A-02)
 - **Acceptance**:
-  1. After one is eaten, the remaining duration of `farmstorm:wild_hunter` under `/effect` is within **700 ticks ± 2**; in `/data get entity @s ActiveEffects` that effect's `amplifier` is 0.
-  2. The F3 hunger line differs by **4** points before and after, and `Saturation` by **4.8** (4 × 1.2).
+  1. After one is eaten, the remaining duration of `farmstorm:wild_hunter` under `/effect` is within **700 ticks ± 2**; in `/data get entity @s active_effects` that effect's `amplifier` is 0.
+  2. The F3 hunger line differs by **4** points before and after, and `Saturation` by **the same value as the vanilla golden apple (9.6 measured)** — `FoodData#eat` is `nutrition × saturationModifier × 2.0F` (V-35).
   3. Converting Wild Apple back to golden apple in the converter yields 1 `minecraft:golden_apple`, and eating a golden apple grants no `farmstorm:wild_hunter` (the bidirectional recipe of D-54).
 
 #### F-78 · Targeting Algorithm: a 5-Block Sphere and a 30° Angle
@@ -402,11 +402,11 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
   2. After the 6th the effect is still there (no cap); health rises by 10 per kill (capped at the vanilla 20).
   3. No kill counter exists in the source: `git grep -nE "killCount|maxKill"` has no output (D-74 forbids adding a counter of your own).
 
-#### F-82 · Full-Screen Grayscale Pass (GUI Included)
+#### F-82 · World-Only Grayscale (the HUD keeps its colours)
 
 - **Complexity**: L | **Person-days**: 3.0
 - **Depends on**: F-60, F-76
-- **Deliverables**: `client/GrayscalePass.java` (`RegisterShadersEvent` registers the `ShaderInstance`; `RenderGuiEvent.Post` runs one full-screen pass over `Minecraft#getMainRenderTarget()`); `assets/farmstorm/shaders/core/grayscale.json`, `grayscale.vsh`, `grayscale.fsh`; `assets/farmstorm/post_effect/grayscale.json` (the mount point of the RT-10 degraded branch)
+- **Deliverables**: `client/GrayscalePass.java` (the vanilla `PostChain`: `GameRenderer#loadEffect(Farmstorm.id("shaders/post/grayscale.json"))` / `shutdownEffect()`, switched once per client tick according to whether the effect is present, and it does not steal the vanilla creeper / spider chain); `assets/farmstorm/shaders/post/grayscale.json` (the chain, `targets` must be an array), `shaders/program/grayscale.json` (program declaration), `shaders/core/grayscale.fsh` (the luminance formula); `assets/farmstorm/post_effect/grayscale.json` (RT-10's reserved mount point, no loader today); `shaders/core/grayscale.json` and `grayscale.vsh` are leftovers of the earlier plan, kept but not loaded
 - **Acceptance**:
   1. With the effect on, the world and the GUI go black and white **at the same time**: in an F3 screenshot the inventory's red hearts, the green experience bar and the chat's coloured text are all grayscale (D-61's “whole screen including the GUI”).
   2. The client log has no `Shader ... could not be loaded` and no `GL_INVALID` line (`12-TECH-0.0.2.md §11 #5`).
@@ -417,7 +417,7 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-76
-- **Deliverables**: `client/WildHunterOutline.java` (`RenderLivingEvent.Post` → `getModel().renderToBuffer(...)` + `RenderType.entityTranslucentEmissive(whiteTexture)` + `RenderSystem.setShaderColor(1, 0.15, 0.15, 0.45)`; distance reads `wild_hunter.highlightRadius` 64.0; filtered by `player.hasLineOfSight`); `assets/farmstorm/textures/misc/white.png` (1×1)
+- **Deliverables**: `client/WildHunterOutline.java` (`RenderLivingEvent.Post` → `getModel().renderToBuffer(...)` + `RenderType.entityTranslucentEmissive(whiteTexture)` + `RenderSystem.setShaderColor(1, 0.15, 0.15, 0.45)`; distance reads `wild_hunter.highlightRadius` 64.0; filtered by `player.hasLineOfSight`); `assets/farmstorm/textures/misc/wild_hunter_red.png` (1×1)
 - **Acceptance**:
   1. Looking straight at a pig within 5 blocks: a red outline appears; at 65 blocks: it is not drawn.
   2. A creature behind a wall is not drawn (`hasLineOfSight` is false); self and same-team players are not drawn.
@@ -442,7 +442,7 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 - **Deliverables**: a regression record (`logs/latest.log` excerpt + a manual-test table); the fix patch touches whitelisted files only
 - **Acceptance**:
   1. All three of #13 (the outline's three conditions), #14 (the dash goes through the server-side recheck) and #15 (kill extension has no cap) in `12-TECH-0.0.2.md §11` pass.
-  2. The seven abilities run through in one go: attribute bonuses / targeting snap / damage knockback / kill extension / full-screen grayscale / red outline / loop sound; after `/effect clear` all of them reset.
+  2. The seven abilities run through in one go: attribute bonuses / targeting snap / damage knockback / kill extension / world-only grayscale / red outline / loop sound; after `/effect clear` all of them reset.
   3. `grep -r "CustomPacketPayload" src/main/java` matches 0 times; `grep -rn "Mixin" src/main/java` matches 0 times (D-40 / D-50).
 
 Phase subtotal: **10 tasks, 16.0 person-days** (S 2 / M 6 / L 2).
@@ -482,7 +482,7 @@ Phase exit criteria: stepping within 1.5 blocks inverts the view at once and loc
 - **Depends on**: F-64, F-87
 - **Deliverables**: `behavior/ZangiefPiledriverController.java` (the server-side three-phase state machine; phase 0 = `amplifier 0` for a duration read from `zangief_cane.stageDelayTicks` 14 ticks, and on expiry re-issue `amplifier 1` under the same id); one log line `桑吉尔蔗 相位 0`
 - **Acceptance**:
-  1. Immediately after the trigger, `/data get entity @s ActiveEffects` shows `farmstorm:zangief_piledriver` with `amplifier` **0** and **14 ticks** remaining ± 1.
+  1. Immediately after the trigger, `/data get entity @s active_effects` shows `farmstorm:zangief_piledriver` with `amplifier` **0** and **14 ticks** remaining ± 1.
   2. 14 ticks later the `amplifier` under the same id becomes **1** (a re-issue, producing no second effect record).
   3. After setting `zangief_cane.stageDelayTicks` to `30` and retesting, phase 0 lasts 30 ticks (the key takes effect).
 
@@ -492,7 +492,7 @@ Phase exit criteria: stepping within 1.5 blocks inverts the view at once and loc
 - **Depends on**: F-88
 - **Deliverables**: the phase 1 segment (`MobEffects.LEVITATION`, `amplifier = levitationLevel - 1 = 6`, lasting `levitationDurationTicks` 20 ticks, applied on tick 14); one log line `桑吉尔蔗 相位 1`
 - **Acceptance**:
-  1. During phase 1 the F3 `Y` coordinate rises tick by tick; in `/data get entity @s ActiveEffects`, `minecraft:levitation` has `amplifier` **6** and **20 ticks** remaining (D-69).
+  1. During phase 1 the F3 `Y` coordinate rises tick by tick; in `/data get entity @s active_effects`, `minecraft:levitation` has `amplifier` **6** and **20 ticks** remaining (D-69).
   2. After setting `zangief_cane.levitationLevel` to `3` and retesting, `amplifier` becomes **2** (the level minus 1).
   3. During phase 0 (the first 14 ticks) the player's Y coordinate does not change (levitation is not applied in phase 0).
 
@@ -503,7 +503,7 @@ Phase exit criteria: stepping within 1.5 blocks inverts the view at once and loc
 - **Deliverables**: the phase 2 segment (`setDeltaMovement` every tick = remaining height ÷ remaining ticks; the effect is cleared as soon as landing is detected; the target duration reads `zangief_cane.fallTicks` 40 ticks, ruling A-03); one log line `落地耗时 {N} 刻`
 - **Acceptance**:
   1. Test once each on flat ground / a two-block platform / a four-block platform: N in all three `落地耗时 {N} 刻` log lines falls within **40 ± 2** (the watershed of `12-TECH-0.0.2.md §11 #10`).
-  2. After landing, `/data get entity @s ActiveEffects` no longer reads `farmstorm:zangief_piledriver` (the effect was cleared).
+  2. After landing, `/data get entity @s active_effects` no longer reads `farmstorm:zangief_piledriver` (the effect was cleared).
   3. After setting `zangief_cane.fallTicks` to `80` and retesting, the landing time at all three heights becomes about 80 (proving it is time servoing, not a fixed speed).
   4. `/kill @s` during phase 2 and respawn: no leftover velocity and no leftover effect.
 
@@ -547,9 +547,9 @@ Phase subtotal: **8 tasks, 11.5 person-days** (S 2 / M 5 / L 1).
 
 ## 7. Phase 15 · Resources, Audio, Advancements and Acceptance (F-94 ~ F-99)
 
-Phase goal: fill in the remaining part of the 36 new resource files, the 39 language keys and the 3 advancements, and complete the four-count cross-check of 298 / 261 / 139 / 77 together with the three-mode regression and the packaging release.
+Phase goal: fill in the remaining part of the 40 resource deliverables, the 39 language keys and the 3 advancements, and complete the four-count cross-check of 302 / 263 / 139 / 77 together with the three-mode regression and the packaging release.
 
-Phase exit criteria: `src/{main,generated}/resources` holds 298 files in total (the 11 `.cache` files excluded); both language files carry 261 keys each with equal key sets; `config/farmstorm-server.toml` has 139 keys; all 22 self-checks of `12-TECH-0.0.2.md §11` pass; `dist/farmstorm-0.0.2+mc1.21.1.jar` exists.
+Phase exit criteria: `src/{main,generated}/resources` holds 302 files in total (the 11 `.cache` files excluded); both language files carry 263 keys each with equal key sets; `config/farmstorm-server.toml` has 139 keys; all 22 self-checks of `12-TECH-0.0.2.md §11` pass; `dist/farmstorm-0.0.2+mc1.21.1.jar` exists.
 
 #### F-94 · Audio and Effect Icon Pipeline
 
@@ -586,14 +586,14 @@ Phase exit criteria: `src/{main,generated}/resources` holds 298 files in total (
   3. `models/item/zangief_cane.json` has `parent` `minecraft:item/generated` and references no block model; `models/item/compressed_hay_block.json` has `parent` `farmstorm:block/compressed_hay_block`.
   4. All 5 items display correctly in the inventory (no purple-black, no missing-model warning).
 
-#### F-97 · Language Files: 39 Entries, Chinese and English Equal
+#### F-97 · Language Files: 41 Entries, Chinese and English Equal
 
 - **Complexity**: S | **Person-days**: 0.5
 - **Depends on**: F-61, F-64, F-65, F-98
-- **Deliverables**: the 39 `ENTRIES` of `datagen/ModLangProvider.java`; the artifacts `assets/farmstorm/lang/zh_cn.json` and `assets/farmstorm/lang/en_us.json`
+- **Deliverables**: the 41 `ENTRIES` of `datagen/ModLangProvider.java`; the artifacts `assets/farmstorm/lang/zh_cn.json` and `assets/farmstorm/lang/en_us.json`
 - **Acceptance**:
-  1. Each of the two `.json` files has **261** keys (222 + 39), and `set(zh) == set(en)` is `True` (`12-TECH-0.0.2.md §7.4`).
-  2. The composition of the 39 matches category by category: `farmstorm.configuration.*` 22 + `item.*` 5 + `block.*` 2 + `effect.*` 2 + `subtitles.*` 2 + `advancements.*` 6 (`12-TECH-0.0.2.md §7.3`); among them the 6 `advancements.*` entries use short phrases — 火了！/ 手摇重 360 / 狂野猎人 (ruling A-09; the three sentences such as “火了！火了！” are item blurbs, belong to the `item.farmstorm.*.tooltip` namespace and never enter the advancement keys).
+  1. Each of the two `.json` files has **263** keys (222 + 41), and `set(zh) == set(en)` is `True` (`12-TECH-0.0.2.md §7.4`).
+  2. The composition of the 41 matches category by category: `farmstorm.configuration.*` 22 + `item.*` 5 + `block.*` 2 + `effect.*` 2 + `subtitles.*` 2 + `advancements.*` 6 (`12-TECH-0.0.2.md §7.3`); among them the 6 `advancements.*` entries use short phrases — 火了！/ 手摇重 360 / 狂野猎人 (ruling A-09; the three sentences such as “火了！火了！” are item blurbs, belong to the `item.farmstorm.*.tooltip` namespace and never enter the advancement keys).
   3. `tooltip.farmstorm.*` is still **16** entries (nothing added by mistake; the “two categories with no additions” of `12-TECH-0.0.2.md §7.3`).
 
 #### F-98 · Three New Advancements
@@ -612,8 +612,8 @@ Phase exit criteria: `src/{main,generated}/resources` holds 298 files in total (
 - **Depends on**: F-75, F-85, F-93, F-94, F-96, F-97
 - **Deliverables**: the fix patch (whitelisted files only) + `dist/farmstorm-0.0.2+mc1.21.1.jar` + the v0.0.2 index section and the asset-provenance section of `README.md` (D-49 / D-66)
 - **Acceptance**:
-  1. **298** resources (JSON 193 / PNG 99 / OGG 2 / GLSL 2 / TOML 1 / `pack.mcmeta` 1), minus the 11 extensionless `.cache` files (run the checking method of `12-TECH-0.0.2.md §7.4` item by item).
-  2. Both language files carry **261** keys with equal key sets; `config/farmstorm-server.toml` has **139** keys; the startup log carries both the `自检 注册对象 77 个` line and the `自检 实体渲染器 11/11 → OK` line.
+  1. **302** resources (JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1), minus the 11 extensionless `.cache` files (run the checking method of `12-TECH-0.0.2.md §7.4` item by item).
+  2. Both language files carry **263** keys with equal key sets; `config/farmstorm-server.toml` has **139** keys; the startup log carries both the `自检 注册对象 77 个` line and the `自检 实体渲染器 11/11 → OK` line.
   3. All 22 self-checks of `12-TECH-0.0.2.md §11` pass, with a reading kept for each.
   4. `grep -r "CustomPacketPayload" src/main/java` matches 0 times; `grep -rn "Mixin" src/main/java` matches 0 times.
   5. Dedicated server started + client connected: the server log has no `NoClassDefFoundError` and the effect-related features work (`12-TECH-0.0.2.md §11 #22`).
@@ -711,11 +711,11 @@ All 22 keys land in F-61; the “Consuming task” column names the implementati
 
 `117 + 22 = 139`, aligned item by item with the “139 toml leaf nodes” of F-61 and F-99; the 22 `farmstorm.configuration.*` language keys for these 22 keys land in F-97 (the key form of ruling A-04).
 
-### 9.3 36 New Resource Files (coverage 36 / 36)
+### 9.3 40 v0.0.2 Resource Deliverables (40 rows, all landed)
 
-The row numbers map one-to-one onto #1–#36 of `12-TECH-0.0.2.md §7.2`; the “Pipeline” column follows that section's basis (handwritten / DataGen / script).
+The row numbers map one-to-one onto #1–#40 of `12-TECH-0.0.2.md §7.2`; the "Pipeline" column follows that section's basis (hand-written / DataGen / script). **Settled by the measured repository after V-49 / V-56 / V-60 / V-64**: the list has 40 rows and **all 40 have landed** (the 3 advancements were delivered by F-98); 3 of them (2 `.ogg` files and `textures/mob_effect/wild_hunter.png`) were already in the repository at the 0.0.2 baseline commit, so `git diff` shows +37 and the resource total is 265 + 37 = **302**.
 
-| # | Path (relative to `src/{main,generated}/resources`) | Category | Pipeline | Task that lands it |
+| # | Path (relative to `src/{main,generated}/resources`) | Category | Pipeline | Landed by |
 |---|---|---|---|---|
 | 1 | `assets/farmstorm/textures/item/molotov.png` | PNG | script | F-95 |
 | 2 | `assets/farmstorm/textures/item/zangief_cane.png` | PNG | script | F-95 |
@@ -723,49 +723,53 @@ The row numbers map one-to-one onto #1–#36 of `12-TECH-0.0.2.md §7.2`; the �
 | 4 | `assets/farmstorm/textures/item/compressed_puffed_wheat.png` | PNG | script | F-95 |
 | 5 | `assets/farmstorm/textures/block/compressed_hay_block.png` | PNG | script | F-95 |
 | 6 | `assets/farmstorm/textures/block/zangief_cane.png` | PNG | script | F-95 |
-| 7 | `assets/farmstorm/textures/misc/white.png` | PNG | script | F-83 |
-| 8 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` | PNG | script | F-94 |
-| 9 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` | OGG | script | F-94 |
-| 10 | `assets/farmstorm/sounds/zangief_piledriver.ogg` | OGG | script | F-94 |
-| 11 | `assets/farmstorm/sounds.json` | JSON | handwritten | F-94 |
-| 12 | `assets/farmstorm/shaders/core/grayscale.json` | JSON | handwritten | F-82 |
-| 13 | `assets/farmstorm/shaders/core/grayscale.vsh` | GLSL | handwritten | F-82 |
-| 14 | `assets/farmstorm/shaders/core/grayscale.fsh` | GLSL | handwritten | F-82 |
-| 15 | `assets/farmstorm/post_effect/grayscale.json` | JSON | handwritten | F-82 |
-| 16 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | F-96 |
-| 17 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | F-96 |
-| 18 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | F-96 |
-| 19 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | F-96 |
-| 20 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | F-96 |
-| 21 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | F-96 |
-| 22 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | F-96 |
-| 23 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | F-96 |
-| 24 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | F-96 |
-| 25 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | F-71 |
-| 26 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | F-72 |
-| 27 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | F-73 |
-| 28 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | F-73 |
-| 29 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | F-73 |
-| 30 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | F-98 |
-| 31 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | F-98 |
-| 32 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | F-98 |
-| 33 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | F-74 |
-| 34 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | F-74 |
-| 35 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | F-71 |
-| 36 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | F-74 |
-| **Total** | **36 rows** | | | **36 / 36, 0 uncovered** |
+| 7 | `assets/farmstorm/textures/misc/white.png` | PNG | script | F-83 (the base texture of the BRIEF §7.2 draft; the silhouette now uses the red one, the file is kept) |
+| 8 | `assets/farmstorm/textures/misc/wild_hunter_red.png` | PNG | script | F-83 (V-60: the colour is baked into the texture) |
+| 9 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` | PNG | script | F-94 |
+| 10 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` | OGG | script | F-94 |
+| 11 | `assets/farmstorm/sounds/zangief_piledriver.ogg` | OGG | script | F-94 |
+| 12 | `assets/farmstorm/sounds.json` | JSON | hand-written | F-94 |
+| 13 | `assets/farmstorm/shaders/core/grayscale.json` | JSON | hand-written | F-82 (the declaration of the earlier plan, not loaded today) |
+| 14 | `assets/farmstorm/shaders/core/grayscale.vsh` | GLSL | hand-written | F-82 (the vertex shader of the earlier plan, not loaded today) |
+| 15 | `assets/farmstorm/shaders/core/grayscale.fsh` | GLSL | hand-written | F-82 (the `fragment` that `program/grayscale.json` references) |
+| 16 | `assets/farmstorm/shaders/post/grayscale.json` | JSON | hand-written | F-82 (V-56: the `PostChain`, loaded at runtime; `targets` must be an array) |
+| 17 | `assets/farmstorm/shaders/program/grayscale.json` | JSON | hand-written | F-82 (V-56: shader program declaration) |
+| 18 | `assets/farmstorm/shaders/program/grayscale.fsh` | GLSL | hand-written | F-82 (V-56: same content as the core copy, a spare) |
+| 19 | `assets/farmstorm/post_effect/grayscale.json` | JSON | hand-written | F-82 (kept but **has no loader today**, RT-10's reserved mount point, V-49) |
+| 20 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | F-96 |
+| 21 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | F-96 |
+| 22 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | F-96 |
+| 23 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | F-96 |
+| 24 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | F-96 |
+| 25 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | F-96 |
+| 26 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | F-96 |
+| 27 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | F-96 |
+| 28 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | F-96 |
+| 29 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | F-71 |
+| 30 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | F-72 |
+| 31 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | F-73 |
+| 32 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | F-73 |
+| 33 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | F-73 |
+| 34 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | F-98 |
+| 35 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | F-98 |
+| 36 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | F-98 |
+| 37 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | F-74 |
+| 38 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | F-74 |
+| 39 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | F-71 |
+| 40 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | F-74 |
+| **Total** | **40 rows** | | | **all 40 landed** |
 
-Summary by category (item-for-item equal to the four-row counting table of `12-TECH-0.0.2.md §7.2`, 36 in total):
+Summary by category (item-for-item equal to the four-row counting table of `12-TECH-0.0.2.md §7.2`, 40 in total):
 
-| Category | Rows | Count | Landing task (by row count) |
+| Category | Rows | Count | Landed by (per row) |
 |---|---|---|---|
-| PNG | #1–#8 | 8 | F-95 ×6, F-83 ×1, F-94 ×1 |
-| OGG | #9–#10 | 2 | F-94 ×2 |
-| JSON | #11, #12, #15–#36 | 24 | F-94 ×1, F-82 ×2, F-96 ×9, F-71 ×2 (#25, #35), F-72 ×1, F-73 ×3, F-98 ×3, F-74 ×3 |
-| GLSL | #13–#14 | 2 | F-82 ×2 |
-| **Total** | — | **36** | **all 36 rows accounted for** |
+| PNG | #1–#9 | 9 | F-95 ×6, F-83 ×2, F-94 ×1 |
+| OGG | #10–#11 | 2 | F-94 ×2 |
+| JSON | #12, #13, #16, #17, #19–#40 | 26 | F-94 ×1, F-82 ×4, F-96 ×9, F-71 ×2, F-72 ×1, F-73 ×3, F-98 ×3, F-74 ×3 |
+| GLSL | #14, #15, #18 | 3 | F-82 ×3 |
+| **Total** | — | **40** | **all 40 rows accounted for** |
 
-**Append-only changes (they create no new file and therefore do not count toward the 36)**: `data/minecraft/tags/block/mineable/pickaxe.json` gains `compressed_hay_block` (F-74), `data/farmstorm/tags/block/deployed_crops.json` gains `zangief_cane` (F-74), both language files gain 39 entries (F-97), and `data/farmstorm/tags/item/modified_crops.json` gains 4 entries (F-71). `262 + 36 = 298`.
+**Append-only changes (they create no new file and therefore do not count toward the 40 rows)**: `data/minecraft/tags/block/mineable/pickaxe.json` gains `compressed_hay_block` (F-74), `data/farmstorm/tags/block/deployed_crops.json` gains `zangief_cane` (F-74), both language files gain 39 entries (F-97), and `data/farmstorm/tags/item/modified_crops.json` gains 4 entries (F-71). `265 + 37 = 302`.
 
 ### 9.4 5 Recipes + 3 Advancements + 1 Item Tag + 2 Vanilla Tag Spots (coverage 11 / 11)
 
@@ -796,7 +800,7 @@ M7 ~ M11 map one-to-one onto Phase 11 ~ Phase 15. Each milestone gives two workl
 | M8 | Compressed Items and Molotov Loop | Phase 12 | 9 | 10.5 | 13.125 | 26.875 | The 5 new recipes are usable, and the impact-point semantics and the resistance matrix all line up |
 | M9 | Wild Hunter and Two Presentation Layers | Phase 13 | 10 | 16.0 | 20.000 | 46.875 | Seven abilities usable after one apple, all reset after clearing the effect |
 | M10 | Zangief Cane and the Input Lock | Phase 14 | 8 | 11.5 | 14.375 | 61.250 | Three phases run in order after stepping on the trap, landing time 40 ± 2 ticks at all three heights |
-| M11 | Resources, Advancements and Acceptance | Phase 15 | 6 | 11.5 | 14.375 | 75.625 | 298 / 261 / 139 / 77 all four align, the jar is releasable |
+| M11 | Resources, Advancements and Acceptance | Phase 15 | 6 | 11.5 | 14.375 | 75.625 | 302 / 263 / 139 / 77 all four align, the jar is releasable |
 | **Total** | | **5 Phases** | **40** | **60.5** | **75.625** | | |
 
 ### M7 · Base and Registry Increment (Phase 11)
@@ -821,7 +825,7 @@ M7 ~ M11 map one-to-one onto Phase 11 ~ Phase 15. Each milestone gives two workl
 
 ### M11 · Resources, Advancements and Acceptance (Phase 15)
 
-- **Completion criteria**: ① resources 298 / JSON 193 / PNG 99 / OGG 2 / GLSL 2; ② both language files carry 261 keys each with equal key sets, and `tooltip.farmstorm.*` is still 16 entries; ③ `config/farmstorm-server.toml` has 139 keys; ④ all 22 self-checks of `12-TECH-0.0.2.md §11` pass; ⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` exists and `jar tf` shows both `.ogg` files.
+- **Completion criteria**: ① resources 302 / JSON 195 / PNG 100 / OGG 2 / GLSL 3; ② both language files carry 263 keys each with equal key sets, and `tooltip.farmstorm.*` is still 16 entries; ③ `config/farmstorm-server.toml` has 139 keys; ④ all 22 self-checks of `12-TECH-0.0.2.md §11` pass; ⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` exists and `jar tf` shows both `.ogg` files.
 - **What is playable at the end of this milestone**: the all-Chinese interface shows no missing glyphs and all 9 new icons display correctly; each of the three new advancements pops one toast; drop the jar into a dedicated server and players need only the mod itself to take part — the client does not crash on a missing class.
 
 ---
@@ -881,17 +885,17 @@ Every key number appearing in this file has its upstream location in the table b
 | 2 | Registered objects **77** | F-66, F-99, §10 | `BRIEF §4` (64 → 77); the 12-category subtotals of `12-TECH-0.0.2.md §2.1` | Consistent |
 | 3 | New config **22** entries | §9.2, F-61 | the single list of `BRIEF §8`; `12-TECH-0.0.2.md §8.1` | Consistent |
 | 4 | config total **139** | F-61, F-97, F-99, §10 | `BRIEF §8` (117 + 22 = 139); `12-TECH-0.0.2.md §8.1` | Consistent |
-| 5 | Resources **298** | F-99, §10 | `BRIEF §4.1` (262) + `12-TECH-0.0.2.md §7.1` (+36) | Consistent |
-| 6 | Language keys **261** | F-97, F-99, §10 | `BRIEF §8` (`222 + 39 = 261`); `12-TECH-0.0.2.md §7.3` (39 = 5 items + 2 blocks + 2 effects + 2 subtitles + 6 advancements + 22 config) | Consistent |
-| 7 | New resources **36** | §9.3, F-95, F-96 | `12-TECH-0.0.2.md §7.2` (36 rows item by item + the four-row category table) | Consistent |
+| 5 | Resources **302** | F-99, §10 | measured base 265 + `12-TECH-0.0.2.md §7.1` (+37) | Consistent |
+| 6 | Language keys **263** | F-97, F-99, §10 | `BRIEF §8` (`222 + 41 = 263`); `12-TECH-0.0.2.md §7.3` (39 = 5 items + 2 blocks + 2 effects + 2 subtitles + 6 advancements + 22 config) | Consistent |
+| 7 | Resource deliverables **40** | §9.3, F-95, F-96 | `12-TECH-0.0.2.md §7.2` (40 rows item by item + the four-row category table) | Consistent |
 | 8 | New language keys **39** | F-97 | `12-TECH-0.0.2.md §7.3` (5 items + 2 blocks + 2 effects + 2 subtitles + 6 advancements + 22 config) | Consistent |
 | 9 | Advancements **15** | F-98, §9.4 | `BRIEF §4` (12 → 15); `10-DECISIONS-0.0.2.md §3.3` D-63 | Consistent |
 | 10 | Converting recipes **24** | F-73, §9.4 | `BRIEF §4` (21 → 24); `10-DECISIONS-0.0.2.md §3.2` D-54 | Consistent |
 | 11 | Recipes **5** | §9.4, F-71 ~ F-73 | `BRIEF §3.2` (3 converting + 2 crafting); `12-TECH-0.0.2.md §2.4` | Consistent |
 | 12 | Type distribution **10 / 6 / 3** | the self-check string of F-62, §12.2 | `BRIEF §4` (Throwable 10 / Deployable 6 / Edible 3); `12-TECH-0.0.2.md §3.1` | Consistent |
 | 13 | Demolition **4** | the self-check string of F-62, §0.4 A-06 | `BRIEF §4` (unchanged); `10-DECISIONS-0.0.2.md §5.3` | Consistent |
-| 14 | Existing resources **262** | the `262 + 36 = 298` of §9.3 | `BRIEF §4.1` (169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`) | Consistent |
-| 15 | Existing language keys **222** | the `222 + 39 = 261` of F-97 | `BRIEF §4.1`; `12-TECH-0.0.2.md §7.3` | Consistent |
+| 14 | Existing resources **262** | the `265 + 37 = 302` of §9.3 | `BRIEF §4.1` (169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`) | Consistent |
+| 15 | Existing language keys **222** | the `222 + 41 = 263` of F-97 | `BRIEF §4.1`; `12-TECH-0.0.2.md §7.3` | Consistent |
 | 16 | Existing config **117** | the `117 + 22 = 139` of F-61 | `BRIEF §4.1` (`defineInRange` 111 + `define` 4 + `defineInList` 2) | Consistent |
 | 17 | Existing registered objects **64** / increment **13** | §9.1 | `BRIEF §4` (64 → 77); `12-TECH-0.0.2.md §2.2` (names all 13 one by one) | Consistent |
 | 18 | `tooltip.farmstorm.*` **16** entries | F-97 | `BRIEF §4.1`; `12-TECH-0.0.2.md §7.3` (the two categories with no additions) | Consistent |
@@ -900,7 +904,7 @@ Every key number appearing in this file has its upstream location in the table b
 | 21 | Resistance **3.6e6** / threshold **6.0** / hardness **30.0F** | §0.4 A-06, F-67, F-68 | `BRIEF §2` D-57 / D-77; `10-DECISIONS-0.0.2.md §5.3` | Consistent (`12-TECH §3.9` and `§11 #9` both read “can break it” after revision, see §12.3 item 1) |
 | 22 | Spin rate **72.0** degrees/tick | §0.4 A-05, F-91 | `BRIEF §2` D-70 / `BRIEF §8` #22; `10-DECISIONS-0.0.2.md §3.3` D-70 | Consistent |
 
-Reconciliation conclusion (this round): the three key figures — the **22** entries of `12-TECH §8.1` with a total of **139**, the **261** language keys of `§7.3`, and the **262 → 298** resources of `§7.1` — are digit-for-digit equal to the current upstream values; across the 22 rows of this table **not one number changed** (they are all post-revision current values, with no residue of the old basis), and only the “consistent” note of row 21 was updated (the two places in `12-TECH` were changed to “can break it” during the revision period).
+Reconciliation conclusion (this round): the three key figures — the **22** entries of `12-TECH §8.1` with a total of **139**, the **263** language keys of `§7.3`, and the **262 → 302** resources of `§7.1` — are digit-for-digit equal to the current upstream values; across the 22 rows of this table **not one number changed** (they are all post-revision current values, with no residue of the old basis), and only the “consistent” note of row 21 was updated (the two places in `12-TECH` were changed to “can break it” during the revision period).
 
 ### 12.2 Self-Check of Task Totals and Phase Boundaries
 
@@ -918,7 +922,7 @@ The four conclusions of the numbering self-check:
 1. **Contiguous**: it starts at F-60 and ends at F-99 with no gap in between, 40 numbers in all (`99 − 60 + 1 = 40`). Check method: `grep -c "^#### F-" 13-TASKS-0.0.2.md` should be **40**, and `grep -oE "F-[0-9]{2}" | sort -u | wc -l` should be **40** as well.
 2. **No duplicates**: each number appears in exactly one task heading plus its dependency / coverage references, with no duplicate at the task-heading level.
 3. **Person-days self-consistent**: `11.0 + 10.5 + 16.0 + 11.5 + 11.5 = 60.5`; `10 × 0.5 + 23 × 1.5 + 7 × 3.0 = 60.5`; `60.5 × 1.25 = 75.625`. The three calculations check one another.
-4. **Coverage self-consistent**: registered objects 13 / 13, config keys 22 / 22, resource files 36 / 36, data entries 11 / 11 (the four tables of §9), 0 uncovered.
+4. **Coverage self-consistent**: registered objects 13 / 13, config keys 22 / 22, resource deliverables 40 / 40, data entries 11 / 11 (the four tables of §9), 0 uncovered.
 
 ### 12.3 Upstream Convention Evolution and Its Final Landing (All Closed in the Revision Period)
 

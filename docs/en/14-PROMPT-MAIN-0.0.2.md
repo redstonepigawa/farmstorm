@@ -15,7 +15,7 @@
 
 This file states only the **increments** of v0.0.2 and the execution discipline that rides on them; it does not cover the part of v0.0.1 that is already finished. Six boundaries:
 
-1. **Coverage**: the four increments of v0.0.2 — 4 new crop profiles (15 → 19), 13 new registered objects (64 → 77), 22 new config keys (117 → 139), 36 new resource files (262 → 298) and 11 data entries (5 recipes + 3 advancements + 1 item tag + 2 vanilla tag sites); plus the three invasive effects (full-screen grayscale D-61, red silhouette D-62, input lock D-60) and their camera, audio, and target-acquisition support (D-59, D-66, D-76, D-64).
+1. **Coverage**: the four increments of v0.0.2 — 4 new crop profiles (15 → 19), 13 new registered objects (64 → 77), 22 new config keys (117 → 139), 40 resource deliverables (265 → 302) and 11 data entries (5 recipes + 3 advancements + 1 item tag + 2 vanilla tag sites); plus the three invasive effects (world-only grayscale D-61, red silhouette D-62, input lock D-60) and their camera, audio, and target-acquisition support (D-59, D-66, D-76, D-64).
 2. **`05-PROMPT-MAIN.md` is still in force and takes precedence for any change to existing v0.0.1 code**: enforce its HC-01 ~ HC-14, N-01 ~ N-14, §4 package structure and naming, §5 execution discipline, and §9 nine traps exactly as written. This file only appends HC-15 ~ HC-28 and N-15 ~ N-28 on the new surface of v0.0.2; it does not restate, rewrite, or relax them.
 3. **Conflict adjudication**: when the two prompts conflict, `10-DECISIONS-0.0.2.md` wins; where that is silent too, take `12-TECH-0.0.2.md` > `11-DESIGN-0.0.2.md` > `13-TASKS-0.0.2.md` in that order; for existing v0.0.1 content the adjudication order still runs through `00-DECISIONS.md` (`05-PROMPT-MAIN.md` §0). Where the flattened construction-period draft `.work/v002-BRIEF.md` agrees with `10-DECISIONS-0.0.2.md`, take its numbers as written; where they disagree, the latter wins.
 4. **Nothing about "which thing to do this round"**: that is the task prompt's business. This file answers only "how is this thing allowed to be done, and what counts as done".
@@ -26,8 +26,8 @@ This file states only the **increments** of v0.0.2 and the execution discipline 
 
 You are the **implementation engineer** for this repository in v0.0.2, making increments on the code already released as v0.0.1.
 
-- **Target shape**: the Minecraft 1.21.1 NeoForge mod `farmstorm` v0.0.2 — 19 crop profiles, 77 registered objects, 139 config keys, 298 resource files, 261 language keys, 15 advancements, 24 conversion recipes + 2 crafting recipes; three new gameplay pieces (Molotov, Compressed Puffed Wheat, Zangief Cane) and one character ability (Wild Hunter) hang off the v0.0.1 profile model.
-- **Delivery criteria**: `.tools\gw.cmd build` exits 0 and produces `build/libs/farmstorm-0.0.2+mc1.21.1.jar`; `dist/farmstorm-0.0.2+mc1.21.1.jar` exists and is larger than `dist/farmstorm-0.0.1+mc1.21.1.jar`; `.tools\gw.cmd runServer` starts a server and the log has no `NoClassDefFoundError`; the four counts 298 / 261 / 139 / 77 match item by item (`13-TASKS-0.0.2.md` §7 F-99).
+- **Target shape**: the Minecraft 1.21.1 NeoForge mod `farmstorm` v0.0.2 — 19 crop profiles, 77 registered objects, 139 config keys, 302 resource files, 263 language keys, 15 advancements, 24 conversion recipes + 2 crafting recipes; three new gameplay pieces (Molotov, Compressed Puffed Wheat, Zangief Cane) and one character ability (Wild Hunter) hang off the v0.0.1 profile model.
+- **Delivery criteria**: `.tools\gw.cmd build` exits 0 and produces `build/libs/farmstorm-0.0.2+mc1.21.1.jar`; `dist/farmstorm-0.0.2+mc1.21.1.jar` exists and is larger than `dist/farmstorm-0.0.1+mc1.21.1.jar`; `.tools\gw.cmd runServer` starts a server and the log has no `NoClassDefFoundError`; the four counts 302 / 263 / 139 / 77 match item by item (`13-TASKS-0.0.2.md` §7 F-99).
 - **Task scale**: `13-TASKS-0.0.2.md` splits this version into **40 tasks** (F-60 ~ F-99), **5 Phases** (Phase 11 ~ Phase 15), 60.5 raw person-days; the critical path is 14.5 person-days / 9 tasks (`13-TASKS-0.0.2.md` §11.1).
 
 Three statements of self-positioning (carried over from `05-PROMPT-MAIN.md` §1, with two sentences added for the v0.0.2 increment):
@@ -53,8 +53,8 @@ You will only ever see this file plus the task prompt for the current Phase. **D
 | Crop profiles | **19** (15 → 19; new `molotov` / `zangief_cane` / `wild_apple` / `compressed_puffed_wheat`) | `.work/v002-BRIEF.md` §3.1; `10-DECISIONS-0.0.2.md` §4; `12-TECH-0.0.2.md` §3.1 |
 | Registered objects | **77** (64 → 77, 13 new, across 12 registries) | `.work/v002-BRIEF.md` §4; `12-TECH-0.0.2.md` §2.1 |
 | config keys | **139** (117 → 139, 22 new: `molotov` 3 / `wild_apple` 2 / `wild_hunter` 11 / `zangief_cane` 6) | `.work/v002-BRIEF.md` §8; `12-TECH-0.0.2.md` §8.1 |
-| Resource files | **298** (262 → 298, 36 new; excluding the 11 extensionless files under `.cache`) | `.work/v002-BRIEF.md` §4.1; `12-TECH-0.0.2.md` §7.1, §7.4 |
-| Language keys | **261** (222 → 261, 39 new; the Chinese and English key sets must be identical verbatim) | `.work/v002-BRIEF.md` §8; `12-TECH-0.0.2.md` §7.3 |
+| Resource files | **302** (265 → 302, 37 new; excluding the 11 files under `.cache` and the 3 `.gitkeep`) | `.work/v002-BRIEF.md` §4.1; `12-TECH-0.0.2.md` §7.1, §7.4 |
+| Language keys | **263** (222 → 263, 41 new; the Chinese and English key sets must be identical verbatim) | `.work/v002-BRIEF.md` §8; `12-TECH-0.0.2.md` §7.3 |
 | Other counts | Advancements **15** (12 → 15), conversion recipes **24** (21 → 24), crafting recipes **2** (0 → 2), Lucky Berry pool **16** (14 → 16) | `.work/v002-BRIEF.md` §4 |
 
 Copy the numbers as written; do not recompute them. Two numbers being equal inside one table is a coincidence, not a check; checks use §6's DoD and the self-check item IDs in `12-TECH-0.0.2.md` §11.
@@ -65,7 +65,7 @@ These five come from RT-10 ~ RT-16 in `12-TECH-0.0.2.md` §10. They are the five
 
 | # | What to confirm | Where to read | If it does not hold |
 |---|---|---|---|
-| 1 | The mount point of full-screen grayscale: whether the `ShaderInstance` registered through `RegisterShadersEvent` compiles, and whether running a full-screen pass over `Minecraft#getMainRenderTarget()` inside `RenderGuiEvent.Post` holds | `12-TECH-0.0.2.md` §4.1, §10 RT-10 | Follow RT-10's mitigation: first split the world and GUI into two passes; if that still fails, gray the world only and register the degradation in the Release notes. **Do not** switch to fog color or texture substitution (D-61) |
+| 1 | The mount point of world-only grayscale: whether the vanilla `PostChain` (`GameRenderer#loadEffect` + `shaders/post/grayscale.json`) loads, and whether the chain's `targets` is an array | `12-TECH-0.0.2.md` §4.1, §10 RT-10 | RT-10 is closed: the main plan **is** `PostChain`, which greys the world only and leaves the HUD in its original colours (V-56); `post_effect/grayscale.json` is only a reserved mount point (no loader, V-49). **Do not** go back to a hand-written pass that samples the target it is writing to (read/write feedback, V-48), and **do not** switch to fog color or texture substitution (D-61) |
 | 2 | How the red silhouette is redrawn: whether `getModel().renderToBuffer(...)` inside `RenderLivingEvent.Post` recurses and whether it drops frames, and whether `hasLineOfSight` can be used directly on the client | `12-TECH-0.0.2.md` §4.2, §10 RT-11 | Fall back to at most 32 per frame (nearest first); **do not** switch to `EntityRenderDispatcher#render`, and **do not** switch to the vanilla glowing effect (D-62) |
 | 3 | The order of input interception: the order of `InputEvent.Key` and `KeyMapping` decides whether 1–9 can really be blocked, and whether `ScreenEvent.Opening` covers every path that opens a GUI | `12-TECH-0.0.2.md` §4.3, §10 RT-13 | Register all five events; hand-test key by key to fill the 21-item table; move a missed path onto an earlier hook; if it is still missed, register "this key cannot be locked" and do not let the other keys through |
 | 4 | Who drives the dash: `ServerPlayer#setDeltaMovement` produces no client-side displacement, so displacement must be driven by client prediction and the server only reviews and settles | `12-TECH-0.0.2.md` §4.5, §10 RT-12 | Prefer client prediction + server adjudication; switch to the alternative (server-side `teleportTo` ≤ 1 block per tick) only if the feel is unacceptable, and the switch must leave a decision record in `12-TECH-0.0.2.md` §4.5 |
@@ -87,7 +87,7 @@ HC-01 ~ HC-14 are in `05-PROMPT-MAIN.md` §3 and remain in force. The 14 below c
 
 - **HC-17 · v0.0.1 inventory freeze**
   - Constraint: do not touch any field of the 15 existing `CropProfile`s, any default value of an existing config key, the 21 existing conversion recipes, the 12 existing advancements, the 16 existing `tooltip.farmstorm.*` keys, or v0.0.1's 10 Chinese documents and 8 English documents.
-  - Consequence of violation: D-49 breaks and `git diff` shows existing lines outside the whitelist; the `117 + 22 = 139` and `222 + 39 = 261` bases fail and all count checks mismatch.
+  - Consequence of violation: D-49 breaks and `git diff` shows existing lines outside the whitelist; the `117 + 22 = 139` and `222 + 41 = 263` bases fail and all count checks mismatch.
   - Source: D-49; `.work/v002-BRIEF.md` §3.4; `10-DECISIONS-0.0.2.md` §6 items 4 and 11.
 
 - **HC-18 · Change-surface whitelist**
@@ -116,8 +116,8 @@ HC-01 ~ HC-14 are in `05-PROMPT-MAIN.md` §3 and remain in force. The 14 below c
   - Source: `13-TASKS-0.0.2.md` §0.4 A-08, §12.3 item 2; D-72; F-74, F-87.
 
 - **HC-23 · Advancement display names are short phrases**
-  - Constraint: the display names of the three new advancements are "On Fire!" (火了！), "Hand-Cranked 360" (手摇重 360), and "Wild Hunter" (狂野猎人), taken solely from the 39-line list in `12-TECH-0.0.2.md` §7.3; the three long summaries belong to the tooltip namespace and do not go into `advancements.farmstorm.*.title`.
-  - Consequence of violation: once the long sentence of `11-DESIGN-0.0.2.md` §9.1 lands in lang, the advancement toast no longer matches the style of the 12 existing short phrases, and the key set no longer matches the 39-line list, so F-97 items 1 and 2 go red.
+  - Constraint: the display names of the three new advancements are "On Fire!" (火了！), "Hand-Cranked 360" (手摇重 360), and "Wild Hunter" (狂野猎人), taken solely from the 41-line list in `12-TECH-0.0.2.md` §7.3; the three long summaries belong to the tooltip namespace and do not go into `advancements.farmstorm.*.title`.
+  - Consequence of violation: once the long sentence of `11-DESIGN-0.0.2.md` §9.1 lands in lang, the advancement toast no longer matches the style of the 12 existing short phrases, and the key set no longer matches the 41-line list, so F-97 items 1 and 2 go red.
   - Source: `13-TASKS-0.0.2.md` §0.4 A-09, §12.3 item 3; D-63.
 
 - **HC-24 · Spin speed 72 degrees/tick**
@@ -131,8 +131,8 @@ HC-01 ~ HC-14 are in `05-PROMPT-MAIN.md` §3 and remain in force. The 14 below c
   - Source: D-53, D-66; `12-TECH-0.0.2.md` §6.4, §10 RT-14.
 
 - **HC-26 · Grayscale must be real grayscale**
-  - Constraint: full-screen grayscale = a custom `ShaderInstance` registered through `RegisterShadersEvent` (`assets/farmstorm/shaders/core/grayscale.json` + `.vsh` / `.fsh`) + one full-screen pass over `Minecraft#getMainRenderTarget()` in `RenderGuiEvent.Post`, applied to world rendering **and** the GUI layer. Do not pass off fog color, texture substitution, or graying the GUI textures separately as a substitute.
-  - Consequence of violation: D-61's "whole screen including the GUI" does not hold — the inventory, health bar, and chat stay colored and the player sees at a glance that only the world faded; F-82 items 1 and 4 go red.
+  - Constraint: world-only grayscale = the vanilla `PostChain` (`GameRenderer#loadEffect(Farmstorm.id("shaders/post/grayscale.json"))` + `shaders/program/grayscale.json` + `shaders/core/grayscale.fsh`), applied to world rendering (blocks / entities / particles); **the HUD and GUI keep their original colours** (D-61 with the scope change of V-56: `PostChain.process()` runs at `GameRenderer:1027`, before the GUI is drawn at `:1073`). Do not pass off fog color, texture substitution, or graying the GUI textures separately as a substitute.
+  - Consequence of violation: the world pass is not genuinely grayscale — blocks / entities / particles stay colored and F-82 items 1 and 4 go red; or someone goes back to a hand-written pass in order to "include the GUI" and hits the read/write feedback (V-48) and the loader-less `post_effect/` (V-49).
   - Source: D-61; `.work/v002-BRIEF.md` §7.1; `12-TECH-0.0.2.md` §4.1, §10 RT-10.
 
 - **HC-27 · The camera changes the render layer only**
@@ -141,7 +141,7 @@ HC-01 ~ HC-14 are in `05-PROMPT-MAIN.md` §3 and remain in force. The 14 below c
   - Source: D-59, D-70; `.work/v002-BRIEF.md` §7.4; F-91.
 
 - **HC-28 · Counts and self-check text**
-  - Constraint: the 13 new registered objects, the five counts (19 / 77 / 139 / 298 / 261), the 36 new resource files, the 39 new language keys, the 15 advancements, and the 24 conversion recipes + 2 crafting recipes all land per `.work/v002-BRIEF.md` §3 / §4 / §8 and `12-TECH-0.0.2.md` §2.1 / §7.2 / §7.3 / §8.1. Copy the four startup self-check lines verbatim, and change them together with the numbers: crops 19, registered objects 77, Lucky Berry pool 16, entity renderers 11/11.
+  - Constraint: the 13 new registered objects, the five counts (19 / 77 / 139 / 302 / 263), the 40 resource deliverables (all landed), the 41 new language keys, the 15 advancements, and the 24 conversion recipes + 2 crafting recipes all land per `.work/v002-BRIEF.md` §3 / §4 / §8 and `12-TECH-0.0.2.md` §2.1 / §7.2 / §7.3 / §8.1. Copy the four startup self-check lines verbatim, and change them together with the numbers: crops 19, registered objects 77, Lucky Berry pool 16, entity renderers 11/11.
   - Consequence of violation: the list's line count does not match the count written out → F-99's four checks go red; the self-check text does not match the actual registry → the self-check line itself becomes a fake pass, which is worse than having none.
   - Source: `.work/v002-BRIEF.md` §3, §4, §4.2, §8; `12-TECH-0.0.2.md` §2.1, §7.4, §11.
 
@@ -156,7 +156,7 @@ The package structure follows the division of labor in `05-PROMPT-MAIN.md` §4.1
 | `effect/` | `WildHunterEffect` (visible, has an icon, three attribute modifiers), `ZangiefPiledriverEffect` (hidden, `amplifier` used as the phase number) | `12-TECH` §3.6 |
 | `registry/` | `FarmstormMobEffects` and `FarmstormSounds`, two new `DeferredRegister`s; hold only `DeferredRegister` and `Supplier`, no logic | `12-TECH` §3.5 |
 | `entity/thrown/` | `MolotovProjectile`, `CompressedPuffedWheatProjectile` (the latter inherits the landing-write path both share) | `12-TECH` §3.7, §3.8 |
-| `behavior/` | `ZangiefCaneTrap` (a `TrapBehavior` implementation), `ZangiefPiledriverController` (the server-side three-phase state machine) | `12-TECH` §3.11, §5 |
+| `behavior/impl/` | `ZangiefCaneTrap` (a `TrapBehavior` implementation), `ZangiefPiledriverController` (the server-side three-phase state machine) — same directory as the existing 5 behaviour implementations (V-04) | `12-TECH` §3.10, §3.11, §5 |
 | `combat/` | `WildHunterCombat` (target-acquisition algorithm and the server settlement entry; both ends share the same deterministic algorithm) | `12-TECH` §3.13 |
 | `client/` | `GrayscalePass`, `WildHunterOutline`, `WildHunterDashClient`, `WildHunterLoopSound`, `ZangiefCameraController`, `InputLockHandler` | `12-TECH` §3.13, §4 |
 
@@ -237,7 +237,7 @@ A task counts as done only when **all** of the following hold; missing any one m
 1. Every acceptance item the task prompt lists can be pointed to code, a resource, or a command reading.
 2. `.tools\gw.cmd compileJava` passes; where DataGen is involved `.tools\gw.cmd runData` passes and the outputs land in `src/generated/resources`; the closing `.tools\gw.cmd build` exits 0 and produces `build/libs/farmstorm-0.0.2+mc1.21.1.jar`.
 3. All 22 new config keys have a reading implementation point (matching the "consuming task" column of `13-TASKS-0.0.2.md` §9.2 line by line), and the key names match the single list in `.work/v002-BRIEF.md` §8 verbatim.
-4. The four counts hold: 139 leaf nodes in `config/farmstorm-server.toml`; 261 keys in each language file with `set(zh) == set(en)`; 298 resources (JSON 193 / PNG 99 / OGG 2 / GLSL 2 / TOML 1 / `pack.mcmeta` 1, excluding the 11 under `.cache`); and the 77-registered-object self-check line plus the 11/11 entity-renderer self-check line both present in the startup log.
+4. The four counts hold: 139 leaf nodes in `config/farmstorm-server.toml`; 263 keys in each language file with `set(zh) == set(en)`; 302 resources (JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1, excluding the 11 under `.cache` and the 3 `.gitkeep`); and the 77-registered-object self-check line plus the 11/11 entity-renderer self-check line both present in the startup log.
 5. The red lines are decidable: `grep -r "CustomPacketPayload" src/main/java` is 0; `grep -rn "Mixin" src/main/java` is 0.
 6. No out-of-scope changes: `git status` shows only whitelisted files and new files; `.work/v002-BRIEF.md`, `docs/zh/00` ~ `15`, and `docs/en/00` ~ `09` are untouched.
 7. No bypassing: no commented-out implementation, no empty-method placeholder, no `@SuppressWarnings("unused")` masking an unused field, no placeholder marker standing in for logic.
@@ -259,7 +259,7 @@ When the task ends, output the template below exactly as given; do not improvise
   - .tools\gw.cmd build → exit code 0, artifact build/libs/farmstorm-0.0.2+mc1.21.1.jar
   - (write failed commands the same way, with the first error verbatim and the summary line)
 - Acceptance items: <each acceptance item of the task prompt → evidence location (file:line / key line of command output / log assertion line)>
-- Counts and red lines: <present values of the 19 / 77 / 139 / 298 / 261 counts involved here; match counts for CustomPacketPayload and Mixin>
+- Counts and red lines: <present values of the 19 / 77 / 139 / 302 / 263 counts involved here; match counts for CustomPacketPayload and Mixin>
 - Open questions: <document contradictions, missing APIs, matters the author must adjudicate; name here any RT numbers you raised; write "none" if there are none>
 - Follow-up note: <one sentence on what you deliberately did not do but will be hit by next>
 ```
@@ -275,8 +275,8 @@ Each of the following can be decided by one command, one place in `git diff`, or
 - **N-17** Do not hard-code any of the 22 config keys as a constant, and do not write the same default value in two places (one in `FarmstormConfig`, another in a business class).
 - **N-18** Do not change the comparison logic of `BlastRule.canBreak()` (`resistance < UNBREAKABLE_RESISTANCE && resistance < this.maxResistance`), and do not change the default values of `grenadeResistThreshold` / `sliceResistThreshold`.
 - **N-19** Do not replace the red silhouette with the vanilla glowing effect (`setGlowingTag` / `MobEffects.GLOWING` / `GlowingEffect`) — that is a white outline visible to the whole server, which contradicts D-62's "visible and ≤ 64 blocks".
-- **N-20** Do not call `EntityRenderDispatcher#render` inside `RenderLivingEvent` to redraw an entity (it recurses into its own event); use only `getModel().renderToBuffer(...)`.
-- **N-21** Do not pass off fog color, texture substitution, or graying the GUI textures separately as full-screen grayscale; any means other than `RenderGuiEvent.Post` must be able to prove "the world and the GUI gray out together".
+- **N-20** Do not call `EntityRenderDispatcher#render` inside `RenderLivingEvent` to redraw an entity (it recurses into its own event); use `LivingEntityRenderer#render(...)` with a re-entrancy guard, and `MultiBufferSource` **must be filtered by `type.format() == DefaultVertexFormat.NEW_ENTITY`** (V-58: a leash uses `POSITION_COLOR_LIGHTMAP` and crashes the client when forced into an entity buffer).
+- **N-21** Do not pass off fog color, texture substitution, or graying the GUI textures separately as grayscale; the criterion is that the world pass (blocks / entities / particles) really greys out, and the HUD keeping its colours is the settled scope of V-56, not a defect.
 - **N-22** Do not rename an mp3 to `.ogg`, do not substitute a silent or placeholder file for either audio, and do not let the script skip and return 0 when ffmpeg is missing.
 - **N-23** Do not write back `player.setYRot` / `setXRot`, and do not use `teleportTo` or `setYHeadRot` to "act out" the inversion and the self-rotation.
 - **N-24** Do not change existing files outside the whitelist; do not change one single file among `.work/v002-BRIEF.md`, `docs/zh/00` ~ `09`, `docs/zh/10` ~ `15`, `docs/en/00` ~ `09`, `docs/en/10` ~ `15`, not even a typo.
@@ -295,10 +295,10 @@ Start with three that run through the whole repository: **`neoForge { }` is case
 | Calling `gradle` / `gradlew` directly fails or misbehaves | `.tools\gw.cmd` does four things, none of them optional: set JDK 21 and `GRADLE_USER_HOME`, start the NeoForge mirror proxy, inject the java.base patch, and add the directory lock to `runServer` | Always `cmd /c ""D:\project_farm\.tools\gw.cmd" <task>"`; do not bypass it and do not write a replacement script | `08-DEV-GUIDE.md` §4.1 |
 | Two `runServer` instances collide on `session.lock` and overwrite each other's logs | Parallel servers share one run directory | Add `-PfsRunDir=run-xxx` before starting the second one, each with its own directory | `08-DEV-GUIDE.md` §4.2 |
 | Compilation reports that a method signature does not exist (RT-01) | Patch-level API drift in 21.1.x; the same happens when someone changes `neo_version` | First confirm `neo_version=21.1.213` has not changed; check the real signature against the source attachment before changing the call; report API existence/signature questions under RT-01 and record the actual signature | `12-TECH` §10; `02-TECH-SPEC.md` §9 RT-01 |
-| After enabling the effect the screen goes all black / only half the screen grays / another mod's HUD disappears (RT-10) | Switching the render target inside `RenderGuiEvent.Post` fights other GUI post-processing, or the `ShaderInstance` failed to compile | First split the world + GUI into two passes; if that fails, gray the world only and register the degradation in the Release notes; do not switch to fog color or texture substitution | `12-TECH` §4.1, §10 RT-10 |
-| Silhouette recurses, drops frames, `StackOverflowError` (RT-11) | `EntityRenderDispatcher#render` was called inside `RenderLivingEvent` | Use only `getModel().renderToBuffer`; draw only within ≤64 blocks and with `hasLineOfSight`; cap at 32 per frame | `12-TECH` §4.2, §10 RT-11 |
+| After enabling the effect the screen goes all black / only half the screen grays / grey appears at the wrong moment (RT-10) | A hand-written pass inside `RenderGuiEvent.Post` samples the render target it is writing to (read/write feedback, V-48), or the `post_effect/` directory is mistaken for a load point (no loader in 21.1.213, V-49) | Go through the vanilla `PostChain` (`GameRenderer#loadEffect`): world greyed, HUD in its original colours (V-56); do not switch to fog color or texture substitution | `12-TECH` §4.1, §10 RT-10 |
+| Silhouette recurses, drops frames, `StackOverflowError`, or `Missing elements in vertex` crashes the client outright (RT-11 / V-58) | `EntityRenderDispatcher#render` was called inside `RenderLivingEvent`; or the whole `MultiBufferSource` was replaced with the entity format (a leash uses `POSITION_COLOR_LIGHTMAP`) | Use `LivingEntityRenderer#render(...)` with a re-entrancy guard; filter `MultiBufferSource` by `type.format() == NEW_ENTITY`; draw only within ≤64 blocks and with `hasLineOfSight`; cap at 32 per frame | `12-TECH` §4.2, §10 RT-11 |
 | The player does not move during the dash / gets pulled back / `moved too quickly!` shows in the log (RT-12) | The driver was judged wrong: `ServerPlayer#setDeltaMovement` produces no client-side displacement | Client prediction + server adjudication; if that log appears, retest after tuning `wild_hunter.dashTicks`; a switch to the alternative needs a decision record | `12-TECH` §4.5, §10 RT-12 |
-| Some key still gets through the input lock (RT-13) | The order of `InputEvent.Key` and `KeyMapping`; or one GUI-opening path does not go through `ScreenEvent.Opening` | Register all five events; hand-test the 21-item table key by key (W/A/S/D/space/shift/left click/right click/1–9/wheel up/wheel down/E/T/`/`/ESC), recording "blocked / got through" for each, with ESC required to work | `12-TECH` §4.3, §10 RT-13 |
+| Some key still gets through the input lock (RT-13) | The order of `InputEvent.Key` and `KeyMapping`; or one GUI-opening path does not go through `ScreenEvent.Opening`; or the `DeathScreen` exemption is missing (V-30) | Register all seven mechanisms (D-79); hand-test the 21-item table key by key (W/A/S/D/space/shift/left click/right click/1–9/wheel up/wheel down/E/T/`/`/ESC), recording "blocked / got through" for each, with ESC required to work | `12-TECH` §4.3, §10 RT-13 |
 | Audio cannot be produced / the build succeeds but there is no sound (RT-14) | the script got no `-Ffmpeg` and nothing is on PATH, or the build it found has no libvorbis (Trae CN's 6.1.1 is exactly that); or `sounds.json`'s `attenuation_distance` does not mean "audible distance" | The script exits with code 1 and prints installation instructions when ffmpeg is missing; the audio tasks are scheduled first in the resource stage (F-94 before F-95 / F-96); re-run once `-Ffmpeg` is correct | `12-TECH` §6.4, §10 RT-14 |
 | After the effect is cleared externally the screen stays upside down and the keys stay locked forever (RT-15) | A third-party "clear negative effects" removed `zangief_piledriver` while the client was still in phase 2 | The client checks every tick whether that effect exists and resets when it does not; switch phases with "remove first, then add" to sidestep `MobEffectInstance#update`'s comparison order; tolerate a 2-tick gap in the self-check | `12-TECH` §5.6, §10 RT-15 |
 | With Iris / shaders installed, entering the grayscale screen goes all black (RT-16) | The grayscale pass conflicts with the shader's framebuffer chain | Register it as a known incompatibility (the "known incompatibilities" section of the README and the Release notes); do no runtime probing and no automatic degradation | `12-TECH` §4.1, §10 RT-16 |
@@ -322,7 +322,7 @@ Start with three that run through the whole repository: **`neoForge { }` is case
 | HC-23 | Advancement display names must be short phrases | `13-TASKS-0.0.2.md` §0.4 A-09, §12.3 item 3; D-63; `12-TECH-0.0.2.md` §7.3 |
 | HC-24 | Spin speed 72 degrees/tick | D-70; `13-TASKS-0.0.2.md` §0.4 A-05; `.work/v002-BRIEF.md` §8 #22 |
 | HC-25 | Audio must be OGG; missing ffmpeg fails outright | D-53, D-66; `12-TECH-0.0.2.md` §6.4, §10 RT-14 |
-| HC-26 | Grayscale must be real grayscale, GUI included | D-61; `.work/v002-BRIEF.md` §7.1; `12-TECH-0.0.2.md` §4.1, §10 RT-10 |
+| HC-26 | Grayscale must be real grayscale (world pass); the HUD keeps its original colours | D-61 (scope changed by V-56); `.work/v002-BRIEF.md` §7.1; `12-TECH-0.0.2.md` §4.1, §10 RT-10 |
 | HC-27 | The camera changes render-layer angles only; roll + pitch take effect together | D-59, D-70; `.work/v002-BRIEF.md` §7.4; F-91 |
 | HC-28 | The five counts and the four self-check lines must match verbatim | `.work/v002-BRIEF.md` §3, §4, §4.2, §8; `12-TECH-0.0.2.md` §2.1, §7.4, §11 |
 
@@ -330,7 +330,7 @@ Start with three that run through the whole repository: **`neoForge { }` is case
 
 ## Translator's notes
 
-1. §1's delivery criteria speak of "the four counts 298 / 261 / 139 / 77", while HC-28 speaks of "the five counts (19 / 77 / 139 / 298 / 261)". The two are left as written and are not reconciled.
-2. §2's resource row reads "262 → 298, 36 new; excluding the 11 extensionless files under `.cache`", and §6 DoD item 4 enumerates the 298 as JSON 193 / PNG 99 / OGG 2 / GLSL 2 / TOML 1 / `pack.mcmeta` 1. Both are reproduced as written; whether the `.cache` deduction applies inside the 262 figure or inside the 298 figure is not decided by the source text.
+1. §1's delivery criteria speak of "the four counts 302 / 263 / 139 / 77", while HC-28 speaks of "the five counts (19 / 77 / 139 / 302 / 263)". The numbers agree; only the way they are counted differs, and the two sentences are left as written.
+2. §2's resource row reads "265 → 302, 37 new; excluding the 11 files under `.cache` and the 3 `.gitkeep`", and §6 DoD item 4 enumerates the 302 as JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1. Both are reproduced as written; whether the `.cache` deduction applies inside the 265 figure or inside the 302 figure is not decided by the source text.
 3. N-24 declares `docs/en/10` ~ `15` read-only, while this translation itself delivers `docs/en/14` and `docs/en/15`. The source sentence is reproduced unchanged; the conflict between the read-only declaration and the existence of these two files is not adjudicated here.
 4. Chinese display names are kept verbatim where they are language-file values; in HC-23 an English rendering is given first and the Chinese original follows in parentheses, following the convention of `05-PROMPT-MAIN.md`.

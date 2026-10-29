@@ -550,9 +550,9 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 ## 7. Phase 15 · 资源、音频、进度与验收（F-94 ~ F-99）
 
-阶段目标：补齐 40 个资源交付里剩下的部分、41 条语言键与 3 个进度，并完成 299 / 263 / 139 / 77 四项计数核对与三模式回归、打包发布。
+阶段目标：补齐 40 个资源交付里剩下的部分、41 条语言键与 3 个进度，并完成 302 / 263 / 139 / 77 四项计数核对与三模式回归、打包发布。
 
-阶段出口判据：`src/{main,generated}/resources` 共 299 个文件（扣 `.cache` 的 11 个与 3 个 `.gitkeep`）；两份语言文件各 263 键且键集相等；`config/farmstorm-server.toml` 139 键；`12-TECH-0.0.2.md §11` 的 22 条自检全过；`dist/farmstorm-0.0.2+mc1.21.1.jar` 存在。
+阶段出口判据：`src/{main,generated}/resources` 共 302 个文件（扣 `.cache` 的 11 个与 3 个 `.gitkeep`）；两份语言文件各 263 键且键集相等；`config/farmstorm-server.toml` 139 键；`12-TECH-0.0.2.md §11` 的 22 条自检全过；`dist/farmstorm-0.0.2+mc1.21.1.jar` 存在。
 
 #### F-94 · 音频与效果图标管线
 
@@ -617,7 +617,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-75、F-85、F-93、F-94、F-96、F-97
 - **交付物**：修复补丁（只落白名单文件）+ `dist/farmstorm-0.0.2+mc1.21.1.jar` + `README.md` 的 v0.0.2 索引节与素材来源声明节（D-49 / D-66）
 - **验收**：
-  1. 资源 **299** 个（JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1），扣 `.cache` 的 11 个无扩展名文件与 3 个 `.gitkeep`（`12-TECH-0.0.2.md §7.4` 的核对方法逐条跑）。
+  1. 资源 **302** 个（JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1），扣 `.cache` 的 11 个无扩展名文件与 3 个 `.gitkeep`（`12-TECH-0.0.2.md §7.4` 的核对方法逐条跑）。
   2. 两份语言文件各 **263** 键且键集相等；`config/farmstorm-server.toml` **139** 键；启动日志的 `自检 注册对象 77 个` 行与 `自检 实体渲染器 11/11 → OK` 行都在。
   3. `12-TECH-0.0.2.md §11` 的 22 条自检全过，逐条留读数。
   4. `grep -r "CustomPacketPayload" src/main/java` 为 0 处；`grep -rn "Mixin" src/main/java` 为 0 处。
@@ -716,9 +716,9 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 `117 + 22 = 139`，与 F-61 与 F-99 的「toml 叶节点 139」逐项对齐；22 个键对应的 22 条 `farmstorm.configuration.*` 语言键由 F-97 落地（裁决 A-04 的键形态）。
 
-### 9.3 40 个 v0.0.2 资源交付（40 行；其中 37 行已在仓库、3 行待 F-98 生成）
+### 9.3 40 个 v0.0.2 资源交付（40 行，全部已在仓库）
 
-行号与 `12-TECH-0.0.2.md §7.2` 的 #1–#40 一一对应；「产线」列沿用该节的口径（手写 / DataGen / 脚本）。**V-49 / V-56 / V-60 / V-64 之后以仓库实测为准**：清单 40 行，其中 3 行（`data/farmstorm/advancement/*.json`）待 F-98 生成，另有 3 行（2 个 `.ogg` 与 `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时就已在仓库里——所以 `git diff` 只显示 +34，而资源总数是 265 + 34 = **299**。
+行号与 `12-TECH-0.0.2.md §7.2` 的 #1–#40 一一对应；「产线」列沿用该节的口径（手写 / DataGen / 脚本）。**V-49 / V-56 / V-60 / V-64 之后以仓库实测为准**：清单 40 行**全部已在仓库**（3 条进度由 F-98 落地），其中 3 行（2 个 `.ogg` 与 `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时就已在仓库里——所以 `git diff` 显示 +37，资源总数 265 + 37 = **302**。
 
 | # | 路径（相对 `src/{main,generated}/resources`） | 类别 | 产线 | 落地的任务 |
 |---|---|---|---|---|
@@ -755,14 +755,14 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 | 31 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | F-73 |
 | 32 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | F-73 |
 | 33 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | F-73 |
-| 34 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | F-98（待生成） |
-| 35 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | F-98（待生成） |
-| 36 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | F-98（待生成） |
+| 34 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | F-98 |
+| 35 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | F-98 |
+| 36 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | F-98 |
 | 37 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | F-74 |
 | 38 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | F-74 |
 | 39 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | F-71 |
 | 40 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | F-74 |
-| **合计** | **40 行** | | | **37 行已在仓库，3 行待 F-98** |
+| **合计** | **40 行** | | | **40 行全部已在仓库** |
 
 按类目汇总（与 `12-TECH-0.0.2.md §7.2` 的四行计数表逐项相等，合计 40）：
 
@@ -774,7 +774,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 | GLSL | #14、#15、#18 | 3 | F-82 ×3 |
 | **合计** | — | **40** | **40 行全部有归属** |
 
-**追加型改动（不产生新文件，因此不计入 40 行）**：`data/minecraft/tags/block/mineable/pickaxe.json` 追加 `compressed_hay_block`（F-74）、`data/farmstorm/tags/block/deployed_crops.json` 追加 `zangief_cane`（F-74）、两份语言文件追加 41 条（F-97，含 V-64 的 2 条实体名）、`data/farmstorm/tags/item/modified_crops.json` 追加 4 条（F-71）。资源总数 `265 + 34 = 299`。
+**追加型改动（不产生新文件，因此不计入 40 行）**：`data/minecraft/tags/block/mineable/pickaxe.json` 追加 `compressed_hay_block`（F-74）、`data/farmstorm/tags/block/deployed_crops.json` 追加 `zangief_cane`（F-74）、两份语言文件追加 41 条（F-97，含 V-64 的 2 条实体名）、`data/farmstorm/tags/item/modified_crops.json` 追加 4 条（F-71）。资源总数 `265 + 37 = 302`。
 
 ### 9.4 5 条配方 + 3 个进度 + 1 个物品标签 + 2 处 vanilla 标签（覆盖 11 / 11）
 
@@ -805,7 +805,7 @@ M7 ~ M11 与 Phase 11 ~ Phase 15 一一对应。每个里程碑给两个工作�
 | M8 | 压缩物与莫洛托夫闭环 | Phase 12 | 9 | 10.5 | 13.125 | 26.875 | 5 条新配方可用，落点语义与抗性矩阵全部对上 |
 | M9 | 狂野猎人与两项表现层 | Phase 13 | 10 | 16.0 | 20.000 | 46.875 | 吃一颗苹果后七项能力可用，清效果后全部复位 |
 | M10 | 桑吉尔蔗与输入锁 | Phase 14 | 8 | 11.5 | 14.375 | 61.250 | 踩陷阱后三相位按时序走完，三个高度落地耗时 40 ± 2 刻 |
-| M11 | 资源、进度与验收 | Phase 15 | 6 | 11.5 | 14.375 | 75.625 | 299 / 263 / 139 / 77 四项对齐，jar 可发布 |
+| M11 | 资源、进度与验收 | Phase 15 | 6 | 11.5 | 14.375 | 75.625 | 302 / 263 / 139 / 77 四项对齐，jar 可发布 |
 | **合计** | | **5 个 Phase** | **40** | **60.5** | **75.625** | | |
 
 ### M7 · 基座与注册增量（Phase 11）
@@ -830,7 +830,7 @@ M7 ~ M11 与 Phase 11 ~ Phase 15 一一对应。每个里程碑给两个工作�
 
 ### M11 · 资源、进度与验收（Phase 15）
 
-- **完成判据**：① 资源 299 / JSON 192 / PNG 100 / OGG 2 / GLSL 3；② 两份语言文件各 263 键且键集相等、`tooltip.farmstorm.*` 仍 16 条；③ `config/farmstorm-server.toml` 139 键；④ `12-TECH-0.0.2.md §11` 的 22 条自检全过；⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` 存在，且 `jar tf` 里能看到两个 `.ogg`。
+- **完成判据**：① 资源 302 / JSON 195 / PNG 100 / OGG 2 / GLSL 3；② 两份语言文件各 263 键且键集相等、`tooltip.farmstorm.*` 仍 16 条；③ `config/farmstorm-server.toml` 139 键；④ `12-TECH-0.0.2.md §11` 的 22 条自检全过；⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` 存在，且 `jar tf` 里能看到两个 `.ogg`。
 - **该里程碑结束时能做什么**：全程中文界面无缺字、9 个新图标都正常；三条新进度各弹一次 toast；把 jar 丢进专用服务器，玩家只装模组本体就能参与，客户端不会因为缺类而崩。
 
 ---
@@ -890,7 +890,7 @@ F-60 构建基线 0.5
 | 2 | 注册对象 **77** 个 | F-66、F-99、§10 | `BRIEF §4`（64 → 77）；`12-TECH-0.0.2.md §2.1` 的 12 类小计 | 一致 |
 | 3 | 新增 config **22** 条 | §9.2、F-61 | `BRIEF §8` 唯一清单；`12-TECH-0.0.2.md §8.1` | 一致 |
 | 4 | config 总数 **139** | F-61、F-97、F-99、§10 | `BRIEF §8`（117 + 22 = 139）；`12-TECH-0.0.2.md §8.1` | 一致 |
-| 5 | 资源 **299** 个 | F-99、§10 | `BRIEF §4.1`（实测存量 265）+ `12-TECH-0.0.2.md §7.1`（+34） | 一致 |
+| 5 | 资源 **302** 个 | F-99、§10 | `BRIEF §4.1`（实测存量 265）+ `12-TECH-0.0.2.md §7.1`（+37） | 一致 |
 | 6 | 语言键 **263** 个 | F-97、F-99、§10 | `BRIEF §8`（`222 + 41 = 263`，V-64）；`12-TECH-0.0.2.md §7.3`（39 = 物品 5 + 方块 2 + 效果 2 + 字幕 2 + 进度 6 + config 22） | 一致 |
 | 7 | 新增资源 **36** 个 | §9.3、F-95、F-96 | `12-TECH-0.0.2.md §7.2`（逐项 36 行 + 四行类目表） | 一致 |
 | 8 | 新增语言键 **39** 条 | F-97 | `12-TECH-0.0.2.md §7.3`（5 物品 + 2 方块 + 2 效果 + 2 字幕 + 6 进度 + 22 config） | 一致 |
@@ -899,7 +899,7 @@ F-60 构建基线 0.5
 | 11 | 配方 **5** 条 | §9.4、F-71 ~ F-73 | `BRIEF §3.2`（转换 3 + 合成 2）；`12-TECH-0.0.2.md §2.4` | 一致 |
 | 12 | 类型分布 **10 / 6 / 3** | F-62 的自检文案、§12.2 | `BRIEF §4`（投掷 10 / 部署 6 / 食用 3）；`12-TECH-0.0.2.md §3.1` | 一致 |
 | 13 | 破障类 **4** | F-62 的自检文案、§0.4 A-06 | `BRIEF §4`（不变）；`10-DECISIONS-0.0.2.md §5.3` | 一致 |
-| 14 | 既有资源 **265** 个 | §9.3 的 `265 + 34 = 299` | 实测（169 JSON + 92 PNG + 2 OGG + 1 TOML + 1 `pack.mcmeta`） | 一致 |
+| 14 | 既有资源 **265** 个 | §9.3 的 `265 + 37 = 302` | 实测（169 JSON + 92 PNG + 2 OGG + 1 TOML + 1 `pack.mcmeta`） | 一致 |
 | 15 | 既有语言键 **222** 个 | F-97 的 `222 + 41 = 263` | `BRIEF §4.1`；`12-TECH-0.0.2.md §7.3` | 一致 |
 | 16 | 既有 config **117** 条 | F-61 的 `117 + 22 = 139` | `BRIEF §4.1`（`defineInRange` 111 + `define` 4 + `defineInList` 2） | 一致 |
 | 17 | 既有注册对象 **64** 个 / 增量 **13** | §9.1 | `BRIEF §4`（64 → 77）；`12-TECH-0.0.2.md §2.2`（逐个点名 13 个） | 一致 |
@@ -909,7 +909,7 @@ F-60 构建基线 0.5
 | 21 | 抗性 **3.6e6** / 阈值 **6.0** / 硬度 **30.0F** | §0.4 A-06、F-67、F-68 | `BRIEF §2` D-57 / D-77；`10-DECISIONS-0.0.2.md §5.3` | 一致（`12-TECH §3.9` 与 `§11 #9` 修订后同为「破得动」，见 §12.3 第 1 条） |
 | 22 | 转速 **72.0** 度/刻 | §0.4 A-05、F-91 | `BRIEF §2` D-70 / `BRIEF §8` #22；`10-DECISIONS-0.0.2.md §3.3` D-70 | 一致 |
 
-复核结论（本轮）：`12-TECH §8.1` 的 **22** 条与总数 **139**、`§7.3` 的语言键 **263**、`§7.1` 的资源 **265 → 299** 三处重点数与上游现值逐位相等；本表 22 行**数字一处未改**（全部为修订后现值，没有旧版口径残留），只更新了第 21 行的「是否一致」备注（`12-TECH` 的两处已在修订期改成「破得动」）。
+复核结论（本轮）：`12-TECH §8.1` 的 **22** 条与总数 **139**、`§7.3` 的语言键 **263**、`§7.1` 的资源 **265 → 302** 三处重点数与上游现值逐位相等；本表 22 行**数字一处未改**（全部为修订后现值，没有旧版口径残留），只更新了第 21 行的「是否一致」备注（`12-TECH` 的两处已在修订期改成「破得动」）。
 
 ### 12.2 任务总量与阶段边界的自检
 

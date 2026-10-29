@@ -67,9 +67,9 @@
 | 1 | `CropProfile` 条数 | **19**（15 → 19） | BRIEF §3.1 / §4；`10-DECISIONS-0.0.2.md` §4；`12-TECH-0.0.2.md` §3.1 |
 | 2 | 注册对象总数 | **77**（64 → 77；启动自检行带 12 类小计） | BRIEF §4；`12-TECH-0.0.2.md` §2.1 / §11 #2 |
 | 3 | config 键 | **139**（117 + 22 新增） | BRIEF §8；`12-TECH-0.0.2.md` §8.1 / §11 #16 |
-| 4 | 资源文件总数 | **299**（265 + 34 新增；JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1，扣 `.cache` 的 11 个与 3 个 `.gitkeep`） | BRIEF §4.1；`12-TECH-0.0.2.md` §7.1 / §11 #17 |
+| 4 | 资源文件总数 | **302**（265 + 37 新增；JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1，扣 `.cache` 的 11 个与 3 个 `.gitkeep`） | BRIEF §4.1；`12-TECH-0.0.2.md` §7.1 / §11 #17 |
 | 5 | 语言文件键 | **263**（222 + 41 新增；中英键集必须相等，V-64） | BRIEF §8；`12-TECH-0.0.2.md` §7.3 / §11 #18 |
-| 6 | 资源交付清单 | **40 行**（PNG 9 / OGG 2 / JSON 26 / GLSL 3；其中 37 行已在仓库、3 行待 F-98） | `12-TECH-0.0.2.md` §7.2；`13-TASKS-0.0.2.md` §9.3 |
+| 6 | 资源交付清单 | **40 行**（PNG 9 / OGG 2 / JSON 26 / GLSL 3），全部已在仓库 | `12-TECH-0.0.2.md` §7.2；`13-TASKS-0.0.2.md` §9.3 |
 | 7 | 新增语言键 | **39**（config 22 + item 5 + block 2 + effect 2 + subtitles 2 + advancements 6） | `12-TECH-0.0.2.md` §7.3；`13-TASKS-0.0.2.md` F-97 |
 | 8 | 新增 config 键 | **22**（molotov 3 / wild_apple 2 / wild_hunter 11 / zangief_cane 6） | BRIEF §8 唯一清单；`12-TECH-0.0.2.md` §8.1 |
 | 9 | 进度 | **15**（12 + 3） | BRIEF §4；`10-DECISIONS-0.0.2.md` D-63；`12-TECH-0.0.2.md` §11 #19 |
@@ -82,7 +82,7 @@
 两条口径提醒：
 
 - v0.0.1 的三个基数是 **117**（config）/ **262**（资源）/ **222**（语言键），不是 `06-PROMPT-TASKS.md` 里更早的 216 / 257——那两组数字已被实测取代，以 BRIEF §4.1 为准。
-- `src/generated/resources` 下的 `.cache` 目录里有 **11 个无扩展名文件**，是 DataGen 缓存，**不进 jar、不计入 299**；资源核对时先扣掉再数。
+- `src/generated/resources` 下的 `.cache` 目录里有 **11 个无扩展名文件**，是 DataGen 缓存，**不进 jar、不计入 302**；资源核对时先扣掉再数。
 
 ---
 
@@ -94,7 +94,7 @@
 | Phase 12 | 压缩物与莫洛托夫！ | 9 | F-67 ~ F-75 | 10.5 | Phase 11 | 5 条新配方可用；投莫洛托夫只追加火 / 岩浆块、原方块一个不少；压缩干草块对瓜！与瓜片子不破、对育碧服务器与 TNT 破 |
 | Phase 13 | 狂 野 猎 人 | 10 | F-76 ~ F-85 | 16.0 | Phase 11 | 吃一颗狂野苹果后七项能力可观察（属性 / 吸附 / 伤害击退 / 续时 / 世界灰度 / 红剪影 / 循环音），`/effect clear` 后全部复位 |
 | Phase 14 | 桑吉尔蔗 | 8 | F-86 ~ F-93 | 11.5 | Phase 11 | 三相位按时序走完；三个高度落地耗时都落在 40 ± 2 刻；21 项键位手测只有 ESC 例外；`Rotation` 不写回 |
-| Phase 15 | 资源、音频、进度与验收 | 6 | F-94 ~ F-99 | 11.5 | Phase 11 + 12 + 13 + 14 | 299 / 263 / 139 / 77 四项对齐；`12-TECH` §11 的 22 条自检全过；`dist/farmstorm-0.0.2+mc1.21.1.jar` 产出 |
+| Phase 15 | 资源、音频、进度与验收 | 6 | F-94 ~ F-99 | 11.5 | Phase 11 + 12 + 13 + 14 | 302 / 263 / 139 / 77 四项对齐；`12-TECH` §11 的 22 条自检全过；`dist/farmstorm-0.0.2+mc1.21.1.jar` 产出 |
 | **合计** | **5 个 Phase** | **40** | **F-60 ~ F-99** | **60.5** | | |
 
 读表要点：
@@ -397,7 +397,7 @@
 
 ### 6.2 本阶段目标
 
-补齐 40 行资源交付里剩下的部分（6 张物品 / 方块贴图、2 个 OGG、1 个效果图标、9 个模型侧 JSON、3 条进度）与 41 条语言键，然后把 **299 / 263 / 139 / 77** 四项计数对齐、把 `12-TECH` §11 的 22 条自检逐条跑过，产出可发布的 `dist/farmstorm-0.0.2+mc1.21.1.jar`。
+补齐 40 行资源交付里剩下的部分（6 张物品 / 方块贴图、2 个 OGG、1 个效果图标、9 个模型侧 JSON、3 条进度）与 41 条语言键，然后把 **302 / 263 / 139 / 77** 四项计数对齐、把 `12-TECH` §11 的 22 条自检逐条跑过，产出可发布的 `dist/farmstorm-0.0.2+mc1.21.1.jar`。
 
 ### 6.3 任务清单
 
@@ -408,7 +408,7 @@
 | F-96 | 方块状态与模型：9 个 JSON | M / 1.5 | F-65、F-67、F-95 | 2 个 blockstate + 2 个方块模型 + 5 个物品模型（桑吉尔蔗模型只有 `textures.particle`、无 `elements`） |
 | F-97 | 语言文件 41 条与中英相等 | S / 0.5 | F-61、F-64、F-65、F-98 | `ModLangProvider` 落 41 条 → 两份各 263 键且键集相等；`tooltip.farmstorm.*` 仍 16 条 |
 | F-98 | 三个新进度 | S / 0.5 | F-69、F-76、F-87 | `first_molotov` / `zangief_hit` / `first_wild_hunter`，父节点分别为 `first_throw` / `first_deploy` / `root`，进度总数 15 |
-| F-99 | 四项计数核对、三模式回归与打包 | L / 3.0 | F-75、F-85、F-93、F-94、F-96、F-97 | 299 / 263 / 139 / 77 四项对齐 + 22 条自检逐条留读数 + `dist` jar + `README.md` 的索引节与素材声明节 |
+| F-99 | 四项计数核对、三模式回归与打包 | L / 3.0 | F-75、F-85、F-93、F-94、F-96、F-97 | 302 / 263 / 139 / 77 四项对齐 + 22 条自检逐条留读数 + `dist` jar + `README.md` 的索引节与素材声明节 |
 
 ### 6.4 本阶段出口判据
 
@@ -423,7 +423,7 @@
 - [ ] **F-97 键数与相等性**：`runData` 后比两份 `.json`。通过的样子：两份各 **263** 键（222 + 41），`set(zh) == set(en)` 为 True；41 条的七类构成逐类对得上（config 22 + item 5 + block 2 + 实体名 2 + effect 2 + subtitles 2 + advancements 6）；`tooltip.farmstorm.*` 仍是 16 条。
 - [ ] **F-98 三条进度**：分别真触发一次，再 `/advancement` 查询。通过的样子：投莫洛托夫弹 `first_molotov`、桑吉尔蔗命中弹 `zangief_hit`、获得效果弹 `first_wild_hunter`，三条各一次 toast；`/advancement` 能查到三条 ID；进度总数 **15**；既有 12 条的 `git diff` 为空。
 - [ ] **F-98 JSON 形状**：读三个文件。通过的样子：`parent` 分别为 `farmstorm:first_throw` / `farmstorm:first_deploy` / `farmstorm:root`，`frame` 为 `task`、`show_toast` 为 true。
-- [ ] **F-99 资源 299**：`git ls-files 'src/main/resources' 'src/generated/resources'`，再扣掉 `.cache` 的 11 个无扩展名文件与 3 个 `.gitkeep`。通过的样子：总数 **299**；JSON **192**、PNG **99**、OGG **2**、GLSL **2**、TOML 1、`pack.mcmeta` 1。
+- [ ] **F-99 资源 302**：`git ls-files 'src/main/resources' 'src/generated/resources'`，再扣掉 `.cache` 的 11 个无扩展名文件与 3 个 `.gitkeep`。通过的样子：总数 **302**；JSON **195**、PNG **100**、OGG **2**、GLSL **3**、TOML 1、`pack.mcmeta` 1。
 - [ ] **F-99 其余三数**：语言键、toml、自检行。通过的样子：两份语言文件各 **263** 键且键集相等；`config/farmstorm-server.toml` **139** 键；日志里 `自检 注册对象 77 个 …` 与 `自检 实体渲染器 11/11 → OK` 两行都在。
 - [ ] **F-99 22 条自检**：按 `12-TECH` §11 逐条跑。通过的样子：22 条全过，逐条留读数（一条一行：编号 / 结论 / 证据位置）。
 - [ ] **F-99 配方书分类已修（V-67）**：`client/ConverterRecipeBookCategory` 已通过 `RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder` 注册 `farmstorm:converting` 的分类（返回 `UNKNOWN`）。通过的样子：客户端日志里 **不再出现** `WARN ClientRecipeBook: Unknown recipe category`（修复前实测 24 条），且打开配方书 UI 不报错；README 的「已知限制」里**不列**这一条。
@@ -441,7 +441,7 @@
 
 ### 6.6 完成后应向用户回报
 
-- 四项计数的命令与结果（299 / 263 / 139 / 77）与资源的六类分解（JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1）。
+- 四项计数的命令与结果（302 / 263 / 139 / 77）与资源的六类分解（JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1）。
 - 两份语言文件的键数、键集 diff 的空结论、`tooltip.farmstorm.*` 的 16。
 - 两个 `.ogg` 的 `ffprobe` 三行原文（编码 / 声道 / 码率），以及缺 ffmpeg 时脚本的退出码与提示原文。
 - 22 条自检的逐条读数（一条一行：编号 / 结论 / 证据位置）。
@@ -470,7 +470,7 @@
 | Phase 12 → 13 | 上一阶段（Phase 12 · 压缩物与莫洛托夫！）已完成：5 条新配方可用、投莫洛托夫只追加火与岩浆块且原方块一个不少、压缩干草块对瓜！与瓜片子不破而对育碧服务器与 TNT 破、转换配方总数 24。本阶段开始 Phase 13 · 狂 野 猎 人，请按 15-PROMPT-TASKS-0.0.2.md「Phase 13」一节执行，只做 F-76 ~ F-85，完成后按 14 的回报格式交回。 |
 | Phase 13 → 14 | 上一阶段（Phase 13 · 狂 野 猎 人）已完成：三项属性加成、5 格 30° 吸附冲刺、伤害与击退、击杀续时无上限、世界灰度（HUD 保持原色）、可见生物红剪影、16 格循环音七项均可观察，`/effect clear` 后全部复位，`CustomPacketPayload` 与 `Mixin` 匹配数都为 0。本阶段开始 Phase 14 · 桑吉尔蔗，请按 15-PROMPT-TASKS-0.0.2.md「Phase 14」一节执行，只做 F-86 ~ F-93，完成后按 14 的回报格式交回。 |
 | Phase 14 → 15 | 上一阶段（Phase 14 · 桑吉尔蔗）已完成：三相位（倒转 → 漂浮 VII 20 刻 → 下坠自转）按时序走完，平地 / 两格 / 四格三个高度的落地耗时都落在 40 ± 2 刻，21 项键位手测只有 ESC 例外，`/data get entity @s Rotation` 全程不变。本阶段开始 Phase 15 · 资源、音频、进度与验收，请按 15-PROMPT-TASKS-0.0.2.md「Phase 15」一节执行，内部按 F-94 → F-95 → F-96 → F-98 → F-97 → F-99 的顺序做，完成后按 14 的回报格式交回。 |
-| Phase 15 → 收尾 | 上一阶段（Phase 15 · 资源、音频、进度与验收）已完成：资源 299 / 语言 263（中英相等）/ config 139 / 注册对象 77 四项对齐，`12-TECH` §11 的 22 条自检逐条留读数，`dist/farmstorm-0.0.2+mc1.21.1.jar` 已产出。现在按 15-PROMPT-TASKS-0.0.2.md §8 的「全项目收尾提示词」做一次发布前自检，只核对与修复，不新增任何功能。 |
+| Phase 15 → 收尾 | 上一阶段（Phase 15 · 资源、音频、进度与验收）已完成：资源 302 / 语言 263（中英相等）/ config 139 / 注册对象 77 四项对齐，`12-TECH` §11 的 22 条自检逐条留读数，`dist/farmstorm-0.0.2+mc1.21.1.jar` 已产出。现在按 15-PROMPT-TASKS-0.0.2.md §8 的「全项目收尾提示词」做一次发布前自检，只核对与修复，不新增任何功能。 |
 
 ---
 
@@ -485,8 +485,8 @@
 
 2. 资源清点（必须逐类点数，只报总数无效）
    重新跑 .tools\gw.cmd runData，按 12-TECH-0.0.2.md §7.1 / §7.4 的口径逐类计数，
-   合计必须是 299 个：JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / pack.mcmeta 1，
-   并扣掉 src/generated/resources 下 .cache 的 11 个无扩展名文件与 3 个 `.gitkeep`（它们不进 jar，不计入 299）。
+   合计必须是 302 个：JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / pack.mcmeta 1，
+   并扣掉 src/generated/resources 下 .cache 的 11 个无扩展名文件与 3 个 `.gitkeep`（它们不进 jar，不计入 302）。
    再跑一次 runData，git diff --stat 必须为空（没有手改生成物的痕迹）。
    语言文件两份各 263 键、set(zh) == set(en) 为 True；其中 tooltip.farmstorm.* 仍是 16 条。
    config/farmstorm-server.toml 叶节点 139 个，带 farmstorm.configuration. 前缀的语言键也是 139 条。
@@ -526,7 +526,7 @@
 
 收尾时的三条判据（人眼复核，不看代理的自我陈述）：
 
-1. 资源清点表的六类加总 = **299**，且每一行都能指到一个目录；`.cache` 的 11 个与 3 个 `.gitkeep` 确实没算进去。
+1. 资源清点表的六类加总 = **302**，且每一行都能指到一个目录；`.cache` 的 11 个与 3 个 `.gitkeep` 确实没算进去。
 2. `12-TECH-0.0.2.md` §11 的 **22 条**全绿，且每条都有证据位置——#9（TNT 炸得动压缩干草块）与 #21（0 个网络包）这两条必须单独点名。
 3. 任务核对表 **40 行**，「未达成」为 0；有则回补后重跑本节，不回补不发布。
 

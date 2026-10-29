@@ -49,7 +49,7 @@ v0.0.2 走的是同一套「文档先行」流程，但深度不同：这一版�
 | 实体渲染器 | **11 / 11** | 客户端日志 `自检 实体渲染器 11/11 → OK` |
 | config 键 | **139** 条（117 + 22） | `run/config/farmstorm-server.toml` 叶节点 |
 | 语言键 | **263 × 2**（中英键集逐字相等） | 两份 `assets/farmstorm/lang/*.json` 键数；`set(zh) == set(en)` |
-| 资源文件 | **299** 个（JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1） | `git ls-files` 出清单后扣 `.cache` 的 11 个与 3 个 `.gitkeep` |
+| 资源文件 | **302** 个（JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1） | `git ls-files` 出清单后扣 `.cache` 的 11 个与 3 个 `.gitkeep` |
 | 进度 | **15** 条（v0.0.1 的 12 + 3） | `data/farmstorm/advancement/` |
 | 转换配方 / 合成配方 | **24 / 2**（+3 / +2） | `src/generated/resources/data/farmstorm/recipe/` |
 | 幸运浆果池 | **16** 种（19 条档案里排除幸运浆果、狂野苹果、压缩膨胀麦） | `CropProfile.LUCKY_BERRY_POOL` |
@@ -194,7 +194,7 @@ jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.w
 | 改良作物档案 | 15 种 | **19 种**（投掷 10 / 部署 6 / 食用 3；破障 4） |
 | registry 对象 | 64 个 | **77 个**（+5 items / +2 blocks / +2 entity / +2 mob_effect / +2 sound_event） |
 | config 键 | 117 个 | **139 个**（+22） |
-| 资源文件 | 262 个（实测；169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | **299 个**（JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1） |
+| 资源文件 | 262 个（实测；169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | **302 个**（JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1） |
 | 语言键 | 222 × 2（中英相等） | **263 × 2**（+41） |
 | 进度 | 12 条 | **15 条**（+3） |
 | 转换配方 / 合成配方 | 21 / 0 | **24 / 2** |
@@ -337,7 +337,7 @@ Seven additions on top of a frozen v0.0.1: the converter finally gets a crafting
 | Registry objects | **77** |
 | config keys | **139** |
 | Language keys | **263 × 2** (zh_cn / en_us key sets identical) |
-| Resource files | **299** (JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1) |
+| Resource files | **302** (JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1) |
 | Advancements | **15** |
 | Tasks | **40** (F-60…F-99) across 5 phases (11: 7, 12: 9, 13: 10, 14: 8, 15: 6) |
 

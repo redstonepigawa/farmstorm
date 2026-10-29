@@ -54,7 +54,7 @@ Carried over from `01-DESIGN.md` §3.7 clause 4: 'radius N blocks' = Euclidean r
 
 ### 1.1 One-line positioning
 
-v0.0.2 is a pure delta on top of the frozen v0.0.1: it adds the single crafting recipe the converter lacks, then 4 `CropProfile` entries, 1 high-hardness block, **2 status effects** (1 visible `farmstorm:wild_hunter`, responsible for rewriting 'melee' as 'lock-on + dash'; 1 hidden `farmstorm:zangief_piledriver`, serving only as the phase-synchronisation channel of the Zangief Cane), and 3 intrusive client presentations (full-screen greyscale, red silhouette, input lock).
+v0.0.2 is a pure delta on top of the frozen v0.0.1: it adds the single crafting recipe the converter lacks, then 4 `CropProfile` entries, 1 high-hardness block, **2 status effects** (1 visible `farmstorm:wild_hunter`, responsible for rewriting 'melee' as 'lock-on + dash'; 1 hidden `farmstorm:zangief_piledriver`, serving only as the phase-synchronisation channel of the Zangief Cane), and 3 intrusive client presentations (world-only grayscale, red silhouette, input lock).
 
 ### 1.2 The 7 new features and their sections
 
@@ -383,7 +383,7 @@ The trigger is issued by the projectile landing; the landing itself first follow
     settleLanding(level, landingVec, pos):
         1. Trigger       -- spawn one 'power 0' explosion at the landing point, only to obtain the landing semantics; settles no damage, touches no block
         2. Enumerate     -- cube of Chebyshev radius 4 centred on the block coordinate containing landingVec
-        3. Euclidean cut -- keep blocks whose 'Euclidean distance from block centre to landingVec' is ≤ 4.0
+        3. Euclidean cut -- with the **integer block** holding landingVec as sphere centre, keep blocks whose integer offset satisfies dx²+dy²+dz² ≤ r²
         4. Top-face test -- per block, judge 'top face touches air' (§5.7); drop the ones that fail
         5. Roll          -- each passing block rolls once on its own (§5.8); write the result into the air position above it (§5.9)
         6. Finish        -- discard the projectile entity, set settled true, the same entity never settles again
@@ -393,10 +393,10 @@ Two hard constraints run between the six steps: ① at the default power of 0 th
 ### 5.6 How the radius of 4 blocks is counted
 
 1. **Candidate set**: with the block coordinate of the landing as origin, all block positions with `dx, dy, dz ∈ [−4, +4]`. That is 9×9×9 = 729 candidates (【本文补充】: 729 is the enumeration bound, not the number actually affected).
-2. **Filtering**: cut the candidate set into a sphere by **Euclidean distance** — the judged point is the `block centre` (`pos.getCenter()`), the origin of the check is the **exact landing coordinate** `landingVec`, and the condition is written `distance ≤ 4.0`.
-3. **Why Euclidean**: 【P-2】 says 'radius 4 blocks'. Under `01-DESIGN.md` §3.7 clause 4, 'radius N blocks' is always read as a Euclidean radius; clause 1 says the origin is by default the block centre or the deployment-point coordinate, and throwables follow the exact landing coordinate of §3.4. The two clauses together give item 2 above.
+2. **Filtering**: cut the candidate set into a sphere by **Euclidean distance** — the origin of the check is the **integer block** holding the landing point (the `BlockPos` settled by §3.4), and the judged point is the candidate's **integer offset** (`dx, dy, dz`) from it, with the condition written `dx² + dy² + dz² ≤ r²`. The exact `landingVec` coordinate is not used: when the sphere centre falls inside a block, 'how many cells are inside the sphere' has no unique answer (ruling V-20).
+3. **Why Euclidean**: 【P-2】 says 'radius 4 blocks'. Under `01-DESIGN.md` §3.7 clause 4, 'radius N blocks' is always read as a Euclidean radius; clause 1 says the origin is by default the block centre or the deployment-point coordinate, and throwables follow the **integer block** settled by §3.4. The two clauses together give item 2 above.
 4. **Why not Chebyshev**: Chebyshev radius 4 is a 9×9×9 block box whose corners are 6.93 blocks away (【本文补充】: the geometric value of √(4²+4²+4²)), far from the intuition of 'radius 4 blocks'; the farthest point of the Euclidean sphere is exactly 4.0 blocks.
-5. **Blocks not counted**: air, water and blocks whose top face is not solid are all eliminated in step 4, so 'how many blocks are within 4 blocks' is not 'how many rolls were made'.
+5. **Blocks not counted**: air, water and blocks whose top face is not solid are all eliminated in step 4, so 'how many blocks are within 4 blocks' is not 'how many rolls were made'. At radius 4.0 the integer sphere (`d² ≤ 16`) holds **257** cells, which is the upper bound of a single write (criteria 1 and 6 of §3.7 in `12-TECH-0.0.2.md`).
 
 ### 5.7 How 'the top face touches air' is judged
 
@@ -405,7 +405,7 @@ There are only two conditions, both judged per block by coordinate on the server
 | Condition | Check | Note |
 |---|---|---|
 | A · Above is air | `level.getBlockState(pos.above()).isAir()` is true | Only vanilla `isAir` counts, which covers air, cave air and void air. Water, a snow layer, grass or a torch above is not air |
-| B · It has a top face that can bear something | `level.getBlockState(pos).isFaceSturdy(level, pos, Direction.UP)` is true | This one naturally excludes air blocks, water, leaves and the like. Without it, 'igniting' a water surface would yield a fire that vanishes at once |
+| B · It is a complete solid block | `level.getBlockState(pos).isSolidRender(level, pos)` is true | This one naturally excludes air blocks, water, leaves, slabs and snow layers. Without it, 'igniting' a water surface would yield a fire that vanishes at once. **Why not `isFaceSturdy(level, pos, Direction.UP)`**: that also lets 'directional blocks with a complete top face' through, which is looser than the design intent; the two agree on slabs and snow layers, and `isSolidRender` is the narrower one (ruling V-21) |
 
 Supplementary wording (【本文补充】):
 
@@ -600,7 +600,7 @@ This is the longest section, because this single status effect rewrites four thi
 
 ### 7.1 One-line positioning
 
-A status effect that temporarily turns the player into a 'hunter': three attribute bonuses + full-screen black-and-white + red silhouette marking + aim-locked dash + kill-based extension — all five hold at the same time while the effect lasts.
+A status effect that temporarily turns the player into a 'hunter': three attribute bonuses + world black-and-white (the HUD keeps its colours) + red silhouette marking + aim-locked dash + kill-based extension — all five hold at the same time while the effect lasts.
 
 ### 7.2 Type and category
 
@@ -661,20 +661,20 @@ The three numbers 0.13 blocks/tick, 5.2 hits/second and 1.4 points in the table 
 3. **Stacking semantics** (the key point): the amounts of several `ADD_MULTIPLIED_TOTAL` modifiers on the same attribute are **summed** first and the total is multiplied once, not multiplied successively. So Speed II (+40%) and Wild Hunter (+30%) present together give ×1.70 (= 1 + 0.40 + 0.30), not ×1.82 (= 1.4 × 1.3) — both multipliers are arithmetic illustrations of 【本文补充】, used to tell 'summing' apart from 'successive multiplication'. This is expanded in §11.7.
 4. **Exact removal**: each of the three modifiers carries a fixed identity (name + UUID). When the effect expires, is cleared or the player dies, they are removed one by one by identity, without deleting modifiers that other sources (potions, equipment, other mods) put on the same attribute.
 
-### 7.6 Black-and-white view (including the GUI)
+### 7.6 Black-and-white view (world-only grayscale, the HUD keeps its colours)
 
 | Item | Specification | Basis |
 |---|---|---|
-| Scope | world rendering **and** the GUI layer: full-screen greyscale, not just a desaturated world | D-61 |
-| Carrier | 1 post_effect JSON + 2 GLSL source files, packaged into the jar | BRIEF §3.2 |
-| Mount point | preferably 'one full-screen pass after the GUI, before the screen'; the concrete event and the alternatives are in section 7 of `12-TECH-0.0.2.md` | BRIEF §7.1 |
+| Scope | the whole world rendering (blocks / entities / particles); **the HUD keeps its original colours** (scope changed by V-56) | D-61 |
+| Carrier | 1 `PostChain` JSON (`shaders/post/grayscale.json`) + 1 program declaration + GLSL source files, packaged into the jar; `post_effect/grayscale.json` is kept as a reserved mount point (no loader today) | BRIEF §3.2 + V-49 |
+| Mount point | the vanilla `PostChain` (`GameRenderer#loadEffect`), run at the end of the world pass; the hand-written pass is abandoned (V-48) | BRIEF §7.1 + V-56 |
 | Activation condition | the local player themself carries `farmstorm:wild_hunter` | D-50 |
 | Unmounting | post-processing stops in the same instant the effect disappears, leaving no afterimage | 【本文补充】 |
 | Affected party | only the holder's own screen; other players on the same server see no greyscale | 【本文补充】 |
 
-Three prohibitions (BRIEF §7.1, copied verbatim): ① faking greyscale with a change of fog colour is prohibited; ② faking greyscale by swapping textures is prohibited; ③ if the preferred mount point does not hold, the fallback must be 'one pass for the world + one pass for the GUI', not 'grey the world only' — the latter must be written into the Release notes and registered under RT-10 as a degradation.
+Three prohibitions (BRIEF §7.1, copied verbatim): ① faking greyscale with a change of fog colour is prohibited; ② faking greyscale by swapping textures is prohibited; ③ if the preferred mount point does not hold, the fallback must be 'one pass for the world + one pass for the GUI', not 'grey the world only'. **What v0.0.2 actually produced**: item ③'s 'one pass for the GUI' has no reliable implementation path (`process()` runs before the GUI is drawn, and taking over the framebuffer hits the read/write feedback of V-48), so per V-56 it landed as 'grey the world only', with that degradation registered in the Release notes.
 
-**Why the GUI must be included**: D-61 asks for 'the whole picture the player sees losing its colour'. Greying only the world leaves a colourful ring of hotbar and health bar behind, and the look breaks at once.
+**Why the first draft asked for the GUI, and why this version accepts leaving it out**: D-61's original intent is 'the whole picture the player sees losing its colour'; greying only the world leaves a colourful ring of hotbar and health bar behind. But on 21.1.213 the only mechanism that lands is the vanilla `PostChain`, whose execution point precedes GUI rendering (`GameRenderer:1027` < `:1073`); including the GUI would mean taking over the framebuffer and hand-writing the target lifecycle — v0.0.2 went down that road once and got 'grey at the wrong moment' (V-48). Between the two evils, V-56 settles on 'world-only grayscale, HUD keeps its colours', written into the Release notes.
 
 ### 7.7 Red highlight
 
@@ -684,9 +684,9 @@ Three prohibitions (BRIEF §7.1, copied verbatim): ① faking greyscale with a c
 | Distance cap | ≤ 64 blocks | D-62 |
 | Visibility | line of sight is required (no block in the way), **never through walls** | D-62 |
 | Excluded targets | the player, teammates | D-62 |
-| Drawing method | take the entity model's `renderToBuffer` and draw it again with the translucent self-illuminating render type | BRIEF §7.2 |
-| Colour | shader colour set to RGBA(1, 0.15, 0.15, 0.45) | BRIEF §7.2 |
-| Texture | 1×1 white texture `assets/farmstorm/textures/misc/white.png` | BRIEF §7.2 |
+| Drawing method | let `LivingEntityRenderer#render(...)` draw it again itself (with a re-entrancy guard); `MultiBufferSource` is **filtered by vertex format**, replacing only the `NEW_ENTITY` kind (V-58) | BRIEF §7.2 + V-58 |
+| Colour | RGBA(1, 0.15, 0.15, 0.45) **baked into the texture** (that render type's shader ignores ColorModulator, so `setShaderColor` has no effect, V-60) | BRIEF §7.2 + V-60 |
+| Texture | 1×1 red texture `assets/farmstorm/textures/misc/wild_hunter_red.png` (RGBA 255/38/38/115) | BRIEF §7.2 + V-60 |
 
 Three prohibitions (BRIEF §7.2, copied verbatim): ① calling the render dispatcher from an entity's render event to redraw the whole entity is prohibited — it recurses into its own event; ② substituting the vanilla glowing effect is prohibited — that is a white outline visible to the whole server, which contradicts D-62; ③ a 'highlight visible to everyone' is not to be built — it is a visual enhancement on the holder's side only.
 
@@ -703,7 +703,7 @@ The candidate set and the ordering rules are all copied from D-64:
 5. **Ordering**: the smallest angle wins; on equal angles the nearer one.
 6. **Computability**: 'the one closest to the crosshair on screen' is equivalent to 'the smallest angle to the look direction', which the server can compute, **with no need to read the client's mouse position** (the wording of D-64).
 
-    selectTarget(player):
+    resolveTarget(player):
         look = player.getLookAngle()                      // look unit vector
         eye  = player.getEyePosition()                     // origin of the check is the eye
         best = null
@@ -769,9 +769,9 @@ Three details (【本文补充】): ① it is 'add 160 ticks', not 'set to 160 t
 | Item | Specification | Basis |
 |---|---|---|
 | Resource | `farmstorm:wild_hunter_loop` (declared as a looping event in `sounds.json`) | BRIEF §7.7 |
-| Source file | `Animals.mp3` converted to mono / 64 kbps Ogg Vorbis | D-53, D-66 |
+| Source file | `Animals_from_3m04s.mp3` (a clip from 3m04s on, 47.14 s) converted to mono / 64 kbps Ogg Vorbis | D-53, D-66 + V-51 |
 | Playing party | one looping `SoundInstance` on the client, not re-sent by the server every tick | D-76 |
-| Position | the sound source is updated onto the player every tick and follows the player | D-76 |
+| Position | **your own instance**: `relative=true`, coordinates **zeroed**, `Attenuation.NONE`, volume fixed at 1.0; **everyone else's**: `relative=false`, updated to their world position every tick, `Attenuation.LINEAR` (V-53) | D-76 |
 | Audible distance | 16 blocks | D-76 |
 | Sound category | `SoundSource.PLAYERS` | D-76 |
 | Start condition | the client detects `farmstorm:wild_hunter` appearing on the local player | D-50 |
@@ -1001,7 +1001,7 @@ The numbering follows the style of §7 in `01-DESIGN.md`; this section is renumb
 ### 11.3 Molotov in the rain / in water
 
 - **Rain**: fire that was written is put out by the rain under vanilla rules; this mod **does no rain-proofing and makes no compensation**. D-58 only prescribes 'placing fire', not 'the fire has to keep burning'.
-- **On a water surface**: a water surface fails condition B of §5.7 (`isFaceSturdy` is false), so that cell **takes no roll**; nor is there any 'air position above' inside water, so no magma block appears out of nowhere under water.
+- **On a water surface**: a water surface fails condition B of §5.7 (`isSolidRender` is false), so that cell **takes no roll**; nor is there any 'air position above' inside water, so no magma block appears out of nowhere under water.
 - **Landing point in water**: the projectile follows the landing procedure of `01-DESIGN.md` §3.4 and settles as usual, only fewer qualifying blocks are filtered out, possibly zero (§5.11).
 - **Landing on the shore next to water**: the land side catches fire as usual; the same Molotov giving two results on different blocks is expected.
 - **No 'disabled in rain' branch**: adding one would require reading the weather state and would turn a pure block check into three (rain / thunder / clear), for zero benefit.
@@ -1082,12 +1082,12 @@ The numbering follows the style of §7 in `01-DESIGN.md`; this section is renumb
 - **Two different tables, alongside the conversion recipe table**: being in the tag ≠ being convertible. The tag governs crafting, the recipe table governs conversion (item 3 of §11.1).
 - **Not synchronised with the Lucky Berry pool**: the pool excludes 3 entries and the tag excludes 3 entries, but not the same objects (the pool excludes the Lucky Berry itself, the tag excludes Compressed Puffed Wheat and the seed items). Do not derive one table from the other.
 
-### 11.13 Full-screen greyscale and shader mods (RT-16)
+### 11.13 World-only grayscale and shader mods (RT-16)
 
 - **No detection**: this mod does **no** runtime detection of shaders (Oculus / Iris and the like) and has no branch that 'turns greyscale off when one is detected'.
-- **Registered as a known incompatibility**: full-screen greyscale runs one more full-screen pass at the end of the render pipeline, and shader mods occupy the same stretch of pipeline too; the possibility that the two overwrite each other is real. Under the wording of RT-16 this goes into the compatibility notes of the release and is not handled as a runtime issue.
+- **Registered as a known incompatibility**: world-only grayscale goes through the vanilla `PostChain` and runs one more screen-wide pass at the end of the render pipeline, and shader mods occupy the same stretch of pipeline too; the possibility that the two overwrite each other is real. Under the wording of RT-16 this goes into the compatibility notes of the release and is not handled as a runtime issue.
 - **Degradation path**: the fallback of RT-10 is 'one pass for the world + one pass for the GUI'; if that is unusable too, degrade one more step per RT-10 (grey the world only) and register the degradation in the Release notes. None of the three cases adds a packet.
-- **D-61 is not changed because of compatibility**: 'including the GUI' is a hard requirement and does not fall back to 'grey the world only' just because some shader pack does not support it.
+- **D-61's carrier is not changed because of compatibility**: even if some shader pack does not support it, this never falls back to fake mechanisms such as fog colour or a texture swap (V-56 changed only the scope: the HUD is not greyed, the world must genuinely be greyed).
 
 ---
 

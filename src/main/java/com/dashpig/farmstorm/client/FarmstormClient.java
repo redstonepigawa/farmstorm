@@ -10,7 +10,9 @@ import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
@@ -39,6 +41,24 @@ public final class FarmstormClient {
     @SubscribeEvent
     public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         event.register(FarmstormMenus.CONVERTER.get(), ConverterScreen::new);
+    }
+
+    /**
+     * F-79：狂野猎人的冲刺是**客户端预测**（BRIEF §7.6）——按下攻击键时本地立刻算位移并冲出去；
+     * 服务端在 {@code AttackEntityEvent} 上用同一套 {@code resolveTarget} 独立复核（F-80）。
+     * 这里只做按键接线，位移数学在 {@code combat/WildHunterDash}（纯函数，可单测）。
+     */
+    @SubscribeEvent
+    public static void onInteractionKey(InputEvent.InteractionKeyMappingTriggered event) {
+        if (event.isAttack()) {
+            WildHunterDashClient.onAttackKey();
+        }
+    }
+
+    /** 冲刺只在生效的头几个 tick 内推进，逐刻推进由这里驱动。 */
+    @SubscribeEvent
+    public static void onClientTick(ClientTickEvent.Post event) {
+        WildHunterDashClient.onClientTick();
     }
 
     /**

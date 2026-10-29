@@ -27,17 +27,24 @@ public final class WildHunterLoopSound extends AbstractTickableSoundInstance {
     private static final Map<UUID, WildHunterLoopSound> ACTIVE = new Object2ObjectOpenHashMap<>();
 
     private final Player owner;
+    /** 自己的实例（relative=true）不需要也不应该 follow：相对声源的位置没有意义。 */
+    private boolean selfSourced;
 
     private WildHunterLoopSound(Player owner) {
         super(FarmstormSounds.WILD_HUNTER_LOOP.get(), SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
         this.owner = owner;
         this.looping = true;
-        this.relative = false;
-        this.attenuation = SoundInstance.Attenuation.NONE;
+        // 自己的光环用相对听者定位：声源不随世界移动 → 根本没有「听者→声源」向量，也就没有左右声像抖动。
+        // 别人的光环保持世界坐标 + LINEAR 衰减，这样才听得出方向（sounds.json 已声明 attenuation_distance: 16）。
+        boolean self = owner == Minecraft.getInstance().player;
+        this.relative = self;
+        this.selfSourced = self;
+        Farmstorm.LOGGER.info("狂野猎人 循环音 实例 {} relative={}", owner.getScoreboardName(), self);
+        // 距离衰减交给音频引擎（sounds.json 已声明 attenuation_distance: 16），不再每刻手写 volume。
+        this.attenuation = SoundInstance.Attenuation.LINEAR;
         this.volume = 1.0F;
         this.pitch = 1.0F;
-        follow();
-        updateVolume();
+        syncPosition();
     }
 
     /** 每客户端刻：给效果在身的玩家各维持一条实例，并按 16 格衰减算音量。 */
@@ -62,7 +69,6 @@ public final class WildHunterLoopSound extends AbstractTickableSoundInstance {
                 Farmstorm.LOGGER.info("狂野猎人 循环音 起 {}", player.getScoreboardName());
             }
             instance.follow();
-            instance.updateVolume();
         }
         Iterator<Map.Entry<UUID, WildHunterLoopSound>> iterator = ACTIVE.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -92,20 +98,24 @@ public final class WildHunterLoopSound extends AbstractTickableSoundInstance {
         }
     }
 
+    /** 只在移动超过 0.1 格时才写源坐标，减少每刻 AL_POSITION 抖动。 */
     private void follow() {
+        if (selfSourced) {
+            return;
+        }
+        double dx = owner.getX() - this.x;
+        double dy = owner.getEyeY() - this.y;
+        double dz = owner.getZ() - this.z;
+        if (dx * dx + dy * dy + dz * dz < 0.01) {
+            return;
+        }
+        syncPosition();
+    }
+
+    private void syncPosition() {
         this.x = owner.getX();
         this.y = owner.getEyeY();
         this.z = owner.getZ();
-    }
-
-    private void updateVolume() {
-        Player local = Minecraft.getInstance().player;
-        if (local == null) {
-            volume = 0.0F;
-            return;
-        }
-        double distance = Math.sqrt(local.distanceToSqr(owner.getX(), owner.getEyeY(), owner.getZ()));
-        volume = (float) Mth.clamp(1.0 - distance / WildHunterClientState.loopRange(), 0.0, 1.0);
     }
 
     @Override

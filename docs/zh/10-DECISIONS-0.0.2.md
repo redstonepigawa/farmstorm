@@ -146,7 +146,7 @@ D:\project_farm\docs\zh\
 | 子系统 | 涉及决策 | 技术落点 |
 |---|---|---|
 | 画面接管（相机） | D-59、D-70 | `ViewportEvent.ComputeCameraAngles`，只改渲染层角度 |
-| 整屏灰度 | D-61 | `RenderGuiEvent.Post` 一次全屏 pass |
+| 世界灰度（HUD 保持原色） | D-61 | 原版 `PostChain`（`GameRenderer#loadEffect`），世界段末尾执行 |
 | 红色剪影 | D-62 | `RenderLivingEvent.Post` 重绘模型 |
 | 输入锁 | D-60 | 五个事件各管一段（**已由 D-79 修订为七个机制**） |
 | 狂野猎人索敌与位移 | D-64、D-65 | 客户端预测 + 服务端判定 |
@@ -170,19 +170,19 @@ D:\project_farm\docs\zh\
 - **依据**：原文给出的唯一理由是「锁死 ESC 会让玩家以为游戏卡死」，因此 ESC 必须始终放行。技术上五个事件各管一段（**已由 D-79 修订为七个机制**，见 §3.5；原口径：移动/跳跃/潜行、攻击/使用、快捷栏 1–9、滚轮、背包/聊天），缺一个就会漏，这条是 RT-13 的评审对象。
 - **落地位置**：`client/FarmstormClient.java`（`MovementInputUpdateEvent`、`InputEvent.InteractionKeyMappingTriggered`、`InputEvent.Key`、`InputEvent.MouseScrollingEvent`、`ScreenEvent.Opening`）；`12-TECH-0.0.2.md` 的输入锁节与 RT-13。
 
-#### D-61 · 黑白含 GUI
+#### D-61 · 黑白（世界灰度，HUD 保持原色）
 
 - **编号**：D-61
-- **结论**：灰度后处理作用于整个世界渲染**与** GUI 层，是整屏灰度，不是只褪世界。
-- **依据**：只褪世界会留下彩色物品栏与血条，玩家一眼就能看出「只有世界变色」，与原版失明效果的观感差距过大。首选挂载点 `RenderGuiEvent.Post` 位于 GUI 之后、上屏之前，一次 pass 天然同时覆盖世界与 GUI，正好满足本条。
-- **落地位置**：`assets/farmstorm/shaders/core/grayscale.fsh` + `assets/farmstorm/post_effect/grayscale.json`（post_effect +1，另含 2 个 GLSL）；`12-TECH-0.0.2.md` 的灰度节与 RT-10（禁止用雾色或贴图替换冒充灰度）。
+- **结论**：灰度后处理作用于**整个世界渲染**（方块、实体、粒子），**HUD / GUI 保持原色**。原稿写的是「整屏灰度、含 GUI」，v0.0.2 施工时按 V-56 改口径。
+- **依据**：原稿的理由是「只褪世界会留下彩色物品栏与血条」。实际能落地的只有原版 `PostChain`：它的 `process()` 在 `GameRenderer:1027`（`renderLevel` 之后）、GUI 绘制（`GameRenderer:1073`）之前执行，因此天然只灰世界；要含 GUI 只能自己接管 framebuffer 并手写 target 管理，v0.0.2 实测在这条路上拿到的是「灰在了不该灰的时候」（V-48），且 `post_effect/` 目录在 NeoForge 21.1.213 没有加载器（V-49）。世界段的观感已经覆盖灰度效果的主体，故按 V-56 接受「HUD 原色」。
+- **落地位置**：`assets/farmstorm/shaders/post/grayscale.json`（`PostChain` 链）+ `shaders/program/grayscale.json` + `shaders/core/grayscale.fsh`；`client/GrayscalePass.java`（`GameRenderer#loadEffect` / `shutdownEffect`）；`assets/farmstorm/post_effect/grayscale.json` 保留为 RT-10 的预留挂载点（当前无加载器，不参与运行）；`12-TECH-0.0.2.md` 的灰度节与 RT-10（禁止用雾色或贴图替换冒充灰度）。
 
 #### D-62 · 红色高亮只画可见的
 
 - **编号**：D-62
 - **结论**：只给**视线内可见**（无方块遮挡）且距离 **≤ 64 格**的生物画红色剪影。排除自己与同队伍玩家。不穿墙。
-- **依据**：穿墙高亮等于把「你看不见的敌人」也标出来，强度远超原版发光效果；64 格是原文给定的距离上限，两者一起构成强度上限。排除自己与同队伍玩家沿用 D-06 的己方口径。技术上必须用 `getModel().renderToBuffer` 重绘，不能用 `EntityRenderDispatcher#render`，否则会递归触发自身事件。
-- **落地位置**：`client/FarmstormClient.java`（`RenderLivingEvent.Post` + `player.hasLineOfSight` + 距离判定）；`assets/farmstorm/textures/misc/white.png`；`12-TECH-0.0.2.md` 的剪影节与 RT-11。
+- **依据**：穿墙高亮等于把「你看不见的敌人」也标出来，强度远超原版发光效果；64 格是原文给定的距离上限，两者一起构成强度上限。排除自己与同队伍玩家沿用 D-06 的己方口径。技术上必须让 `LivingEntityRenderer#render(...)` 重画并带重入守卫，不能用 `EntityRenderDispatcher#render`，否则会递归触发自身事件；`MultiBufferSource` 还必须按顶点格式过滤，否则拴绳（`POSITION_COLOR_LIGHTMAP`）会让客户端直接崩（V-58）。
+- **落地位置**：`client/FarmstormClient.java`（`RenderLivingEvent.Post` + `player.hasLineOfSight` + 距离判定）；`assets/farmstorm/textures/misc/wild_hunter_red.png`（颜色烘进贴图，V-60）；`12-TECH-0.0.2.md` 的剪影节与 RT-11。
 
 #### D-63 · 新增 3 个进度
 
@@ -462,7 +462,7 @@ D:\project_farm\docs\zh\
 3. **不引入 Mixin**：三个侵入性效果全部走 NeoForge 事件与原生扩展点（D-40）。
 4. **不改 v0.0.1 任何既有数值与配方**：15 条既有 `CropProfile` 的任何字段、任何既有 config 键的默认值、既有 21 条转换配方、既有 12 个进度一律不动（施工事实卡 §3.4）。
 5. **不改破障阈值的比较逻辑**：`BlastRule.canBreak()` 的 `resistance < maxResistance` 不动，`grenadeResistThreshold` 与 `sliceResistThreshold` 的默认值也不动；D-78 澄清的是阈值归属与文档写法，不是改实现（§5.3、§5.5）。
-6. **不做光影类模组的兼容检测**：整屏灰度与 Oculus / Iris 一类后处理模组的冲突只登记为已知不兼容，不写运行时探测，也不做降级分支（RT-16）。
+6. **不做光影类模组的兼容检测**：世界灰度（原版 `PostChain`）与 Oculus / Iris 一类后处理模组的冲突只登记为已知不兼容，不写运行时探测，也不做降级分支（RT-16）。
 7. **不给压缩干草块做可旋转 pillar**：六面同贴图、无 axis 变体（D-57）。
 8. **不新增伤害类型**：`damage_types` +0，仍是 D-39 的 `farmstorm:void_bolt` 与 `farmstorm:crop_blast` 两个；莫洛托夫不造成伤害（D-58）。
 9. **不新增注册类目**：`block_entities`、`menu types`、`recipe type` / `serializer`、`data components`、创造标签页在施工事实卡 §3.2 里全是 +0（`zangief_cane` 复用既有 `DeployedCropBlockEntity`，转换配方复用 `ConverterRecipe`）。

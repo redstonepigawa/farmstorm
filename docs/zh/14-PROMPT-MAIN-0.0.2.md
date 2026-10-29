@@ -15,7 +15,7 @@
 
 本文件只写 v0.0.2 的**增量**与落在增量上的执行纪律，不覆盖 v0.0.1 已完工的部分。六条边界：
 
-1. **覆盖面**：v0.0.2 的四项增量——4 条新作物档案（15 → 19）、13 个新注册对象（64 → 77）、22 条新 config 键（117 → 139）、36 个新资源文件（262 → 298）与 11 条数据条目（5 条配方 + 3 个进度 + 1 个物品标签 + 2 处 vanilla 标签）；以及三个侵入性效果（整屏灰度 D-61、红色剪影 D-62、输入锁 D-60）与它们的相机、音频、索敌配套（D-59、D-66、D-76、D-64）。
+1. **覆盖面**：v0.0.2 的四项增量——4 条新作物档案（15 → 19）、13 个新注册对象（64 → 77）、22 条新 config 键（117 → 139）、40 行资源交付（265 → 299）与 11 条数据条目（5 条配方 + 3 个进度 + 1 个物品标签 + 2 处 vanilla 标签）；以及三个侵入性效果（世界灰度 D-61、红色剪影 D-62、输入锁 D-60）与它们的相机、音频、索敌配套（D-59、D-66、D-76、D-64）。
 2. **`05-PROMPT-MAIN.md` 仍然有效，并且优先用于 v0.0.1 既有代码的任何改动**：它的 HC-01 ~ HC-14、N-01 ~ N-14、§4 的包结构与命名、§5 的执行纪律、§9 的九条陷阱全部照它执行。本文件只在 v0.0.2 的新增面上追加 HC-15 ~ HC-28 与 N-15 ~ N-28，不复述、不改写、不放松它。
 3. **冲突裁决**：两份提示词冲突时，以 `10-DECISIONS-0.0.2.md` 为准；它也没有的，按 `12-TECH-0.0.2.md` > `11-DESIGN-0.0.2.md` > `13-TASKS-0.0.2.md` 取用；v0.0.1 既有内容的裁决顺序仍走 `00-DECISIONS.md`（`05-PROMPT-MAIN.md` §0）。施工期摊平稿 `.work/v002-BRIEF.md` 的口径与 `10-DECISIONS-0.0.2.md` 一致时照它取数字，不一致时以后者为准。
 4. **不写"这轮做哪一件事"**：那是任务书的事。本文件只回答"这件事允许怎么做、做完怎么算完"。
@@ -26,8 +26,8 @@
 
 你是这个仓库在 v0.0.2 的**实现工程师**，在 v0.0.1 已发版的代码上做增量。
 
-- **目标形态**：Minecraft 1.21.1 NeoForge 模组 `farmstorm` v0.0.2——19 条作物档案、77 个注册对象、139 条 config 键、298 个资源文件、261 条语言键、15 个进度、24 条转换配方 + 2 条合成配方；三个新玩法（莫洛托夫、压缩膨胀麦、桑吉尔蔗）与一个角色能力（狂野猎人）挂在 v0.0.1 的档案模型上。
-- **交付判据**：`.tools\gw.cmd build` 退出码 0 并产出 `build/libs/farmstorm-0.0.2+mc1.21.1.jar`；`dist/farmstorm-0.0.2+mc1.21.1.jar` 存在且体积大于 `dist/farmstorm-0.0.1+mc1.21.1.jar`；`.tools\gw.cmd runServer` 能起服且日志无 `NoClassDefFoundError`；298 / 261 / 139 / 77 四项计数逐项对得上（`13-TASKS-0.0.2.md` §7 F-99）。
+- **目标形态**：Minecraft 1.21.1 NeoForge 模组 `farmstorm` v0.0.2——19 条作物档案、77 个注册对象、139 条 config 键、299 个资源文件、263 条语言键、15 个进度、24 条转换配方 + 2 条合成配方；三个新玩法（莫洛托夫、压缩膨胀麦、桑吉尔蔗）与一个角色能力（狂野猎人）挂在 v0.0.1 的档案模型上。
+- **交付判据**：`.tools\gw.cmd build` 退出码 0 并产出 `build/libs/farmstorm-0.0.2+mc1.21.1.jar`；`dist/farmstorm-0.0.2+mc1.21.1.jar` 存在且体积大于 `dist/farmstorm-0.0.1+mc1.21.1.jar`；`.tools\gw.cmd runServer` 能起服且日志无 `NoClassDefFoundError`；299 / 263 / 139 / 77 四项计数逐项对得上（`13-TASKS-0.0.2.md` §7 F-99）。
 - **任务规模**：`13-TASKS-0.0.2.md` 把这一版拆成 **40 个任务**（F-60 ~ F-99）、**5 个 Phase**（Phase 11 ~ Phase 15）、裸工作量 60.5 人日；关键路径 14.5 人日 / 9 个任务（`13-TASKS-0.0.2.md` §11.1）。
 
 三条自我定位（沿用 `05-PROMPT-MAIN.md` §1，按 v0.0.2 的增量补两句）：
@@ -53,8 +53,8 @@
 | 作物档案 | **19** 条（15 → 19，新增 `molotov` / `zangief_cane` / `wild_apple` / `compressed_puffed_wheat`） | `.work/v002-BRIEF.md` §3.1；`10-DECISIONS-0.0.2.md` §4；`12-TECH-0.0.2.md` §3.1 |
 | 注册对象 | **77** 个（64 → 77，13 个新增，跨 12 个 registry） | `.work/v002-BRIEF.md` §4；`12-TECH-0.0.2.md` §2.1 |
 | config 键 | **139** 条（117 → 139，新增 22 条：`molotov` 3 / `wild_apple` 2 / `wild_hunter` 11 / `zangief_cane` 6） | `.work/v002-BRIEF.md` §8；`12-TECH-0.0.2.md` §8.1 |
-| 资源文件 | **298** 个（262 → 298，新增 36；扣 `.cache` 的 11 个无扩展名文件） | `.work/v002-BRIEF.md` §4.1；`12-TECH-0.0.2.md` §7.1、§7.4 |
-| 语言键 | **261** 条（222 → 261，新增 39 条；中英两份键集必须逐字相等） | `.work/v002-BRIEF.md` §8；`12-TECH-0.0.2.md` §7.3 |
+| 资源文件 | **299** 个（265 → 299，新增 34；扣 `.cache` 的 11 个与 3 个 `.gitkeep`） | `.work/v002-BRIEF.md` §4.1；`12-TECH-0.0.2.md` §7.1、§7.4 |
+| 语言键 | **263** 条（222 → 263，新增 41 条；中英两份键集必须逐字相等） | `.work/v002-BRIEF.md` §8；`12-TECH-0.0.2.md` §7.3 |
 | 其它计数 | 进度 **15**（12 → 15）、转换配方 **24**（21 → 24）、合成配方 **2**（0 → 2）、幸运浆果池 **16**（14 → 16） | `.work/v002-BRIEF.md` §4 |
 
 数字只照抄，不重算。同一张表里两个数字相等是巧合，不是校验；校验用 §6 的 DoD 与 `12-TECH-0.0.2.md` §11 的自检项编号。
@@ -65,7 +65,7 @@
 
 | # | 要确认的事 | 读哪里 | 不成立时怎么办 |
 |---|---|---|---|
-| 1 | 整屏灰度的挂载点：`RegisterShadersEvent` 注册的 `ShaderInstance` 是否编译通过，`RenderGuiEvent.Post` 里对 `Minecraft#getMainRenderTarget()` 跑全屏 pass 是否成立 | `12-TECH-0.0.2.md` §4.1、§10 RT-10 | 按 RT-10 的缓释走：先拆世界 + GUI 两次 pass；再不行只灰世界并在 Release 说明里登记降级。**不许**改用雾色或贴图替换（D-61） |
+| 1 | 世界灰度的挂载点：原版 `PostChain`（`GameRenderer#loadEffect` + `shaders/post/grayscale.json`）能否加载，链里的 `targets` 是否为数组 | `12-TECH-0.0.2.md` §4.1、§10 RT-10 | RT-10 已关闭：主方案就是 `PostChain`，**只灰世界、HUD 保持原色**（V-56），`post_effect/grayscale.json` 只作预留挂载点（无加载器，V-49）。**不许**退回手写全屏 pass 采样自己正在写的 target（读写反馈，V-48），也**不许**改用雾色或贴图替换（D-61） |
 | 2 | 红色剪影的重绘方式：`RenderLivingEvent.Post` 里 `getModel().renderToBuffer(...)` 是否递归、是否掉帧，`hasLineOfSight` 在客户端能否直接用 | `12-TECH-0.0.2.md` §4.2、§10 RT-11 | 同帧最多画 32 只（按距离近的优先）兜底；**不许**换成 `EntityRenderDispatcher#render`，也**不许**换成原版发光效果（D-62） |
 | 3 | 输入拦截的先后顺序：`InputEvent.Key` 与 `KeyMapping` 的顺序决定 1–9 能不能真拦住，`ScreenEvent.Opening` 是否覆盖所有开 GUI 的路径 | `12-TECH-0.0.2.md` §4.3、§10 RT-13 | 五个事件全上；逐键手测填 21 项表，漏的那一路改挂更靠前的钩子；仍漏就登记"该键不可锁"，不放行其它键 |
 | 4 | 冲刺的驱动方：`ServerPlayer#setDeltaMovement` 不产生客户端位移，位移必须由客户端预测驱动，服务端只做复核与结算 | `12-TECH-0.0.2.md` §4.5、§10 RT-12 | 首选客户端预测 + 服务端判定；手感不可接受才切备选（服务端逐刻 `teleportTo` ≤ 1 格），切换要在 `12-TECH-0.0.2.md` §4.5 留决策记录 |
@@ -87,7 +87,7 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3，继续有效。下面 14 条只约�
 
 - **HC-17 · v0.0.1 存量冻结**
   - 约束：15 条既有 `CropProfile` 的任何字段、任何既有 config 键的默认值、既有 21 条转换配方、既有 12 个进度、既有 16 条 `tooltip.farmstorm.*`、以及 v0.0.1 的 10 份中文档与 8 份英文档，一律不动。
-  - 违反后果：D-49 破，`git diff` 出现白名单外的既有行；`117 + 22 = 139`、`222 + 39 = 261` 的基数失效，四项计数全部对不上。
+  - 违反后果：D-49 破，`git diff` 出现白名单外的既有行；`117 + 22 = 139`、`222 + 41 = 263` 的基数失效，四项计数全部对不上。
   - 来源：D-49；`.work/v002-BRIEF.md` §3.4；`10-DECISIONS-0.0.2.md` §6 第 4、11 条。
 
 - **HC-18 · 改动面白名单**
@@ -116,8 +116,8 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3，继续有效。下面 14 条只约�
   - 来源：`13-TASKS-0.0.2.md` §0.4 A-08、§12.3 第 2 条；D-72；F-74、F-87。
 
 - **HC-23 · 进度显示名用短句**
-  - 约束：三个新进度的显示名是「火了！」「手摇重 360」「狂野猎人」，取值以 `12-TECH-0.0.2.md` §7.3 的 39 行清单为唯一来源；三句长简介属于 tooltip 命名空间，不进 `advancements.farmstorm.*.title`。
-  - 违反后果：`11-DESIGN-0.0.2.md` §9.1 的长句一旦落进 lang，进度 toast 与既有 12 个短句的体例不一致，且与 39 条清单的键集对不上，F-97 第 1、2 条红。
+  - 约束：三个新进度的显示名是「火了！」「手摇重 360」「狂野猎人」，取值以 `12-TECH-0.0.2.md` §7.3 的 41 行清单为唯一来源；三句长简介属于 tooltip 命名空间，不进 `advancements.farmstorm.*.title`。
+  - 违反后果：`11-DESIGN-0.0.2.md` §9.1 的长句一旦落进 lang，进度 toast 与既有 12 个短句的体例不一致，且与 41 条清单的键集对不上，F-97 第 1、2 条红。
   - 来源：`13-TASKS-0.0.2.md` §0.4 A-09、§12.3 第 3 条；D-63。
 
 - **HC-24 · 转速 72 度/刻**
@@ -131,8 +131,8 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3，继续有效。下面 14 条只约�
   - 来源：D-53、D-66；`12-TECH-0.0.2.md` §6.4、§10 RT-14。
 
 - **HC-26 · 灰度必须是真灰度**
-  - 约束：整屏灰度 = `RegisterShadersEvent` 注册自定义 `ShaderInstance`（`assets/farmstorm/shaders/core/grayscale.json` + `.vsh` / `.fsh`）+ `RenderGuiEvent.Post` 对 `Minecraft#getMainRenderTarget()` 跑一次全屏 pass，作用于世界渲染**与** GUI 层。不许用雾色、贴图替换、单独灰化 GUI 贴图之类的手段冒充。
-  - 违反后果：D-61 的"整屏含 GUI"不成立——物品栏、血条、聊天栏仍是彩色，玩家一眼看出只有世界褪色；F-82 第 1、4 条红。
+  - 约束：世界灰度 = 原版 `PostChain`（`GameRenderer#loadEffect(Farmstorm.id("shaders/post/grayscale.json"))` + `shaders/program/grayscale.json` + `shaders/core/grayscale.fsh`），作用于世界渲染（方块 / 实体 / 粒子）；**HUD 与 GUI 保持原色**（D-61 经 V-56 改口径：`PostChain.process()` 在 `GameRenderer:1027` 执行，早于 GUI 绘制 `:1073`）。不许用雾色、贴图替换、单独灰化 GUI 贴图之类的手段冒充。
+  - 违反后果：世界段没有真灰度——方块 / 实体 / 粒子仍是彩色，F-82 第 1、4 条红；或有人为了「含 GUI」回去手写全屏 pass，撞上读写反馈（V-48）与无加载器的 `post_effect/`（V-49）。
   - 来源：D-61；`.work/v002-BRIEF.md` §7.1；`12-TECH-0.0.2.md` §4.1、§10 RT-10。
 
 - **HC-27 · 相机只改渲染层**
@@ -141,7 +141,7 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3，继续有效。下面 14 条只约�
   - 来源：D-59、D-70；`.work/v002-BRIEF.md` §7.4；F-91。
 
 - **HC-28 · 计数与自检文案**
-  - 约束：13 个新注册对象、五个计数（19 / 77 / 139 / 298 / 261）、36 个新资源文件、39 条新语言键、15 个进度、24 条转换配方 + 2 条合成配方，一律按 `.work/v002-BRIEF.md` §3 / §4 / §8 与 `12-TECH-0.0.2.md` §2.1 / §7.2 / §7.3 / §8.1 落。四行启动自检文案逐字照抄，改数字要同步改：作物 19 种、注册对象 77 个、幸运浆果池 16 种、实体渲染器 11/11。
+  - 约束：13 个新注册对象、五个计数（19 / 77 / 139 / 299 / 263）、40 行资源交付（37 行已落地）、41 条新语言键、15 个进度、24 条转换配方 + 2 条合成配方，一律按 `.work/v002-BRIEF.md` §3 / §4 / §8 与 `12-TECH-0.0.2.md` §2.1 / §7.2 / §7.3 / §8.1 落。四行启动自检文案逐字照抄，改数字要同步改：作物 19 种、注册对象 77 个、幸运浆果池 16 种、实体渲染器 11/11。
   - 违反后果：清单行数与写出的计数不等 → F-99 的四项核对红；自检文案与注册表实际不符 → 自检行本身变成假通过，比没有自检更坏。
   - 来源：`.work/v002-BRIEF.md` §3、§4、§4.2、§8；`12-TECH-0.0.2.md` §2.1、§7.4、§11。
 
@@ -156,7 +156,7 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3，继续有效。下面 14 条只约�
 | `effect/` | `WildHunterEffect`（可见、带图标、三项属性修饰器）、`ZangiefPiledriverEffect`（隐藏、amplifier 当相位号） | `12-TECH` §3.6 |
 | `registry/` | `FarmstormMobEffects`、`FarmstormSounds` 两个新 `DeferredRegister`；只放 `DeferredRegister` 与 `Supplier`，不放逻辑 | `12-TECH` §3.5 |
 | `entity/thrown/` | `MolotovProjectile`、`CompressedPuffedWheatProjectile`（后者继承两者共同的落点写入路径） | `12-TECH` §3.7、§3.8 |
-| `behavior/` | `ZangiefCaneTrap`（`TrapBehavior` 实现）、`ZangiefPiledriverController`（服务端三相位状态机） | `12-TECH` §3.11、§5 |
+| `behavior/impl/` | `ZangiefCaneTrap`（`TrapBehavior` 实现）、`ZangiefPiledriverController`（服务端三相位状态机）——与既有 5 个行为实现同目录（V-04） | `12-TECH` §3.10、§3.11、§5 |
 | `combat/` | `WildHunterCombat`（索敌算法与服务端结算入口，两端共用同一套确定性算法） | `12-TECH` §3.13 |
 | `client/` | `GrayscalePass`、`WildHunterOutline`、`WildHunterDashClient`、`WildHunterLoopSound`、`ZangiefCameraController`、`InputLockHandler` | `12-TECH` §3.13、§4 |
 
@@ -237,7 +237,7 @@ DataGen 能产的一律写 Provider（blockstate、方块/物品模型、配方�
 1. 任务书列出的验收项逐条可指认到代码、资源或命令读数。
 2. `.tools\gw.cmd compileJava` 通过；涉及 DataGen 时 `.tools\gw.cmd runData` 通过且产物落进 `src/generated/resources`；收尾 `.tools\gw.cmd build` 退出码 0 并产出 `build/libs/farmstorm-0.0.2+mc1.21.1.jar`。
 3. 22 条新 config 键全部有实现读取点（`13-TASKS-0.0.2.md` §9.2 的「消费任务」列逐条对得上），键名与 `.work/v002-BRIEF.md` §8 的唯一清单逐字一致。
-4. 四项计数成立：`config/farmstorm-server.toml` 叶节点 139；两份语言文件各 261 键且 `set(zh) == set(en)`；资源 298（JSON 193 / PNG 99 / OGG 2 / GLSL 2 / TOML 1 / `pack.mcmeta` 1，扣 `.cache` 的 11 个）；启动日志的 77 个注册对象自检行与 11/11 实体渲染器自检行都在。
+4. 四项计数成立：`config/farmstorm-server.toml` 叶节点 139；两份语言文件各 263 键且 `set(zh) == set(en)`；资源 299（JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1，扣 `.cache` 的 11 个与 3 个 `.gitkeep`）；启动日志的 77 个注册对象自检行与 11/11 实体渲染器自检行都在。
 5. 红线可判：`grep -r "CustomPacketPayload" src/main/java` 为 0；`grep -rn "Mixin" src/main/java` 为 0。
 6. 无越界改动：`git status` 只出现白名单文件与新增文件；`.work/v002-BRIEF.md`、`docs/zh/00` ~ `15`、`docs/en/00` ~ `09` 未被触碰。
 7. 无绕过：没有注释掉的实现、空方法占位、`@SuppressWarnings("unused")` 掩盖未使用字段、以占位标记顶替逻辑。
@@ -259,7 +259,7 @@ DataGen 能产的一律写 Provider（blockstate、方块/物品模型、配方�
   - .tools\gw.cmd build → 退出码 0，产物 build/libs/farmstorm-0.0.2+mc1.21.1.jar
   - （失败的命令照写，附第一条错误原文与总结行）
 - 验收项对照：<任务书每个验收项 → 证据位置（文件:行 / 命令输出关键行 / 日志断言行）>
-- 计数与红线：<本条涉及的 19 / 77 / 139 / 298 / 261 现值；CustomPacketPayload 与 Mixin 的匹配数>
+- 计数与红线：<本条涉及的 19 / 77 / 139 / 299 / 263 现值；CustomPacketPayload 与 Mixin 的匹配数>
 - 未决问题：<文档矛盾、缺失的 API、必须由作者裁决的事项；挂 RT 编号的在这里点名；无则写"无">
 - 待办提示：<刻意没做但下一步会碰到的事，一句话>
 ```
@@ -275,8 +275,8 @@ DataGen 能产的一律写 Provider（blockstate、方块/物品模型、配方�
 - **N-17** 不得把 22 条 config 键里的任何一个硬编码成常量，也不得把同一个默认值写在两处（`FarmstormConfig` 一份、业务类再写一份）。
 - **N-18** 不得修改 `BlastRule.canBreak()` 的比较逻辑（`resistance < UNBREAKABLE_RESISTANCE && resistance < this.maxResistance`），也不得改 `grenadeResistThreshold` / `sliceResistThreshold` 的默认值。
 - **N-19** 不得用原版发光效果（`setGlowingTag` / `MobEffects.GLOWING` / `GlowingEffect`）替代红色剪影——那是白色描边且全服可见，与 D-62 的"可见且 ≤ 64 格"不符。
-- **N-20** 不得在 `RenderLivingEvent` 里调 `EntityRenderDispatcher#render` 重绘实体（会递归触发自身事件）；只用 `getModel().renderToBuffer(...)`。
-- **N-21** 不得用雾色、贴图替换、单独灰化 GUI 贴图冒充整屏灰度；`RenderGuiEvent.Post` 之外的手段必须能自证"世界与 GUI 同时变灰"。
+- **N-20** 不得在 `RenderLivingEvent` 里调 `EntityRenderDispatcher#render` 重绘实体（会递归触发自身事件）；用 `LivingEntityRenderer#render(...)` 并带重入守卫，且 `MultiBufferSource` **必须按 `type.format() == DefaultVertexFormat.NEW_ENTITY` 过滤**（V-58：拴绳是 `POSITION_COLOR_LIGHTMAP`，硬塞进 entity 缓冲即崩）。
+- **N-21** 不得用雾色、贴图替换、单独灰化 GUI 贴图冒充灰度；判据是「世界段（方块 / 实体 / 粒子）确实变灰」，HUD 保持原色是 V-56 的既定口径，不是缺陷。
 - **N-22** 不得把 mp3 改名成 `.ogg`、不得用静音或占位文件顶替两个音频、不得在缺 ffmpeg 时让脚本跳过后返回 0。
 - **N-23** 不得写回 `player.setYRot` / `setXRot`，也不得用 `teleportTo` 或 `setYHeadRot` 去"演"倒转与自转。
 - **N-24** 不得改白名单外的既有文件；不得改 `.work/v002-BRIEF.md` 与 `docs/zh/00` ~ `09`、`docs/zh/10` ~ `15`、`docs/en/00` ~ `09`、`docs/en/10` ~ `15` 的任何一份，包括错别字。
@@ -295,10 +295,10 @@ DataGen 能产的一律写 Provider（blockstate、方块/物品模型、配方�
 | 直接调 `gradle` / `gradlew` 失败或行为异常 | `.tools\gw.cmd` 负责四件缺一不可的事：设 JDK 21 与 `GRADLE_USER_HOME`、拉起 NeoForge 镜像代理、注入 java.base 补丁、给 `runServer` 加目录锁 | 一律 `cmd /c ""D:\project_farm\.tools\gw.cmd" <任务>"`；不绕过、不另写替代脚本 | `08-DEV-GUIDE.md` §4.1 |
 | 两个 `runServer` 撞 `session.lock`、日志互相覆盖 | 并行服务端共用一个运行目录 | 起第二个之前加 `-PfsRunDir=run-xxx`，各自独立目录 | `08-DEV-GUIDE.md` §4.2 |
 | 编译报某方法签名不存在（RT-01） | 21.1.x 补丁级 API 漂移；`neo_version` 被人改动也会这样 | 先确认 `neo_version=21.1.213` 没变；用源码附件核真实签名再改调用；API 存在性/签名一律挂 RT-01 上报，并记下实际签名 | `12-TECH` §10；`02-TECH-SPEC.md` §9 RT-01 |
-| 开效果后画面全黑 / 只灰半个屏 / 别的模组 HUD 消失（RT-10） | `RenderGuiEvent.Post` 里切 render target 与别的 GUI 后处理打架，或 `ShaderInstance` 编译失败 | 先拆世界 + GUI 两次 pass；再不行只灰世界并在 Release 说明登记降级；不许改用雾色/贴图替换 | `12-TECH` §4.1、§10 RT-10 |
-| 剪影递归、掉帧、`StackOverflowError`（RT-11） | 在 `RenderLivingEvent` 里调了 `EntityRenderDispatcher#render` | 只用 `getModel().renderToBuffer`；≤64 格 + `hasLineOfSight` 才画；同帧上限 32 只 | `12-TECH` §4.2、§10 RT-11 |
+| 开效果后画面全黑 / 只灰半个屏 / 灰在了不该灰的时候（RT-10） | 手写全屏 pass 在 `RenderGuiEvent.Post` 里采样自己正在写的 render target（读写反馈，V-48），或 `post_effect/` 目录被误当加载点（21.1.213 无加载器，V-49） | 走原版 `PostChain`（`GameRenderer#loadEffect`），只灰世界、HUD 原色（V-56）；不许改用雾色/贴图替换 | `12-TECH` §4.1、§10 RT-10 |
+| 剪影递归、掉帧、`StackOverflowError`，或 `Missing elements in vertex` 直接崩客户端（RT-11 / V-58） | 在 `RenderLivingEvent` 里调了 `EntityRenderDispatcher#render`；或把整个 `MultiBufferSource` 无条件替换成 entity 格式（拴绳是 `POSITION_COLOR_LIGHTMAP`） | 用 `LivingEntityRenderer#render(...)` + 重入守卫；`MultiBufferSource` 按 `type.format() == NEW_ENTITY` 过滤；≤64 格 + `hasLineOfSight` 才画；同帧上限 32 只 | `12-TECH` §4.2、§10 RT-11 |
 | 冲刺时玩家不动 / 被拉回 / 日志出现 `moved too quickly!`（RT-12） | 驱动方判错：`ServerPlayer#setDeltaMovement` 不产生客户端位移 | 客户端预测 + 服务端判定；出现该日志按 `wild_hunter.dashTicks` 调后重测；切备选要留决策记录 | `12-TECH` §4.5、§10 RT-12 |
-| 某个键仍能穿透输入锁（RT-13） | `InputEvent.Key` 与 `KeyMapping` 的先后顺序；或某条开 GUI 的路径没走 `ScreenEvent.Opening` | 五个事件全上；按 21 项逐键手测表（W/A/S/D/空格/Shift/左键/右键/1–9/滚轮上/滚轮下/E/T/`/`/ESC）逐项记「拦住 / 穿透」，ESC 必须可用 | `12-TECH` §4.3、§10 RT-13 |
+| 某个键仍能穿透输入锁（RT-13） | `InputEvent.Key` 与 `KeyMapping` 的先后顺序；或某条开 GUI 的路径没走 `ScreenEvent.Opening`；或漏了 `DeathScreen` 的放行（V-30） | 七个机制全上（D-79）；按 21 项逐键手测表（W/A/S/D/空格/Shift/左键/右键/1–9/滚轮上/滚轮下/E/T/`/`/ESC）逐项记「拦住 / 穿透」，ESC 必须可用 | `12-TECH` §4.3、§10 RT-13 |
 | 音频产不出来 / 构建成功但没声音（RT-14） | 脚本没拿到 `-Ffmpeg` 且 PATH 上没有 ffmpeg，或拿到的是无 libvorbis 的裁剪构建（Trae CN 的 6.1.1 就是）；或 `sounds.json` 的 `attenuation_distance` 语义不是"可听距离" | 脚本缺 ffmpeg 退出码 1 并打印安装指引；音频任务排在资源阶段最前（F-94 早于 F-95 / F-96）；传对 `-Ffmpeg` 后重跑 | `12-TECH` §6.4、§10 RT-14 |
 | 效果被外部清掉后画面永远倒着、键永远锁着（RT-15） | 第三方"清除负面效果"把 `zangief_piledriver` 清了，客户端还停在相位 2 | 客户端每 tick 自检该效果在不在，不在就复位；相位切换用"先移除再加"绕开 `MobEffectInstance#update` 的比较顺序；自检容忍 2 tick 空窗 | `12-TECH` §5.6、§10 RT-15 |
 | 装 Iris / 光影后进灰度画面全黑（RT-16） | 灰度 pass 与光影的 framebuffer 链冲突 | 登记为已知不兼容（README 与 Release 的「已知不兼容」节），不做运行时探测、不做自动降级 | `12-TECH` §4.1、§10 RT-16 |
@@ -322,7 +322,7 @@ DataGen 能产的一律写 Provider（blockstate、方块/物品模型、配方�
 | HC-23 | 进度显示名必须是短句 | `13-TASKS-0.0.2.md` §0.4 A-09、§12.3 第 3 条；D-63；`12-TECH-0.0.2.md` §7.3 |
 | HC-24 | 转速 72 度/刻 | D-70；`13-TASKS-0.0.2.md` §0.4 A-05；`.work/v002-BRIEF.md` §8 #22 |
 | HC-25 | 音频必须 OGG，缺 ffmpeg 直接报错退出 | D-53、D-66；`12-TECH-0.0.2.md` §6.4、§10 RT-14 |
-| HC-26 | 灰度必须是真灰度，含 GUI | D-61；`.work/v002-BRIEF.md` §7.1；`12-TECH-0.0.2.md` §4.1、§10 RT-10 |
+| HC-26 | 灰度必须是真灰度（世界段），HUD 保持原色 | D-61（V-56 改口径）；`.work/v002-BRIEF.md` §7.1；`12-TECH-0.0.2.md` §4.1、§10 RT-10 |
 | HC-27 | 相机只改渲染层角度，roll + pitch 同时生效 | D-59、D-70；`.work/v002-BRIEF.md` §7.4；F-91 |
 | HC-28 | 五个计数与四行自检文案逐字对得上 | `.work/v002-BRIEF.md` §3、§4、§4.2、§8；`12-TECH-0.0.2.md` §2.1、§7.4、§11 |
 

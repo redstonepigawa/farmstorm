@@ -3,7 +3,7 @@
 > 项目：农场风云 / Farmstorm · v0.0.2
 > 依据：`.work/v002-BRIEF.md`（口径定稿）+ `docs/zh/10-DECISIONS-0.0.2.md`（D-49 ~ D-79）+ `docs/zh/11-DESIGN-0.0.2.md`（7 个新功能的设计规格）+ `docs/zh/12-TECH-0.0.2.md`（注册对象 / 类设计 / 资源 / config 清单）
 > 本文件把 12-TECH 的规格拆成 **40** 个「一次可独立提交、可独立验证」的任务，编号 **F-60 ~ F-99**，接 `03-TASKS.md` 的 F-59。Phase 11 ~ Phase 15 与 `04-ROADMAP.md` 的 M7 ~ M11 一一对应。
-> 覆盖：13 个新增注册对象、22 条新增 config 键、36 个新增资源文件、11 条数据条目（5 条配方 + 3 个进度 + 1 个物品标签 + 2 处 vanilla 标签），未覆盖 0 条（逐条对照见 §9）。
+> 覆盖：13 个新增注册对象、22 条新增 config 键、40 个资源交付（37 已落地）、11 条数据条目（5 条配方 + 3 个进度 + 1 个物品标签 + 2 处 vanilla 标签），未覆盖 0 条（逐条对照见 §9）。
 > 本文件只读上游：不改 `03-TASKS.md`、`04-ROADMAP.md`、`10` / `11` / `12` 号文件、`.work/v002-BRIEF.md` 与 `src/`。
 
 ---
@@ -101,7 +101,7 @@ F-60 构建基线 0.5
     ├─ F-78 索敌 1.5
     │   ├─ F-79 冲刺 3.0
     │   └─ F-80 复核结算 1.5 ── F-81 击杀续时 0.5
-    ├─ F-82 整屏灰度 3.0
+    ├─ F-82 世界灰度 3.0
     ├─ F-83 剪影 1.5
     └─ F-84 循环音 1.5 ── F-94 音频管线 3.0
 汇聚层（Phase 出口与最终验收；每个节点只出现一次，前置逐条见任务块的「依赖」字段）：
@@ -195,8 +195,8 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-60
 - **交付物**：`effect/WildHunterEffect.java`（可见、带图标、三项属性修饰器的挂载与卸下）、`effect/ZangiefPiledriverEffect.java`（隐藏、amplifier 当相位号）、`registry/FarmstormMobEffects.java`、`registry/FarmstormSounds.java`、`Farmstorm.java`（挂两个 `REGISTER`）
 - **验收**：
-  1. `/effect give @s farmstorm:wild_hunter 10` 成功且 HUD 出现效果图标；`/effect give @s farmstorm:zangief_piledriver 10 2` 成功且 HUD 无图标、物品栏无描述（`12-TECH-0.0.2.md §3.6`）。
-  2. `/data get entity @s ActiveEffects` 里 `farmstorm:zangief_piledriver` 的 `amplifier` 为 **2**、`show_icon` 为 **false**（D-50 的相位通道成立）。
+  1. `/effect give @s farmstorm:wild_hunter 10` 成功且 HUD 出现效果图标；`/effect give @s farmstorm:zangief_piledriver 10 2 true` 成功且 HUD 无图标、物品栏无描述（`12-TECH-0.0.2.md §3.6`）。**必须带第五个参数 `true`**：1.21.1 的 `MobEffect` 没有 `shouldRenderHUD()` / `shouldRenderIcon()`，`/effect` 的五参构造令 `showIcon = visible`，裸写三参会得到 `show_icon:1b`（裁决 V-08）。
+  2. `/data get entity @s active_effects` 里 `farmstorm:zangief_piledriver` 的 `amplifier` 为 **2**、`show_icon` 为 **false**（D-50 的相位通道成立）。1.21.1 的实体 NBT 键名是小写 `active_effects`，写成 `ActiveEffects` 会报 `Found no elements matching`（裁决 V-09）。
   3. `/playsound farmstorm:zangief_piledriver master @s ~ ~ ~ 1 1` 与 `/playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1` 都成功，两个事件在 `/playsound` 补全列表里可见（`12-TECH-0.0.2.md §11 #6`）。
   4. 专用服务器启动日志无 `NoClassDefFoundError`（两个效果类与两个注册类都在公共侧，不依赖 `Dist.CLIENT`）。
 
@@ -237,7 +237,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **交付物**：`registry/FarmstormBlocks.java` 里 `COMPRESSED_HAY_BLOCK` 的 `BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(30.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.GRASS)`（普通 `Block`，不新增类）
 - **验收**：
   1. `/setblock ~ ~ ~ farmstorm:compressed_hay_block` 后 F3 的目标方块面板硬度读数为 **30**；`/execute if block ~ ~ ~ farmstorm:compressed_hay_block run say ok` 回 `ok`。
-  2. 空手左键该方块 30 秒不掉落任何物品（`requiresCorrectToolForDrops`）；换钻石镐一次破坏并取出本体方块（掉落的战利品表在 F-74 落地）。
+  2. 空手 / 木镐左键该方块 30 秒（600 tick）后**方块仍在、进度约 0.400、掉落 0**（`requiresCorrectToolForDrops`）。**「钻石镐一次破坏并取出本体」移交 F-74 收口**：`minecraft:mineable/pickaxe`、`minecraft:needs_diamond_tool` 两条标签与战利品表都是 F-74 的交付物，本任务只做「属性核对 + 抗性矩阵实测」（裁决 V-14）。
   3. 用瓜！与瓜片子各炸一次，方块**保持**（阈值 6.0，`6.0 < 6.0` 为假）；用育碧服务器炸一次，方块**被破坏**（阈值 3.6e6）。
   4. 紧贴方块 `/summon tnt` 并引爆，方块**被破坏**（裁决 A-06：原版爆炸破得动，与修订后的 `12-TECH-0.0.2.md §3.9` 与 `§11 #9` 同一结论）。
 
@@ -261,7 +261,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
   1. 平地投一颗，`/data get entity @p Health` 投前投后相同（`damageCap = 0`，无伤害）。
   2. 以落点为心 3×3×3 逐格 `/execute if block` 与投前逐一对齐，无任何方块被破坏（`NEVER_BREAK`）。
   3. 日志出现 `莫洛托夫 落点 (x, y, z) 威力 0`，与 `molotov.triggerExplosionPower` 默认值 0 一致。
-  4. 把 `molotov.triggerExplosionPower` 改成 `4` 后重投，出现方块破坏；改回 0 后不再破坏（证明该键确实驱动这次爆炸的威力）。
+  4. 把 `molotov.triggerExplosionPower` 改成 `4` 后重投：爆心内**实体出现原版击退**（`/data get entity @s Motion` 由 0 变非零）、**方块破坏仍为 0**、血量不变；改回 0 后击退消失（既证明该键驱动威力，又不违反 A-10「调大威力只增加对实体伤害，永远不破坏方块，破坏权限与威力无关」）。
 
 #### F-70 · 球内候选枚举与逐格掷火 / 岩浆块
 
@@ -273,7 +273,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
   2. 在非 `isSolidRender` 的方块（台阶 / 雪层）上方不放置任何东西（`12-TECH-0.0.2.md §3.7` 判据 2）。
   3. 连投 20 颗，`岩浆块 / (火 + 岩浆块)` 落在 **10 %–20 %** 区间（85 : 15 的粗核）；日志三次数值可直接相加核对。
   4. 把 `molotov.effectRadius` 改成 `1.0` 后重投，日志里的 `候选 {N}` 明显变小（半径确实读 config）。
-  5. 单次投掷在同一刻内完成，服务端日志无 `Can't keep up` 行（上限约 268 次 `setBlock`）。
+  5. 单次投掷在同一刻内完成，服务端日志无 `Can't keep up` 行（上限 257 次 `setBlock`）。
 
 #### F-71 · 转换器合成配方与 `converter_fuel` 标签
 
@@ -302,8 +302,8 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-65、F-71
 - **交付物**：`datagen/ModRecipeProvider.java` 三条 `ConverterRecipe`（`minecraft:crimson_fungus` ⇄ `farmstorm:molotov`；`minecraft:sugar_cane` ⇄ `farmstorm:zangief_cane`；`minecraft:golden_apple` ⇄ `farmstorm:wild_apple`），双向、经验成本读既有键（默认 3）、无催化剂；产物 `data/farmstorm/recipe/molotov.json`、`zangief_cane.json`、`wild_apple.json`
 - **验收**：
-  1. 三个 JSON 的 `type` 为 `farmstorm:converting`、`bidirectional` 为 `true`、`experience` 为 3。
-  2. 转换器 GUI 里金苹果 → 狂野苹果正反各一次都成功；`/xp query @s levels` 两次各少 3 点。
+  1. 三个 JSON 的 `type` 为 `farmstorm:converting`；`bidirectional`（默认 `true`）、`experience`（默认 3）、催化剂三项**省略即默认**——`ConverterRecipeSerializer` 用 `optionalFieldOf`，生成物里本来就没有这三个键，既有 21 条同样如此（裁决 V-25）。运行期值（`xpCost = 3`、反向命中）以实测为准，不要为了「字面落盘」改 codec。
+  2. 转换器 GUI 里金苹果 → 狂野苹果正反各一次都成功；`/xp query @s points` 两次各少 3 点（扣的是**经验点数**不是等级，D-12；`/xp query @s levels` 读数**不变**）。边界用例：当前级内进度点耗尽时仍只扣 3 点、等级随之掉 1 级（裁决 V-24）。
   3. 转换类配方（`farmstorm:converting`）在 `src/generated/resources/data/farmstorm/recipe/` 下共 **24** 条（21 + 3，`BRIEF §4`）。
   4. 既有 21 条转换配方与转换成本键的默认值一个都没改（`git diff` 只含新增行）。
 
@@ -313,7 +313,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-67
 - **交付物**：`datagen/ModLootTableProvider.java`（+2 张：`compressed_hay_block` 掉自身、`zangief_cane` 走部署方块口径）；`datagen/ModBlockTagsProvider.java`（`minecraft:mineable/pickaxe` 追加 `compressed_hay_block`；新建 `minecraft:needs_diamond_tool`；`farmstorm:deployed_crops` 追加 `zangief_cane`）
 - **验收**：
-  1. 钻石镐挖压缩干草块掉本体；木镐挖 30 秒不掉（`requiresCorrectToolForDrops` + `needs_diamond_tool` 两条共同生效）。
+  1. 钻石镐挖压缩干草块掉本体；木镐挖 600 tick 后**进度 0.400、方块仍在、掉落 0**（`requiresCorrectToolForDrops` + `needs_diamond_tool` 两条共同生效）。**两种情形必须分开表述**：「600 tick 后没挖穿」≠「破了但没掉」（裁决 V-28）。
   2. `data/minecraft/tags/block/needs_diamond_tool.json` 的 `values` 为 `["farmstorm:compressed_hay_block"]`（新建文件）。
   3. `data/minecraft/tags/block/mineable/pickaxe.json` 的 `values` 追加了 `farmstorm:compressed_hay_block`，既有条目逐条仍在（追加，不是覆盖）。
   4. `data/farmstorm/tags/block/deployed_crops.json` 的 `values` 含 `farmstorm:zangief_cane`；`data/farmstorm/loot_table/blocks/zangief_cane.json` 存在且掉自身（玩家自己挖掉时）。
@@ -334,9 +334,9 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 ## 5. Phase 13 · 狂 野 猎 人（F-76 ~ F-85）
 
-阶段目标：落地三项侵入性效果里的两项（整屏灰度 D-61、红色剪影 D-62）与狂野猎人的全部玩法（属性、索敌、冲刺、伤害击退、击杀续时、循环音、狂野苹果入口）。
+阶段目标：落地三项侵入性效果里的两项（世界灰度 D-61、红色剪影 D-62）与狂野猎人的全部玩法（属性、索敌、冲刺、伤害击退、击杀续时、循环音、狂野苹果入口）。
 
-阶段出口判据：吃一颗狂野苹果后 700 刻内——三项属性读数可查、对 5 格内 30° 内的生物攻击会吸附、连杀 6 只效果仍在、整屏黑白含 GUI、可见生物有红色剪影、循环音跟随；`/effect clear` 后七项全部复位。
+阶段出口判据：吃一颗狂野苹果后 700 刻内——三项属性读数可查、对 5 格内 30° 内的生物攻击会吸附、连杀 6 只效果仍在、世界黑白（HUD 保持原色）、可见生物有红色剪影、循环音跟随；`/effect clear` 后七项全部复位。
 
 #### F-76 · 狂野猎人三项属性加成
 
@@ -344,9 +344,9 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-61、F-64
 - **交付物**：`WildHunterEffect#addAttributeModifiers` / `#removeAttributeModifiers`（三个固定 `ResourceLocation` 常量 + `ADD_MULTIPLIED_TOTAL`），读 `wild_hunter.speedBonusPercent` 30.0 / `attackSpeedBonusPercent` 30.0 / `attackDamageBonusPercent` 40.0
 - **验收**：
-  1. 吃狂野苹果后 F3 的 `Speed` 读数 +30 %、`Attack Speed` +30 %、`Attack Damage` +40 %（与 config 默认值逐项对）。
-  2. `/effect clear @s farmstorm:wild_hunter` 后三项读数回到基线（id 固定，修饰器卸得掉）。
-  3. 把 `wild_hunter.attackDamageBonusPercent` 改成 `100.0` 后重进存档，F3 的伤害读数翻倍；改回 40.0 后恢复。
+  1. 吃狂野苹果后依次读 `/attribute @s minecraft:generic.movement_speed get`（+30 %）、`minecraft:generic.attack_speed get`（+30 %）、`minecraft:generic.attack_damage get`（+40 %），与投前基线逐项对。**不要用 F3 面板**：1.21.1 的调试屏不显示属性数值（裁决 V-61）。
+  2. `/effect clear @s farmstorm:wild_hunter` 后三项 `/attribute … get` 读数回到基线（id 固定，修饰器卸得掉）。
+  3. 把 `wild_hunter.attackDamageBonusPercent` 改成 `100.0` 后重进存档，`/attribute @s minecraft:generic.attack_damage get` 的读数翻倍；改回 40.0 后恢复。
 
 #### F-77 · 狂野苹果食用与授予效果
 
@@ -354,8 +354,8 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-65、F-76
 - **交付物**：`registry/FarmstormItems.java` 里 `wild_apple` 的 `FoodProperties`（营养读 `wild_apple.nutrition` 4、饱和度修正读 `wild_apple.saturationModifier` 1.2）+ 食用后施加 `farmstorm:wild_hunter`（时长读 `wild_hunter.durationTicks` 700，裁决 A-02）
 - **验收**：
-  1. 吃一颗后 `/effect` 里 `farmstorm:wild_hunter` 剩余时长在 **700 刻 ± 2** 内；`/data get entity @s ActiveEffects` 里该效果 `amplifier` 为 0。
-  2. F3 的 hunger 行投前投后差为 **4** 点，`Saturation` 差为 **4.8**（4 × 1.2）。
+  1. 吃一颗后 `/effect` 里 `farmstorm:wild_hunter` 剩余时长在 **700 刻 ± 2** 内；`/data get entity @s active_effects` 里该效果 `amplifier` 为 0。
+  2. F3 的 hunger 行投前投后差为 **4** 点，`Saturation` 差为**原版金苹果同值（实测 9.6）**——1.21.1 的 `FoodData#eat` 是 `saturation += nutrition × saturationModifier × 2.0F`，文档原先漏了末尾的 ×2；同一次探针里原版金苹果也是 9.6，与 DESIGN「取原版同值」一致，所以**代码不动、判据不写死数字**（裁决 V-35）。
   3. 用转换器把狂野苹果换回金苹果：产出 1 个 `minecraft:golden_apple`，且食用金苹果不授予 `farmstorm:wild_hunter`（D-54 的双向配方）。
 
 #### F-78 · 索敌算法：5 格球与 30° 夹角
@@ -385,9 +385,9 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-78
-- **交付物**：`combat/WildHunterCombat` 的服务端入口（收到 `ServerboundSwingPacket` 时用与客户端同一套算法独立算目标，结算伤害并在「成功造成伤害」时调原版 `LivingEntity#knockback` 默认强度）
+- **交付物**：`combat/WildHunterCombat` 的服务端入口（用与客户端同一套 `resolveTarget` 独立算目标，结算伤害并在「成功造成伤害」时调原版 `LivingEntity#knockback` 默认强度）。**服务端拿不到 `ServerboundSwingPacket` 的公开事件**（NeoForge 1.21.1 没有，且 D-40 禁 Mixin、D-50 禁自订包）：改为在 `PlayerTickEvent.Post` 用「swing 状态跃变 + 冲刺水平位移」双信号感知，并与 `AttackEntityEvent` 去抖，同一次挥击只结算一次（裁决 V-44）
 - **验收**：
-  1. 攻击 30° 内的猪一次：`/data get entity <target> Health` 减少量等于 F3 显示的加成后伤害值。
+  1. 攻击 30° 内的猪一次：`/data get entity <target> Health` 的减少量等于 `/attribute @s minecraft:generic.attack_damage get` 的加成后读数（**F3 面板不显示属性数值**，裁决 V-61）。
   2. 结算后目标被推开：`/data get entity <target> Pos` 前后差 >= 0.2 格（D-75 原版默认强度，不自订数值）。
   3. 攻击 30° 外的生物：正常攻击、无吸附，玩家坐标不变。
   4. 目标是同队伍玩家时既不吸附也不掉血。
@@ -402,14 +402,14 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
   2. 第 6 次之后效果仍然存在（无次数上限）；生命值每次击杀 +10 点（上限按原版 20 点）。
   3. 源码里不存在任何击杀计数器：`git grep -nE "killCount|maxKill"` 无输出（D-74 不得自加计数器）。
 
-#### F-82 · 整屏灰度 pass（含 GUI）
+#### F-82 · 世界灰度（HUD 保持原色）
 
 - **复杂度**：L ｜ **折算人日**：3.0
 - **依赖**：F-60、F-76
-- **交付物**：`client/GrayscalePass.java`（`RegisterShadersEvent` 注册 `ShaderInstance`；`RenderGuiEvent.Post` 对 `Minecraft#getMainRenderTarget()` 跑一次全屏 pass）；`assets/farmstorm/shaders/core/grayscale.json`、`grayscale.vsh`、`grayscale.fsh`；`assets/farmstorm/post_effect/grayscale.json`（RT-10 退化分支的挂载点）
+- **交付物**：`client/GrayscalePass.java`（原版 `PostChain`：`GameRenderer#loadEffect(Farmstorm.id("shaders/post/grayscale.json"))` / `shutdownEffect()`，每客户端刻按效果在不在开关，且不抢原版苦力怕 / 蜘蛛的链）；`assets/farmstorm/shaders/post/grayscale.json`（链声明，`targets` 必须是数组）、`shaders/program/grayscale.json`（程序声明）、`shaders/core/grayscale.fsh`（亮度公式）；`assets/farmstorm/post_effect/grayscale.json`（RT-10 退化分支的预留挂载点，当前无加载器）；`shaders/core/grayscale.json`、`grayscale.vsh` 是上一版方案的遗留物，保留但不加载
 - **验收**：
-  1. 开效果后世界与 GUI **同时**黑白：F3 截图里物品栏红心、绿色经验条、聊天栏彩色文字全部为灰度（D-61 的「整屏含 GUI」）。
-  2. 客户端日志无 `Shader ... could not be loaded`，无 `GL_INVALID` 行（`12-TECH-0.0.2.md §11 #5`）。
+  1. 开效果后**世界黑白、HUD 保持原色**：F3 截图里方块 / 实体 / 粒子为灰度，物品栏红心、绿色经验条与聊天栏彩色文字**不变**（D-61 经 V-56 改口径——`PostChain.process()` 在 `GameRenderer:1027` 执行，早于 GUI 绘制 `:1073`，含 GUI 没有可靠实现路径）。
+  2. 客户端日志无 `Could not load program` / `Shader ... could not be loaded`、无 `GL_INVALID` 行，且出现「灰度 PostChain 加载」与「卸载」两条日志（`12-TECH-0.0.2.md §11 #5`）。
   3. 开效果与不开效果的 F3 `ms` 读数差 **< 3 ms**。
   4. `/effect clear @s farmstorm:wild_hunter` 后 1 刻内恢复彩色；用雾色 / 贴图替换冒充灰度的写法一律不算通过（`BRIEF §7.1` 的禁止项）。
 
@@ -417,12 +417,13 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-76
-- **交付物**：`client/WildHunterOutline.java`（`RenderLivingEvent.Post` → `getModel().renderToBuffer(...)` + `RenderType.entityTranslucentEmissive(whiteTexture)` + `RenderSystem.setShaderColor(1, 0.15, 0.15, 0.45)`；距离读 `wild_hunter.highlightRadius` 64.0；`player.hasLineOfSight` 过滤）；`assets/farmstorm/textures/misc/white.png`（1×1）
+- **交付物**：`client/WildHunterOutline.java`（`RenderLivingEvent.Post` 里用 `LivingEntityRenderer#render(...)` 重画，`MultiBufferSource` **按顶点格式过滤**——只把 `DefaultVertexFormat.NEW_ENTITY` 换成 `RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE)`，其余原样放行（V-58：拴绳是 `POSITION_COLOR_LIGHTMAP`，硬塞进 entity 缓冲即崩）；红色烘进贴图而不是 `setShaderColor`（该着色器忽略 ColorModulator，V-60）；`AFTER_ENTITIES` 捕获相机 / 投影，`RenderGuiEvent.Pre` 在灰度之后重画；距离读 `wild_hunter.highlightRadius` 64.0；`player.hasLineOfSight` 过滤）；`assets/farmstorm/textures/misc/wild_hunter_red.png`（1×1 RGBA (255,38,38,115)）
 - **验收**：
   1. 5 格内直视一只猪：出现红色剪影；65 格外：不画。
   2. 墙后的生物不画（`hasLineOfSight` 为假）；自己与同队伍玩家不画。
   3. 不触发递归重绘：客户端日志无 `StackOverflowError`，且 F3 `ms` 与不画剪影时差 **< 3 ms**（RT-11）。
   4. 把 `wild_hunter.highlightRadius` 改成 `8.0` 后重进，10 格外的生物不再被画。
+  5. **顶点格式回归（V-58）**：把带拴绳的生物（拴过的羊 / 僵尸猪灵 / 流浪商人）拉进 64 格视野内，客户端不崩、日志无 `Missing elements in vertex`；崩过的话先去 `run-<dir>/crash-reports/` 看报告再下判断。
 
 #### F-84 · 循环音 `SoundInstance`
 
@@ -442,8 +443,8 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **交付物**：回归记录（`logs/latest.log` 摘录 + 手测表）；修复补丁只落白名单文件
 - **验收**：
   1. `12-TECH-0.0.2.md §11` 的 #13（剪影三条件）、#14（冲刺走服务端复核）、#15（击杀续时无上限）三条全过。
-  2. 七项能力一次跑通：属性加成 / 索敌吸附 / 伤害击退 / 击杀续时 / 整屏灰度 / 红色剪影 / 循环音；`/effect clear` 后全部复位。
-  3. `grep -r "CustomPacketPayload" src/main/java` 为 0 处；`grep -rn "Mixin" src/main/java` 为 0 处（D-40 / D-50）。
+  2. 七项能力一次跑通：属性加成 / 索敌吸附 / 伤害击退 / 击杀续时 / 世界灰度（HUD 原色）/ 红色剪影 / 循环音；`/effect clear` 后全部复位。
+  3. `grep -r "CustomPacketPayload" src/main/java` 为 0 处；Mixin 这一条查**实际用法**而不是字面命中：`@Mixin` 注解 0 处、`mixins.json` / `mixins.*.json` 0 个、`org.spongepowered` 引用 0 处、`build.gradle` 无 mixin 依赖（D-40 / D-50）。`grep -rn "Mixin"` 会有 5 处命中，**全部是解释「为什么不用 Mixin」的 javadoc 注释**，两种读数都写进回归记录，不为了凑字面 0 去洗掉解释性注释（裁决 V-47）。
 
 阶段小计：**10 个任务、16.0 人日**（S 2 / M 6 / L 2）。
 
@@ -459,7 +460,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-63、F-65
-- **交付物**：`registry/FarmstormBlocks.java` 的 `deployed(ZANGIEF_CANE, …)`（陷阱类口径：世界隐形，`textures.particle` 在 F-95）；`behavior/ZangiefCaneTrap.java`（`TrapBehavior` 实现，静态单例注册进 `DeployedBehaviors`）
+- **交付物**：`registry/FarmstormBlocks.java` 的 `deployed(ZANGIEF_CANE, …)`（陷阱类口径：世界隐形，`textures.particle` 在 F-95）；`behavior/impl/ZangiefCaneTrap.java`（`TrapBehavior` 实现，静态单例注册进 `DeployedBehaviors`；与既有 5 个实现同目录，裁决 V-04）
 - **验收**：
   1. `/setblock ~ ~ ~ farmstorm:zangief_cane` 返回成功；世界里无可见几何体，但破坏粒子用的是 `zangief_cane.png`。
   2. `DeployedBehaviors.of(DeployedKind.ZANGIEF_CANE)` 返回 `ZangiefCaneTrap` 单例：启动日志打印 6 个 kind 到单例的映射，`ZANGIEF_CANE` 一行指向该类。
@@ -482,7 +483,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-64、F-87
 - **交付物**：`behavior/ZangiefPiledriverController.java`（服务端三相位状态机；相位 0 = `amplifier 0`、时长读 `zangief_cane.stageDelayTicks` 14 刻，到期重发同 id 的 `amplifier 1`）；日志一行 `桑吉尔蔗 相位 0`
 - **验收**：
-  1. 触发后立即 `/data get entity @s ActiveEffects`：`farmstorm:zangief_piledriver` 的 `amplifier` 为 **0**、剩余 **14 刻** ± 1。
+  1. 触发后立即 `/data get entity @s active_effects`：`farmstorm:zangief_piledriver` 的 `amplifier` 为 **0**、剩余 **14 刻** ± 1。
   2. 14 刻后同一 id 的 `amplifier` 变 **1**（重发，不产生第二条效果记录）。
   3. 把 `zangief_cane.stageDelayTicks` 改成 `30` 后重测，相位 0 持续 30 刻（键生效）。
 
@@ -492,7 +493,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-88
 - **交付物**：相位 1 段（`MobEffects.LEVITATION`，`amplifier = levitationLevel - 1 = 6`、持续 `levitationDurationTicks` 20 刻，在第 14 刻施加）；日志一行 `桑吉尔蔗 相位 1`
 - **验收**：
-  1. 相位 1 期间 F3 的 `Y` 坐标逐刻上升；`/data get entity @s ActiveEffects` 里 `minecraft:levitation` 的 `amplifier` 为 **6**、剩余 **20 刻**（D-69）。
+  1. 相位 1 期间 F3 的 `Y` 坐标逐刻上升；`/data get entity @s active_effects` 里 `minecraft:levitation` 的 `amplifier` 为 **6**、剩余 **20 刻**（D-69）。
   2. 把 `zangief_cane.levitationLevel` 改成 `3` 后重测，`amplifier` 变成 **2**（等级减 1）。
   3. 相位 0 期间（前 14 刻）玩家 Y 坐标不变（漂浮不在相位 0 施加）。
 
@@ -500,10 +501,10 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-89
-- **交付物**：相位 2 段（每刻 `setDeltaMovement` = 剩余高度 ÷ 剩余刻数；检测落地即清效果；目标时长读 `zangief_cane.fallTicks` 40 刻，裁决 A-03）；日志一行 `落地耗时 {N} 刻`
+- **交付物**：相位 2 段（先 `setNoGravity(true)` 再每刻 `setDeltaMovement` = 剩余高度 ÷ 剩余刻数——不关重力的话实测每刻多降 0.23 格，四格高台会从 40 刻掉到 23 刻；检测落地即清效果并**恢复 `noGravity`**；`noGravity` 必须在**所有**退出路径恢复：落地 / `/kill` / 掉线 / `/effect clear` / 维度切换，漏一条玩家永久悬空，裁决 V-39；目标时长读 `zangief_cane.fallTicks` 40 刻，裁决 A-03）；日志一行 `落地耗时 {N} 刻`
 - **验收**：
-  1. 平地 / 两格高台 / 四格高台各测一次，日志三次 `落地耗时 {N} 刻` 的 N 都落在 **40 ± 2** 内（`12-TECH-0.0.2.md §11 #10` 的分水岭）。
-  2. 落地后 `/data get entity @s ActiveEffects` 读不到 `farmstorm:zangief_piledriver`（效果被清）。
+  1. 平地 / 两格高台 / 四格高台各测一次，日志三次 `落地耗时 {N} 刻` 的 N 都落在 **40 ± 2** 内（`12-TECH-0.0.2.md §11 #10` 的分水岭）。**「高台」指 ≥3×3 台面**：1×1 石柱构型会被自己的柱体中途截住（实测 23 刻），属边缘几何结果，不作缺陷处理（裁决 V-46）。
+  2. 落地后 `/data get entity @s active_effects` 读不到 `farmstorm:zangief_piledriver`（效果被清），且玩家落地后能正常受重力（`noGravity` 已恢复）。
   3. 把 `zangief_cane.fallTicks` 改成 `80` 后重测，三个高度的落地耗时都变成约 80（证明是时间伺服而不是定速）。
   4. 相位 2 中 `/kill @s` 后重生：无残留速度、无残留效果。
 
@@ -522,14 +523,14 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：L ｜ **折算人日**：3.0
 - **依赖**：F-88
-- **交付物**：`client/InputLockHandler.java`（五个事件各管一段：`MovementInputUpdateEvent` 清 `forwardImpulse` / `leftImpulse` / `jumping` / `shiftKeyDown`；`InputEvent.InteractionKeyMappingTriggered` 取消攻击与使用；`InputEvent.Key` 放行 `GLFW_KEY_ESCAPE` 其余取消；`InputEvent.MouseScrollingEvent` 取消；`ScreenEvent.Opening` 只放行 `PauseScreen`）
+- **交付物**：`client/InputLockHandler.java`（**七个机制**各管一段，D-79 修订：`MovementInputUpdateEvent` 清 `forwardImpulse` / `leftImpulse` / `jumping` / `shiftKeyDown`；`InputEvent.MouseButton.Pre` 取消左右键按下；`InputEvent.InteractionKeyMappingTriggered` 取消攻击与使用（含按住左键的持续挖掘）；`InputEvent.Key` 里抽干快捷栏 1–9 / Q / E / F / F5 的 `consumeClick()`（该事件不可取消，只能抢消费）；`InputEvent.MouseScrollingEvent` 取消；`CalculatePlayerTurnEvent` 把 `mouseSensitivity` 设 0；`ScreenEvent.Opening` 放行 `PauseScreen` **与 `DeathScreen`**，其余 `setNewScreen(null)`）。**为什么必须放行 `DeathScreen`**：F-90 的验收要在相位 2 里 `/kill`，只放行 `PauseScreen` 会把死亡屏拦掉——玩家在无 UI 状态卡死，且解锁后旧屏不会自动恢复（裁决 V-30）。
 - **验收**：
   1. 相位 0 至 2 期间按 W/A/S/D、空格、Shift：F3 坐标不动（移动与跳跃被清零）。
   2. 左键 / 右键不产生攻击与使用（目标方块 `/data get block` 不变，目标生物不掉血）。
   3. 1–9 与滚轮切不了快捷栏：F3 显示的选中槽编号不变。
   4. E 打不开背包、T 与 `/` 打不开聊天（`ScreenEvent.Opening` 拦下）。
   5. **ESC 能打开暂停菜单**（D-60 只留 ESC）。
-  6. 效果结束后所有键 1 刻内恢复；按 `12-TECH-0.0.2.md §10 RT-13` 的 21 项逐键手测并填表。
+  6. 效果结束后所有键 1 刻内恢复；按 `12-TECH-0.0.2.md §10 RT-13` 的 21 项逐键手测并填表。**视角一项按「转速降至约 1/15.6」记，不写「视角已锁死」**：`setMouseSensitivity(0)` 之后 `MouseHandler#turnPlayer` 的系数仍是 `0 × 0.6 + 0.2 = 0.2`，相对默认 0.5 只慢 15.6 倍，无 Mixin 无法归零（裁决 V-31）。
 
 #### F-93 · Phase 14 出口回归
 
@@ -540,6 +541,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
   1. `12-TECH-0.0.2.md §11` 的 #10（三相位时序与落地时长）、#11（只对非己方玩家生效）、#12（输入锁只漏 ESC）三条全过。
   2. 相位日志四行齐全：`桑吉尔蔗 相位 0` / `相位 1` / `相位 2` / `结束`，且 `落地耗时 {N} 刻` 出现过一次。
   3. `grep -r "CustomPacketPayload" src/main/java` 为 0 处（相位同步全靠隐藏效果 + `ClientboundSetEntityMotionPacket`）。
+  4. 出口记录的三条口径：视角写「转速降至约 1/15.6」而不是「已锁死」（V-31）；`noGravity` 的五条退出路径逐条点过（落地 / `/kill` / 掉线 / `/effect clear` / 维度切换，V-39）；「高台」注明 **≥3×3 台面**、1×1 柱面属边缘构型（V-46）。
 
 阶段小计：**8 个任务、11.5 人日**（S 2 / M 5 / L 1）。
 
@@ -547,9 +549,9 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 ## 7. Phase 15 · 资源、音频、进度与验收（F-94 ~ F-99）
 
-阶段目标：补齐 36 个新增资源文件里剩下的部分、39 条语言键与 3 个进度，并完成 298 / 261 / 139 / 77 四项计数核对与三模式回归、打包发布。
+阶段目标：补齐 40 个资源交付里剩下的部分、41 条语言键与 3 个进度，并完成 299 / 263 / 139 / 77 四项计数核对与三模式回归、打包发布。
 
-阶段出口判据：`src/{main,generated}/resources` 共 298 个文件（扣 `.cache` 的 11 个）；两份语言文件各 261 键且键集相等；`config/farmstorm-server.toml` 139 键；`12-TECH-0.0.2.md §11` 的 22 条自检全过；`dist/farmstorm-0.0.2+mc1.21.1.jar` 存在。
+阶段出口判据：`src/{main,generated}/resources` 共 299 个文件（扣 `.cache` 的 11 个与 3 个 `.gitkeep`）；两份语言文件各 263 键且键集相等；`config/farmstorm-server.toml` 139 键；`12-TECH-0.0.2.md §11` 的 22 条自检全过；`dist/farmstorm-0.0.2+mc1.21.1.jar` 存在。
 
 #### F-94 · 音频与效果图标管线
 
@@ -586,14 +588,14 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
   3. `models/item/zangief_cane.json` 的 `parent` 为 `minecraft:item/generated`，不引用方块模型；`models/item/compressed_hay_block.json` 的 `parent` 为 `farmstorm:block/compressed_hay_block`。
   4. 5 个物品在物品栏里都正常显示（无紫黑、无缺模型警告）。
 
-#### F-97 · 语言文件 39 条与中英相等
+#### F-97 · 语言文件 41 条与中英相等
 
 - **复杂度**：S ｜ **折算人日**：0.5
 - **依赖**：F-61、F-64、F-65、F-98
-- **交付物**：`datagen/ModLangProvider.java` 的 39 条 `ENTRIES`；产物 `assets/farmstorm/lang/zh_cn.json` 与 `assets/farmstorm/lang/en_us.json`
+- **交付物**：`datagen/ModLangProvider.java` 的 41 条 `ENTRIES`；产物 `assets/farmstorm/lang/zh_cn.json` 与 `assets/farmstorm/lang/en_us.json`
 - **验收**：
-  1. 两份 `.json` 各 **261** 键（222 + 39），`set(zh) == set(en)` 为 `True`（`12-TECH-0.0.2.md §7.4`）。
-  2. 39 条的构成逐类对得上：`farmstorm.configuration.*` 22 条 + `item.*` 5 条 + `block.*` 2 条 + `effect.*` 2 条 + `subtitles.*` 2 条 + `advancements.*` 6 条（`12-TECH-0.0.2.md §7.3`）；其中 `advancements.*` 的 6 条用短句——火了！/ 手摇重 360 / 狂野猎人（裁决 A-09；「火了！火了！」等三句是物品简介，归 `item.farmstorm.*.tooltip` 命名空间，不进进度键）。
+  1. 两份 `.json` 各 **263** 键（222 + 41），`set(zh) == set(en)` 为 `True`（`12-TECH-0.0.2.md §7.4`）。
+  2. 41 条的构成逐类对得上：`farmstorm.configuration.*` 22 条 + `item.*` 5 条 + `block.*` 2 条 + `entity.*` 2 条（V-64）+ `effect.*` 2 条 + `subtitles.*` 2 条 + `advancements.*` 6 条（`12-TECH-0.0.2.md §7.3`）；其中 `advancements.*` 的 6 条用短句——火了！/ 手摇重 360 / 狂野猎人（裁决 A-09；「火了！火了！」等三句是物品简介，归 `item.farmstorm.*.tooltip` 命名空间，不进进度键）。
   3. `tooltip.farmstorm.*` 仍是 **16** 条（没有误加，`12-TECH-0.0.2.md §7.3` 的「没有新增的两类」）。
 
 #### F-98 · 三个新进度
@@ -612,8 +614,8 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-75、F-85、F-93、F-94、F-96、F-97
 - **交付物**：修复补丁（只落白名单文件）+ `dist/farmstorm-0.0.2+mc1.21.1.jar` + `README.md` 的 v0.0.2 索引节与素材来源声明节（D-49 / D-66）
 - **验收**：
-  1. 资源 **298** 个（JSON 193 / PNG 99 / OGG 2 / GLSL 2 / TOML 1 / `pack.mcmeta` 1），扣 `.cache` 的 11 个无扩展名文件（`12-TECH-0.0.2.md §7.4` 的核对方法逐条跑）。
-  2. 两份语言文件各 **261** 键且键集相等；`config/farmstorm-server.toml` **139** 键；启动日志的 `自检 注册对象 77 个` 行与 `自检 实体渲染器 11/11 → OK` 行都在。
+  1. 资源 **299** 个（JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1），扣 `.cache` 的 11 个无扩展名文件与 3 个 `.gitkeep`（`12-TECH-0.0.2.md §7.4` 的核对方法逐条跑）。
+  2. 两份语言文件各 **263** 键且键集相等；`config/farmstorm-server.toml` **139** 键；启动日志的 `自检 注册对象 77 个` 行与 `自检 实体渲染器 11/11 → OK` 行都在。
   3. `12-TECH-0.0.2.md §11` 的 22 条自检全过，逐条留读数。
   4. `grep -r "CustomPacketPayload" src/main/java` 为 0 处；`grep -rn "Mixin" src/main/java` 为 0 处。
   5. 专用服务器起服 + 客户端连接：服务端日志无 `NoClassDefFoundError`，效果相关功能正常（`12-TECH-0.0.2.md §11 #22`）。
@@ -711,9 +713,9 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 `117 + 22 = 139`，与 F-61 与 F-99 的「toml 叶节点 139」逐项对齐；22 个键对应的 22 条 `farmstorm.configuration.*` 语言键由 F-97 落地（裁决 A-04 的键形态）。
 
-### 9.3 36 个新增资源文件（覆盖 36 / 36）
+### 9.3 40 个 v0.0.2 资源交付（40 行；其中 37 行已在仓库、3 行待 F-98 生成）
 
-行号与 `12-TECH-0.0.2.md §7.2` 的 #1–#36 一一对应；「产线」列沿用该节的口径（手写 / DataGen / 脚本）。
+行号与 `12-TECH-0.0.2.md §7.2` 的 #1–#40 一一对应；「产线」列沿用该节的口径（手写 / DataGen / 脚本）。**V-49 / V-56 / V-60 / V-64 之后以仓库实测为准**：清单 40 行，其中 3 行（`data/farmstorm/advancement/*.json`）待 F-98 生成，另有 3 行（2 个 `.ogg` 与 `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时就已在仓库里——所以 `git diff` 只显示 +34，而资源总数是 265 + 34 = **299**。
 
 | # | 路径（相对 `src/{main,generated}/resources`） | 类别 | 产线 | 落地的任务 |
 |---|---|---|---|---|
@@ -723,49 +725,53 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 | 4 | `assets/farmstorm/textures/item/compressed_puffed_wheat.png` | PNG | 脚本 | F-95 |
 | 5 | `assets/farmstorm/textures/block/compressed_hay_block.png` | PNG | 脚本 | F-95 |
 | 6 | `assets/farmstorm/textures/block/zangief_cane.png` | PNG | 脚本 | F-95 |
-| 7 | `assets/farmstorm/textures/misc/white.png` | PNG | 脚本 | F-83 |
-| 8 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` | PNG | 脚本 | F-94 |
-| 9 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` | OGG | 脚本 | F-94 |
-| 10 | `assets/farmstorm/sounds/zangief_piledriver.ogg` | OGG | 脚本 | F-94 |
-| 11 | `assets/farmstorm/sounds.json` | JSON | 手写 | F-94 |
-| 12 | `assets/farmstorm/shaders/core/grayscale.json` | JSON | 手写 | F-82 |
-| 13 | `assets/farmstorm/shaders/core/grayscale.vsh` | GLSL | 手写 | F-82 |
-| 14 | `assets/farmstorm/shaders/core/grayscale.fsh` | GLSL | 手写 | F-82 |
-| 15 | `assets/farmstorm/post_effect/grayscale.json` | JSON | 手写 | F-82 |
-| 16 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | F-96 |
-| 17 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | F-96 |
-| 18 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | F-96 |
-| 19 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | F-96 |
-| 20 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | F-96 |
-| 21 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | F-96 |
-| 22 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | F-96 |
-| 23 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | F-96 |
-| 24 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | F-96 |
-| 25 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | F-71 |
-| 26 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | F-72 |
-| 27 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | F-73 |
-| 28 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | F-73 |
-| 29 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | F-73 |
-| 30 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | F-98 |
-| 31 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | F-98 |
-| 32 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | F-98 |
-| 33 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | F-74 |
-| 34 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | F-74 |
-| 35 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | F-71 |
-| 36 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | F-74 |
-| **合计** | **36 行** | | | **36 / 36，未覆盖 0** |
+| 7 | `assets/farmstorm/textures/misc/white.png` | PNG | 脚本 | F-83（BRIEF §7.2 原稿底色；剪影已改用红图，文件保留） |
+| 8 | `assets/farmstorm/textures/misc/wild_hunter_red.png` | PNG | 脚本 | F-83（V-60：颜色烘进贴图） |
+| 9 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` | PNG | 脚本 | F-94 |
+| 10 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` | OGG | 脚本 | F-94 |
+| 11 | `assets/farmstorm/sounds/zangief_piledriver.ogg` | OGG | 脚本 | F-94 |
+| 12 | `assets/farmstorm/sounds.json` | JSON | 手写 | F-94 |
+| 13 | `assets/farmstorm/shaders/core/grayscale.json` | JSON | 手写 | F-82（上一版方案的声明，当前不加载） |
+| 14 | `assets/farmstorm/shaders/core/grayscale.vsh` | GLSL | 手写 | F-82（上一版方案的顶点着色器，当前不加载） |
+| 15 | `assets/farmstorm/shaders/core/grayscale.fsh` | GLSL | 手写 | F-82（`program/grayscale.json` 的 `fragment` 引用的就是它） |
+| 16 | `assets/farmstorm/shaders/post/grayscale.json` | JSON | 手写 | F-82（V-56：`PostChain` 链，运行时加载；`targets` 必须是数组） |
+| 17 | `assets/farmstorm/shaders/program/grayscale.json` | JSON | 手写 | F-82（V-56：shader 程序声明） |
+| 18 | `assets/farmstorm/shaders/program/grayscale.fsh` | GLSL | 手写 | F-82（V-56：与 core 版同内容，备用副本） |
+| 19 | `assets/farmstorm/post_effect/grayscale.json` | JSON | 手写 | F-82（保留文件但**当前无加载器**，RT-10 退化分支的预留挂载点，V-49） |
+| 20 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | F-96 |
+| 21 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | F-96 |
+| 22 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | F-96 |
+| 23 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | F-96 |
+| 24 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | F-96 |
+| 25 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | F-96 |
+| 26 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | F-96 |
+| 27 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | F-96 |
+| 28 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | F-96 |
+| 29 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | F-71 |
+| 30 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | F-72 |
+| 31 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | F-73 |
+| 32 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | F-73 |
+| 33 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | F-73 |
+| 34 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | F-98（待生成） |
+| 35 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | F-98（待生成） |
+| 36 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | F-98（待生成） |
+| 37 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | F-74 |
+| 38 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | F-74 |
+| 39 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | F-71 |
+| 40 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | F-74 |
+| **合计** | **40 行** | | | **37 行已在仓库，3 行待 F-98** |
 
-按类目汇总（与 `12-TECH-0.0.2.md §7.2` 的四行计数表逐项相等，合计 36）：
+按类目汇总（与 `12-TECH-0.0.2.md §7.2` 的四行计数表逐项相等，合计 40）：
 
 | 类目 | 行号 | 数量 | 落地任务（按行数） |
 |---|---|---|---|
-| PNG | #1–#8 | 8 | F-95 ×6、F-83 ×1、F-94 ×1 |
-| OGG | #9–#10 | 2 | F-94 ×2 |
-| JSON | #11、#12、#15–#36 | 24 | F-94 ×1、F-82 ×2、F-96 ×9、F-71 ×2（#25、#35）、F-72 ×1、F-73 ×3、F-98 ×3、F-74 ×3 |
-| GLSL | #13–#14 | 2 | F-82 ×2 |
-| **合计** | — | **36** | **36 行全部有归属** |
+| PNG | #1–#9 | 9 | F-95 ×6、F-83 ×2、F-94 ×1 |
+| OGG | #10–#11 | 2 | F-94 ×2 |
+| JSON | #12、#13、#16、#17–#40 | 26 | F-94 ×1、F-82 ×4、F-96 ×9、F-71 ×2、F-72 ×1、F-73 ×3、F-98 ×3、F-74 ×3 |
+| GLSL | #14、#15、#18 | 3 | F-82 ×3 |
+| **合计** | — | **40** | **40 行全部有归属** |
 
-**追加型改动（不产生新文件，因此不计入 36）**：`data/minecraft/tags/block/mineable/pickaxe.json` 追加 `compressed_hay_block`（F-74）、`data/farmstorm/tags/block/deployed_crops.json` 追加 `zangief_cane`（F-74）、两份语言文件追加 39 条（F-97）、`data/farmstorm/tags/item/modified_crops.json` 追加 4 条（F-71）。`262 + 36 = 298`。
+**追加型改动（不产生新文件，因此不计入 40 行）**：`data/minecraft/tags/block/mineable/pickaxe.json` 追加 `compressed_hay_block`（F-74）、`data/farmstorm/tags/block/deployed_crops.json` 追加 `zangief_cane`（F-74）、两份语言文件追加 41 条（F-97，含 V-64 的 2 条实体名）、`data/farmstorm/tags/item/modified_crops.json` 追加 4 条（F-71）。资源总数 `265 + 34 = 299`。
 
 ### 9.4 5 条配方 + 3 个进度 + 1 个物品标签 + 2 处 vanilla 标签（覆盖 11 / 11）
 
@@ -796,7 +802,7 @@ M7 ~ M11 与 Phase 11 ~ Phase 15 一一对应。每个里程碑给两个工作�
 | M8 | 压缩物与莫洛托夫闭环 | Phase 12 | 9 | 10.5 | 13.125 | 26.875 | 5 条新配方可用，落点语义与抗性矩阵全部对上 |
 | M9 | 狂野猎人与两项表现层 | Phase 13 | 10 | 16.0 | 20.000 | 46.875 | 吃一颗苹果后七项能力可用，清效果后全部复位 |
 | M10 | 桑吉尔蔗与输入锁 | Phase 14 | 8 | 11.5 | 14.375 | 61.250 | 踩陷阱后三相位按时序走完，三个高度落地耗时 40 ± 2 刻 |
-| M11 | 资源、进度与验收 | Phase 15 | 6 | 11.5 | 14.375 | 75.625 | 298 / 261 / 139 / 77 四项对齐，jar 可发布 |
+| M11 | 资源、进度与验收 | Phase 15 | 6 | 11.5 | 14.375 | 75.625 | 299 / 263 / 139 / 77 四项对齐，jar 可发布 |
 | **合计** | | **5 个 Phase** | **40** | **60.5** | **75.625** | | |
 
 ### M7 · 基座与注册增量（Phase 11）
@@ -811,8 +817,8 @@ M7 ~ M11 与 Phase 11 ~ Phase 15 一一对应。每个里程碑给两个工作�
 
 ### M9 · 狂野猎人与两项表现层（Phase 13）
 
-- **完成判据**：① `12-TECH-0.0.2.md §11` 的 #13 / #14 / #15 三条全过；② 整屏灰度含 GUI（`§11 #5` 的 shader 无报错 + 帧率差 < 3 ms）；③ 循环音 16 格衰减成立且不切断原版背景音乐；④ `CustomPacketPayload` 与 `Mixin` 的匹配数都为 0。
-- **该里程碑结束时能做什么**：吃一颗狂野苹果进入 35 秒的狂野猎人——三项属性加成、对 5 格内准星最近的生物吸附冲刺、伤害与击退、击杀续时无上限；画面整屏黑白（含物品栏）、可见生物画红剪影、狩猎音乐跟着自己走。
+- **完成判据**：① `12-TECH-0.0.2.md §11` 的 #13 / #14 / #15 三条全过；② 世界灰度、HUD 原色（`§11 #5` 的 shader 无报错 + 帧率差 < 3 ms，V-56）；③ 循环音 16 格衰减成立且不切断原版背景音乐；④ `CustomPacketPayload` 与 `Mixin` 的匹配数都为 0。
+- **该里程碑结束时能做什么**：吃一颗狂野苹果进入 35 秒的狂野猎人——三项属性加成、对 5 格内准星最近的生物吸附冲刺、伤害与击退、击杀续时无上限；画面世界黑白（物品栏与血条保持彩色）、可见生物画红剪影、狩猎音乐跟着自己走。
 
 ### M10 · 桑吉尔蔗与输入锁（Phase 14）
 
@@ -821,7 +827,7 @@ M7 ~ M11 与 Phase 11 ~ Phase 15 一一对应。每个里程碑给两个工作�
 
 ### M11 · 资源、进度与验收（Phase 15）
 
-- **完成判据**：① 资源 298 / JSON 193 / PNG 99 / OGG 2 / GLSL 2；② 两份语言文件各 261 键且键集相等、`tooltip.farmstorm.*` 仍 16 条；③ `config/farmstorm-server.toml` 139 键；④ `12-TECH-0.0.2.md §11` 的 22 条自检全过；⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` 存在，且 `jar tf` 里能看到两个 `.ogg`。
+- **完成判据**：① 资源 299 / JSON 192 / PNG 100 / OGG 2 / GLSL 3；② 两份语言文件各 263 键且键集相等、`tooltip.farmstorm.*` 仍 16 条；③ `config/farmstorm-server.toml` 139 键；④ `12-TECH-0.0.2.md §11` 的 22 条自检全过；⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` 存在，且 `jar tf` 里能看到两个 `.ogg`。
 - **该里程碑结束时能做什么**：全程中文界面无缺字、9 个新图标都正常；三条新进度各弹一次 toast；把 jar 丢进专用服务器，玩家只装模组本体就能参与，客户端不会因为缺类而崩。
 
 ---
@@ -881,8 +887,8 @@ F-60 构建基线 0.5
 | 2 | 注册对象 **77** 个 | F-66、F-99、§10 | `BRIEF §4`（64 → 77）；`12-TECH-0.0.2.md §2.1` 的 12 类小计 | 一致 |
 | 3 | 新增 config **22** 条 | §9.2、F-61 | `BRIEF §8` 唯一清单；`12-TECH-0.0.2.md §8.1` | 一致 |
 | 4 | config 总数 **139** | F-61、F-97、F-99、§10 | `BRIEF §8`（117 + 22 = 139）；`12-TECH-0.0.2.md §8.1` | 一致 |
-| 5 | 资源 **298** 个 | F-99、§10 | `BRIEF §4.1`（262）+ `12-TECH-0.0.2.md §7.1`（+36） | 一致 |
-| 6 | 语言键 **261** 个 | F-97、F-99、§10 | `BRIEF §8`（`222 + 39 = 261`）；`12-TECH-0.0.2.md §7.3`（39 = 物品 5 + 方块 2 + 效果 2 + 字幕 2 + 进度 6 + config 22） | 一致 |
+| 5 | 资源 **299** 个 | F-99、§10 | `BRIEF §4.1`（实测存量 265）+ `12-TECH-0.0.2.md §7.1`（+34） | 一致 |
+| 6 | 语言键 **263** 个 | F-97、F-99、§10 | `BRIEF §8`（`222 + 41 = 263`，V-64）；`12-TECH-0.0.2.md §7.3`（39 = 物品 5 + 方块 2 + 效果 2 + 字幕 2 + 进度 6 + config 22） | 一致 |
 | 7 | 新增资源 **36** 个 | §9.3、F-95、F-96 | `12-TECH-0.0.2.md §7.2`（逐项 36 行 + 四行类目表） | 一致 |
 | 8 | 新增语言键 **39** 条 | F-97 | `12-TECH-0.0.2.md §7.3`（5 物品 + 2 方块 + 2 效果 + 2 字幕 + 6 进度 + 22 config） | 一致 |
 | 9 | 进度 **15** 个 | F-98、§9.4 | `BRIEF §4`（12 → 15）；`10-DECISIONS-0.0.2.md §3.3` D-63 | 一致 |
@@ -890,8 +896,8 @@ F-60 构建基线 0.5
 | 11 | 配方 **5** 条 | §9.4、F-71 ~ F-73 | `BRIEF §3.2`（转换 3 + 合成 2）；`12-TECH-0.0.2.md §2.4` | 一致 |
 | 12 | 类型分布 **10 / 6 / 3** | F-62 的自检文案、§12.2 | `BRIEF §4`（投掷 10 / 部署 6 / 食用 3）；`12-TECH-0.0.2.md §3.1` | 一致 |
 | 13 | 破障类 **4** | F-62 的自检文案、§0.4 A-06 | `BRIEF §4`（不变）；`10-DECISIONS-0.0.2.md §5.3` | 一致 |
-| 14 | 既有资源 **262** 个 | §9.3 的 `262 + 36 = 298` | `BRIEF §4.1`（169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | 一致 |
-| 15 | 既有语言键 **222** 个 | F-97 的 `222 + 39 = 261` | `BRIEF §4.1`；`12-TECH-0.0.2.md §7.3` | 一致 |
+| 14 | 既有资源 **265** 个 | §9.3 的 `265 + 34 = 299` | 实测（169 JSON + 92 PNG + 2 OGG + 1 TOML + 1 `pack.mcmeta`） | 一致 |
+| 15 | 既有语言键 **222** 个 | F-97 的 `222 + 41 = 263` | `BRIEF §4.1`；`12-TECH-0.0.2.md §7.3` | 一致 |
 | 16 | 既有 config **117** 条 | F-61 的 `117 + 22 = 139` | `BRIEF §4.1`（`defineInRange` 111 + `define` 4 + `defineInList` 2） | 一致 |
 | 17 | 既有注册对象 **64** 个 / 增量 **13** | §9.1 | `BRIEF §4`（64 → 77）；`12-TECH-0.0.2.md §2.2`（逐个点名 13 个） | 一致 |
 | 18 | `tooltip.farmstorm.*` **16** 条 | F-97 | `BRIEF §4.1`；`12-TECH-0.0.2.md §7.3`（没有新增的两类） | 一致 |
@@ -900,7 +906,7 @@ F-60 构建基线 0.5
 | 21 | 抗性 **3.6e6** / 阈值 **6.0** / 硬度 **30.0F** | §0.4 A-06、F-67、F-68 | `BRIEF §2` D-57 / D-77；`10-DECISIONS-0.0.2.md §5.3` | 一致（`12-TECH §3.9` 与 `§11 #9` 修订后同为「破得动」，见 §12.3 第 1 条） |
 | 22 | 转速 **72.0** 度/刻 | §0.4 A-05、F-91 | `BRIEF §2` D-70 / `BRIEF §8` #22；`10-DECISIONS-0.0.2.md §3.3` D-70 | 一致 |
 
-复核结论（本轮）：`12-TECH §8.1` 的 **22** 条与总数 **139**、`§7.3` 的语言键 **261**、`§7.1` 的资源 **262 → 298** 三处重点数与上游现值逐位相等；本表 22 行**数字一处未改**（全部为修订后现值，没有旧版口径残留），只更新了第 21 行的「是否一致」备注（`12-TECH` 的两处已在修订期改成「破得动」）。
+复核结论（本轮）：`12-TECH §8.1` 的 **22** 条与总数 **139**、`§7.3` 的语言键 **263**、`§7.1` 的资源 **265 → 299** 三处重点数与上游现值逐位相等；本表 22 行**数字一处未改**（全部为修订后现值，没有旧版口径残留），只更新了第 21 行的「是否一致」备注（`12-TECH` 的两处已在修订期改成「破得动」）。
 
 ### 12.2 任务总量与阶段边界的自检
 

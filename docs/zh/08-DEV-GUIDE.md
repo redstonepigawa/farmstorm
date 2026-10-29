@@ -10,8 +10,8 @@
 | 形态 | Minecraft 1.21.1 · NeoForge 21.1.x · Java 21 模组 |
 | modid | `farmstorm` · 包名 `com.dashpig.farmstorm` |
 | 规模 | **74 个 Java 类 / 6,889 行**；169 个生成的 JSON + 91 张材质 |
-| 注册对象 | 64 个（items 22 / blocks 20 / BE 6 / entity 9 / recipe 2 / tab 1 / damage 2 / component 1 / menu 1） |
-| config | **117 键**（封闭集合，见 §4.3） |
+| 注册对象 | 64 个（v0.0.1：items 22 / blocks 20 / BE 6 / entity 9 / recipe 2 / tab 1 / damage 2 / component 1 / menu 1）；**v0.0.2 为 77 个**（13 个新注册对象，明细见 `13-TASKS-0.0.2.md` F-66） |
+| config | **117 键**（v0.0.1，封闭集合，见 §4.3）；**v0.0.2 为 139 键**（117 + 22） |
 | 架构 | **服务端权威**；0 个自定义网络包；**无 Mixin** |
 
 ## 2. 代码地图
@@ -81,8 +81,10 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 `gw.cmd` 另有 `runserver.lock` 目录锁做串行兜底（含陈旧锁自动接管）。
 
 ### 4.3 改 config 要注意
-117 个键是**封闭集合**：不许新增、不许改名、不许删除。真要加键，先改 `01-DESIGN.md §3.8`，否则 `tools/verify_project.py` 会失败。
+117 个键是**封闭集合**（v0.0.1 口径；v0.0.2 为 **139** 键）：不许新增、不许改名、不许删除。真要加键，先改 `01-DESIGN.md §3.8`（0.0.2 的新键记在 `12-TECH-0.0.2.md §8`），否则 `tools/verify_project.py` 会失败。
 ⚠️ 改**默认值**不会影响已生成的 `config/farmstorm-server.toml`——要让新默认值生效，得删掉该文件重新生成，或手动改值。
+
+⚠️ **改 `run-*/config/farmstorm-server.toml` 时不要用 `Set-Content -Encoding utf8`**：PowerShell 会写 **UTF-8 BOM**，NeoForge 判文件无效、改名成 `.bak` 并按默认值重建，改动被静默吞掉；服务器运行中改还会被 FileWatcher 回写。正确做法是**先停服**，再用 `[System.IO.File]::WriteAllText($path, $text, (New-Object System.Text.UTF8Encoding($false)))`，写完核对首字节是 `91,99,111`（`[co`）而不是 `239,187,191`（BOM）（V-33）。
 
 ## 5. 一次典型改动的工作流
 
@@ -101,12 +103,14 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 
 | 检查项 | 内容 |
 |---|---|
-| config | 从 `01-DESIGN.md §3.8` 现算 117 键，与 `run/config/farmstorm-server.toml` **逐键比对** |
-| 注册 ID | 64 个 ID 的全源码字面量核对 |
+| config | 从 `01-DESIGN.md §3.8` 现算 117 键，与 `run/config/farmstorm-server.toml` **逐键比对**（**仍是 v0.0.1 口径**：0.0.2 实际 139 键，脚本未升级前这一项对 22 个新键零覆盖） |
+| 注册 ID | 64 个 ID 的全源码字面量核对 —— **这是子集检查**（只验「文档那 64 个能否在源码里找到字面量」），既不查多余对象也不查各 registry 总数，所以 0.0.2 新增的 13 个对象它完全看不见，仍然 FAIL 0 |
 | 语言 | `zh_cn` 与 `en_us` 键集必须完全相同 |
 | 禁令 | 无 `@Mixin`、无 `TODO(api-unverified)`、无 `printStackTrace`/`System.out.println`、无空 catch、无 `[PROBE]` 残留 |
 
-其它门禁：`runData` 第二次跑应 `written: 0`（幂等）；jar 里不得含 `*Probe*` 类；`mods.toml` 解析出的版本必须等于 `gradle.properties` 的 `mod_version`。
+其它门禁：`runData` 第二次跑应 `written: 0`（幂等）；jar 里不得含 `*Probe*` 类（**要扫 jar 本身**——`verify_project.py` 目前只扫源码，删了源码但没重建时陈旧 class 仍会进 jar）；`mods.toml` 解析出的版本必须等于 `gradle.properties` 的 `mod_version`。
+
+⚠️ **脚本的风险不是「变红」而是「静默失明」**：0.0.2 口径（77 注册对象 / 139 config 键 / 261 资源 / 263 语言键位）它一条都没覆盖，跑出 FAIL 0 并不代表文档与实现一致。升级脚本时必须对每个 registry 同时校验「缺失」与「多余」，并加上 jar 内 `Probe` 条目为 0 这条。
 
 ## 7. 已经踩过的坑（照这个表躲）
 
@@ -120,8 +124,9 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 | 界面上根本没有按钮 | 只有菜单层实现了 `clickMenuButton`，Screen 层没加控件 | 服务端逻辑与客户端控件是两件事，`Screen#init` 里必须 `addRenderableWidget` |
 | `/reload` 后配方仍命中旧的 | `RecipesUpdatedEvent` 是**纯客户端**事件 | 服务端在 `AddReloadListenerEvent` 里清缓存，并做 `byKey` 身份校验 |
 | `/reload` 直接卡死、服务器起不到 Done | `PreparableReloadListener` 没调 `barrier.wait(...)` | 所有 reload listener 必须 `barrier.wait(Unit.INSTANCE).thenRun(...)` |
-| 无玩家时实体完全不动 | 没人的区块**不 tick** | 测试前 `forceload add`，并轮询确认实体真的进入了世界再计时 |
-| 临时探针类混进 jar | Gradle 会在 `build/tmp` 留 stash | 删源码后跑 `clean build`，并 `grep` jar 内 `Probe` 为 0 |
+| 无玩家时实体完全不动 | 没人的区块**不 tick** | 测试前 `forceload add`，并轮询确认实体真的进入了世界再计时。**`forceload add` 的参数是方块列坐标不是区块坐标**：想加载区块 (6,6) 要写 `forceload add 96 96 104 104`，写成 `forceload add 6 6` 只标记了区块 (0,0)，`execute if block` 会全报 `That position is not loaded`，投掷物在未加载区块里当场消失、整轮统计为 0 |
+| 复跑时结果莫名偏大（如干态 36 格 hay） | 上一轮作废时留下的**冻结实体随区块加载复活** | 验收脚本开头先「`kill` 三连 + 静置 1.5s + 清场后基线断言」（目标位置 hay=0 / compressed=0），基线不成立整轮作废；世界被污染时直接删 `run-*/world` 全新重跑 |
+| 临时探针类混进 jar | 删了源码**但没重建**，陈旧 class 还在 `build/classes` 与 jar 里 | 删源码后**重新 build**，并确认三处为 0：`src` / `build\classes` / **jar 内**。⚠️ **并行期间禁止 `clean`**：`:clean` 会先删 `build/`，若另一条 lane 的 java 正占用 `build/moddev/artifacts/*.jar`，删除会失败并把 `build/` 删掉一半，后续构建状态不可信——只用增量 `build`；确需 clean 时先确认全机没有别的 lane 在跑（`Get-Process java` 看窗口标题判断归属），clean 后重新完整 build 一次 |
 | `runData` 只生成 0 个文件 | `runs.data` 缺 `programArguments` | `--mod <id> --all --output ... --existing ...`（已在 `build.gradle` 里） |
 | 材质生成后竹子图标变了 | 用了 1.21.1 客户端 jar | 材质脚本必须指向 `26.3` 客户端 jar（`gen_textures.py --vanilla-assets`） |
 | 1.21.1 编译不过的常用签名 | 文档按旧版写的 | `MobEffects.DAMAGE_BOOST/DAMAGE_RESISTANCE/JUMP/MOVEMENT_SPEED/DIG_SPEED`；`PushReaction`；`ColorParticleOption.create(...)`；`Creeper` 无 `setPowered` |
@@ -131,6 +136,8 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 **服务端**：`gw.cmd runServer -PfsRunDir=run-xxx` → 起好后用 RCON 下命令（`run-xxx/server.properties` 里开 `enable-rcon`）。验收世界状态用 `execute if block ...`，比读日志可靠。
 
 **客户端**（渲染/界面问题只能这样验证）：`gw.cmd runClient -PfsRunDir=run-xxx`。
+
+> **客户端「无栈直接退出」先看 crash-reports**：进程突然没了、`latest.log` 里没有任何 `Exception` 时，别先假定是外部 kill——去 `run-<dir>/crash-reports/` 看一眼。v0.0.2 有三次被判成「被别的 lane 杀了」，实际每次都有完整报告（例如 `IllegalStateException: Missing elements in vertex: UV0, UV1, Normal`，来自剪影渲染把拴绳塞进 entity 缓冲区，V-58）。
 
 #### ⚠️ 先记住这条：主菜单不写日志，**别把静默当卡死**
 
@@ -143,6 +150,12 @@ Get-Process java | Where-Object { $_.MainWindowTitle } | Select-Object Id, MainW
 
 # 2) jstack 在本仓库被沙箱拒绝（"拒绝访问"），不要指望线程栈。
 ```
+
+#### 服务端假玩家（FakePlayer）测量的三个坑
+
+1. **落地判定**：`Player#getDigSpeed` 里有 `if (!onGround()) f /= 5.0F`。用 FakePlayer 测挖掘速度前必须 `setOnGround(true)`，否则读数比真实玩家慢 5 倍，结论会反过来（V-27）。
+2. **属性与统计**：`FakePlayer#awardStat` 是**空实现**，`BLOCK_MINED` 一类计数器恒为 0——拿它当「事件有没有触发」的判据没有判别力（V-26）。
+3. **原版副作用**：假玩家会静默吞掉一大批原版副作用（统计、部分事件）。用统计量做证据前，先确认它在被测环境里真的会变。
 
 #### 进世界的正确做法（已实测，2026-10-29）
 
@@ -167,9 +180,9 @@ Get-Process java | Where-Object { $_.MainWindowTitle } | Select-Object Id, MainW
 4. `--quickPlaySingleplayer` 在本仓库**不生效**（会卡在无障碍引导页，需 `options.txt` 里 `onboardAccessibility:false`）；进存档只能靠临时钩子调 `Minecraft#createWorldOpenFlows().openWorld(...)`。
 5. 截图：`Screenshot.takeScreenshot(...)`，产出图能直接看，别用「应该没问题」结案。
 
-> 一次完整往返（起服 → 客户端进世界 → 截图 → 关掉）约 3 分钟。**收尾务必 kill 客户端 java，并在服务端侧 `stop`**——留下进程会让下一个任务的 `runserver.lock` 或端口冲突。
+> 一次完整往返（起服 → 客户端进世界 → 截图 → 关掉）约 3 分钟。**收尾只杀自己起的那个进程**：起进程时记 PID，收尾用 `Stop-Process -Id <自己的 PID>`；服务端优先用 RCON `stop` 优雅停机；锁只删自己那把（`runserver-<FS_RUN_LOCK>.lock`）。**不要 `Get-Process java | Stop-Process -Force`**——共享机器上会杀掉另一条 lane 的客户端，症状是对方「无崩溃栈、无 crash report、直接 exit -1」，极难归因（V-37）。
 
-**临时探针规则**：验证完必须删干净——源码、`build/classes`、jar 三处都不能留 `*Probe*`；日志里不要留高频 `LOGGER.info`。
+**临时探针规则**：验证完必须删干净——源码、`build/classes`、jar 三处都不能留 `*Probe*`；日志里不要留高频 `LOGGER.info`。**证据要落 `.work/`，不要只留在 `run-*/logs/latest.log`**：run 目录的日志重启就轮转，前一版的矩阵结果就是从 `.log.gz` 里捞回来的（V-15）。验收前先查 `git status` 有无 `debug/`、`*Probe*` 残留。
 
 ## 9. 提交与发版
 

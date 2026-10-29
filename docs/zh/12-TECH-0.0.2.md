@@ -41,14 +41,15 @@ BRIEF §4.2 要求由本文件产出三个自洽的数。本文的处理是**先
 
 | 清单 | 所在小节 | 清单行数 | BRIEF §4.1 存量 | 新总数 |
 |---|---|---|---|---|
-| 新增资源文件 | §7.2 | **36** | 262 | **298** |
-| 新增语言文件键 | §7.3 | **39** | 222 | **261** |
+| 新增资源文件 | §7.2 | **40** | 265 | **299** |
+| 新增语言文件键 | §7.3 | **41** | 222 | **263** |
 | 新增 config 键 | §8.1 | **22** | 117 | **139** |
 
 两条硬校验（实现阶段由 `runData` 与启动日志双向卡住）：
 
-- 新增 `farmstorm.configuration.*` 语言键数 **22** == §8.1 的表行数 **22**；`zh_cn` 与 `en_us` 的键集必须逐字相等（`222 + 39 = 261`，两份都是 261）。
-- 资源文件总数 = 迁移前 262 + 36 = **298**；按类别拆 = JSON 169+24=193、PNG 91+8=99、OGG 0+2=2、GLSL 0+2=2、TOML 1、`pack.mcmeta` 1 → 193+99+2+2+1+1 = 298。
+- 新增 `farmstorm.configuration.*` 语言键数 **22** == §8.1 的表行数 **22**；`zh_cn` 与 `en_us` 的键集必须逐字相等（`222 + 41 = 263`，两份都是 263）。
+- 资源文件总数 = 迁移前 **265** + 34 = **299**；按类别拆 = JSON 169+23=192、PNG 92+8=100、OGG 2、GLSL 0+3=3、TOML 1、`pack.mcmeta` 1 → 192+100+2+3+1+1 = 299。
+- **口径（V-64/V-65 与实测校正）**：§7.2 的清单是 40 行（v0.0.2 的资源交付全集），其中 3 行（`advancement/*.json`）待 F-98 生成、3 行（2 个 `.ogg` + `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时已在仓库里，所以 `git diff` 只显示 +34。以仓库实测为准：299 个文件（不计 `src/generated/resources/.cache` 的 11 个缓存与 3 个 `.gitkeep`）。
 
 ### 0.4 数字口径（照抄 BRIEF §4）
 
@@ -94,7 +95,7 @@ D-50 只规定「借道隐藏 MobEffect」，没有点名哪个效果承载哪�
 
 | 侵入性效果 | 承载它的 MobEffect | 判据 | 依据 |
 |---|---|---|---|
-| 整屏灰度（含 GUI） | `farmstorm:wild_hunter` | 效果存在即为开 | D-61 + `plan0.0.2.txt` 第 40 行 |
+| 世界灰度（HUD 保持原色） | `farmstorm:wild_hunter` | 效果存在即为开 | D-61（V-56 改口径）+ `plan0.0.2.txt` 第 40 行 |
 | 红色剪影 | `farmstorm:wild_hunter` | 效果存在即为开 | D-62 + 同上 |
 | 相机倒转 / 自转 / 输入锁 | `farmstorm:zangief_piledriver` | amplifier 0/1/2 三相位都在锁定期内 | D-59 / D-60 / D-70 + `plan0.0.2.txt` 第 29 行 |
 
@@ -253,7 +254,7 @@ BRIEF §3.2 把 registry 对象与数据文件混排在一张表里。本文按�
 | `ZangiefCaneTrap` | **新建** | `TrapBehavior` 实现：球形 1.5 格触发 | 无 |
 | `ZangiefPiledriverController` | **新建** | 服务端三相位状态机 | 无 |
 | `WildHunterCombat` | **新建** | 服务端目标复核、伤害与击退、击杀续时 | 无 |
-| `GrayscalePass` | **新建** | 客户端整屏灰度 pass | 无 |
+| `GrayscalePass` | **新建** | 客户端世界灰度（原版 `PostChain`，不含 HUD） | 无 |
 | `WildHunterOutline` | **新建** | 客户端红色剪影 | 无 |
 | `InputLockHandler` | **新建** | 客户端输入锁（5 个事件） | 无 |
 | `ZangiefCameraController` | **新建** | 客户端渲染层角度（roll / pitch / yaw） | 无 |
@@ -493,12 +494,12 @@ public class MolotovProjectile extends ThrownCropEntity {
 
 **`scatter` 的判据（逐条固定，避免实现阶段各写一套）**：
 
-1. 候选集合 = `BlockPos.betweenClosed(center.offset(-r,-r,-r), center.offset(r,r,r))` 里满足 `center.distSqr(pos) <= r*r` 的格（`r = molotov.effectRadius`，默认 4.0 格 → 球内约 268 格）。
+1. 候选集合 = `BlockPos.betweenClosed(center.offset(-r,-r,-r), center.offset(r,r,r))` 里满足 `center.distSqr(pos) <= r*r` 的格（`r = molotov.effectRadius`，默认 4.0 格 → 球内 **257** 格）。**球心取落点所在的整数格**（`landingBlock` 的返回值），距离按整数格偏移算 `dx²+dy²+dz² ≤ r²`，不取 `landingVec` 的精确坐标——否则「球内格数」没有定义（`11-DESIGN-0.0.2.md` §5.6 同口径）。
 2. 该格「上表面接触空气」= `level.getBlockState(pos).isSolidRender(...)` 为真 **且** `level.getBlockState(pos.above()).isAir()` 为真。**本文补充**：只认「实心 + 上面是空气」，不认可穿过方块（草、雪层），避免「草方块顶上放火」变成「方块的草上放火」这种视觉错误。
 3. 每个候选格**独立**掷：`float roll = level.random.nextFloat() * 100.0F; if (roll < fireChance) 放火 else 放岩浆块`。`fireChance = molotov.fireChance`（默认 85.0 %）→ 余下的 15 % 自动是岩浆块，不需要第二个键。
-4. 写入位置 = **上方那个空气位**（`pos.above()`），一律 `level.setBlock(target, state, Block.UPDATE_ALL)`。
+4. 写入位置 = **上方那个空气位**（`pos.above()`），一律 `level.setBlock(target, state, Block.UPDATE_CLIENTS)`。**为什么不是 `UPDATE_ALL`**：`LevelChunk#setBlockState:283` 调 `onPlace` 是**无条件**的（只 gate 在 `!isClientSide`），火照样排 tick、照样蔓延；`markAndNotifyBlock:269` 才把 `blockUpdated`（邻居更新）gate 在 `flags & 1`，`UPDATE_CLIENTS` 恰好跳过它，避免岩浆块 / 火触发红石、流体、重力连锁。`updateNeighbourShapes` 仍会跑（支撑物消失时的形状更新），这是想要的。
 5. 不替换、不破坏原方块：`pos` 自身一个字节都不动；原方块没有掉落、没有粒子。
-6. 单次投掷的写入上限 = 球内候选格数（≈268），不另设熔断——268 次 `setBlock` 在同一 tick 内是可接受的量级（对照 v0.0.1 膨胀麦湿态 5×5×5 = 125 次 / 一次投掷）。
+6. 单次投掷的写入上限 = 球内候选格数（257），不另设熔断——257 次 `setBlock` 在同一 tick 内是可接受的量级（对照 v0.0.1 膨胀麦湿态 5×5×5 = 125 次 / 一次投掷）。
 
 **为什么用 0 威力爆炸**：D-58 的原文是「落点触发一次威力 0 的爆炸，该爆炸只当落点触发器」。威力 0 时原版伤害公式得 `Infinity` 之外的退化值（半径 0 无实体进入），加上 `damageCap = 0` 直接跳过我们的伤害段，是**两道**空操作；同时保留 `ExplosionEvent.Start` 这个事件钩子——领地 / 保护类模组仍有机会否决它（与 v0.0.1 的 `FarmstormExplosion#detonate` 一致）。
 
@@ -658,6 +659,8 @@ player.setDeltaMovement(0.0, -Math.min(h / n, MAX_SERVO_SPEED), 0.0);
 
 为什么定速不行：plan 的约束是**时间**（1.7–2 秒），而定速下落地时长由起始高度决定，玩家被漂浮抬多高每一局都不一样，`v` 一旦写死就必然在某些高度上超时或提前落地。伺服用「剩余高度 ÷ 剩余刻数」把时间钉住，高度自动被吸收。
 
+**伺服必须先关重力**：进入相位 2 前 `setNoGravity(true)`。只设 `setDeltaMovement` 的话，原版重力每刻还会再叠一份——v0.0.2 实测每刻多降 **0.23 格**，地表与两格高度因为剩余高度小、误差还在 ±2 刻内，四格高台会从 40 刻直接掉到 **23 刻**（V-39）。`noGravity` 必须在**所有**退出路径恢复：落地、`/kill`、掉线、`/effect clear`、维度切换——漏一条玩家就永久悬空。
+
 | 量 | 取值 | 说明 |
 |---|---|---|
 | `fallTicks` | `zangief_cane.fallTicks`，默认 **40 刻 = 2.0 秒**，范围 1–200 | plan 的「1.7–2 秒」取上界 2.0 秒作为默认；要 1.7 秒设 34 |
@@ -674,7 +677,7 @@ player.setDeltaMovement(0.0, -Math.min(h / n, MAX_SERVO_SPEED), 0.0);
 
 | 方法 | 规则 | 依据 |
 |---|---|---|
-| `selectTarget(ServerPlayer)` | 候选 = 以玩家为球心 `wild_hunter.searchRadius`（5.0 格）内的 `LivingEntity`，且与视线方向夹角 ≤ `wild_hunter.searchAngleDegrees`（30.0°）；排除自己、同队伍玩家（`player.isAlliedTo(other)`）、旁观者 | D-64 |
+| `resolveTarget(Player)` | 候选 = 以玩家为球心 `wild_hunter.searchRadius`（5.0 格）内的 `LivingEntity`，且与视线方向夹角 ≤ `wild_hunter.searchAngleDegrees`（30.0°）；排除自己、同队伍玩家（`player.isAlliedTo(other)`）、旁观者 | D-64 |
 | 排序 | 夹角最小者优先；夹角相同取距离近者（`Comparator.comparingDouble(angle).thenComparingDouble(distSqr)`） | D-64 |
 | `onSwing(ServerPlayer)` | 挂 `PlayerInteractEvent.LeftClickEmpty` 不够（那只覆盖空挥），真正的入口是 `ServerboundSwingPacket` 的服务端处理路径 ⇒ 用 `PlayerEvent`/原版攻击流程的**服务端结算点**复核目标；命中即按玩家自身攻击力结算伤害 | D-65 + BRIEF §7.6 |
 | 击退 | 伤害成功后调 `target.knockback(0.4, dx, dz)` 的原版默认强度，不自订数值 | D-75 |
@@ -683,7 +686,7 @@ player.setDeltaMovement(0.0, -Math.min(h / n, MAX_SERVO_SPEED), 0.0);
 
 **「攻击伤害」这一项怎么落地**：D-75 只说击退用原版默认强度，没有给额外伤害数值。本文口径：**吸附本身不产生伤害**，伤害来自玩家自己那次普通攻击（走原版 `Player#attack`），因此不需要 `wild_hunter.attackDamage` 这种键。属性的 `attackDamageBonusPercent`（+40 %）由 §3.5 的 `MobEffect` 提供，是效果本身的加成，与吸附无关。
 
-**关键：服务端独立算一遍，不听客户端的**。BRIEF §7.6 的原文是「客户端在『本地按下攻击键 + 自己持有效果 + 本地算出合法目标』时立刻朝目标方向给速度，服务端在收到 `ServerboundSwingPacket` 时用同一套确定性算法独立算一遍目标并结算伤害与击退」。「同一套」的意思就是：`selectTarget` 的**代码只有一份**，客户端与服务端都调它，只是客户端那份跑在 `ClientLevel` 上（要给 `Level` 泛型或传 `LivingEntity` 列表，不能写死 `ServerLevel`）。
+**关键：服务端独立算一遍，不听客户端的**。BRIEF §7.6 的原文是「客户端在『本地按下攻击键 + 自己持有效果 + 本地算出合法目标』时立刻朝目标方向给速度，服务端在收到 `ServerboundSwingPacket` 时用同一套确定性算法独立算一遍目标并结算伤害与击退」。「同一套」的意思就是：`resolveTarget` 的**代码只有一份**，客户端与服务端都调它，只是客户端那份跑在 `ClientLevel` 上（要给 `Level` 泛型或传 `LivingEntity` 列表，不能写死 `ServerLevel`）。
 
 **读哪些 config 键**：`wild_hunter.searchRadius`、`wild_hunter.searchAngleDegrees`、`wild_hunter.killExtensionTicks`、`wild_hunter.killHealPoints`、`wild_hunter.dashTicks`。
 **写哪些注册对象**：无。
@@ -694,8 +697,8 @@ player.setDeltaMovement(0.0, -Math.min(h / n, MAX_SERVO_SPEED), 0.0);
 
 | 类 | 职责 | 关键方法 / 挂载点 | 读哪些 config 键 | 写哪些注册对象 |
 |---|---|---|---|---|
-| `GrayscalePass` | 整屏灰度（含 GUI） | `RegisterShadersEvent` 注册 `ShaderInstance`；`RenderGuiEvent.Post` 跑 pass | 无 | 无 |
-| `WildHunterOutline` | 红色剪影 | `RenderLivingEvent.Post` → `getModel().renderToBuffer(...)` | 无 | 无 |
+| `GrayscalePass` | 世界灰度（HUD 保持原色） | `GameRenderer#loadEffect` / `shutdownEffect` 加载原版 `PostChain`，每客户端刻按效果在不在开关 | 无 | 无 |
+| `WildHunterOutline` | 红色剪影 | `RenderLivingEvent.Post` 用 `LivingEntityRenderer#render(...)` 重画（`MultiBufferSource` 按顶点格式过滤）；`AFTER_ENTITIES` 捕获相机、`RenderGuiEvent.Pre` 在灰度之后重画 | 无 | 无 |
 | `InputLockHandler` | 键鼠锁定（只留 ESC） | 5 个事件，见 §4.3 | 无 | 无 |
 | `ZangiefCameraController` | 渲染层 roll / pitch / yaw | `ViewportEvent.ComputeCameraAngles` | `zangief_cane.spinDegreesPerTick`（只用于自转累加；**客户端读不到服务端 config，见 §4.4 的降级口径**） | 无 |
 | `WildHunterLoopSound` | 循环音，跟随玩家 | 自写 `SoundInstance`，`isLooping() = true` | 无 | 无 |
@@ -722,9 +725,9 @@ player.setDeltaMovement(0.0, -Math.min(h / n, MAX_SERVO_SPEED), 0.0);
 | `config/FarmstormConfig.java` | +4 个分组共 22 个键（`molotov` / `wild_apple` / `wild_hunter` / `zangief_cane`）+ 烘焙快照 | §8 |
 | `datagen/ModRecipeProvider.java` | +5 条配方：1 条有序合成、1 条无序合成、3 条转换 | §7.2 |
 | `datagen/ModItemModelProvider.java` | 4 个 `basicItem` + 1 个 `withExistingParent(compressed_hay_block → block/compressed_hay_block)` | §7.2 |
-| `datagen/ModBlockStateProvider.java` | `DEPLOYED_INVISIBLE` 加 `"zangief_cane"`；新增 `cubeAll` 的压缩干草块 | D-68 |
+| `datagen/ModBlockStateProvider.java` | `DEPLOYED_INVISIBLE` 加 `"zangief_cane"`；新增 `cubeAll` 的压缩干草块；**`registerStatesAndModels` 的 dispatch 必须补 `else { simpleBlock(block); }` 分支**——没有 else 时普通方块会被**静默跳过**，连 blockstate 都不生成，表现为 `deployedModel` 抛 `部署方块缺少外观定义`（V-23 的根因） | D-68 |
 | `datagen/ModLootTableProvider.java` | +2 张方块战利品表（部署方块口径 + 普通方块口径） | §7.2 |
-| `datagen/ModLangProvider.java` | +39 条（见 §7.3） | §7.3 |
+| `datagen/ModLangProvider.java` | +41 条（见 §7.3，含 V-64 补的两条实体名） | §7.3 |
 | `datagen/ModAdvancementProvider.java` | +3 条进度；`AWARD_REQUIRED` 追加 `first_molotov` / `zangief_hit` / `first_wild_hunter` | D-63 |
 | `datagen/ModBlockTagsProvider.java` | `deployed_crops` 追加 `zangief_cane`；`mineable/pickaxe` 追加 `compressed_hay_block`；新建 `needs_diamond_tool` | D-57 |
 | `datagen/ModItemTagsProvider.java` | `modified_crops` 追加 4 条（三个新作物 + 压缩膨胀麦）；新建 `converter_fuel`（19 条档案对应物品 + 原版农作物） | D-52 / D-55 / D-56 |
@@ -741,7 +744,7 @@ BRIEF §3.3 的可改文件清单已把下面三个文件纳入（`DeployedBehav
 | `registry/FarmstormBlockEntities.java` | 同上：`deployedOf(DeployedKind)` 也是穷尽 `switch` | +1 个 `case ZANGIEF_CANE -> FANG_TRAP_CACTUS.get();` + 把 `FarmstormBlocks.ZANGIEF_CANE.get()` 加进 `FANG_TRAP_CACTUS` 那个 `BlockEntityType.Builder.of(…)` 的方块列表 | `block_entities` 数量保持 6（一个 type 收两个方块），**待验证（挂 RT-04）**：`BlockEntityType.Builder#of` 是否接受 `Block...` 可变参数 |
 | `entity/thrown/PuffedWheatProjectile.java` | 见 §3.8：把写入的方块抽出成扩展点，D-77 的「完全沿用」才是同一份代码路径而不是两份复制 | +1 个 `protected BlockState fillBlock()` + 1 行改用（`fillHay` 由 `private static` 转实例方法） | 无 |
 
-三处改动都不产生新的注册对象、不产生新的资源文件、不新增 config 键：§2 的 77、§7 的 36、§8 的 22 都不变。
+三处改动都不产生新的注册对象、不产生新的资源文件、不新增 config 键：§2 的 77、§7 的 40、§8 的 22 都不变。
 
 ---
 
@@ -751,41 +754,43 @@ BRIEF §3.3 的可改文件清单已把下面三个文件纳入（`DeployedBehav
 
 三者的共同前提（BRIEF 未写，由 §0.6 推出）：**状态来源永远是自己身上的效果**。客户端不询问服务端、不缓存服务端消息、不新增包。
 
-### 4.1 灰度（D-61，整屏含 GUI）→ RT-10
+### 4.1 灰度（D-61 经 V-56 裁定：世界灰度，HUD 保持原色）→ RT-10
 
 **触发条件**：本地玩家身上存在 `farmstorm:wild_hunter`（§0.6）。效果的「在 / 不在」由原版 `ClientboundUpdateMobEffectPacket` 送到的 `MobEffectInstance` 决定，客户端每 tick 读一次。
 
-**首选方案（不许换）**：
+**首选方案（V-48 / V-49 / V-55 / V-56 收敛后）**：
 
-1. `RegisterShadersEvent`（mod 总线）里注册一个自定义 `ShaderInstance`，程序落在 `assets/farmstorm/shaders/core/grayscale.json + grayscale.vsh + grayscale.fsh`。
-2. `RenderGuiEvent.Post` 里对 `Minecraft.getInstance().getMainRenderTarget()` 跑一次全屏 pass。
+1. **走原版 `PostChain`**：`Minecraft#gameRenderer#loadEffect(Farmstorm.id("shaders/post/grayscale.json"))` 加载，`shutdownEffect()` 卸载。target 管理、属性绑定与 ping-pong 全由框架负责，本模组不碰任何 GL 状态。
+2. 每客户端刻按「效果在不在」开关一次（`ClientTickEvent.Post` → `GrayscalePass.tick()`），并**只关掉自己加载的那条链**：`gameRenderer.currentEffect()` 非空时（原版苦力怕 / 蜘蛛的链在跑）不抢。
+3. 链只有两个 pass：`farmstorm:grayscale`（`minecraft:main` → `swap`）与 `blit`（`swap` → `minecraft:main`），程序声明在 `shaders/program/grayscale.json`（vertex `minecraft:blit` + fragment `farmstorm:grayscale`）。
 
-选 `RenderGuiEvent.Post` 的理由（BRIEF §7.1 原文）：它在 GUI 之后、上屏之前，一次 pass 同时覆盖世界与 GUI，正好满足 D-61 的「整屏灰度，不是只褪世界」。
+**为什么放弃「`RenderGuiEvent.Post` 里手写全屏 pass」这条首选方案**（BRIEF §7.1 的原文方案）：
+
+- 自绑 target 再采样**自己正在写的** render target，GL 的读写反馈结果未定义——v0.0.2 的实测症状正是「灰在了不该灰的时候」（`/effect clear` 之后那帧反而又暗又灰）。
+- 要跑通得 blit 到临时 RT 再采样，等于手写全套 GL 状态与 target 生命周期；改用官方 `PostChain` 后这些全部由框架兜住。
+- 代价见下条：`PostChain.process()` 在 `GameRenderer:1027`（`renderLevel` 之后）、GUI 绘制（`GameRenderer:1073`）之前执行，**只灰世界，不灰 HUD**。D-61 因此按 V-56 改口径为「世界灰度，HUD 保持原色」；要含 GUI 只能自己接管 framebuffer，与 D-50 同级地超出本版边界。
 
 ```java
-// client/render/GrayscalePass.java（骨架，签名以 1.21.1 为准）
-private static ShaderInstance shader;                       // RegisterShadersEvent 里赋值
+// client/GrayscalePass.java（骨架，签名以 1.21.1 为准）
+private static final ResourceLocation EFFECT = Farmstorm.id("shaders/post/grayscale.json");
+private static boolean loaded;                              // 只卸自己加载的那条链
 
-@SubscribeEvent
-public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
-    event.registerShader(new ShaderInstance(event.getResourceProvider(),
-            Farmstorm.id("grayscale"), DefaultVertexFormat.POSITION_TEX), s -> shader = s);
-}
-
-@SubscribeEvent
-public static void onRenderGuiPost(RenderGuiEvent.Post event) {
-    if (!WildHunterClientState.active() || shader == null) return;   // 不在效果里：0 开销，连 target 都不碰
-    Minecraft mc = Minecraft.getInstance();
-    RenderTarget main = mc.getMainRenderTarget();
-    main.bindWrite(true);                                            // 切到主 target
-    RenderSystem.setShader(() -> shader);
-    RenderSystem.setShaderTexture(0, main.getColorTextureId());      // 采样自己上一帧的结果
-    blitFullScreenQuad();                                            // 画一张铺满屏幕的四边形
-    mc.getMainRenderTarget().bindWrite(true);                        // 复位
+public static void tick() {
+    Minecraft minecraft = Minecraft.getInstance();
+    boolean wanted = WildHunterClientState.active();
+    if (wanted && !loaded) {
+        if (minecraft.gameRenderer.currentEffect() == null) {   // 不抢原版苦力怕 / 蜘蛛的链
+            minecraft.gameRenderer.loadEffect(EFFECT);
+            loaded = true;
+        }
+    } else if (!wanted && loaded) {
+        minecraft.gameRenderer.shutdownEffect();
+        loaded = false;
+    }
 }
 ```
 
-**为什么 pass 要在 `active()` 为假时第一行就 return**：灰度是「异常状态」而不是常驻后处理。常态下它必须是零成本，否则每个玩家的每一帧都白跑一次全屏 pass，等于给全服降帧。`active()` 是客户端快照（见下），不是现查效果。
+**为什么开关要在 `active()` 为假时第一件事就 return**：灰度是「异常状态」而不是常驻后处理。常态下它必须是零成本，否则每个玩家的每一帧都白跑一次全屏 pass，等于给全服降帧。`active()` 是客户端快照（见下），不是现查效果。
 
 **`WildHunterClientState` 是什么**：`client/WildHunterClientState.java`，客户端的状态缓存类，职责只有一件——把 `wild_hunter` 的几个「跨子系统共用、且服务端 config 读不到」的量算一次，供 §4.1 / §4.2 / §4.6 三个钩子直接读：
 
@@ -801,17 +806,19 @@ public static void onRenderGuiPost(RenderGuiEvent.Post event) {
 
 | 文件 | 形态 | 谁用它 | 说明 |
 |---|---|---|---|
-| `shaders/core/grayscale.json` | `ShaderInstance` 的程序声明 | **首选**（本节） | BRIEF §7.1 点名的那个 json |
-| `shaders/core/grayscale.vsh` / `grayscale.fsh` | GLSL 源码 | 两种形态共用 | BRIEF §3.2 的「2 个 GLSL」就是这两个文件 |
-| `post_effect/grayscale.json` | `PostChain` 声明 | **RT-10 退化分支** | BRIEF §3.2 登记的 +1；用同一对 GLSL，只换挂载方式 |
+| `shaders/post/grayscale.json` | `PostChain` 链声明（`targets` 数组 + 两个 pass） | **运行时唯一被加载的那份** | `GameRenderer#loadEffect` 读的就是它；`targets` 必须是**数组**（`PostChain.load:63` 只认数组），写成对象会被整段跳过并报 `Output target … does not exist` |
+| `shaders/program/grayscale.json` | shader 程序声明（vertex `minecraft:blit`、fragment `farmstorm:grayscale`） | 运行时由 `PostChain` 加载 | 新版 1.21 目录布局：程序声明在 `shaders/program/`，GLSL 仍在 `shaders/core/` |
+| `shaders/core/grayscale.fsh`（+ `shaders/program/grayscale.fsh` 同内容副本） | GLSL 片元着色器：`0.299 / 0.587 / 0.114` 求亮度后回写 `vec4(vec3(luminance), color.a)` | 运行时（`fragment` 引用的就是这一支） | 编号与 BRIEF §3.2 登记的「2 个 GLSL」对应；两份的唯一差别是采样器名（`Sampler0` / `DiffuseSampler`），改亮度公式两处要同步 |
+| `shaders/core/grayscale.json` / `grayscale.vsh` | 上一版「`RegisterShadersEvent` + 自定义 `ShaderInstance`」方案的声明与顶点着色器 | **当前不被加载**（`PostChain` 走 `shaders/program/` + 原版 `minecraft:blit`） | 保留不算错，但改灰度逻辑时不要只改这一对就以为生效了 |
+| `post_effect/grayscale.json` | 新版 `post_effect` 声明 | **RT-10 退化分支的预留挂载点，当前无加载器** | NeoForge 21.1.213 全 jar 只有原版 `PostChain` / `PostPass`，`post_effect/` 目录没有注册入口；文件保留（不破坏资源计数），但**不在 JSON 内加注释**——严格 JSON，`//` 会让将来的加载器直接失败（V-49） |
 
-**待验证（BRIEF §7.1 原文）**：`RenderGuiEvent.Post` 期间切换 render target 是否与其它模组的 GUI 后处理打架。
+**RT-10 的结论（已关闭）**：原「`RenderGuiEvent.Post` 手写全屏 pass」的方案废弃，改用上表的原版 `PostChain`。三条落地事实：
 
-- **怎么验**：装一个做 GUI 后处理的模组（或临时在 `RenderGuiEvent.Post` 里再跑一次自己的 pass）→ 进入效果 → 观察是否出现「画面全黑 / 只灰了半个屏幕 / 其它模组的 HUD 消失」。同时看日志里 `GL_INVALID_OPERATION` 一类的 GL 报错（`-Dmixin.debug` 无关，直接看 `latest.log` 的 `[Render thread/ERROR]` 行）。
-- **判定**：出现上述任一现象即视为「打架」，走下面的退化分支。
-- **退化分支（BRIEF §7.1 给出）**：`RenderLevelStageEvent` 的 AFTER 阶段（世界段跑完、GUI 之前，具体常量名 **待验证，挂 RT-10**）跑一次世界灰度 + `RenderGuiEvent.Post` 只对 GUI 区跑一次。两次 pass 的 GLSL 完全相同，只换挂载点与视口。若世界段这一步也不成立，就只灰世界，并在 Release 说明里把「GUI 不灰」登记为降级。
-- **RT 归属**：本条待验证挂 **RT-10**（整屏灰度后处理的挂载点不成立）。
-- **另有一条 API 待验证（挂 RT-01）**：`RegisterShadersEvent#registerShader(ShaderInstance, Consumer<ShaderInstance>)` 的签名、以及 `ShaderInstance(ResourceManager, ResourceLocation, VertexFormat)` 这个三参构造在 1.21.1 上是否仍然成立（1.21 改过 shader 装载路径，`shaders/core/*.json` 与 `post_effect/*.json` 两套并存）。若三参构造不成立，改用 `Shaders` 的工具方法或改走 `PostChain`（§6 的 §7.2 #15 已经把那份资源列进清单，退化时不需要补文件）。
+1. 手写 pass 若要正确，必须改为「blit 到临时 RT 再采样」，且需要自己 `bindWrite` 主 target——`RenderTarget` 在 1.21.1 是**抽象类**，可取用的实现是 `com.mojang.blaze3d.pipeline.TextureTarget`（骨架照抄 `RenderTarget` 会编译不过，V-49）。
+2. 原版 `PostChain` 的 target 由框架按名字分配，不存在读写反馈；`targets` 写成数组即可。
+3. 只灰世界是 `process()` 的执行位置决定的（`GameRenderer:1027` < GUI `GameRenderer:1073`），不是配置项——按 V-56 记入 D-61 的口径。
+
+**RT-01 的备注**：`RegisterShadersEvent` / `ShaderInstance` 三参构造这条 API 不再是本模块的依赖面（改走 `PostChain` 后不再注册自定义 `ShaderInstance`）。
 
 **禁止（BRIEF §7.1 原文）**：用雾色或贴图替换冒充灰度。D-61 要的是真灰度——「雾色」只能褪远处，「贴图替换」只能改方块表面，两者都改不了 GUI，也改不了实体与粒子。
 
@@ -819,29 +826,45 @@ public static void onRenderGuiPost(RenderGuiEvent.Post event) {
 
 **触发条件**：同 §4.1（`wild_hunter` 存在）。
 
-**首选方案（不许换）**：
+**首选方案（V-58 / V-60 收敛后）**：
 
-1. 订阅 `RenderLivingEvent.Post`。
-2. 取 `LivingEntityRenderer#getModel()`。
-3. 用 `Model#renderToBuffer` 以 `RenderType.entityTranslucentEmissive(whiteTexture)` 再画一遍。
-4. 配 `RenderSystem.setShaderColor(1.0F, 0.15F, 0.15F, 0.45F)`。
-5. 白色 1×1 贴图放 `assets/farmstorm/textures/misc/white.png`。
+1. **`MultiBufferSource` 按顶点格式过滤**，不是无条件替换：只有 `type.format() == DefaultVertexFormat.NEW_ENTITY`（模型本体与护甲层）才换成 `RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE)`，其余 `buffers.getBuffer(type)` **原样放行**。拴绳 `RenderType.LEASH` 用的是 `DefaultVertexFormat.POSITION_COLOR_LIGHTMAP`（只有位置 / 颜色 / 光照，没有 UV0 / UV1 / Normal），塞进 entity 格式的缓冲区会在 `BufferBuilder.endLastVertex` 抛 `IllegalStateException: Missing elements in vertex` 并**直接把客户端打崩**（v0.0.2 实测崩过两次：`EntityRenderer.renderLeash` → 剪影钩子）。两处调用点共用同一个 `shellSource(...)`。
+2. **颜色烘进贴图**：`textures/misc/wild_hunter_red.png` 是 1×1 RGBA **(255, 38, 38, 115)**，即 D-62 的 `(1, 0.15, 0.15)` 与 0.45 透明度。`entityTranslucentEmissive` 的着色器**故意忽略 ColorModulator**（emissive 的定义就是不受光照与色彩调制），`RenderSystem.setShaderColor` 对它无效。
+3. **重画走 `LivingEntityRenderer#render(...)`**（不是 `EntityRenderDispatcher#render`）：变换链由渲染器自己执行，几何与本体必然重合；放大 `1.008` 倍避免与本体 z-fighting；配一个 `rendering` 重入守卫，否则 `render` 内部再触发 `RenderLivingEvent` 会无限递归。
+4. **`RenderLivingEvent.Post` 触发时 poseStack 已经被 `popPose()` 过**（`LivingEntityRenderer:137/139`），不能直接当实体坐标系复用——要重画得自己 `pushPose()` / `scale(...)`，或者干脆新建一个 `PoseStack`。
+5. **剪影画在灰度之后**：灰度链在世界段末尾跑（`GameRenderer:1027`），世界阶段画的剪影会被一起灰掉。做法是两段——`RenderLevelStageEvent.Stage.AFTER_ENTITIES` 捕获投影矩阵 / modelview / 相机 / `partialTick`；`RenderGuiEvent.Pre` 里恢复这三样，用**新建的** `PoseStack` 只做世界平移（camera 旋转已经在 modelview 里，再乘一次就把旋转应用两遍，剪影会画到错误位置），逐只 `render(...)` 后 `endBatch()`。
 
 ```java
+// client/WildHunterOutline.java（骨架，签名以 1.21.1 为准）
+// ① 按顶点格式过滤：只有 entity 格式才换成红色 emissive 类型，其余原样放行
+private static MultiBufferSource shellSource(MultiBufferSource buffers) {
+    return type -> type.format() == DefaultVertexFormat.NEW_ENTITY
+            ? buffers.getBuffer(RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE))
+            : buffers.getBuffer(type);
+}
+
+// ② 世界阶段只捕获状态（AFTER_ENTITIES 时投影 / modelview / 相机都还是对的）
 @SubscribeEvent
-public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
-    if (!WildHunterClientState.active()) return;
-    LivingEntity entity = event.getEntity();
-    LocalPlayer self = Minecraft.getInstance().player;
-    if (entity == self || entity.isSpectator() || self.isAlliedTo(entity)) return;
-    if (self.distanceToSqr(entity) > sq(WildHunterClientState.highlightRadius())) return;  // D-62：highlightRadius，默认 64.0 格
-    if (!self.hasLineOfSight(entity)) return;                        // D-62：无方块遮挡
-    var model = event.getRenderer().getModel();
-    var buffer = event.getMultiBufferSource().getBuffer(
-            RenderType.entityTranslucentEmissive(WHITE_TEXTURE));
-    RenderSystem.setShaderColor(1.0F, 0.15F, 0.15F, 0.45F);
-    model.renderToBuffer(event.getPoseStack(), buffer, event.getPackedLight(), OverlayTexture.NO_OVERLAY, -1);
-    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);            // 必须复位，否则后续实体被染红
+public static void onRenderStage(RenderLevelStageEvent event) {
+    if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
+    capturedProjection = new Matrix4f(RenderSystem.getProjectionMatrix());
+    capturedModelView  = new Matrix4f(RenderSystem.getModelViewMatrix());
+    capturedCamera     = event.getCamera();
+}
+
+// ③ 真正重画放在 GUI 阶段（灰度之后），用新建的 PoseStack 只做世界平移
+@SubscribeEvent
+public static void onRenderGuiPre() {
+    if (!WildHunterClientState.active() || capturedCamera == null) return;
+    RenderSystem.setProjectionMatrix(capturedProjection, VertexSorting.DISTANCE_TO_ORIGIN);
+    RenderSystem.getModelViewStack().set(capturedModelView);          // camera 旋转已在 modelview 里
+    for (LivingEntity entity : targets()) {
+        PoseStack poseStack = new PoseStack();
+        poseStack.translate(entity.getX() - cam.x, entity.getY() - cam.y, entity.getZ() - cam.z);
+        poseStack.scale(1.008F, 1.008F, 1.008F);                      // 避免与本体 z-fighting
+        renderer.render(entity, yaw, partialTick, poseStack, shellSource(buffers), LightTexture.FULL_BRIGHT);
+    }
+    buffers.endBatch();
 }
 ```
 
@@ -857,7 +880,7 @@ public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
 
 **禁止（BRIEF §7.2 原文）**：
 
-- 不许在 `RenderLivingEvent` 里调 `EntityRenderDispatcher#render` 重绘整只实体——会递归触发自身事件，直接栈溢出。
+- 不许在 `RenderLivingEvent` 里调 `EntityRenderDispatcher#render` 重绘整只实体——会递归触发自身事件，直接栈溢出（实现调的是 `LivingEntityRenderer#render`，并带 `rendering` 重入守卫）。
 - 不许用原版发光效果（`Glowing`）替代：那样是**白色**描边且**全服可见**，与 D-62 的「红色、只给自己看、只给可见的」三条全不符。
 
 **待验证（挂 RT-11）**：
@@ -865,7 +888,7 @@ public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
 | 待验证项 | 怎么验 | 判定 |
 |---|---|---|
 | `hasLineOfSight` 在客户端实体上的可用性与开销 | 在墙后 / 墙前各站一次，看是否只对墙前的生物画剪影；同时 `/debug profile` 看 tick 与帧时间 | 墙后有剪影 = 不可用，需退回「按距离 + 视线粗略采样」 |
-| `setShaderColor` 的 alpha（0.45）是否对 `entityTranslucentEmissive` 生效 | 把 alpha 调 0.0 与 1.0 各看一次 | 两个极端都不变化 = alpha 不生效，改用 `RenderType` 自带透明度或顶点色 |
+| 颜色能否靠 `setShaderColor` 加上（BRIEF §7.2 的原稿做法） | 进效果后看剪影是不是红色 | **已证伪**：`entityTranslucentEmissive` 的着色器忽略 ColorModulator → 改成把 RGBA(255,38,38,115) 烘进 `wild_hunter_red.png`（V-60） |
 | 大量实体时的帧时间 | 30 只生物同屏 × 效果开启 | 帧时间增量 > 3 ms 视为不可接受，需要加「同帧最多 32 只」的熔断 |
 
 **性能护栏（本文补充）**：每帧最多画 **32** 只（按距离近的优先），超出的不画。理由：`renderToBuffer` 是整模型重绘，不是便宜的描边 pass；默认 64 格半径里的一次大乱斗可能有上百只生物。
@@ -885,8 +908,8 @@ public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
 | 攻击 / 使用 / **按住左键持续挖掘** | `InputEvent.InteractionKeyMappingTriggered` | `event.setCanceled(true)`，作第二道网。`continueAttack` 每 tick 也会 fire 它，因此**能拦住持续挖掘** |
 | 快捷栏 1–9 / Q / E / F / F5 | **`InputEvent.Key` + 抽干 `consumeClick()`** | 该事件**不可取消**（`InputEvent.java:214` 未实现 `ICancellableEvent`），且触发在 `KeyMapping.set/click` **之后**（`KeyboardHandler.java:483-484` → `:485`）。但 `handleKeybinds()` 要到 tick 里才消费（`Minecraft.java:1837` → `:1944`），所以**在事件里把对应 `KeyMapping.consumeClick()` 抽干，等于拦截** |
 | 滚轮切栏 | `InputEvent.MouseScrollingEvent` | 取消 |
-| **鼠标转视角** | **`CalculatePlayerTurnEvent`** | `event.setMouseSensitivity(0)`（`ClientHooks.java:368`，事件方法见 `CalculatePlayerTurnEvent.java:46`）。**这是唯一无 Mixin 的视角锁** |
-| 背包 / 聊天 | `ScreenEvent.Opening` | 只放行 `PauseScreen`，其余 `setNewScreen(null)` 或取消 |
+| **鼠标转视角** | **`CalculatePlayerTurnEvent`** | `event.setMouseSensitivity(0)`（`ClientHooks.java:368`，事件方法见 `CalculatePlayerTurnEvent.java:46`）。**这是唯一无 Mixin 的视角手段，但它不是真正的锁**：`MouseHandler#turnPlayer` 里 `d2 = sens × 0.6 + 0.2`，灵敏度 0 时系数仍为 **0.2**，相对默认 0.5 约慢 **15.6 倍而非 0**——无 Mixin 归不了零，登记为已知限制（V-31） |
+| 背包 / 聊天 | `ScreenEvent.Opening` | 放行 `PauseScreen` **与 `DeathScreen`**，其余 `setNewScreen(null)` 或取消。放行死亡屏是必需的：相位 2 里 `/kill` 若被拦，玩家会在无 UI 状态卡死且解锁后旧屏不恢复（V-30） |
 
 ```java
 // client/input/InputLockHandler.java（骨架，D-79 版）
@@ -975,12 +998,20 @@ MC 里玩家位置本来就是客户端权威（服务端只做速度校验）�
 
 | # | 在哪 | 发生什么 | 依据 |
 |---|---|---|---|
-| 1 | 客户端 | 本地按下攻击键 + 自己身上有 `wild_hunter` + 本地 `selectTarget` 算出合法目标 | BRIEF §7.6 |
+| 1 | 客户端 | 本地按下攻击键 + 自己身上有 `wild_hunter` + 本地 `WildHunterCombat.resolveTarget` 算出合法目标 | BRIEF §7.6 |
 | 2 | 客户端 | 立刻朝目标方向给速度：`setDeltaMovement(dir.normalize().scale(dist / dashTicks))`，`dashTicks = 3` 刻跨到位 | D-65 |
 | 3 | 客户端 | 照常发 `ServerboundSwingPacket`（原版攻击流程本来就会发，不需要额外包） | §9 |
-| 4 | 服务端 | 收到 swing 时用**同一份** `selectTarget` 独立算一遍目标；不合法就什么都不做 | BRIEF §7.6 |
+| 4 | 服务端 | 用**同一份** `resolveTarget` 独立算一遍目标（服务端没有 `ServerboundSwingPacket` 的公开事件，感知方式见本节末「服务端怎么知道玩家挥了一下」）；不合法就什么都不做 | BRIEF §7.6 + V-44 |
 | 5 | 服务端 | 合法则结算伤害（玩家自身攻击力）与击退（D-75 的原版默认强度） | D-75 |
 | 6 | 服务端 | **不下发位移**（不下发 `ClientboundSetEntityMotionPacket` 去纠正玩家） | 避免「被拉回」 |
+
+**服务端怎么知道玩家挥了一下（V-44 的落地机制）**：NeoForge 1.21.1 **没有** `ServerboundSwingPacket` 的公开事件，D-40 禁 Mixin、D-50 禁自订包，因此服务端只能**旁路感知**，不能靠事件：
+
+1. 挂在 `PlayerTickEvent.Post`，每刻观察两个信号：① swing 状态跃变（`swinging` / `swingTime` / `attackAnim`，`LivingEntity:185/188/195`）；② 本刻的水平位移（冲刺）。
+2. **两个信号同时成立才结算**：单用 ① 会把右键 / 挖掘算成一次挥击，单用 ② 会把爆炸击退算成一次冲刺。
+3. **必须去抖**：真实命中会同时触发 `AttackEntityEvent`，同一次挥击只准结算一次（两边共用同一个「本刻已结算」标记）。
+4. 判定仍走 `resolveTarget`，5 格 / 30° 一个都不许放宽；不合法就什么都不做。
+5. 由此「吸附判定成功即必中」：只要锥内有合法目标且这次挥击被服务端感知，就按玩家自身攻击力结算，不管原版那一下有没有真的碰到实体。
 
 **为什么第 6 步必须是「不下发」**：BRIEF §7.6 的待验证说得很清楚——`ServerPlayer#setDeltaMovement` 并不会让客户端玩家移动（玩家移动是客户端模拟的），所以「服务端给速度」这句在实现上必须落到客户端驱动。若服务端硬发速度包，客户端会在下一 tick 被自己的位置校验覆盖，表现为「冲一半被拽回来」。**红线**：不许为了这个新增网络包（D-50）。
 
@@ -1177,16 +1208,16 @@ RT-15 的风险是「隐藏 MobEffect 被其它模组的效果清理逻辑干扰
 
 | 目标 | ffmpeg 参数 | 判据 |
 |---|---|---|
-| 音频 → Ogg Vorbis | `-ac 1 -ar 44100 -c:a libvorbis -b:a 64k` | **mono**（1 声道）、**64 kbps**（D-53） |
+| 音频 → Ogg Vorbis | `-ac 1 -c:a libvorbis -b:a 64k`（**不写 `-ar`**，保留源采样率） | **mono**（1 声道）、**64 kbps**（D-53）、采样率随源（本版 `zangief_piledriver` 44.1 kHz、`wild_hunter_loop` 48 kHz，作者指定剪辑） |
 | 图标 → PNG | `-vf scale=18:18:flags=lanczos -pix_fmt rgba` | **18×18**，无透明通道要求（D-53） |
 
 ```powershell
-ffmpeg -y -i "<源 mp3>" -vn -ac 1 -ar 44100 -c:a libvorbis -b:a 64k "<目标>.ogg"
+ffmpeg -y -i "<源 mp3>" -vn -ac 1 -c:a libvorbis -b:a 64k "<目标>.ogg"
 ffmpeg -y -i "<源 jpg>" -vf "scale=18:18:flags=lanczos" -pix_fmt rgba "<目标>.png"
 ```
 
 - `-vn` 必须加：源 mp3 若带封面，不加会把封面当视频流写进 ogg，Minecraft 直接拒绝加载。
-- `-ar 44100` 固定采样率：不同源的采样率混在一起会让音量听起来忽大忽小。
+- **不固定采样率**（V-62）：两个源的采样率是作者剪辑时定的（`zangief_piledriver` 44.1 kHz、`wild_hunter_loop` 48 kHz），强行统一到 44100 会重采样，且与作者听感不符。判据是「时长 / 声道 / 码率」三项，**不比 md5**——Ogg 每次重编码的流序列号都是随机的，md5 天然不一致。
 - 18×18 不是 16×16：效果图标在原版 HUD 里按 18×18 绘制（`MobEffectInstance` 的图标区），16×16 会被拉伸 1.125 倍，边缘发虚。
 
 ### 6.3 `assets/farmstorm/sounds.json`（1 个文件，2 个事件）
@@ -1292,9 +1323,11 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 **同一个脚本还产 4 张 16×16 物品图标**（`molotov` / `zangief_cane` / `wild_apple` / `compressed_puffed_wheat`）与 1 张 `textures/block/zangief_cane.png`（只作陷阱方块的 `particle` 贴图，D-68）。占位稿规则沿用 `gen_textures.py`：作物图标右下角叠绿色「+」（`plan0.0.1.txt` 第 8 条区分原版与改良），四个新作物同样加「+」。
 
-### 6.6 1×1 白色贴图
+**生成器输出与仓库现状允许存在颜色级手调**（V-65）：`item/bamboo_firecracker.png` 与 `item/compressed_puffed_wheat.png` 的 SHA256 与当前 `gen_textures.py` 的输出不一致，逐像素比对确认形状与透明度完全一致、差异只在颜色/明度（前者 165 个差异像素还全落在 `alpha=0` 的全透明区，肉眼不可见），判定为 v0.0.1 期间的有意手调——**不回滚、不重生成**；重跑生成器前须逐张比对，避免把手工修正覆盖掉。
 
-`assets/farmstorm/textures/misc/white.png`：1×1、全白、RGBA（255,255,255,255）。BRIEF §7.2 指定。剪影靠 `setShaderColor` 上红色，贴图本身必须是纯白——否则颜色会相乘变脏。
+### 6.6 1×1 红色贴图
+
+`assets/farmstorm/textures/misc/wild_hunter_red.png`：1×1、RGBA (255, 38, 38, 115)，即 D-62 的 `(1, 0.15, 0.15)` 乘 0.45 透明度。BRIEF §7.2 的原稿是「纯白贴图 + `setShaderColor` 上红色」，但 `entityTranslucentEmissive` 的着色器**故意忽略 ColorModulator**，颜色必须来自贴图本身（V-60）——所以直接生成红色贴图，`setShaderColor` 省掉，也就不存在「忘了复位把后续实体染红」的坑。
 
 ### 6.7 管线顺序与证据
 
@@ -1309,7 +1342,7 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 **证据要留下**（RT-14 的验收材料）：步骤 1 的完整 stdout（含每个目标的回读校验行）、步骤 2 的「原版命中 / 退回占位」清单、`dist/farmstorm-0.0.2+mc1.21.1.jar` 内 `assets/farmstorm/sounds/` 的 2 个 `.ogg` 条目（`jar tf` 或解压看）。
 
-**两个脚本不进 jar、也不计入 §7.2 的 36**：它们落在仓库的 `tools/` 下，是构建期工具，不是模组资源。
+**两个脚本不进 jar、也不计入 §7.2 的 40 行**：它们落在仓库的 `tools/` 下，是构建期工具，不是模组资源。
 
 ---
 
@@ -1319,17 +1352,17 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 | 类别 | v0.0.1 | 增量 | v0.0.2 |
 |---|---|---|---|
-| `.json` | 169 | +24 | **193** |
-| `.png` | 91 | +8 | **99** |
-| `.ogg` | 0 | +2 | **2** |
-| `.glsl`（`.vsh` + `.fsh`） | 0 | +2 | **2** |
+| `.json` | 169 | +23 | **192** |
+| `.png` | 92 | +8 | **100** |
+| `.ogg` | 2 | +0 | **2** |
+| `.glsl`（`.vsh` + `.fsh`） | 0 | +3 | **3** |
 | `.toml`（`neoforge.mods.toml`） | 1 | +0 | **1** |
 | `pack.mcmeta` | 1 | +0 | **1** |
-| **合计** | **262** | **+36** | **298** |
+| **合计** | **265** | **+34** | **299** |
 
 口径提醒（BRIEF §4.1）：`src/generated/resources/.cache` 下的 11 个无扩展名文件是 DataGen 缓存，**不进 jar、不计入**。语言文件的 2 个 `.json` 已经算在 169 里（内容变、文件不增）。
 
-### 7.2 新增资源文件逐项清单（**36 行**）
+### 7.2 新增资源文件逐项清单（**40 行**）
 
 「产线」列：`手写` = 用编辑器写死在 `src/main/resources`；`DataGen` = 由 Provider 生成到 `src/generated/resources`；`脚本` = 由 §6 的转换脚本产出。
 
@@ -1341,54 +1374,58 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | 4 | `assets/farmstorm/textures/item/compressed_puffed_wheat.png` | PNG 16×16 | 脚本 | 压缩膨胀麦物品图标 | D-56 |
 | 5 | `assets/farmstorm/textures/block/compressed_hay_block.png` | PNG 16×16 灰度 | 脚本 | 压缩干草块六面贴图（干草块侧面灰度版） | D-57 / §6.5 |
 | 6 | `assets/farmstorm/textures/block/zangief_cane.png` | PNG 16×16 | 脚本 | 陷阱方块的 `textures.particle`（世界隐形，D-68） | D-68 |
-| 7 | `assets/farmstorm/textures/misc/white.png` | PNG 1×1 | 脚本 | 红色剪影的底色贴图 | BRIEF §7.2 |
-| 8 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` | PNG 18×18 | 脚本 | 狂野猎人效果图标 | D-53 / D-66 |
-| 9 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` | OGG mono 64k | 脚本 | 循环音本体 | D-53 / D-76 |
-| 10 | `assets/farmstorm/sounds/zangief_piledriver.ogg` | OGG mono 64k | 脚本 | 桑吉尔蔗触发音本体 | D-53 / D-66 |
-| 11 | `assets/farmstorm/sounds.json` | JSON | 手写 | 2 个声音事件定义 | D-76 / §6.3 |
-| 12 | `assets/farmstorm/shaders/core/grayscale.json` | JSON | 手写 | 灰度 `ShaderInstance` 的程序声明 | BRIEF §7.1 |
-| 13 | `assets/farmstorm/shaders/core/grayscale.vsh` | GLSL | 手写 | 全屏四边形顶点着色器 | BRIEF §7.1 / §3.2 |
-| 14 | `assets/farmstorm/shaders/core/grayscale.fsh` | GLSL | 手写 | 灰度片段着色器（`dot(rgb, 亮度系数)`） | BRIEF §7.1 / §3.2 |
-| 15 | `assets/farmstorm/post_effect/grayscale.json` | JSON | 手写 | 灰度后处理声明（RT-10 退化分支的 `PostChain` 挂载） | BRIEF §3.2 |
-| 16 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | 单变体 `cube_all` | D-57 |
-| 17 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | `face`×`facing`×`floating` 全变体 → 空模型 | D-68 |
-| 18 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | 六面同贴图模型 | D-57 |
-| 19 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | 空模型（只有 `textures.particle`） | D-68 |
-| 20 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | `item/generated` + layer0 | §2.2 |
-| 21 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | `item/generated`（不引用方块模型） | D-68 |
-| 22 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | `item/generated` | §2.2 |
-| 23 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | `item/generated` | D-56 |
-| 24 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | `parent = farmstorm:block/compressed_hay_block` | D-57 |
-| 25 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | 转换器合成：中心 `minecraft:crafting_table` + 八格 `#farmstorm:converter_fuel` | D-52 |
-| 26 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | 无序：4 个 `puffed_wheat` → 1 个 `compressed_puffed_wheat` | D-67 |
-| 27 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:crimson_fungus` ⇄ `molotov`，双向，经验 3，无催化剂 | D-54 同形 |
-| 28 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:sugar_cane` ⇄ `zangief_cane`，双向，经验 3 | D-54 同形 |
-| 29 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:golden_apple` ⇄ `wild_apple`，双向，经验 3 | D-54 |
-| 30 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | 进度：初次投出莫洛托夫 | D-63 |
-| 31 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | 进度：桑吉尔蔗首次命中 | D-63 |
-| 32 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | 进度：首次获得狂野猎人效果 | D-63 |
-| 33 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | 掉自身（`requiresCorrectToolForDrops` 决定空手不掉） | D-57 |
-| 34 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | 部署方块口径：`survives_explosion` + 掉自身 | 既有 5 张同形 |
-| 35 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | 新建物品标签：原版农作物 + 19 条档案里能当农作物的物品 | D-52 |
-| 36 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | 新建：`compressed_hay_block` 需要钻石镐 | D-57 |
+| 7 | `assets/farmstorm/textures/misc/white.png` | PNG 1×1 | 脚本 | 1×1 纯白贴图（BRIEF §7.2 原稿的底色；剪影已改用红图，文件保留） | BRIEF §7.2 |
+| 8 | `assets/farmstorm/textures/misc/wild_hunter_red.png` | PNG 1×1 | 脚本 | 红色剪影贴图，RGBA(255,38,38,115)，颜色烘进贴图（V-60） | BRIEF §7.2 + V-60 |
+| 9 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` | PNG 18×18 | 脚本 | 狂野猎人效果图标 | D-53 / D-66 |
+| 10 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` | OGG mono 64k | 脚本 | 循环音本体 | D-53 / D-76 |
+| 11 | `assets/farmstorm/sounds/zangief_piledriver.ogg` | OGG mono 64k | 脚本 | 桑吉尔蔗触发音本体 | D-53 / D-66 |
+| 12 | `assets/farmstorm/sounds.json` | JSON | 手写 | 2 个声音事件定义 | D-76 / §6.3 |
+| 13 | `assets/farmstorm/shaders/core/grayscale.json` | JSON | 手写 | 上一版「`RegisterShadersEvent` + 自定义 `ShaderInstance`」的程序声明（当前不加载） | BRIEF §7.1 |
+| 14 | `assets/farmstorm/shaders/core/grayscale.vsh` | GLSL | 手写 | 上一版方案的全屏四边形顶点着色器（当前不加载，`PostChain` 用原版 `minecraft:blit`） | BRIEF §7.1 / §3.2 |
+| 15 | `assets/farmstorm/shaders/core/grayscale.fsh` | GLSL | 手写 | 灰度片段着色器（`dot(rgb, 亮度系数)`），`program/grayscale.json` 的 `fragment` 引用的就是它 | BRIEF §7.1 / §3.2 + V-56 |
+| 16 | `assets/farmstorm/shaders/post/grayscale.json` | JSON | 手写 | 灰度 `PostChain` 链声明（运行时由 `GameRenderer#loadEffect` 加载；`targets` 必须是数组） | V-56 / V-49 |
+| 17 | `assets/farmstorm/shaders/program/grayscale.json` | JSON | 手写 | 灰度 shader 程序声明（vertex `minecraft:blit` + fragment `farmstorm:grayscale`） | V-56 |
+| 18 | `assets/farmstorm/shaders/program/grayscale.fsh` | GLSL | 手写 | 与 `core/grayscale.fsh` 同内容（采样器名不同），备用副本 | V-56 |
+| 19 | `assets/farmstorm/post_effect/grayscale.json` | JSON | 手写 | 灰度后处理声明 —— **当前无加载器**，是 RT-10 退化分支的预留挂载点（V-49） | BRIEF §3.2 + V-49 |
+| 20 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | 单变体 `cube_all` | D-57 |
+| 21 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | `face`×`facing`×`floating` 全变体 → 空模型 | D-68 |
+| 22 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | 六面同贴图模型 | D-57 |
+| 23 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | 空模型（只有 `textures.particle`） | D-68 |
+| 24 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | `item/generated` + layer0 | §2.2 |
+| 25 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | `item/generated`（不引用方块模型） | D-68 |
+| 26 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | `item/generated` | §2.2 |
+| 27 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | `item/generated` | D-56 |
+| 28 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | `parent = farmstorm:block/compressed_hay_block` | D-57 |
+| 29 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | 转换器合成：中心 `minecraft:crafting_table` + 八格 `#farmstorm:converter_fuel` | D-52 |
+| 30 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | 无序：4 个 `puffed_wheat` → 1 个 `compressed_puffed_wheat` | D-67 |
+| 31 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:crimson_fungus` ⇄ `molotov`，双向，经验 3，无催化剂 | D-54 同形 |
+| 32 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:sugar_cane` ⇄ `zangief_cane`，双向，经验 3 | D-54 同形 |
+| 33 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:golden_apple` ⇄ `wild_apple`，双向，经验 3 | D-54 |
+| 34 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | 进度：初次投出莫洛托夫（**待 F-98 生成**） | D-63 |
+| 35 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | 进度：桑吉尔蔗首次命中（**待 F-98 生成**） | D-63 |
+| 36 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | 进度：首次获得狂野猎人效果（**待 F-98 生成**） | D-63 |
+| 37 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | 掉自身（`requiresCorrectToolForDrops` 决定空手不掉） | D-57 |
+| 38 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | 部署方块口径：`survives_explosion` + 掉自身 | 既有 5 张同形 |
+| 39 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | 新建物品标签：原版农作物 + 19 条档案里能当农作物的物品 | D-52 |
+| 40 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | 新建：`compressed_hay_block` 需要钻石镐 | D-57 |
 
 列名对应关系（本节是文件清单，不是键表）：**文件路径** ↔ 键名；**类别** ↔ 默认值（含文件尺寸，如 `PNG 16×16`）；**产线** ↔ 范围（该文件由谁产出、可否复跑）；**用途** ↔ 用途；**依据** ↔ 依据 D 编号。
 
-**行数核对**：`36` 行；分类计数 PNG 8（#1–#8）+ OGG 2（#9–#10）+ JSON 24（#11–#12、#15–#36）+ GLSL 2（#13–#14）→ 见下表。#11–#36 共 26 个槽位 = 24 个 JSON + 2 个 GLSL，与分类计数一致。
+**行数核对**：本表 `40` 行（V-49 / V-56 / V-60 之后以仓库实测为准）。其中 **37 行已在仓库**，3 行（`data/farmstorm/advancement/*.json`）待 F-98 生成；另有 3 行（2 个 `.ogg` 与 `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时就已在仓库里。因此「基线之后新增」是 34 个文件（`git diff` 的口径），总数则是 265 + 34 = **299**。
 
 | 类别 | 行号 | 数量 |
 |---|---|---|
-| PNG | #1–#8 | 8 |
-| OGG | #9–#10 | 2 |
-| JSON | #11–#12、#15–#36 | 24 |
-| GLSL | #13–#14 | 2 |
-| **合计** | — | **36** |
+| PNG | #1–#9 | 9 |
+| OGG | #10–#11 | 2 |
+| JSON | #12、#13、#16、#17、#19、#20、#21、#22、#23、#24、#25、#26、#27、#28、#29、#30、#31、#32、#33、#34、#35、#36、#37、#38、#39、#40 | 26 |
+| GLSL | #14、#15、#18 | 3 |
+| **合计** | — | **40** |
 
-**追加型改动（不产生新文件，不计入 36）**：`data/minecraft/tags/block/mineable/pickaxe.json` 追加 `compressed_hay_block`；`data/farmstorm/tags/block/deployed_crops.json` 追加 `zangief_cane`；`data/farmstorm/tags/item/modified_crops.json` 追加 4 条；`assets/farmstorm/lang/{zh_cn,en_us}.json` 追加 39 条（§7.3）；既有的 12 个进度文件不动。
+**追加型改动（不产生新文件，不计入 40 行）**：`data/minecraft/tags/block/mineable/pickaxe.json` 追加 `compressed_hay_block`；`data/farmstorm/tags/block/deployed_crops.json` 追加 `zangief_cane`；`data/farmstorm/tags/item/modified_crops.json` 追加 4 条；`assets/farmstorm/lang/{zh_cn,en_us}.json` 追加 39 条（§7.3）；既有的 12 个进度文件不动。
 
-### 7.3 新增语言文件键逐项清单（**39 行**）
+### 7.3 新增语言文件键逐项清单（**41 行**）
 
-键集由 `ModLangProvider` 的同一张 `ENTRIES` 表按列写出，因此 `zh_cn` 与 `en_us` 的键天然相等。`222 + 39 = 261`，两份都必须是 **261**。
+键集由 `ModLangProvider` 的同一张 `ENTRIES` 表按列写出，因此 `zh_cn` 与 `en_us` 的键天然相等。`222 + 41 = 263`，两份都必须是 **263**（V-64：原 39 行表漏了 2 条实体名）。
 
 | # | 键 | `zh_cn` | `en_us` | 依据 |
 |---|---|---|---|---|
@@ -1431,10 +1468,12 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | 37 | `farmstorm.configuration.zangief_cane.levitationDurationTicks` | 漂浮时长（tick） | Levitation duration (ticks) | §8.1 #20 |
 | 38 | `farmstorm.configuration.zangief_cane.fallTicks` | 相位 2 的目标落地时长（tick） | Target landing duration of phase 2 (ticks) | §8.1 #21 |
 | 39 | `farmstorm.configuration.zangief_cane.spinDegreesPerTick` | 水平自转速度（度/刻） | Horizontal spin speed (degrees/tick) | §8.1 #22 |
+| 40 | `entity.farmstorm.molotov` | 莫洛托夫！ | Molotov | V-64（原表漏了这两条，缺它们时 `/summon` 反馈与死亡信息显示裸键） |
+| 41 | `entity.farmstorm.compressed_puffed_wheat` | 压缩膨胀麦 | Compressed Puffed Wheat | V-64 |
 
 列名对应关系：**键** ↔ 键名；**`zh_cn` / `en_us` 两列** ↔ 值（语言文件没有「范围」，两份文本互为对照）；**类别**由键前缀给出（`item.` / `block.` / `effect.` / `subtitles.` / `advancements.` / `farmstorm.configuration.`）；**依据**见最后一列。
 
-**行数核对**：`39` 行 = 物品 5（#1–#5）+ 方块 2（#6–#7）+ 效果 2（#8–#9）+ 字幕 2（#10–#11）+ 进度 6（#12–#17）+ config 22（#18–#39）。`222 + 39 = 261`。
+**行数核对**：`41` 行 = 物品 5（#1–#5）+ 方块 2（#6–#7）+ 效果 2（#8–#9）+ 字幕 2（#10–#11）+ 进度 6（#12–#17）+ config 22（#18–#39）+ 实体名 2（#40–#41）。`222 + 41 = 263`。
 
 **没有新增的两类，写明理由**：
 
@@ -1447,10 +1486,11 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 | 数 | 怎么核 | 期望 |
 |---|---|---|
-| 资源 298 | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources \| Where-Object Name -ne '.cache' \| Measure-Object`，再减去 `.cache` 下的 11 个 | 298 |
-| JSON 193 | 同上但只数 `.json` | 193 |
-| PNG 99 | 只数 `.png` | 99 |
-| 语言键 261 | `python -c "import json;print(len(json.load(open('…/zh_cn.json'))))"`，`en_us` 同跑 | 两个都 261 |
+| 资源 299 | `git ls-files 'src/main/resources' 'src/generated/resources'` 再扣 `.cache` 的 11 个与 3 个 `.gitkeep` | 299 |
+| JSON 192 | 同上但只数 `.json` | 192 |
+| PNG 100 | 只数 `.png` | 100 |
+| GLSL 3 | 只数 `.vsh` / `.fsh` | 3 |
+| 语言键 263 | `python -c "import json;print(len(json.load(open('…/zh_cn.json'))))"`，`en_us` 同跑 | 两个都 263 |
 | 两份键集相等 | 同上但比 `set(a) == set(b)` | `True` |
 
 ---
@@ -1546,7 +1586,7 @@ spinDegreesPerTick = 72.0          # D-70：1440 度/秒 ÷ 20
 | 新增 `farmstorm.configuration.*` 语言键 | **22** | §7.3 的 #18–#39，逐条对应 §8.1 的 #1–#22 |
 | 两份相等 | `22 == 22` | `ModLangProvider` 用同一张 `ENTRIES` 表按列写两份文件，键集天然相等 |
 | 新总数 | **139** | `117 + 22` |
-| 语言键新总数 | **261** | `222 + 39`（其中 config 22 条） |
+| 语言键新总数 | **263** | `222 + 41`（其中 config 22 条、实体名 2 条） |
 
 实现阶段的机械比对：`run/config/farmstorm-server.toml` 的叶节点数应为 **139**，`zh_cn.json` 里 `farmstorm.configuration.` 前缀的键数也应为 **139**。两数不等就说明有键漏生成。
 
@@ -1588,7 +1628,7 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 8 | 三项属性加成（+30 % 移速 / +30 % 攻速 / +40 % 伤害） | `MobEffect#addAttributeModifiers` | 不需要包 | 原版在客户端也会执行该方法（`LivingEntity#onEffectAdded` 两侧对称），客户端属性表与服务端一致 |
 | 9 | 桑吉尔蔗触发音 | `level.playSound(null, pos, …)` | `ClientboundSoundPacket` | 位置 + 事件 + 音量 + 音高，一次性 |
 | 10 | 狂野猎人循环音 | 客户端自写 `SoundInstance`（D-76） | **零包** | 音的生命周期 == 效果的生命周期，客户端从 #6 就能推出该不该播 |
-| 11 | 莫洛托夫落点的火 / 岩浆块 | `level.setBlock(target, state, UPDATE_ALL)` | `ClientboundBlockUpdatePacket` | 每个被改的格一个区块级更新包（原版自动合并同区块的连续更新） |
+| 11 | 莫洛托夫落点的火 / 岩浆块 | `level.setBlock(target, state, UPDATE_CLIENTS)` | `ClientboundBlockUpdatePacket` | 每个被改的格一个区块级更新包（原版自动合并同区块的连续更新） |
 | 12 | 莫洛托夫的爆炸表现 | `FarmstormExplosion#detonate` 的 `finalizeExplosion` | `ClientboundExplodePacket` + `ClientboundLevelParticlesPacket` | 原版爆炸的两件套；威力 0 时前者只有位置与音效 |
 | 13 | 投掷物实体出现在世界里 | `level.addFreshEntity(projectile)` | `ClientboundAddEntityPacket` | 原版实体生成流程 |
 | 14 | 陷阱方块静默消失 | `be.consume()` 里的 `server.removeBlock(pos, false)` + `levelEvent(PARTICLES_DESTROY_BLOCK)` | `ClientboundBlockUpdatePacket` + `ClientboundLevelEventPacket` | 后者就是原版的方块破坏粒子事件，不需要自己发粒子包 |
@@ -1644,13 +1684,13 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 
 | 编号 | 风险 | 触发条件 | 首要缓释 | 兜底 | 实现阶段怎么验 |
 |---|---|---|---|---|---|
-| **RT-10** | 整屏灰度后处理的挂载点不成立 | `RenderGuiEvent.Post` 里切换 render target 与其它模组的 GUI 后处理打架：画面全黑、只灰半个屏、其它模组 HUD 消失；或 `RegisterShadersEvent` 注册的 `ShaderInstance` 编译失败 | 拆成世界 + GUI 两次 pass（`RenderLevelStageEvent` 的 AFTER 阶段 + `RenderGuiEvent.Post`）；再不行只灰世界并在 Release 说明里降级登记 | 只灰世界 + 在 Release 说明写明「GUI 不灰」；若连世界 pass 都不成立，D-61 降级为「只褪世界」并登记为已知缺陷 | ① 进效果后看是否整屏灰度（标题栏与物品栏也必须灰）；② 同屏开另一个做 GUI 后处理的模组，看是否互相破坏；③ `latest.log` 里 `[Render thread/ERROR]` 是否出现 GL 或 shader 编译错误；④ 记录帧时间（F3）前后差 |
-| **RT-11** | 剪影重绘递归或掉帧 | 在 `RenderLivingEvent` 里误调 `EntityRenderDispatcher#render` 导致递归；或同屏生物过多导致帧时间暴涨；或 `hasLineOfSight` 在客户端不可用 | 用 `getModel().renderToBuffer` 而非 dispatcher 重绘；≤64 格 + 视线才画 | 同帧最多 32 只（按距离近的优先）；仍不行则只画「距离 ≤ 16 格」的一个子集，并在 Release 说明写明 | ① 30 只生物同屏 + 效果开启，看是否卡死或掉帧 > 3 ms；② 墙前 / 墙后各站一次，确认墙后无剪影；③ 65 格外确认无剪影；④ 看日志有无 `StackOverflowError` |
+| **RT-10** | 世界灰度后处理的挂载点（**已关闭**：改用原版 `PostChain`，见 §4.1 的「RT-10 的结论」）| `RenderGuiEvent.Post` 里切换 render target 与其它模组的 GUI 后处理打架：画面全黑、只灰半个屏、其它模组 HUD 消失；或 `RegisterShadersEvent` 注册的 `ShaderInstance` 编译失败 | 拆成世界 + GUI 两次 pass（`RenderLevelStageEvent` 的 AFTER 阶段 + `RenderGuiEvent.Post`）；再不行只灰世界并在 Release 说明里降级登记 | 只灰世界 + 在 Release 说明写明「GUI 不灰」；若连世界 pass 都不成立，D-61 降级为「只褪世界」并登记为已知缺陷 | ① 进效果后看**世界**是否灰度（方块 / 实体 / 粒子），HUD 保持原色即为预期（V-56）；② 同屏开另一个做 GUI 后处理的模组，看是否互相破坏；③ `latest.log` 里 `[Render thread/ERROR]` 是否出现 GL 或 `Could not load program` 一类错误；④ 记录帧时间（F3）前后差 |
+| **RT-11** | 剪影重绘递归、掉帧，或**顶点格式不匹配把客户端打崩** | 在 `RenderLivingEvent` 里误调 `EntityRenderDispatcher#render` 导致递归；或 `MultiBufferSource` 无条件替换 RenderType（拴绳是 `POSITION_COLOR_LIGHTMAP`，塞进 entity 缓冲即 `Missing elements in vertex`，V-58 实测崩过两次）；或同屏生物过多导致帧时间暴涨；或 `hasLineOfSight` 在客户端不可用 | 用 `LivingEntityRenderer#render(...)` 重画并配重入守卫；`MultiBufferSource` **按 `type.format() == DefaultVertexFormat.NEW_ENTITY` 过滤**；≤64 格 + 视线才画 | 同帧最多 32 只（按距离近的优先）；仍不行则只画「距离 ≤ 16 格」的一个子集，并在 Release 说明写明 | ① 30 只生物同屏 + 效果开启，看是否卡死或掉帧 > 3 ms；② 墙前 / 墙后各站一次，确认墙后无剪影；③ 65 格外确认无剪影；④ 看日志有无 `StackOverflowError` |
 | **RT-12** | 冲刺位移的驱动方判错，玩家不动或被拉回 | 服务端 `setDeltaMovement` 对 `ServerPlayer` 不产生客户端位移；或客户端预测位移被服务端的移动校验判成「移动过快」而拉回 | 走客户端预测 + 服务端判定；备选逐刻 teleport | 切到备选：服务端每刻 `teleportTo` ≤ 1 格、带碰撞检测；切换时在 §4.5 追加决策记录 | ① 打一条 `setDeltaMovement` 日志看客户端是否位移；② 冲刺时看 `latest.log` 有无 `moved too quickly!` / `moved wrongly!`；③ 对着墙冲刺确认停在墙前不穿墙；④ 目标被方块完全占据时确认本次不吸附 |
 | **RT-13** | 输入拦截有遗漏，某个键仍能穿透 | `InputEvent.Key` 与 `KeyMapping` 的先后顺序导致 1–9 没拦住（**已定论**，见 D-79：该事件不可取消，改为抽干消费）；或某个 GUI 打开路径没走 `ScreenEvent.Opening` | 七个机制全上（D-79）；实现阶段逐键手测一遍并留记录 | 对漏掉的那一路改挂更靠前的钩子（如再加 `ScreenEvent.KeyPressed`）；仍漏则在 Release 说明登记「该键不可锁」 | 逐键手测并填表：W/A/S/D/空格/Shift/左键/右键/1–9/滚轮上/滚轮下/E/T/`/`/ESC 共 21 项，每项记「拦住 / 穿透」；ESC 必须可用 |
 | **RT-14** | ffmpeg 不在 PATH 上，或换机器 / 换构建后拿不到带 libvorbis 的 ffmpeg，音频产不出来 | 脚本拿不到可用 ffmpeg——本机现状：7.1 essentials 在 `D:\dsh\default\sf6_audio\tools\ffmpeg.exe`，**可用**；Trae CN 的 6.1.1 **无 libvorbis** 不可用；或 `sounds.json` 的 `attenuation_distance` 在 1.21.1 上语义不是「可听距离」 | 转换脚本缺 ffmpeg 或 ffmpeg 无 libvorbis 一律直接报错退出；音频任务排在资源阶段最前，早失败早发现；工具已就位并实测通过（`tools/convert_media.ps1`） | 传对 `-Ffmpeg` 绝对路径即可；换机器时按脚本打印的安装指引装一个带 libvorbis 的构建 | ① 不传 `-Ffmpeg` 且 PATH 上没有时必须打印安装指引并退出码 1，传入可用路径时打印环境可用并退出码 0；② 真跑后 `ffprobe` 回读校验声道 = 1、码率 ≈ 64 kbps；③ 游戏内站 8 / 16 / 17 / 32 格各听一次；④ `jar tf` 确认两个 `.ogg` 在 jar 里 |
 | **RT-15** | 隐藏 MobEffect 被其它模组的效果清理逻辑干扰 | 第三方模组「清除全部负面效果」（`/effect clear`、药水、命令）把 `zangief_piledriver` 提前清掉，客户端仍停在相位 2：画面永远倒着、键永远锁着 | 客户端每 tick 自检「阶段效果还在不在」，不在就自己复位 | 服务端一侧对称自检：`ACTIVE` 有记录但 `getEffect` 为空 ⇒ `finish` + `warn`，不重新施加 | ① `/effect give @s farmstorm:zangief_piledriver 10 2 false` 看画面倒转 + 输入锁 + 自转；② `/effect clear @s` 后 100 ms 内必须全部复位，日志出现「状态复位（效果被外部清除）」；③ 相位切换打日志看客户端是否读到 `null`（硬切换的 1 tick 空窗） |
-| **RT-16** | 整屏灰度与光影类模组（Oculus/Iris 等）不兼容 | 装了光影类模组时，灰度 pass 与光影的 framebuffer 链冲突：画面全黑、光影失效、或灰度只作用于最终合成前的一层 | 文档登记为已知不兼容，不做运行时检测 | Release 说明与 README 的「已知不兼容」节列出 Oculus / Iris；不做版本探测、不做自动降级 | ① 装 Iris + 任一光影，进效果看画面是否全黑或光影失效；② 不装光影时回到 RT-10 的第 ① 步确认正常；③ 在 `12-TECH` 与本条登记一次，不再复查 |
+| **RT-16** | 世界灰度与光影类模组（Oculus/Iris 等）不兼容 | 装了光影类模组时，灰度 `PostChain` 与光影的 framebuffer 链冲突：画面全黑、光影失效、或灰度只作用于最终合成前的一层 | 文档登记为已知不兼容，不做运行时检测 | Release 说明与 README 的「已知不兼容」节列出 Oculus / Iris；不做版本探测、不做自动降级 | ① 装 Iris + 任一光影，进效果看画面是否全黑或光影失效；② 不装光影时回到 RT-10 的第 ① 步确认正常；③ 在 `12-TECH` 与本条登记一次，不再复查 |
 
 **七条编号清单**：RT-10、RT-11、RT-12、RT-13、RT-14、RT-15、RT-16（连续，无缺号、无合并）。
 
@@ -1678,20 +1718,20 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 2 | 77 个注册对象齐全 | 同一次启动，看新增的注册对象自检行 | `自检 注册对象 77 个：items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1 → OK` |
 | 3 | 幸运浆果池是 16 条而不是 17 或 18 | 同一次启动，看池自检行 | `自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK` |
 | 4 | 11 个实体都有渲染器（FIX-1 的既有哨兵） | 客户端启动日志 | `自检 实体渲染器 11/11 → OK`，且紧随其后那行列出 11 个实体 ID（含 `farmstorm:molotov` 与 `farmstorm:compressed_puffed_wheat`） |
-| 5 | 灰度着色器编译成功 | 客户端启动日志 | 无 `Shader … could not be loaded` / `GL_INVALID` 行；进效果后 F3 帧率不出现断崖（与不进效果相比掉帧 < 3 ms） |
+| 5 | 灰度链加载成功（原版 `PostChain`） | 客户端启动日志 | 无 `Shader … could not be loaded` / `GL_INVALID` 行；进效果后 F3 帧率不出现断崖（与不进效果相比掉帧 < 3 ms） |
 | 6 | 两个声音事件被资源管理器读到 | 客户端启动后在聊天栏执行 `/playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1` 与 `zangief_piledriver` 各一次 | 两条命令都成功、都能听到声音；缺任一则命令报 `Unknown sound event` |
 | 7 | 莫洛托夫的落点语义 | 在平地上投一颗，清点火焰与岩浆块数量并对照 D-58 | 球半径 4 格内只有「上表面接触空气」的方块上方新增了火/岩浆块；原方块一个都没少；无爆炸伤害、无方块破坏；火 : 岩浆块 ≈ 85 : 15（投 20 颗做粗核） |
 | 8 | 压缩膨胀麦完全沿用膨胀麦 | 同一位置分别投一颗膨胀麦、一颗压缩膨胀麦，各记一次 | 两次的立方体边长一致（干 3 / 遇水 5）、落点方块一致、被 3.6e6 方块挡住的格一致；唯一差异是写入的方块（干草块 vs 压缩干草块） |
 | 9 | 压缩干草块的抗性边界（D-57） | 用 `/setblock` 放一块，旁边放一块圆石；分别用瓜！、育碧服务器、原版 TNT 各炸一次 | 瓜！炸不掉压缩干草块、炸得掉圆石；育碧服务器两块都炸得掉；**原版 TNT 也炸得掉压缩干草块**（原版 `Explosion` 逐格减 `(resistance + 0.3) * 0.3`，6.0 抗性挡不住圆石级别的方块——圆石本身就会被 TNT 炸掉） |
-| 10 | 桑吉尔蔗的三相位时序与落地时长 | 站进 1.5 格内，掐表 + 看日志；在平地 / 两格高台 / 四格高台各测一次 | 立刻倒转；14 刻后开始漂浮（VII 级、20 刻）；34 刻后开始下坠 + 自转（72.0 度/刻 = 1440 度/秒）；**三个高度测出的落地耗时都落在 `fallTicks`（默认 40 刻）± 2 刻内**（这是逐刻伺服与定速方案的分水岭）；落地后 100 ms 内画面与输入全部复位；日志有 `桑吉尔蔗 相位 0→1→2→结束` 四行与 `落地耗时 {N} 刻` |
+| 10 | 桑吉尔蔗的三相位时序与落地时长 | 站进 1.5 格内，掐表 + 看日志；在平地 / 两格高台 / 四格高台各测一次（**「高台」指 ≥3×3 台面**；1×1 石柱会被自己的柱体中途截住，属边缘几何构型，不作缺陷，V-46） | 立刻倒转；14 刻后开始漂浮（VII 级、20 刻）；34 刻后开始下坠 + 自转（72.0 度/刻 = 1440 度/秒）；**三个高度测出的落地耗时都落在 `fallTicks`（默认 40 刻）± 2 刻内**（这是逐刻伺服与定速方案的分水岭）；落地后 100 ms 内画面与输入全部复位；日志有 `桑吉尔蔗 相位 0→1→2→结束` 四行与 `落地耗时 {N} 刻` |
 | 11 | 桑吉尔蔗只对非己方玩家生效 | 同队玩家 A、敌对玩家 B、创造模式玩家 C、旁观者 D 各踩一次 | 只有 B 被打桩机；A（同队）不触发；C、D 不触发；陷阱触发后**方块消失且不掉落任何物品** |
 | 12 | 输入锁只漏 ESC | 按 §10 RT-13 的 21 项逐键手测并填表 | 除 ESC 外全部拦住；ESC 能打开暂停菜单；效果消失后所有键立刻恢复 |
 | 13 | 红色剪影的三个条件 | 站 5 格内 / 65 格外；墙前 / 墙后；同队玩家 / 敌对玩家 | 只有「≤64 格 + 无遮挡 + 非己方」的生物被画红色剪影；自己与同队玩家不画；65 格外不画 |
 | 14 | 狂野猎人冲刺走服务端复核 | 开效果后对 5 格内、30° 内的生物攻击一次；再对 30° 外的生物攻击一次 | 前者吸附并造成伤害与击退；后者正常攻击、无吸附；`latest.log` 无 `moved too quickly!`（若出现，按 RT-12 调 `dashTicks`） |
 | 15 | 击杀续时无上限 | 开效果后连续击杀 6 个生物，每次看效果剩余时长 | 每次「到期时刻」都 +8 秒、生命 +10 点；6 次后仍然有效（无次数上限） |
 | 16 | 配置键数 139 且两侧相等 | `run/config/farmstorm-server.toml` 数叶节点；`zh_cn.json` 数 `farmstorm.configuration.` 前缀的键 | 两个数都是 **139**（117 + 22）；新增的 22 个键名与 §8.1 逐字一致，且与 BRIEF §8 的唯一清单逐列相同 |
-| 17 | 资源文件 298 且分类对得上 | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources` 减 `.cache` 的 11 个 | 总数 **298**；JSON **193**、PNG **99**、OGG **2**、GLSL **2**、TOML 1、`pack.mcmeta` 1 |
-| 18 | 语言键 261 且中英相等 | `ModLangProvider` 跑完后比两份 `.json` 的键集 | 两份都 **261** 键（222 + 39）；`set(zh) == set(en)` 为 `True`；其中 `tooltip.farmstorm.*` 仍是 **16** 条（没有误加） |
+| 17 | 资源文件 299 且分类对得上 | `git ls-files` 出清单后扣 `.cache` 的 11 个与 3 个 `.gitkeep` | 总数 **299**；JSON **192**、PNG **100**、OGG **2**、GLSL **2**、TOML 1、`pack.mcmeta` 1 |
+| 18 | 语言键 263 且中英相等 | `ModLangProvider` 跑完后比两份 `.json` 的键集 | 两份都 **263** 键（222 + 41）；`set(zh) == set(en)` 为 `True`；其中 `tooltip.farmstorm.*` 仍是 **16** 条（没有误加） |
 | 19 | 三个新进度能解锁 | 分别：投出莫洛托夫 / 让桑吉尔蔗命中一名玩家 / 获得狂野猎人效果 | 三个进度各弹一次 toast；`/advancement` 里能看到 `farmstorm:first_molotov`、`farmstorm:zangief_hit`、`farmstorm:first_wild_hunter` |
 | 20 | 5 条新配方的形状与数量 | 工作台里做转换器（中心工作台 + 八格农作物）；无序放 4 个膨胀麦；转换器里转换 molotov / zangief_cane / wild_apple 各一次 | 转换器得 1 个；4 个膨胀麦得 1 个压缩膨胀麦；三条转换各扣 3 点经验且双向可用（金苹果 ⇄ 狂野苹果 正反各一次） |
 | 21 | 0 个自定义网络包 | `grep -r "CustomPacketPayload" src/main/java` | **0 处匹配**（v0.0.1 也是 0；v0.0.2 不许首次出现） |

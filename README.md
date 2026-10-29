@@ -1,6 +1,6 @@
 # 农场风云 / Farmstorm
 
-Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已实现并发版）· **v0.0.2（文档已就绪，尚未实现）**
+Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已实现并发版）· **v0.0.2（已实现并发版）**
 
 > 把原版农作物改造成 PvP 道具：同一种作物可以种在地里、扔出去、架在墙上、或者吃掉。
 > Vanilla crops re-armed as PvP gadgets: plant them, throw them, mount them, or eat them.
@@ -28,27 +28,52 @@ D-01 说的「文档先行、代码由提示词驱动」已经跑完一轮：**�
 
 ---
 
-## 📋 v0.0.2：文档已就绪，实现还没开始
+## 🚀 v0.0.2 索引（已实现；本节与文末「素材来源」即 F-99 交付的两节）
 
-v0.0.2 走的是同一套「文档先行」流程，但深度不同：这一版要新接三个 0.0.1 完全没有的子系统——**整屏灰度后处理**、**客户端重绘红色剪影**、**键鼠输入拦截**——所以六份文档里技术规格最厚（1680 行）。
+v0.0.2 走的是同一套「文档先行」流程，但深度不同：这一版新接三个 0.0.1 完全没有的子系统——**世界灰度后处理**（原版 `PostChain`，只灰世界不灰 HUD）、**客户端重绘红色剪影**、**键鼠输入拦截**——所以六份文档里技术规格最厚（`12-TECH-0.0.2.md`）。**实现已完成**，下表是文档侧口径，紧接着的「实测口径」是发布时该引用的数字。
 
 | 项 | 值 | 依据 |
 |---|---|---|
-| 新增决策 | **D-49 ~ D-79**，30 条 | `10-DECISIONS-0.0.2.md` |
+| 新增决策 | **D-49 ~ D-79**，31 条 | `10-DECISIONS-0.0.2.md` |
 | 裁决记录 | **A-01 ~ A-11**，11 条 | `13-TASKS-0.0.2.md` §0.4 + `15-PROMPT-TASKS-0.0.2.md` §0.4 |
 | 新增内容 | 7 项：转换器合成配方、莫洛托夫！、桑吉尔蔗、压缩干草块、压缩膨胀麦、狂 野 猎 人、狂野苹果 | `11-DESIGN-0.0.2.md` |
 | 任务 | **40 个**（F-60 ~ F-99），5 个 Phase（11 ~ 15） | `13-TASKS-0.0.2.md` |
 | 工作量 | **60.5 人日裸 / 75.6 含缓冲**；关键路径 14.5 人日 / 9 个任务 | `13-TASKS-0.0.2.md` §2 §11 |
 | 技术风险 | **RT-10 ~ RT-16**，7 条新增 | `12-TECH-0.0.2.md` §10 |
 
+### v0.0.2 实测口径（发布说明引用这一份）
+
+| 项 | 实测值 | 怎么核 |
+|---|---|---|
+| 注册对象 | **77**（items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1） | 启动日志 `自检 注册对象 77 个 … → OK` |
+| 实体渲染器 | **11 / 11** | 客户端日志 `自检 实体渲染器 11/11 → OK` |
+| config 键 | **139** 条（117 + 22） | `run/config/farmstorm-server.toml` 叶节点 |
+| 语言键 | **263 × 2**（中英键集逐字相等） | 两份 `assets/farmstorm/lang/*.json` 键数；`set(zh) == set(en)` |
+| 资源文件 | **299** 个（JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1） | `git ls-files` 出清单后扣 `.cache` 的 11 个与 3 个 `.gitkeep` |
+| 进度 | **15** 条（v0.0.1 的 12 + 3） | `data/farmstorm/advancement/` |
+| 转换配方 / 合成配方 | **24 / 2**（+3 / +2） | `src/generated/resources/data/farmstorm/recipe/` |
+| 幸运浆果池 | **16** 种（19 条档案里排除幸运浆果、狂野苹果、压缩膨胀麦） | `CropProfile.LUCKY_BERRY_POOL` |
+| 任务 | **40 个**（F-60 ~ F-99），5 个 Phase：11 = 7 / 12 = 9 / 13 = 10 / 14 = 8 / 15 = 6 | `13-TASKS-0.0.2.md` |
+
+### 已知限制（每次发布都必须一并说明）
+
+| 限制 | 现象 / 口径 | 依据 |
+|---|---|---|
+| **灰度只作用于世界，HUD 保持原色** | 方块 / 实体 / 粒子变灰，物品栏、血条、聊天栏仍是彩色。原版 `PostChain` 的 `process()` 在 `GameRenderer:1027` 执行、GUI 在 `:1073` 绘制，含 GUI 没有可靠实现路径，故按此口径发布 | V-56 / V-61；`12-TECH §4.1` |
+| **相位 2 的「视角锁定」只是降速，不是锁死** | `CalculatePlayerTurnEvent#setMouseSensitivity(0)` 之后 `MouseHandler#turnPlayer` 的系数仍是 `0×0.6+0.2 = 0.2`，相对默认 0.5 约慢 **15.6 倍**；无 Mixin 无法归零 | V-31；`12-TECH §4.3` |
+| **F11 / F2 / F3 / ESC 拦不住** | 这四个键的原版处理在 `KeyboardHandler#keyPress` 内部、早于任何 NeoForge 钩子，Mixin-free 够不着；D-60 的锁定范围本来也不含它们 | `12-TECH §4.3` |
+| **1×1 石柱构型的落地时长偏短** | 3×3 及以上台面三个地形都是 40 ± 2 刻；1×1 石柱会让玩家漂浮段的横向漂移把自己挪出柱顶、下坠中途被柱体截住（实测 23 刻），属真实几何结果，不作缺陷 | V-46；`12-TECH §11 #10` |
+
+> 之前登记过的「配方书分类 `Unknown recipe category: farmstorm:convert`」**已在 v0.0.2 修掉**（`client/ConverterRecipeBookCategory` 走 `RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder`），不再列为已知限制。
+
 **两条硬约束继续有效，且这一版更吃紧**：0 个自定义网络包（C-6 / D-50，客户端状态全部借隐藏 `MobEffect` 同步）、无 Mixin（D-40）。此外 v0.0.1 的 `00`–`09` 与 `docs/en/00`–`09` **全部冻结不动**（D-49），v0.0.2 只写增量。
 
-> ✅ **媒体管线已就位并实测通过**：`tools/convert_media.ps1` 已写好，三个源素材能转成两个 mono 64 kbps OGG（1.78 MB + 33 KB）与一张 18×18 PNG（1.4 KB）。本机 ffmpeg 在 `D:\dsh\default\sf6_audio\tools\ffmpeg.exe`（7.1 essentials，带 libvorbis）——**它不在 PATH 上，要传 `-Ffmpeg`**；Trae CN 自带的 6.1.1 是裁剪构建、没有 libvorbis，不能用。脚本不下载任何东西（npm / maven / 镜像都不可达）；缺 ffmpeg 或源文件时直接退 1，一个文件都不写。
+> ✅ **媒体管线已就位并实测通过**：`tools/convert_media.ps1` 已写好，三个源素材能转成两个 mono 64 kbps OGG（`wild_hunter_loop` **352 KB / 47.14 s / 48 kHz**、`zangief_piledriver` **33 KB / 44.1 kHz**）与一张 18×18 PNG（1.4 KB）。本机跑法固定为 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File …` 且输出重定向到文件，**不要加 `-Force`**（会重编已验收的产物，Ogg 字节不可复现）。本机 ffmpeg 在 `D:\dsh\default\sf6_audio\tools\ffmpeg.exe`（7.1 essentials，带 libvorbis）——**它不在 PATH 上，要传 `-Ffmpeg`**；Trae CN 自带的 6.1.1 是裁剪构建、没有 libvorbis，不能用。脚本不下载任何东西（npm / maven / 镜像都不可达）；缺 ffmpeg 或源文件时直接退 1，一个文件都不写。
 
 ### 怎么构建
 
 ```cmd
-cmd /c ""D:\project_farm\.tools\gw.cmd" build        :: 产出 build/libs/farmstorm-0.0.1+mc1.21.1.jar
+cmd /c ""D:\project_farm\.tools\gw.cmd" build        :: 产出 build/libs/farmstorm-0.0.2+mc1.21.1.jar
 cmd /c ""D:\project_farm\.tools\gw.cmd" runServer    :: 起专用服务器（首次需 run/eula.txt）
 cmd /c ""D:\project_farm\.tools\gw.cmd" runData      :: 重新生成 src/generated/resources
 cmd /c ""D:\project_farm\.tools\gw.cmd" runClient    :: 起客户端
@@ -61,7 +86,7 @@ cmd /c ""D:\project_farm\.tools\gw.cmd" runClient    :: 起客户端
 ### 玩家怎么装（不需要懂构建）
 
 1. 用 PCL / HMCL 建一个 **Minecraft 1.21.1 + NeoForge 21.1.x** 的版本（本机实测用 21.1.265 亦可）。
-2. 打开该版本的 `mods` 文件夹（没有就新建），把 `farmstorm-0.0.1+mc1.21.1.jar` 放进去。
+2. 打开该版本的 `mods` 文件夹（没有就新建），把 `farmstorm-<版本>+mc1.21.1.jar` 放进去。当前发布件见 `dist/`（`0.0.1` 已发布；`0.0.2` 的 jar 在 `build/libs/`，`dist/` 打包由 F-99 收口）。（F-99 收口后 `dist/` 会有 0.0.2，届时应把本句改成「`dist/` 里是当前发布版」。）
 3. 启动游戏。创造模式物品栏最后会多一个「农场风云」标签页，22 个物品都在里面。
 
 jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.work/PLAN.md) 与 Release 说明。
@@ -164,13 +189,13 @@ jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.w
 
 ## 关键数字 / Key numbers
 
-| 指标 | v0.0.1（已实现） | v0.0.2（文档口径） |
+| 指标 | v0.0.1（已实现） | v0.0.2（**实测**） |
 |---|---|---|
 | 改良作物档案 | 15 种 | **19 种**（投掷 10 / 部署 6 / 食用 3；破障 4） |
 | registry 对象 | 64 个 | **77 个**（+5 items / +2 blocks / +2 entity / +2 mob_effect / +2 sound_event） |
 | config 键 | 117 个 | **139 个**（+22） |
-| 资源文件 | 262 个（实测；169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | **298 个**（+36） |
-| 语言键 | 222 × 2（中英相等） | **261 × 2**（+39） |
+| 资源文件 | 262 个（实测；169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | **299 个**（JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1） |
+| 语言键 | 222 × 2（中英相等） | **263 × 2**（+41） |
 | 进度 | 12 条 | **15 条**（+3） |
 | 转换配方 / 合成配方 | 21 / 0 | **24 / 2** |
 | 幸运浆果池 | 14 种 | **16 种**（排除幸运浆果、狂野苹果、压缩膨胀麦） |
@@ -305,6 +330,26 @@ Never dump a whole document set at once.
 
 Seven additions on top of a frozen v0.0.1: the converter finally gets a crafting recipe; Molotov! (a thrown grenade that seeds fire and magma on the impact surface); Zangief Cane (a trap that flips your view, levitates you and spins you on the way down); Compressed Hay Block; Compressed Puffed Wheat; the Wild Hunter status effect (whole-screen greyscale, red silhouettes, crosshair-snapped melee lunge, a looping 16-block theme, and kill-based extension); and Wild Apple. Still no Mixin, still server-authoritative, still zero custom network packets — client state rides on hidden `MobEffect` instances instead.
 
+### v0.0.2 at a glance
+
+| Item | v0.0.2 (measured) |
+|---|---|
+| Registry objects | **77** |
+| config keys | **139** |
+| Language keys | **263 × 2** (zh_cn / en_us key sets identical) |
+| Resource files | **299** (JSON 192 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1) |
+| Advancements | **15** |
+| Tasks | **40** (F-60…F-99) across 5 phases (11: 7, 12: 9, 13: 10, 14: 8, 15: 6) |
+
+**Known limitations (always state these in the release notes):**
+
+- **Greyscale covers the world only; the HUD stays coloured.** The vanilla `PostChain` runs at `GameRenderer:1027`, before GUI rendering at `:1073`; there is no reliable Mixin-free way to include the HUD (V-56 / V-61).
+- **The phase-2 "look lock" only slows the camera down (~1/15.6), it does not freeze it.** `setMouseSensitivity(0)` still leaves a factor of `0.2` in `MouseHandler#turnPlayer` (V-31).
+- **F11 / F2 / F3 / ESC cannot be blocked** — their vanilla handling happens inside `KeyboardHandler#keyPress`, before any NeoForge hook.
+- **The 1×1 pillar landing time is short** (~23 ticks vs 40 ± 2 on a ≥3×3 platform): the player drifts off the pillar top and is caught by the pillar itself. Geometric, not a defect (V-46).
+
+The former "`Unknown recipe category: farmstorm:convert`" warning is **fixed** in v0.0.2 (`RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder`) and is no longer a known limitation.
+
 ---
 
 ## 素材来源与非商业声明 / Asset provenance
@@ -313,16 +358,25 @@ Seven additions on top of a frozen v0.0.1: the converter finally gets a crafting
 
 | 产物 | 来源 | 处理 |
 |---|---|---|
-| `sounds/wild_hunter_loop.ogg` | `Animals.mp3`（非原创音乐） | 转 mono / 64 kbps Ogg Vorbis，作「狂 野 猎 人」状态期间循环播放 |
+| `sounds/wild_hunter_loop.ogg` | `Animals_from_3m04s.mp3`（非原创音乐；作者指定取 **3m04s 起的剪辑**，47.14 s） | 转 mono / 64 kbps Ogg Vorbis（保留源采样率 48 kHz），作「狂 野 猎 人」状态期间循环播放 |
 | `sounds/zangief_piledriver.ogg` | SF6 视频片段 `BV1qu411W7ha`（846–850 段） | 同上，作桑吉尔蔗触发音 |
 | `textures/mob_effect/wild_hunter.png` | 作者提供的桌面 JPG | 居中裁切缩放为 18×18 PNG |
+| `textures/item/*.png`、`textures/block/*.png`（含 `compressed_hay_block.png` 的灰度版与 `misc/wild_hunter_red.png` 的 1×1 红图） | **原版 Minecraft 1.21.1 客户端 jar** 的 `assets/minecraft/textures/{item,block}/*.png`（本机 `26.3-NeoForge_26.3.0.99.jar`） | 由 `tools/gen_textures.py` 用标准库 `zipfile` **直读 jar、不解包**，按需做灰度化 / 缩放到 16×16 / 右下角叠绿色「+」，产物是本模组的占位素材；**不修改原图、不在仓库内分发原版素材本体** |
 
 ### 使用条件（务必照此分发）
 
 1. **非商业**：不得将上述素材或其转换产物用于任何商业用途。
 2. **署名**：转载、二次分发本模组时，必须连同本表一并保留。
-3. **范围**：这条限制**只针对上述三个素材**；模组自身的代码与自绘素材另按 `## 许可 / License` 一节处理。
+3. **范围**：这条限制针对上表前三行（两个音频 + 效果图标）；第四行的原版贴图派生图**另按 Minecraft 使用条款处理**（见下），模组自身的代码与自绘素材按 `## 许可 / License` 一节处理。
 4. **可移除**：若权利人提出异议，维护者会移除对应素材并发布替代版本；发现问题的请联系仓库维护者。
+
+### 关于原版贴图派生图
+
+`textures/item/*.png` 与 `textures/block/*.png` 是**从原版客户端 jar 读出来再变换**的派生图，不是原创素材，也不属于上表的三个第三方素材：
+
+- 它们受 **Minecraft 使用条款（EULA / Brand and Asset Guidelines）** 约束，本项目不对其主张任何权利；
+- 仓库里只有**变换后的小尺寸占位图**，不含原版 jar 的原始文件，也不重新分发原版素材；
+- 若权利人要求，换成自绘素材即可——`tools/gen_textures.py` 的 `--out` 指向任意目录，替换后重新 `runData` 即可，不影响代码。
 
 ### 已知风险（维护者注）
 

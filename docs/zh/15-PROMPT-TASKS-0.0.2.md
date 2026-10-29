@@ -426,7 +426,7 @@
 - [ ] **F-99 资源 299**：`git ls-files 'src/main/resources' 'src/generated/resources'`，再扣掉 `.cache` 的 11 个无扩展名文件与 3 个 `.gitkeep`。通过的样子：总数 **299**；JSON **192**、PNG **99**、OGG **2**、GLSL **2**、TOML 1、`pack.mcmeta` 1。
 - [ ] **F-99 其余三数**：语言键、toml、自检行。通过的样子：两份语言文件各 **263** 键且键集相等；`config/farmstorm-server.toml` **139** 键；日志里 `自检 注册对象 77 个 …` 与 `自检 实体渲染器 11/11 → OK` 两行都在。
 - [ ] **F-99 22 条自检**：按 `12-TECH` §11 逐条跑。通过的样子：22 条全过，逐条留读数（一条一行：编号 / 结论 / 证据位置）。
-- [ ] **F-99 已知外观缺陷**：客户端日志里 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3。通过的样子：确认它**只影响配方书分组**、不影响配方可用性与转换器本身，并把这一条写进 README 的「已知限制」（V-63）。
+- [ ] **F-99 配方书分类已修（V-67）**：`client/ConverterRecipeBookCategory` 已通过 `RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder` 注册 `farmstorm:converting` 的分类（返回 `UNKNOWN`）。通过的样子：客户端日志里 **不再出现** `WARN ClientRecipeBook: Unknown recipe category`（修复前实测 24 条），且打开配方书 UI 不报错；README 的「已知限制」里**不列**这一条。
 - [ ] **F-99 结构与专用服务器**：跑两条 `grep` 与一次起服。通过的样子：`grep -r "CustomPacketPayload" src/main/java` 为 0 处；Mixin 查**实际用法**（`@Mixin` 注解、`mixins*.json`、`org.spongepowered`、`build.gradle` 依赖全为 0，字面命中 5 处全是解释性注释，V-47）；专用服务器启动无 `NoClassDefFoundError`，客户端连入后效果相关功能正常。
 - [ ] **F-99 jar 内容**：`jar tf dist/farmstorm-0.0.2+mc1.21.1.jar`。通过的样子：能看到两个 `.ogg`、`assets/farmstorm/sounds.json`、以及 6 个灰度相关资源（`shaders/post/grayscale.json`、`shaders/program/grayscale.json`、`shaders/program/grayscale.fsh`、`shaders/core/grayscale.json` / `.vsh` / `.fsh`），外加 `post_effect/grayscale.json`（V-49：保留但当前无加载器）。
 

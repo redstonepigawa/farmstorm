@@ -907,7 +907,9 @@ public static void onRenderGuiPre() {
 | 颜色能否靠 `setShaderColor` 加上（BRIEF §7.2 的原稿做法） | 进效果后看剪影是不是红色 | **已证伪**：`entityTranslucentEmissive` 的着色器忽略 ColorModulator → 改成把 RGBA(255,38,38,115) 烘进 `wild_hunter_red.png`（V-60） |
 | 大量实体时的帧时间 | 30 只生物同屏 × 效果开启 | 帧时间增量 > 3 ms 视为不可接受，需要加「同帧最多 32 只」的熔断 |
 
-**已知外观缺陷（V-63）**：客户端对自定义配方类型报 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3——`farmstorm:converting` 没有对应的配方书分类。它**只影响配方书的分组显示**，不影响配方可用性、也不影响转换器本身；本轮不修，登记在 `08-DEV-GUIDE` 的已知限制里，F-99 出口验收一并处理。
+**已修（V-67）**：客户端曾对自定义配方类型报 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:converting/<id>`（实测 24 条）——`farmstorm:converting` 不在 vanilla 的配方书 switch 里，而 NeoForge 的 `RecipeBookManager.findCategories` 钩子没人注册。修法：`client/ConverterRecipeBookCategory` 通过 `RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder` 注册 finder，返回 `RecipeBookCategories.UNKNOWN`。
+
+为什么是 `UNKNOWN` 而不是 `CRAFTING_MISC`：转换配方只能在转换器方块里做，塞进工作台 misc tab 会让玩家看着能合成却摆不进合成格（还有踩 `PlaceRecipe` 的风险）；`UNKNOWN` 是 vanilla 自带分类，行为与现状一致，只是不再刷警告。出口验收时确认日志不再出现该 WARN。
 
 **性能护栏（本文补充）**：每帧最多画 **32** 只（按距离近的优先），超出的不画。理由：`renderToBuffer` 是整模型重绘，不是便宜的描边 pass；默认 64 格半径里的一次大乱斗可能有上百只生物。
 

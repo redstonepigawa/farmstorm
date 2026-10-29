@@ -1,0 +1,8 @@
+# F-76 判据3 基线态（config=40.0，本会话）：用僵尸做等价读数（玩家稍后同样三态）
+forceload add 0 0 32 32
+execute at Dev run summon minecraft:zombie ~1 ~ ~ {NoAI:1b,PersistenceRequired:1b,CustomName:'"F76Base"'}
+execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.movement_speed get
+effect give @e[type=minecraft:zombie,limit=1] farmstorm:wild_hunter 700 0
+execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.movement_speed get

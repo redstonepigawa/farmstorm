@@ -1,0 +1,15 @@
+=== f76 rcon session  port=25641  2026-10-29T09:50:59.722Z ===
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Zombie is 4.199999999999999"
+> /effect give @e[type=minecraft:zombie,limit=1] farmstorm:wild_hunter 700 0
+    "Applied effect effect.farmstorm.wild_hunter to Zombie"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Zombie is 4.199999999999999"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.movement_speed get
+    "Value of attribute Speed for entity Zombie is 0.29900000542402266"
+> /data get entity @e[type=minecraft:zombie,limit=1] attributes
+    "Zombie has the following entity data: [{id: "minecraft:generic.oxygen_bonus", base: 0.0d}, {id: "minecraft:generic.attack_damage", modifiers: [{amount: 0.4d, id: "farmstorm:wild_hunter_attack_damage", operation: "add_multiplied_total"}], base: 3.0d}, {id: "minecraft:zombie.spawn_reinforcements", base: 0.07784452610784864d}, {id: "minecraft:generic.movement_speed", modifiers: [{amount: 0.3d, id: "farmstorm:wild_hunter_speed", operation: "add_multiplied_total"}], base: 0.23000000417232513d}, {id: "minecraft:generic.follow_range", modifiers: [{amount: -0.036076121299096264d, id: "minecraft:random_spawn_bonus", operation: "add_multiplied_base"}], base: 35.0d}, {id: "minecraft:generic.knockback_resistance", modifiers: [{amount: 0.019916799480377816d, id: "minecraft:random_spawn_bonus", operation: "add_value"}], base: 0.0d}]"
+> /effect clear @e[type=minecraft:zombie,limit=1] farmstorm:wild_hunter
+    "Removed effect effect.farmstorm.wild_hunter from Zombie"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Zombie is 3.0"

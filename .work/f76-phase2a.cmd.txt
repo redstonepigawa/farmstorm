@@ -1,0 +1,4 @@
+effect give Dev farmstorm:wild_hunter 700 0
+execute as Dev run attribute @s minecraft:generic.attack_damage get
+execute as Dev run attribute @s minecraft:generic.movement_speed get
+effect clear Dev farmstorm:wild_hunter

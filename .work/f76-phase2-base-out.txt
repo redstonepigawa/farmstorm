@@ -1,0 +1,15 @@
+=== f76 rcon session  port=25641  2026-10-29T09:35:00.246Z ===
+> /forceload add 0 0 32 32
+    "Marked 9 chunks in Overworld from [0, 0] to [2, 2] to be force loaded"
+> /execute at Dev run summon minecraft:zombie ~1 ~ ~ {NoAI:1b,PersistenceRequired:1b,CustomName:'"F76Base"'}
+    "Summoned new F76Base"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Zombie is 3.0"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.movement_speed get
+    "Value of attribute Speed for entity Zombie is 0.23000000417232513"
+> /effect give @e[type=minecraft:zombie,limit=1] farmstorm:wild_hunter 700 0
+    "Applied effect effect.farmstorm.wild_hunter to Zombie"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Zombie is 4.199999999999999"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.movement_speed get
+    "Value of attribute Speed for entity Zombie is 0.29900000542402266"

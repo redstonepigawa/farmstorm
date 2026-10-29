@@ -1,0 +1,5 @@
+=== f76 rcon session  port=25641  2026-10-29T09:42:43.161Z ===
+> /save-all flush
+    "Saving the game (this may take a moment!) / Saved the game"
+> /stop
+    "Stopping the server"

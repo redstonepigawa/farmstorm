@@ -1,0 +1,11 @@
+=== f76 rcon session  port=25641  2026-10-29T09:29:22.687Z ===
+> /effect give Dev farmstorm:wild_hunter 700 0
+    "Applied effect effect.farmstorm.wild_hunter to Dev"
+> /data get entity Dev Attributes
+    "Found no elements matching Attributes"
+> /data get entity Dev attributes
+    "Dev has the following entity data: [{id: "minecraft:generic.attack_damage", modifiers: [{amount: 0.4d, id: "farmstorm:wild_hunter_attack_damage", operation: "add_multiplied_total"}], base: 1.0d}, {id: "minecraft:player.entity_interaction_range", base: 3.0d}, {id: "minecraft:player.block_interaction_range", base: 4.5d}, {id: "minecraft:generic.attack_speed", modifiers: [{amount: 0.3d, id: "farmstorm:wild_hunter_attack_speed", operation: "add_multiplied_total"}], base: 4.0d}, {id: "minecraft:generic.oxygen_bonus", base: 0.0d}, {id: "minecraft:generic.movement_speed", modifiers: [{amount: 0.3d, id: "farmstorm:wild_hunter_speed", operation: "add_multiplied_total"}], base: 0.10000000149011612d}]"
+> /execute as Dev run data get entity @s ActiveEffects
+    ""
+> /execute as Dev run data get entity @s Inventory
+    "Dev has the following entity data: []"

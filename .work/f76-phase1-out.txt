@@ -1,0 +1,31 @@
+=== f76 rcon session  port=25641  2026-10-29T09:31:39.702Z ===
+> /effect clear Dev farmstorm:wild_hunter
+    "Target doesn't have the requested effect"
+> /execute as Dev run attribute @s minecraft:generic.movement_speed get
+    "Value of attribute Speed for entity Dev is 0.10000000149011612"
+> /execute as Dev run attribute @s minecraft:generic.attack_speed get
+    "Value of attribute Attack Speed for entity Dev is 4.0"
+> /execute as Dev run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Dev is 1.0"
+> /data get entity Dev attributes
+    "Dev has the following entity data: [{id: "minecraft:generic.attack_damage", base: 1.0d}, {id: "minecraft:player.entity_interaction_range", base: 3.0d}, {id: "minecraft:player.block_interaction_range", base: 4.5d}, {id: "minecraft:generic.attack_speed", base: 4.0d}, {id: "minecraft:generic.oxygen_bonus", base: 0.0d}, {id: "minecraft:generic.movement_speed", base: 0.10000000149011612d}]"
+> /effect give Dev farmstorm:wild_hunter 700 0
+    "Applied effect effect.farmstorm.wild_hunter to Dev"
+> /execute as Dev run attribute @s minecraft:generic.movement_speed get
+    "Value of attribute Speed for entity Dev is 0.13000000193715097"
+> /execute as Dev run attribute @s minecraft:generic.attack_speed get
+    "Value of attribute Attack Speed for entity Dev is 5.2"
+> /execute as Dev run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Dev is 1.4"
+> /data get entity Dev attributes
+    "Dev has the following entity data: [{id: "minecraft:generic.attack_damage", modifiers: [{amount: 0.4d, id: "farmstorm:wild_hunter_attack_damage", operation: "add_multiplied_total"}], base: 1.0d}, {id: "minecraft:player.entity_interaction_range", base: 3.0d}, {id: "minecraft:player.block_interaction_range", base: 4.5d}, {id: "minecraft:generic.attack_speed", modifiers: [{amount: 0.3d, id: "farmstorm:wild_hunter_attack_speed", operation: "add_multiplied_total"}], base: 4.0d}, {id: "minecraft:generic.oxygen_bonus", base: 0.0d}, {id: "minecraft:generic.movement_speed", modifiers: [{amount: 0.3d, id: "farmstorm:wild_hunter_speed", operation: "add_multiplied_total"}], base: 0.10000000149011612d}]"
+> /effect clear Dev farmstorm:wild_hunter
+    "Removed effect effect.farmstorm.wild_hunter from Dev"
+> /execute as Dev run attribute @s minecraft:generic.movement_speed get
+    "Value of attribute Speed for entity Dev is 0.10000000149011612"
+> /execute as Dev run attribute @s minecraft:generic.attack_speed get
+    "Value of attribute Attack Speed for entity Dev is 4.0"
+> /execute as Dev run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Dev is 1.0"
+> /data get entity Dev attributes
+    "Dev has the following entity data: [{id: "minecraft:generic.attack_damage", base: 1.0d}, {id: "minecraft:player.entity_interaction_range", base: 3.0d}, {id: "minecraft:player.block_interaction_range", base: 4.5d}, {id: "minecraft:generic.attack_speed", base: 4.0d}, {id: "minecraft:generic.oxygen_bonus", base: 0.0d}, {id: "minecraft:generic.movement_speed", base: 0.10000000149011612d}]"

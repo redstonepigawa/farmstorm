@@ -1,0 +1,11 @@
+=== f76 rcon session  port=25641  2026-10-29T09:47:55.520Z ===
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity F76Base is 3.0"
+> /effect give @e[type=minecraft:zombie,limit=1] farmstorm:wild_hunter 700 0
+    "Applied effect effect.farmstorm.wild_hunter to F76Base"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity F76Base is 6.0"
+> /execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.movement_speed get
+    "Value of attribute Speed for entity F76Base is 0.29900000542402266"
+> /data get entity @e[type=minecraft:zombie,limit=1] attributes
+    "F76Base has the following entity data: [{id: "minecraft:generic.movement_speed", modifiers: [{amount: 0.3d, id: "farmstorm:wild_hunter_speed", operation: "add_multiplied_total"}], base: 0.23000000417232513d}, {id: "minecraft:generic.oxygen_bonus", base: 0.0d}, {id: "minecraft:generic.attack_damage", modifiers: [{amount: 1.0d, id: "farmstorm:wild_hunter_attack_damage", operation: "add_multiplied_total"}], base: 3.0d}]"

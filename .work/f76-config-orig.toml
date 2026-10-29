@@ -1,0 +1,643 @@
+[converter]
+	#D-12：每次转换扣除的经验点数（不足则拒绝转换，绝不扣等级）
+	# Default: 3
+	# Range: 0 ~ 1000
+	xpCost = 3
+	#D-12：火把花 / 瓶子草正向转换额外消耗的下界之星个数
+	# Default: 1
+	# Range: 0 ~ 64
+	netherStarForwardCost = 1
+	#D-12：反向转换是否也消耗下界之星
+	netherStarOnReverse = false
+
+[stack]
+	#D-16：投掷型作物的堆叠上限
+	# Default: 16
+	# Range: 1 ~ 64
+	throwable = 16
+	#D-16：部署型 / 食用型 / 播种物的堆叠上限
+	# Default: 64
+	# Range: 1 ~ 64
+	other = 64
+
+[deploy]
+	#D-13 / D-37：仅 pumpkin_turret 的固定硬挖刻数（200 刻 = 10 秒）
+	# Default: 200
+	# Range: 0 ~ 72000
+	turretMiningTicks = 200
+	#是否强制依附方块为完整不透明方块（半砖 / 玻璃 / 树叶不合格）
+	supportMustBeFullOpaque = true
+	#G-9：依附方块消失且不悬空时，是否掉落物品本体
+	dropOnSupportLost = true
+
+[teams]
+	#D-06：己方判定实现（scoreboard / ftbteams，v0.0.1 只实现 scoreboard）
+	resolver = "scoreboard"
+	#G-8：无队伍玩家的降级口径（self = 只对自身友好）
+	untamedFallback = "self"
+
+[explosion]
+	#C-2 / D-19：瓜片子爆炸无法摧毁的抗性阈值（6.0 = 圆石）
+	# Default: 6.0
+	# Range: 0.0 ~ 100.0
+	sliceResistThreshold = 6.0
+	#D-19：瓜！爆炸无法摧毁的抗性阈值（6.0 = 圆石）
+	# Default: 6.0
+	# Range: 0.0 ~ 100.0
+	grenadeResistThreshold = 6.0
+
+[throwable]
+	#G-6：投掷物实体的寿命上限
+	# Default: 100
+	# Range: 1 ~ 1200
+	lifetimeTicks = 100
+
+[food]
+	#D-29：食用型作物的食用时长
+	# Default: 32
+	# Range: 1 ~ 200
+	eatTicks = 32
+
+[puffed_wheat]
+	#干态替换立方体边长
+	# Default: 3
+	# Range: 1 ~ 15
+	dryEdge = 3
+	#遇水扩容后的立方体边长
+	# Default: 5
+	# Range: 1 ~ 15
+	wetEdge = 5
+
+[blast_carrot]
+	#陷阱触发的切比雪夫半径
+	# Default: 1
+	# Range: 0 ~ 16
+	triggerRadius = 1
+	#爆炸威力
+	# Default: 2
+	# Range: 0 ~ 100
+	explosionPower = 2
+	#单次爆炸的伤害上限
+	# Default: 7
+	# Range: 0 ~ 1000
+	maxDamage = 7
+
+	[blast_carrot.nausea]
+		#反胃等级（1 = I 级）
+		# Default: 3
+		# Range: 1 ~ 255
+		level = 3
+		#反胃时长（0 = 不施加）
+		# Default: 60
+		# Range: 0 ~ 72000
+		durationTicks = 60
+
+[ubi_server]
+	#爆炸威力
+	# Default: 4
+	# Range: 0 ~ 100
+	explosionPower = 4
+	#伤害上限
+	# Default: 2
+	# Range: 0 ~ 1000
+	maxDamage = 2
+
+[toxic_ubi_server]
+	#爆炸威力
+	# Default: 2
+	# Range: 0 ~ 100
+	explosionPower = 2
+	#伤害上限
+	# Default: 2
+	# Range: 0 ~ 1000
+	maxDamage = 2
+	#G-4：剧毒药水云半径（沿用原版滞留药水）
+	# Default: 3.0
+	# Range: 0.0 ~ 16.0
+	cloudRadius = 3.0
+	#G-4：剧毒药水云时长（沿用原版滞留药水）
+	# Default: 600
+	# Range: 0 ~ 72000
+	cloudDurationTicks = 600
+
+[melon_slice_bomb]
+	#爆炸威力
+	# Default: 2
+	# Range: 0 ~ 100
+	explosionPower = 2
+	#伤害上限
+	# Default: 6
+	# Range: 0 ~ 1000
+	maxDamage = 6
+
+[melon_grenade]
+	#落点上方生成的西瓜片投掷物个数
+	# Default: 4
+	# Range: 0 ~ 64
+	spawnCount = 4
+	#生成位置相对落点的垂直偏移
+	# Default: 1
+	# Range: 0 ~ 8
+	spawnOffsetY = 1
+	#x/z 轴随机偏移上界
+	# Default: 0.3
+	# Range: 0.0 ~ 8.0
+	horizontalJitter = 0.3
+	#爆炸威力
+	# Default: 3
+	# Range: 0 ~ 100
+	explosionPower = 3
+	#伤害上限
+	# Default: 8
+	# Range: 0 ~ 1000
+	maxDamage = 8
+
+[pumpkin_turret]
+	#索敌切比雪夫半径
+	# Default: 15
+	# Range: 0 ~ 64
+	targetRadius = 15
+	#导弹命中造成的虚空伤害点数
+	# Default: 1
+	# Range: 0 ~ 100
+	projectileDamage = 1
+	#命中时施加的击退等级
+	# Default: 1
+	# Range: 0 ~ 10
+	knockbackLevel = 1
+	#D-28：开火间隔（60 刻 = 3 秒）
+	# Default: 60
+	# Range: 1 ~ 72000
+	fireIntervalTicks = 60
+
+[awakened_torchflower]
+	#光环欧氏半径
+	# Default: 20.0
+	# Range: 0.0 ~ 128.0
+	auraRadius = 20.0
+	#光环刷新间隔（5 秒）
+	# Default: 100
+	# Range: 1 ~ 72000
+	refreshTicks = 100
+	#手持剑时授予的火焰附加等级
+	# Default: 1
+	# Range: 0 ~ 10
+	fireAspectLevel = 1
+	#G-7：每次刷新在玩家周围生成的 flame 粒子数
+	# Default: 8
+	# Range: 0 ~ 64
+	particlesPerRefresh = 8
+
+	[awakened_torchflower.strength]
+		#力量等级（1 = I 级）
+		# Default: 3
+		# Range: 1 ~ 255
+		level = 3
+		#力量时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+	[awakened_torchflower.resistance]
+		#抗性提升等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#抗性提升时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+	[awakened_torchflower.haste]
+		#急迫等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#急迫时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+	[awakened_torchflower.speed]
+		#速度等级（1 = I 级）
+		# Default: 1
+		# Range: 1 ~ 255
+		level = 1
+		#速度时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+	[awakened_torchflower.water_breathing]
+		#水下呼吸等级（1 = I 级）
+		# Default: 1
+		# Range: 1 ~ 255
+		level = 1
+		#水下呼吸时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+	[awakened_torchflower.night_vision]
+		#夜视等级（1 = I 级）
+		# Default: 1
+		# Range: 1 ~ 255
+		level = 1
+		#夜视时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+[awakened_pitcher_plant]
+	#光环欧氏半径
+	# Default: 10.0
+	# Range: 0.0 ~ 128.0
+	auraRadius = 10.0
+	#光环刷新间隔（5 秒）
+	# Default: 100
+	# Range: 1 ~ 72000
+	refreshTicks = 100
+	#是否移除范围内玩家的全部负面效果
+	clearHarmful = true
+	#G-7：每次刷新在玩家周围生成的 heart 粒子数
+	# Default: 8
+	# Range: 0 ~ 64
+	particlesPerRefresh = 8
+
+	[awakened_pitcher_plant.regeneration]
+		#生命恢复等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#生命恢复时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+	[awakened_pitcher_plant.saturation]
+		#饱和等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#饱和时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+	[awakened_pitcher_plant.absorption]
+		#伤害吸收等级（1 = I 级）
+		# Default: 1
+		# Range: 1 ~ 255
+		level = 1
+		#伤害吸收时长（0 = 不施加）
+		# Default: 300
+		# Range: 0 ~ 72000
+		durationTicks = 300
+
+[fang_trap_cactus]
+	#C-5 / D-20：触发用欧氏距离
+	# Default: 3.0
+	# Range: 0.0 ~ 32.0
+	triggerRadius = 3.0
+	#外圈尖牙个数
+	# Default: 8
+	# Range: 1 ~ 64
+	outerFangCount = 8
+	#外圈尖牙延迟（0.5 秒）
+	# Default: 10
+	# Range: 0 ~ 200
+	outerDelayTicks = 10
+	#G-3：外圈尖牙分布半径
+	# Default: 2.0
+	# Range: 0.0 ~ 16.0
+	outerRadius = 2.0
+	#内圈尖牙个数
+	# Default: 5
+	# Range: 1 ~ 64
+	innerFangCount = 5
+	#内圈尖牙延迟（0.2 秒）
+	# Default: 4
+	# Range: 0 ~ 200
+	innerDelayTicks = 4
+	#G-3：内圈尖牙分布半径
+	# Default: 1.0
+	# Range: 0.0 ~ 16.0
+	innerRadius = 1.0
+
+[bamboo_firecracker]
+	#生成一个风弹的间隔
+	# Default: 5
+	# Range: 1 ~ 200
+	spawnIntervalTicks = 5
+	#生成持续总时长（140 / 5 = 28 次）
+	# Default: 140
+	# Range: 1 ~ 7200
+	durationTicks = 140
+
+[red_mushroom_puff]
+	#范围效果欧氏半径
+	# Default: 4.0
+	# Range: 0.0 ~ 32.0
+	radius = 4.0
+
+	[red_mushroom_puff.nausea]
+		#反胃等级（1 = I 级）
+		# Default: 5
+		# Range: 1 ~ 255
+		level = 5
+		#反胃时长（0 = 不施加）
+		# Default: 60
+		# Range: 0 ~ 72000
+		durationTicks = 60
+
+	[red_mushroom_puff.blindness]
+		#失明等级（1 = I 级）
+		# Default: 1
+		# Range: 1 ~ 255
+		level = 1
+		#失明时长（0 = 不施加）
+		# Default: 60
+		# Range: 0 ~ 72000
+		durationTicks = 60
+
+[brown_mushroom_puff]
+	#范围效果欧氏半径
+	# Default: 4.0
+	# Range: 0.0 ~ 32.0
+	radius = 4.0
+
+	[brown_mushroom_puff.weakness]
+		#虚弱等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#虚弱时长（0 = 不施加）
+		# Default: 200
+		# Range: 0 ~ 72000
+		durationTicks = 200
+
+	[brown_mushroom_puff.slowness]
+		#缓慢等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#缓慢时长（0 = 不施加）
+		# Default: 100
+		# Range: 0 ~ 72000
+		durationTicks = 100
+
+[lucky_berry]
+	#D-29：营养值
+	# Default: 4
+	# Range: 0 ~ 20
+	nutrition = 4
+	#D-29：饱和度修正
+	# Default: 0.3
+	# Range: 0.0 ~ 10.0
+	saturationModifier = 0.3
+	#随机生成改良作物的个数
+	# Default: 16
+	# Range: 0 ~ 64
+	randomCropCount = 16
+	#生成的末地城战利品宝箱个数
+	# Default: 2
+	# Range: 0 ~ 16
+	lootChestCount = 2
+	#小爆炸的威力
+	# Default: 1
+	# Range: 0 ~ 100
+	smallExplosionPower = 1
+	#D-18：创造模式的持续时长（90 秒）
+	# Default: 1800
+	# Range: 1 ~ 72000
+	creativeDurationTicks = 1800
+
+	[lucky_berry.regeneration]
+		#生命恢复等级（1 = I 级，25% 分支）
+		# Default: 5
+		# Range: 1 ~ 255
+		level = 5
+		#生命恢复时长（0 = 不施加）
+		# Default: 100
+		# Range: 0 ~ 72000
+		durationTicks = 100
+
+	[lucky_berry.strength]
+		#力量等级（1 = I 级，1.9% 分支）
+		# Default: 5
+		# Range: 1 ~ 255
+		level = 5
+		#力量时长（0 = 不施加）
+		# Default: 12000
+		# Range: 0 ~ 72000
+		durationTicks = 12000
+
+	[lucky_berry.resistance]
+		#抗性提升等级（1 = I 级，1.9% 分支）
+		# Default: 3
+		# Range: 1 ~ 255
+		level = 3
+		#抗性提升时长（0 = 不施加）
+		# Default: 12000
+		# Range: 0 ~ 72000
+		durationTicks = 12000
+
+	[lucky_berry.jump_boost]
+		#跳跃提升等级（1 = I 级，1.9% 分支）
+		# Default: 5
+		# Range: 1 ~ 255
+		level = 5
+		#跳跃提升时长（0 = 不施加）
+		# Default: 12000
+		# Range: 0 ~ 72000
+		durationTicks = 12000
+
+	[lucky_berry.speed]
+		#速度等级（1 = I 级，1.9% 分支）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#速度时长（0 = 不施加）
+		# Default: 12000
+		# Range: 0 ~ 72000
+		durationTicks = 12000
+
+	[lucky_berry.chance]
+		#在食用者位置生成一道闪电
+		# Default: 15.0
+		# Range: 0.0 ~ 100.0
+		lightning = 15.0
+		#生成 randomCropCount 个随机改良农作物
+		# Default: 25.0
+		# Range: 0.0 ~ 100.0
+		random_crops = 25.0
+		#生命恢复分支
+		# Default: 25.0
+		# Range: 0.0 ~ 100.0
+		regeneration = 25.0
+		#生成 lootChestCount 个末地城战利品宝箱
+		# Default: 25.0
+		# Range: 0.0 ~ 100.0
+		loot_chest = 25.0
+		#威力为 smallExplosionPower 的爆炸
+		# Default: 5.0
+		# Range: 0.0 ~ 100.0
+		small_explosion = 5.0
+		#闪电苦力怕
+		# Default: 3.0
+		# Range: 0.0 ~ 100.0
+		charged_creeper = 3.0
+		#600 秒的神级增益
+		# Default: 1.9
+		# Range: 0.0 ~ 100.0
+		godlike_buff = 1.9
+		#创造模式 creativeDurationTicks
+		# Default: 0.1
+		# Range: 0.0 ~ 100.0
+		creative_mode = 0.1
+
+[power_beet]
+	#D-29：营养值
+	# Default: 4
+	# Range: 0 ~ 20
+	nutrition = 4
+	#D-29：饱和度修正
+	# Default: 0.3
+	# Range: 0.0 ~ 10.0
+	saturationModifier = 0.3
+
+	[power_beet.strength]
+		#力量等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#力量时长（0 = 不施加）
+		# Default: 600
+		# Range: 0 ~ 72000
+		durationTicks = 600
+
+	[power_beet.speed]
+		#速度等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#速度时长（0 = 不施加）
+		# Default: 600
+		# Range: 0 ~ 72000
+		durationTicks = 600
+
+	[power_beet.haste]
+		#急迫等级（1 = I 级）
+		# Default: 2
+		# Range: 1 ~ 255
+		level = 2
+		#急迫时长（0 = 不施加）
+		# Default: 600
+		# Range: 0 ~ 72000
+		durationTicks = 600
+
+	[power_beet.resistance]
+		#抗性提升等级（1 = I 级）
+		# Default: 1
+		# Range: 1 ~ 255
+		level = 1
+		#抗性提升时长（0 = 不施加）
+		# Default: 600
+		# Range: 0 ~ 72000
+		durationTicks = 600
+
+[molotov]
+	#D-58：落点球半径；球内每个「上表面接触空气」的方块独立掷一次
+	# Default: 4.0
+	# Range: 0.0 ~ 16.0
+	effectRadius = 4.0
+	#D-58：每格放火的概率（%）；余下的百分比自动放岩浆块，不设第二个键（A-01）
+	# Default: 85.0
+	# Range: 0.0 ~ 100.0
+	fireChance = 85.0
+	#D-58：落点触发爆炸的威力；0 = 只当落点触发器（A-10：任何威力都不破坏方块）
+	# Default: 0
+	# Range: 0 ~ 100
+	triggerExplosionPower = 0
+
+[wild_apple]
+	#D-54：营养值（取原版金苹果同值）
+	# Default: 4
+	# Range: 0 ~ 20
+	nutrition = 4
+	#D-54：饱和度修正（取原版金苹果同值）
+	# Default: 1.2
+	# Range: 0.0 ~ 10.0
+	saturationModifier = 1.2
+
+[wild_hunter]
+	#效果基础时长（700 刻 = 35 秒）；狂野苹果授予的就是这个时长（A-02）
+	# Default: 700
+	# Range: 1 ~ 72000
+	durationTicks = 700
+	#D-74：效果期间每击杀一个生物的续时（160 刻 = 8 秒，无次数上限）
+	# Default: 160
+	# Range: 0 ~ 72000
+	killExtensionTicks = 160
+	#D-74：每次击杀回复的生命点数
+	# Default: 10.0
+	# Range: 0.0 ~ 40.0
+	killHealPoints = 10.0
+	#D-64：索敌球半径
+	# Default: 5.0
+	# Range: 0.0 ~ 32.0
+	searchRadius = 5.0
+	#D-64：候选与视线方向的夹角上限
+	# Default: 30.0
+	# Range: 0.0 ~ 180.0
+	searchAngleDegrees = 30.0
+	#D-65：吸附冲刺跨越到位所用的刻数
+	# Default: 3
+	# Range: 1 ~ 20
+	dashTicks = 3
+	#移动速度加成（%）
+	# Default: 30.0
+	# Range: 0.0 ~ 1000.0
+	speedBonusPercent = 30.0
+	#攻击速度加成（%）
+	# Default: 30.0
+	# Range: 0.0 ~ 1000.0
+	attackSpeedBonusPercent = 30.0
+	#攻击伤害加成（%）
+	# Default: 40.0
+	# Range: 0.0 ~ 1000.0
+	attackDamageBonusPercent = 40.0
+	#D-62：红色剪影的最大距离
+	# Default: 64.0
+	# Range: 0.0 ~ 256.0
+	highlightRadius = 64.0
+	#D-76：循环音的可听距离
+	# Default: 16.0
+	# Range: 0.0 ~ 64.0
+	loopSoundRange = 16.0
+
+[zangief_cane]
+	#D-73：触发球半径（球形欧氏距离）
+	# Default: 1.5
+	# Range: 0.0 ~ 8.0
+	triggerRadius = 1.5
+	#D-69：相位 0（已倒转、等待漂浮）的时长
+	# Default: 14
+	# Range: 0 ~ 200
+	stageDelayTicks = 14
+	#D-69：漂浮等级；amplifier = 等级 − 1 = 6
+	# Default: 7
+	# Range: 1 ~ 255
+	levitationLevel = 7
+	#D-69：漂浮时长 = 相位 1 时长
+	# Default: 20
+	# Range: 0 ~ 72000
+	levitationDurationTicks = 20
+	#相位 2 目标落地时长（刻）；服务端逐刻伺服向下速度以落在该时长内（A-03）
+	# Default: 40
+	# Range: 1 ~ 200
+	fallTicks = 40
+	#D-70：相位 2 水平自转（72 × 20 = 1440 度/秒，方向固定逆时针）
+	# Default: 72.0
+	# Range: 0.0 ~ 360.0
+	spinDegreesPerTick = 72.0

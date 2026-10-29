@@ -1,0 +1,9 @@
+=== f76 rcon session  port=25641  2026-10-29T09:33:07.679Z ===
+> /effect give Dev farmstorm:wild_hunter 700 0
+    "Applied effect effect.farmstorm.wild_hunter to Dev"
+> /execute as Dev run attribute @s minecraft:generic.attack_damage get
+    "Value of attribute Attack Damage for entity Dev is 1.4"
+> /execute as Dev run attribute @s minecraft:generic.movement_speed get
+    "Value of attribute Speed for entity Dev is 0.13000000193715097"
+> /effect clear Dev farmstorm:wild_hunter
+    "Removed effect effect.farmstorm.wild_hunter from Dev"

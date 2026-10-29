@@ -1,0 +1,18 @@
+# ===== F-76 A. 清场后的真基线（先 clear 确保无残留）=====
+effect clear Dev farmstorm:wild_hunter
+execute as Dev run attribute @s minecraft:generic.movement_speed get
+execute as Dev run attribute @s minecraft:generic.attack_speed get
+execute as Dev run attribute @s minecraft:generic.attack_damage get
+data get entity Dev attributes
+# ===== B. 施加 farmstorm:wild_hunter 700 刻 amplifier 0 =====
+effect give Dev farmstorm:wild_hunter 700 0
+execute as Dev run attribute @s minecraft:generic.movement_speed get
+execute as Dev run attribute @s minecraft:generic.attack_speed get
+execute as Dev run attribute @s minecraft:generic.attack_damage get
+data get entity Dev attributes
+# ===== C. /effect clear 后回落 =====
+effect clear Dev farmstorm:wild_hunter
+execute as Dev run attribute @s minecraft:generic.movement_speed get
+execute as Dev run attribute @s minecraft:generic.attack_speed get
+execute as Dev run attribute @s minecraft:generic.attack_damage get
+data get entity Dev attributes

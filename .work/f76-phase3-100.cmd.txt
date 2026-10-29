@@ -1,0 +1,6 @@
+# F-76 判据3 第2态：config attackDamageBonusPercent=100.0（改文件后重启服务端）
+execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+effect give @e[type=minecraft:zombie,limit=1] farmstorm:wild_hunter 700 0
+execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.attack_damage get
+execute as @e[type=minecraft:zombie,limit=1] run attribute @s minecraft:generic.movement_speed get
+data get entity @e[type=minecraft:zombie,limit=1] attributes

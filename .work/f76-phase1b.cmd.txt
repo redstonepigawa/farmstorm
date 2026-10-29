@@ -1,0 +1,5 @@
+effect give Dev farmstorm:wild_hunter 700 0
+data get entity Dev Attributes
+data get entity Dev attributes
+execute as Dev run data get entity @s ActiveEffects
+execute as Dev run data get entity @s Inventory

@@ -34,7 +34,7 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 /**
- * 20 张方块战利品表（TECH §6.7）：14 张作物 + 5 张部署方块 + 1 张转换器。
+ * 22 张方块战利品表（TECH §6.7 + F-74）：14 张作物 + 6 张部署方块 + 1 张压缩干草块 + 1 张转换器。
  *
  * <p>作物表复用原版作物表的结构（成熟判定 + 数量区间 + 时运修正 + 爆炸衰减），只把 item 换成
  * 改良版的作物与播种物（DESIGN §3.2.4）；数量区间逐条照抄 TECH §6.7。
@@ -100,12 +100,18 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
         crop(FarmstormBlocks.LUCKY_BERRY_BUSH.get(), FarmstormItems.LUCKY_BERRY.get(),
                 FarmstormItems.LUCKY_BERRY.get(), UniformGenerator.between(1.0F, 3.0F), 0);
 
-        // ---- 5 张部署方块表：掉自身，被爆炸破坏时掉 0 个 ----
+        // ---- 6 张部署方块表：掉自身，被爆炸破坏时掉 0 个 ----
         deployed(FarmstormBlocks.BLAST_CARROT.get());
         deployed(FarmstormBlocks.PUMPKIN_TURRET.get());
         deployed(FarmstormBlocks.AWAKENED_TORCHFLOWER.get());
         deployed(FarmstormBlocks.AWAKENED_PITCHER_PLANT.get());
         deployed(FarmstormBlocks.FANG_TRAP_CACTUS.get());
+        // F-74：桑吉尔蔗同形入表——玩家自挖掉自身；触发消失走 consume() 不经过战利品表（A-08）
+        deployed(FarmstormBlocks.ZANGIEF_CANE.get());
+
+        // ---- 1 张压缩干草块表：掉自身（F-74；能否取出由 requiresCorrectToolForDrops + needs_diamond_tool 决定）----
+        this.add(FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
+                this.createSingleItemTable(FarmstormBlocks.COMPRESSED_HAY_BLOCK.get()));
 
         // ---- 1 张转换器表：只掉本体（内容物由 dropContents 负责）----
         this.add(FarmstormBlocks.CONVERTER.get(), this.createSingleItemTable(FarmstormBlocks.CONVERTER.get()));
@@ -179,6 +185,8 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormBlocks.AWAKENED_TORCHFLOWER.get(),
                 FarmstormBlocks.AWAKENED_PITCHER_PLANT.get(),
                 FarmstormBlocks.FANG_TRAP_CACTUS.get(),
+                FarmstormBlocks.ZANGIEF_CANE.get(),
+                FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
                 FarmstormBlocks.CONVERTER.get());
     }
 }

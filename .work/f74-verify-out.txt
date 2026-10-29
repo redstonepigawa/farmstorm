@@ -1,0 +1,123 @@
+### RCON connected 127.0.0.1:25622
+
+## 0. 清场与基线（V-16 方块坐标 forceload / V-17 清场 + 基线断言）
+> forceload add 96 96 128 128
+    | No chunks were marked for force loading
+> fill 96 96 96 128 112 128 minecraft:air
+    | Successfully filled 1 block(s)
+> kill @e[type=minecraft:item]
+    | No entity was found
+> execute if block 104 100 104 minecraft:air
+    | Test passed
+> execute if block 110 100 110 minecraft:air
+    | Test passed
+> execute if block 114 100 114 minecraft:air
+    | Test passed
+  [PASS] 基线：104,100,104 空
+  [PASS] 基线：110,100,110 空
+  [PASS] 基线：114,100,114 空
+
+## 1. 压缩干草块 · 第一次（工具门槛 + 30 秒 + 挖穿）
+> f74probe hay
+    | [F74PROBE] tag block=compressed_hay_block dim=minecraft:overworld pos=104, 100, 104 mineable/pickaxe=true needs_diamond_tool=true requiresCorrectToolForDrops=true destroySpeed=30.0 gameMode=SURVIVAL
+    | [F74PROBE] loottable key=farmstorm:blocks/compressed_hay_block empty=false
+    | [F74PROBE] gate tool=empty onGround=true hasCorrectToolForDrops=false canHarvestBlock=false toolSpeed=1.0 perTick=0.000333
+    | [F74PROBE] gate tool=minecraft:wooden_pickaxe onGround=true hasCorrectToolForDrops=false canHarvestBlock=false toolSpeed=2.0 perTick=0.000667
+    | [F74PROBE] gate tool=minecraft:stone_pickaxe onGround=true hasCorrectToolForDrops=false canHarvestBlock=false toolSpeed=4.0 perTick=0.001333
+    | [F74PROBE] gate tool=minecraft:iron_pickaxe onGround=true hasCorrectToolForDrops=false canHarvestBlock=false toolSpeed=6.0 perTick=0.002000
+    | [F74PROBE] gate tool=minecraft:diamond_pickaxe onGround=true hasCorrectToolForDrops=true canHarvestBlock=true toolSpeed=8.0 perTick=0.008889
+    | [F74PROBE] gate tool=minecraft:netherite_pickaxe onGround=true hasCorrectToolForDrops=true canHarvestBlock=true toolSpeed=9.0 perTick=0.010000
+    | [F74PROBE] hold tool=empty ticks=600 perTick=0.000333 progressAt600=0.200000 stateAfter=farmstorm:compressed_hay_block blockStillThere=true dropped=0
+    | [F74PROBE] hold tool=minecraft:wooden_pickaxe ticks=600 perTick=0.000667 progressAt600=0.400000 stateAfter=farmstorm:compressed_hay_block blockStillThere=true dropped=0
+    | [F74PROBE] hold tool=minecraft:stone_pickaxe ticks=600 perTick=0.001333 progressAt600=0.800000 stateAfter=farmstorm:compressed_hay_block blockStillThere=true dropped=0
+    | [F74PROBE] digprep tool=empty hand=minecraft:air state=farmstorm:compressed_hay_block canHarvestBlock=false perTick=0.000333 needTicks=3000 directDrops=[farmstorm:compressed_hay_blockx1]
+    | [F74PROBE] dig tool=empty stateBeforeStop=farmstorm:compressed_hay_block canHarvestAtStop=false stateAfter=minecraft:air broken=true handAfter=minecraft:air drops=total=0 {}
+    | [F74PROBE] digprep tool=minecraft:wooden_pickaxe hand=minecraft:wooden_pickaxe state=farmstorm:compressed_hay_block canHarvestBlock=false perTick=0.000667 needTicks=1500 directDrops=[farmstorm:compressed_hay_blockx1]
+    | [F74PROBE] dig tool=minecraft:wooden_pickaxe stateBeforeStop=farmstorm:compressed_hay_block canHarvestAtStop=false stateAfter=minecraft:air broken=true handAfter=minecraft:wooden_pickaxe drops=total=0 {}
+    | [F74PROBE] digprep tool=minecraft:iron_pickaxe hand=minecraft:iron_pickaxe state=farmstorm:compressed_hay_block canHarvestBlock=false perTick=0.002000 needTicks=500 directDrops=[farmstorm:compressed_hay_blockx1]
+    | [F74PROBE] dig tool=minecraft:iron_pickaxe stateBeforeStop=farmstorm:compressed_hay_block canHarvestAtStop=false stateAfter=minecraft:air broken=true handAfter=minecraft:iron_pickaxe drops=total=0 {}
+    | [F74PROBE] digprep tool=minecraft:diamond_pickaxe hand=minecraft:diamond_pickaxe state=farmstorm:compressed_hay_block canHarvestBlock=true perTick=0.008889 needTicks=113 directDrops=[farmstorm:compressed_hay_blockx1]
+    | [F74PROBE] dig tool=minecraft:diamond_pickaxe stateBeforeStop=farmstorm:compressed_hay_block canHarvestAtStop=true stateAfter=minecraft:air broken=true handAfter=minecraft:diamond_pickaxe drops=total=1 {farmstorm:compressed_hay_block=1}
+  [PASS] run1 运行时标签：mineable/pickaxe + needs_diamond_tool 均 true、硬速 30.0
+  [PASS] run1 战利品表已加载（empty=false）
+  [PASS] run1 门槛：空手 false
+  [PASS] run1 门槛：木镐 false、0.000667/tick
+  [PASS] run1 门槛：石镐 false、0.001333/tick
+  [PASS] run1 门槛：铁镐 false、0.002000/tick
+  [PASS] run1 门槛：钻石镐 true、0.008889/tick
+  [PASS] run1 门槛：下界合金镐 true、0.010000/tick
+  [PASS] run1 空手 30 秒：进度 0.200、方块未破、掉落 0
+  [PASS] run1 木镐 30 秒：进度 0.400、方块未破、掉落 0
+  [PASS] run1 石镐 30 秒：进度 0.800、方块未破、掉落 0
+  [PASS] run1 钻石镐：战利品表直算得到本体 1 个
+  [PASS] run1 空手挖穿：方块被破坏、掉落 0
+  [PASS] run1 木镐挖穿：方块被破坏、掉落 0（工具门槛生效）
+  [PASS] run1 铁镐挖穿：方块被破坏、掉落 0（needs_diamond_tool 卡住铁镐）
+  [PASS] run1 钻石镐挖穿：方块被破坏、掉本体 1 个
+
+## 2. 压缩干草块 · 第二次（同一命令重复执行，验证可复现）
+> f74probe hay
+    | [F74PROBE] tag block=compressed_hay_block dim=minecraft:overworld pos=104, 100, 104 mineable/pickaxe=true needs_diamond_tool=true requiresCorrectToolForDrops=true destroySpeed=30.0 gameMode=SURVIVAL
+    | [F74PROBE] loottable key=farmstorm:blocks/compressed_hay_block empty=false
+    | [F74PROBE] gate tool=empty onGround=true hasCorrectToolForDrops=false canHarvestBlock=false toolSpeed=1.0 perTick=0.000333
+    | [F74PROBE] gate tool=minecraft:wooden_pickaxe onGround=true hasCorrectToolForDrops=false canHarvestBlock=false toolSpeed=2.0 perTick=0.000667
+    | [F74PROBE] gate tool=minecraft:stone_pickaxe onGround=true hasCorrectToolForDrops=false canHarvestBlock=false toolSpeed=4.0 perTick=0.001333
+    | [F74PROBE] gate tool=minecraft:iron_pickaxe onGround=true hasCorrectToolForDrops=false canHarvestBlock=false toolSpeed=6.0 perTick=0.002000
+    | [F74PROBE] gate tool=minecraft:diamond_pickaxe onGround=true hasCorrectToolForDrops=true canHarvestBlock=true toolSpeed=8.0 perTick=0.008889
+    | [F74PROBE] gate tool=minecraft:netherite_pickaxe onGround=true hasCorrectToolForDrops=true canHarvestBlock=true toolSpeed=9.0 perTick=0.010000
+    | [F74PROBE] hold tool=empty ticks=600 perTick=0.000333 progressAt600=0.200000 stateAfter=farmstorm:compressed_hay_block blockStillThere=true dropped=0
+    | [F74PROBE] hold tool=minecraft:wooden_pickaxe ticks=600 perTick=0.000667 progressAt600=0.400000 stateAfter=farmstorm:compressed_hay_block blockStillThere=true dropped=0
+    | [F74PROBE] hold tool=minecraft:stone_pickaxe ticks=600 perTick=0.001333 progressAt600=0.800000 stateAfter=farmstorm:compressed_hay_block blockStillThere=true dropped=0
+    | [F74PROBE] digprep tool=empty hand=minecraft:air state=farmstorm:compressed_hay_block canHarvestBlock=false perTick=0.000333 needTicks=3000 directDrops=[farmstorm:compressed_hay_blockx1]
+    | [F74PROBE] dig tool=empty stateBeforeStop=farmstorm:compressed_hay_block canHarvestAtStop=false stateAfter=minecraft:air broken=true handAfter=minecraft:air drops=total=0 {}
+    | [F74PROBE] digprep tool=minecraft:wooden_pickaxe hand=minecraft:wooden_pickaxe state=farmstorm:compressed_hay_block canHarvestBlock=false perTick=0.000667 needTicks=1500 directDrops=[farmstorm:compressed_hay_blockx1]
+    | [F74PROBE] dig tool=minecraft:wooden_pickaxe stateBeforeStop=farmstorm:compressed_hay_block canHarvestAtStop=false stateAfter=minecraft:air broken=true handAfter=minecraft:wooden_pickaxe drops=total=0 {}
+    | [F74PROBE] digprep tool=minecraft:iron_pickaxe hand=minecraft:iron_pickaxe state=farmstorm:compressed_hay_block canHarvestBlock=false perTick=0.002000 needTicks=500 directDrops=[farmstorm:compressed_hay_blockx1]
+    | [F74PROBE] dig tool=minecraft:iron_pickaxe stateBeforeStop=farmstorm:compressed_hay_block canHarvestAtStop=false stateAfter=minecraft:air broken=true handAfter=minecraft:iron_pickaxe drops=total=0 {}
+    | [F74PROBE] digprep tool=minecraft:diamond_pickaxe hand=minecraft:diamond_pickaxe state=farmstorm:compressed_hay_block canHarvestBlock=true perTick=0.008889 needTicks=113 directDrops=[farmstorm:compressed_hay_blockx1]
+    | [F74PROBE] dig tool=minecraft:diamond_pickaxe stateBeforeStop=farmstorm:compressed_hay_block canHarvestAtStop=true stateAfter=minecraft:air broken=true handAfter=minecraft:diamond_pickaxe drops=total=1 {farmstorm:compressed_hay_block=1}
+  [PASS] run2 运行时标签：mineable/pickaxe + needs_diamond_tool 均 true、硬速 30.0
+  [PASS] run2 战利品表已加载（empty=false）
+  [PASS] run2 门槛：空手 false
+  [PASS] run2 门槛：木镐 false、0.000667/tick
+  [PASS] run2 门槛：石镐 false、0.001333/tick
+  [PASS] run2 门槛：铁镐 false、0.002000/tick
+  [PASS] run2 门槛：钻石镐 true、0.008889/tick
+  [PASS] run2 门槛：下界合金镐 true、0.010000/tick
+  [PASS] run2 空手 30 秒：进度 0.200、方块未破、掉落 0
+  [PASS] run2 木镐 30 秒：进度 0.400、方块未破、掉落 0
+  [PASS] run2 石镐 30 秒：进度 0.800、方块未破、掉落 0
+  [PASS] run2 钻石镐：战利品表直算得到本体 1 个
+  [PASS] run2 空手挖穿：方块被破坏、掉落 0
+  [PASS] run2 木镐挖穿：方块被破坏、掉落 0（工具门槛生效）
+  [PASS] run2 铁镐挖穿：方块被破坏、掉落 0（needs_diamond_tool 卡住铁镐）
+  [PASS] run2 钻石镐挖穿：方块被破坏、掉本体 1 个
+
+## 3. 桑吉尔蔗（部署方块口径）：玩家自挖掉自身
+> f74probe cane
+    | [F74PROBE] tag block=zangief_cane dim=minecraft:overworld pos=110, 100, 110 deployed_crops=true requiresCorrectToolForDrops=false destroySpeed=0.5
+    | [F74PROBE] loottable key=farmstorm:blocks/zangief_cane empty=false
+    | [F74PROBE] digprep tool=empty hand=minecraft:air state=farmstorm:zangief_cane canHarvestBlock=true perTick=0.066667 needTicks=15 directDrops=[farmstorm:zangief_canex1]
+    | [F74PROBE] dig tool=empty stateBeforeStop=farmstorm:zangief_cane canHarvestAtStop=true stateAfter=minecraft:air broken=true handAfter=minecraft:air drops=total=1 {farmstorm:zangief_cane=1}
+  [PASS] 桑吉尔蔗：deployed_crops=true、无工具门槛
+  [PASS] 桑吉尔蔗：战利品表已加载（empty=false）
+  [PASS] 桑吉尔蔗：战利品表直算得到自身 1 个
+  [PASS] 桑吉尔蔗：空手挖掉掉自身 1 个
+
+## 4. 对照组：同一套机具打原版石头，证明读数能看到掉落
+> f74probe control
+    | [F74PROBE] control block=minecraft:stone pos=114, 100, 114 mineable/pickaxe=true needs_diamond_tool=false
+    | [F74PROBE] digprep tool=minecraft:wooden_pickaxe hand=minecraft:wooden_pickaxe state=minecraft:stone canHarvestBlock=true perTick=0.044444 needTicks=23 directDrops=[minecraft:cobblestonex1]
+    | [F74PROBE] dig tool=minecraft:wooden_pickaxe stateBeforeStop=minecraft:stone canHarvestAtStop=true stateAfter=minecraft:air broken=true handAfter=minecraft:wooden_pickaxe drops=total=1 {minecraft:cobblestone=1}
+  [PASS] 对照组：木镐挖石头掉圆石 1 个
+
+## 5. 收尾清场
+> fill 96 96 96 128 112 128 minecraft:air
+    | Successfully filled 1 block(s)
+> kill @e[type=minecraft:item]
+    | No entity was found
+> execute if block 104 100 104 minecraft:air
+    | Test passed
+  [PASS] 收尾：104,100,104 已清空
+
+### 全部断言通过 (0 FAIL)

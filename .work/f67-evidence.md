@@ -54,3 +54,12 @@ farmstorm:explosion_immune=false  farmstorm:blast_proof=false
 真挖穿后**仍然 0 掉落**，说明卡住掉落入口的是 `requiresCorrectToolForDrops` 的工具门槛，**不是**战利品表缺失（两者都在 F-74 补齐）。
 
 > 注：1.21.1 里 `tick()` 只累计进度，真正的破坏发生在客户端发 `STOP_DESTROY_BLOCK` 之后；所以「30 秒」用例只发 START 不发 STOP，与真实客户端行为一致。
+
+## 更正二：`BLOCK_MINED 0→0` 这条论据不成立（F-74 发现）
+
+上面表格里用 `BLOCK_MINED` 恒 0→0 来推断「`playerDestroy` 从未执行」——**这个推断无效**：
+`FakePlayer#awardStat` 是空实现（`FakePlayer.java:100`），所以该计数器**无论掉不掉都是 0→0**，没有判别力。
+
+**结论本身不变**（当时卡住掉落的确实是 `requiresCorrectToolForDrops` 的工具门槛），但论据要换成：
+`canHarvestBlock` 判定 + 实际掉落实体计数 + `Block.getDrops()` 直算。F-74 用这三条重测后确认：
+空手/木镐/铁镐挖穿后掉落均为 0，钻石镐挖穿掉本体 1 个（113 tick）。

@@ -9,7 +9,9 @@ import com.dashpig.farmstorm.registry.FarmstormDataComponents;
 import com.dashpig.farmstorm.registry.FarmstormEntityTypes;
 import com.dashpig.farmstorm.registry.FarmstormItems;
 import com.dashpig.farmstorm.registry.FarmstormMenus;
+import com.dashpig.farmstorm.registry.FarmstormMobEffects;
 import com.dashpig.farmstorm.registry.FarmstormRecipes;
+import com.dashpig.farmstorm.registry.FarmstormSounds;
 import com.dashpig.farmstorm.team.ScoreboardTeamResolver;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.dashpig.farmstorm.util.CropProfile;
@@ -44,6 +46,9 @@ public final class Farmstorm {
         FarmstormRecipes.SERIALIZER_REGISTER.register(modBus);
         FarmstormDataComponents.REGISTER.register(modBus);
         FarmstormCreativeTabs.REGISTER.register(modBus);
+        // 2 个 mob_effects 与 2 个 sound_events（F-64 / TECH §2.2 #10~#13）：D-50 的相位通道与 D-66/D-76 的音频。
+        FarmstormMobEffects.REGISTER.register(modBus);
+        FarmstormSounds.REGISTER.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, FarmstormConfig.SPEC);
 

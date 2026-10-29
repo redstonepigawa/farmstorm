@@ -1,0 +1,106 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 26 busy and 1 incompatible and 29 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :writeServerLegacyClasspath UP-TO-DATE
+> Task :prepareServerRun UP-TO-DATE
+
+> Task :runServer
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[13:53:53] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[13:53:53] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[13:53:53] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[13:53:53] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[13:53:53] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[13:53:53] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[13:53:53] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.2 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[13:53:54] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[13:53:54] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[13:53:54] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[13:53:54] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[13:53:55] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[13:54:03] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[13:54:03] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[13:54:03] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[13:54:03] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[13:54:03] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[13:54:03] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[13:54:03] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[13:54:03] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[13:54:03] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[13:54:03] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[13:54:03] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[13:54:03] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[13:54:03] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[13:54:03] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[13:54:03] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[13:54:05] [main/INFO] [minecraft/RecipeManager]: Loaded 1311 recipes
+[13:54:05] [main/INFO] [minecraft/AdvancementTree]: Loaded 1411 advancements
+[13:54:05] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[13:54:07] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.1
+[13:54:07] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[13:54:07] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[13:54:07] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[13:54:07] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25565
+[13:54:07] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using default channel type
+[13:54:07] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[13:54:07] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[13:54:07] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[13:54:07] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[13:54:07] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[13:54:13] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[13:54:13] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[13:54:14] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 323 ms
+[13:54:14] [Server thread/INFO] [minecraft/DedicatedServer]: Done (6.709s)! For help, type "help"
+[13:54:14] [Server thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[13:54:14] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] === F-64 探针开始 ===
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] 注册表 mob_effect: wild_hunter=com.dashpig.farmstorm.effect.WildHunterEffect@35caf5da / zangief_piledriver=com.dashpig.farmstorm.effect.ZangiefPiledriverEffect@428e8834
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针]   wild_hunter 类=com.dashpig.farmstorm.effect.WildHunterEffect category=BENEFICIAL color=0x8b1a1a
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针]   zangief_piledriver 类=com.dashpig.farmstorm.effect.ZangiefPiledriverEffect category=HARMFUL
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] 注册表 sound_event: wild_hunter_loop=farmstorm:wild_hunter_loop / zangief_piledriver=farmstorm:zangief_piledriver
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针]   /playsound 补全数据源（BuiltInRegistries.SOUND_EVENT 键集）含两个键=true
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Applied effect effect.farmstorm.wild_hunter to [Minecraft]]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:wild_hunter 10 → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针]   → ActiveEffects=[{id=farmstorm:wild_hunter, amplifier=0, duration=200, visible=true, show_icon=true}] | NBT=[{duration:200,id:"farmstorm:wild_hunter","neoforge:cures":["protected_by_totem","milk"],show_icon:1b}]
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Applied effect effect.farmstorm.zangief_piledriver to [Minecraft]]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:zangief_piledriver 10 2 → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针]   → ActiveEffects=[{id=farmstorm:wild_hunter, amplifier=0, duration=200, visible=true, show_icon=true}{id=farmstorm:zangief_piledriver, amplifier=2, duration=200, visible=true, show_icon=true}] | NBT=[{duration:200,id:"farmstorm:wild_hunter","neoforge:cures":["protected_by_totem","milk"],show_icon:1b},{amplifier:2b,duration:200,id:"farmstorm:zangief_piledriver","neoforge:cures":["protected_by_totem","milk"],show_icon:1b}]
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Applied effect effect.farmstorm.zangief_piledriver to [Minecraft]]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:zangief_piledriver 10 2 true → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针]   →（hideParticles=true 对照）NBT=[{duration:200,id:"farmstorm:wild_hunter","neoforge:cures":["protected_by_totem","milk"],show_icon:1b},{amplifier:2b,duration:200,id:"farmstorm:zangief_piledriver","neoforge:cures":["protected_by_totem","milk"],show_icon:0b,show_particles:0b}]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /data get entity @s active_effects → 返回值 2，回调 success=1 result=2
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /data get entity @s ActiveEffects → 失败 com.mojang.brigadier.exceptions.CommandSyntaxException: Found no elements matching ActiveEffects
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Played sound farmstorm:zangief_piledriver to [Minecraft]]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /playsound farmstorm:zangief_piledriver master @s ~ ~ ~ 1 1 → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Played sound farmstorm:wild_hunter_loop to [Minecraft]]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1 → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Removed every effect from [Minecraft]]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect clear @s → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] 玩家属性基线（无效果） speed=0.10000000149011612 attack_speed=4.0 attack_damage=1.0
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Applied effect effect.farmstorm.wild_hunter to [Minecraft]]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:wild_hunter 100 → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] 玩家属性 施加后（应 0.13 / 5.2 / 1.4） speed=0.13000000193715097 attack_speed=5.2 attack_damage=1.4
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Removed effect effect.farmstorm.wild_hunter from [Minecraft]]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect clear @s farmstorm:wild_hunter → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] 玩家属性 命令清除后（应回基线） speed=0.10000000149011612 attack_speed=4.0 attack_damage=1.0
+[13:54:14] [Server thread/INFO] [minecraft/MinecraftServer]: [[Minecraft]: Summoned new Zombie]
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] [探针] /summon minecraft:zombie ~ ~ ~ {NoAI:1b,Silent:1b,PersistenceRequired:1b} → 返回值 1，回调 success=1 result=1
+[13:54:14] [Server thread/INFO] [farmstorm/]: [探针] step1 抛异常 java.lang.IllegalArgumentException: Can't find attribute minecraft:generic.attack_speed

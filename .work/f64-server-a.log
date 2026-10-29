@@ -1,0 +1,157 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 26 busy and 1 incompatible and 25 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources
+> Task :classes
+> Task :downloadAssets UP-TO-DATE
+> Task :writeServerLegacyClasspath UP-TO-DATE
+> Task :prepareServerRun UP-TO-DATE
+
+> Task :runServer
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[13:49:56] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[13:49:56] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[13:49:56] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[13:49:56] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[13:49:56] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[13:49:56] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[13:49:56] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.2 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[13:49:57] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[13:49:58] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[13:49:58] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[13:49:58] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[13:49:58] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[13:50:04] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[13:50:04] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[13:50:04] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[13:50:04] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[13:50:04] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[13:50:04] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[13:50:04] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[13:50:04] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[13:50:04] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[13:50:04] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[13:50:04] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[13:50:04] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[13:50:04] [main/ERROR] [minecraft/Settings]: Failed to load properties from file: server.properties
+java.nio.file.NoSuchFileException: server.properties
+	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85) ~[?:?] {}
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103) ~[?:?] {}
+	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108) ~[?:?] {}
+	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:234) ~[?:?] {}
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:379) ~[?:?] {}
+	at java.base/java.nio.file.Files.newByteChannel(Files.java:431) ~[?:?] {}
+	at java.base/java.nio.file.spi.FileSystemProvider.newInputStream(FileSystemProvider.java:420) ~[?:?] {}
+	at java.base/java.nio.file.Files.newInputStream(Files.java:159) ~[?:?] {}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.dedicated.Settings.loadFromFile(Settings.java:38) ~[neoforge-21.1.213.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.dedicated.DedicatedServerProperties.fromFile(DedicatedServerProperties.java:132) ~[neoforge-21.1.213.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.dedicated.DedicatedServerSettings.<init>(DedicatedServerSettings.java:12) ~[neoforge-21.1.213.jar%23125!/:?] {re:classloading}
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.Main.main(Main.java:125) ~[neoforge-21.1.213.jar%23125!/:?] {re:classloading}
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?] {}
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?] {}
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136) ~[loader-4.0.42.jar%23102!/:4.0] {}
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.serverService(CommonLaunchHandler.java:128) ~[loader-4.0.42.jar%23102!/:4.0] {}
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.NeoForgeServerDevLaunchHandler.runService(NeoForgeServerDevLaunchHandler.java:23) ~[loader-4.0.42.jar%23102!/:4.0] {}
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118) ~[loader-4.0.42.jar%23102!/:4.0] {}
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) [modlauncher-11.0.5.jar%2382!/:?] {}
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) [modlauncher-11.0.5.jar%2382!/:?] {}
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) [modlauncher-11.0.5.jar%2382!/:?] {}
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103) [modlauncher-11.0.5.jar%2382!/:?] {}
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74) [modlauncher-11.0.5.jar%2382!/:?] {}
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) [modlauncher-11.0.5.jar%2382!/:?] {}
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.5.jar%2382!/:?] {}
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?] {}
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?] {}
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?] {}
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?] {}
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?] {}
+[13:50:04] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[13:50:04] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[13:50:04] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[13:50:05] [main/INFO] [minecraft/Main]: No existing world data, creating new world
+[13:50:05] [main/INFO] [minecraft/RecipeManager]: Loaded 1311 recipes
+[13:50:06] [main/INFO] [minecraft/AdvancementTree]: Loaded 1411 advancements
+[13:50:06] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[13:50:07] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.1
+[13:50:07] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[13:50:07] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[13:50:07] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[13:50:07] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25565
+[13:50:07] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using default channel type
+[13:50:07] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[13:50:07] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[13:50:07] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[13:50:07] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[13:50:07] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[13:50:16] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[13:50:16] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:16] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:17] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:17] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:18] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:18] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:19] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:19] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:20] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:20] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[13:50:21] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 42%
+[13:50:21] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 5316 ms
+[13:50:21] [Server thread/INFO] [minecraft/DedicatedServer]: Done (14.110s)! For help, type "help"
+[13:50:21] [Server thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[13:50:21] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] === F-64 探针开始 ===
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] 命令源 [Minecraft] @ BlockPos{x=-52, y=67, z=109}
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] 注册表 mob_effect: wild_hunter=com.dashpig.farmstorm.effect.WildHunterEffect@757b2b6b / zangief_piledriver=com.dashpig.farmstorm.effect.ZangiefPiledriverEffect@12799e3a
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针]   wild_hunter 类=com.dashpig.farmstorm.effect.WildHunterEffect category=BENEFICIAL color=0x8b1a1a
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针]   zangief_piledriver 类=com.dashpig.farmstorm.effect.ZangiefPiledriverEffect category=HARMFUL
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] 注册表 sound_event: wild_hunter_loop=farmstorm:wild_hunter_loop / zangief_piledriver=farmstorm:zangief_piledriver
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针]   /playsound 补全数据源（BuiltInRegistries.SOUND_EVENT 键集）含两个键=true
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:wild_hunter 10 → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针]   → ActiveEffects=[] | NBT=null
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:zangief_piledriver 10 2 → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针]   → ActiveEffects=[] | NBT=null
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:zangief_piledriver 10 2 true → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针]   →（hideParticles=true 对照）NBT=null
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /data get entity @s active_effects → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /data get entity @s ActiveEffects → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /playsound farmstorm:zangief_piledriver master @s ~ ~ ~ 1 1 → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1 → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect clear @s → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] 属性基线（无效果） speed=0.10000000149011612 attack_speed=4.0 attack_damage=1.0
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:wild_hunter 100 → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] 属性 施加后（应 0.13 / 5.2 / 1.4） speed=0.10000000149011612 attack_speed=4.0 attack_damage=1.0
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect clear @s farmstorm:wild_hunter → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] 属性 命令清除后（应回基线） speed=0.10000000149011612 attack_speed=4.0 attack_damage=1.0
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] [探针] /effect give @s farmstorm:wild_hunter 1 → success=-1 result=-1（无回调：命令未 sendSuccess/sendFailure）
+[13:50:21] [Server thread/INFO] [farmstorm/]: [探针] 属性 施加 1 秒（20 刻）后 speed=0.10000000149011612 attack_speed=4.0 attack_damage=1.0
+[13:50:22] [Server thread/INFO] [farmstorm/]: [探针] 属性 第 19 刻（效果应仍在） speed=0.10000000149011612 attack_speed=4.0 attack_damage=1.0
+[13:50:22] [Server thread/INFO] [farmstorm/]: [探针] 属性 第 22 刻（应已过期并卸下） speed=0.10000000149011612 attack_speed=4.0 attack_damage=1.0 | ActiveEffects=[]
+[13:50:22] [Server thread/INFO] [farmstorm/]: [探针] === F-64 探针结束 ===
+[13:50:22] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[13:50:22] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[13:50:22] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[13:50:23] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[13:50:23] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[13:50:23] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[13:50:23] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[13:50:23] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[13:50:23] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[13:50:23] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+
+BUILD SUCCESSFUL in 40s
+7 actionable tasks: 2 executed, 5 up-to-date

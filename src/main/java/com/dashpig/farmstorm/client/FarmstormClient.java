@@ -14,6 +14,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterRecipeBookCategoriesEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.RenderLivingEvent;
@@ -44,6 +45,17 @@ public final class FarmstormClient {
     @SubscribeEvent
     public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         event.register(FarmstormMenus.CONVERTER.get(), ConverterScreen::new);
+    }
+
+    /**
+     * 自定义配方类型 {@code farmstorm:converting} 不在 vanilla 的配方书 switch 里，
+     * 不注册 finder 就会每个配方刷一条 {@code Unknown recipe category} WARN。
+     * 返回 {@code UNKNOWN}（不进任何 tab）而不是 {@code CRAFTING_MISC}：
+     * 转换配方只能在转换器方块里做，塞进工作台 misc tab 会让用户看着能合成却摆不进合成格。
+     */
+    @SubscribeEvent
+    public static void onRecipeBookCategories(RegisterRecipeBookCategoriesEvent event) {
+        ConverterRecipeBookCategory.onRegisterRecipeBookCategories(event);
     }
 
     /**

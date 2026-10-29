@@ -270,7 +270,7 @@
 | F-77 | 狂野苹果食用与授予效果 | M / 1.5 | F-65、F-76 | `FoodProperties`（营养 4 / 饱和度 1.2）+ 食用后施加 `farmstorm:wild_hunter`（时长读 `wild_hunter.durationTicks` 700，A-02） |
 | F-78 | 索敌算法：5 格球与 30° 夹角 | M / 1.5 | F-76 | `resolveTarget()`：半径 5 球内、夹角 ≤ 30°，排除自己 / 同队 / 旁观；夹角最小优先、同夹角取近 + 一行目标日志 |
 | F-79 | 冲刺的客户端预测位移 | L / 3.0 | F-78 | 本地按下攻击键 + 自己持有效果 + 本地算出同一目标时给速度，3 刻跨到位；落点被方块占据则本次不吸附 |
-| F-80 | 服务端复核与伤害 / 击退结算 | M / 1.5 | F-78 | 用同一套 `resolveTarget` 独立算目标，结算伤害，并在「成功造成伤害」后调原版 `LivingEntity#knockback` 默认强度。服务端**没有** `ServerboundSwingPacket` 的公开事件，改为 `PlayerTickEvent.Post` 的「swing 状态跃变 + 冲刺位移」双信号感知 + 与 `AttackEntityEvent` 去抖（V-44） |
+| F-80 | 服务端复核与伤害 / 击退结算 | M / 1.5 | F-78 | 用同一套 `resolveTarget` 独立算目标，结算伤害，并在「成功造成伤害」后调原版 `LivingEntity#knockback` 默认强度。服务端**没有** `ServerboundSwingPacket` 的公开事件，改为 `PlayerTickEvent.Post` 的「swing 状态跃变 + 冲刺位移」双信号感知，**两者允许跨 tick 配对**（`SWING_WINDOW = 2`：位移常晚 1–2 刻到达，同刻判据必然零结算，V-66）+ 与 `AttackEntityEvent` 去抖（`DEDUPE_TICKS = 1` + `lastDirectHit`）（V-44 / V-66） |
 | F-81 | 击杀续时无次数上限 | S / 0.5 | F-80 | 每杀一个生物剩余时长 +160 刻、回复 10 点生命，不写任何计数器（D-74） |
 | F-82 | 世界灰度（HUD 保持原色） | L / 3.0 | F-60、F-76 | 原版 `PostChain`：`GameRenderer#loadEffect` 加载 `shaders/post/grayscale.json`（`targets` 必须是数组）+ `shaders/program/grayscale.json` + `shaders/core/grayscale.fsh`；`post_effect/grayscale.json` 保留为预留挂载点（当前无加载器） |
 | F-83 | 红色剪影：可见 + 不超过 64 格 | M / 1.5 | F-76 | `RenderLivingEvent.Post` 用 `LivingEntityRenderer#render(...)` 重绘、`MultiBufferSource` **按顶点格式过滤**（V-58）+ `hasLineOfSight` + 距离 ≤ 64；颜色烘进 `textures/misc/wild_hunter_red.png`（V-60）；`AFTER_ENTITIES` 捕获相机、`RenderGuiEvent.Pre` 在灰度之后重画 |
@@ -289,6 +289,7 @@
 - [ ] **F-79 撞墙与占位**：玩家与目标之间放一堵石墙再攻击；再用 `/setblock` 把目标格占满后攻击。通过的样子：前者冲刺停在墙外侧、不穿墙不补位；后者本次不吸附（玩家坐标不变）；`logs/latest.log` 无 `moved too quickly!`。
 - [ ] **F-80 伤害与击退**：攻击 30° 内的猪一次，攻击前记血量与 `Pos`、以及 `/attribute @s minecraft:generic.attack_damage get`。通过的样子：`/data get entity <target> Health` 的减少量等于该属性读数（**F3 不显示属性数值**，V-61）；`Pos` 前后差 ≥ 0.2 格（D-75 原版默认强度）。
 - [ ] **F-80 对照两组**：攻击 30° 外的生物；攻击同队玩家。通过的样子：前者正常攻击、无吸附、玩家坐标不变；后者既不吸附也不掉血。
+- [ ] **F-80 跨 tick 配对（V-66）**：开效果后从 5 格外**真的冲过去**打一次（不许用探针直接调 `tick()`、不许站着空挥）。通过的样子：日志出现 `狂野猎人 吸附挥击 速度 {S}`（`S ≥ 0.55`）且目标掉血；位移比 swing 晚 1–2 刻到达也照样结算；同一次挥击只出一条该日志。**教训**：合成状态能骗过验收，这类判据必须走真包。
 - [ ] **F-81 连杀 6 只**：每次击杀后读 `/effect`。通过的样子：每只剩余时长 **+160 刻**、日志出现 6 行 `狂野猎人 续时`；第 6 次之后效果仍在；生命每次 +10 点；`git grep -nE "killCount|maxKill"` 无输出。
 - [ ] **F-82 世界灰度**：开效果后截一张带物品栏与聊天栏的 F3 图。通过的样子：**世界黑白、HUD 保持原色**（方块 / 实体 / 粒子为灰度，红心、绿色经验条、聊天栏彩色文字不变，V-56）；客户端日志无 `Could not load program` / `Shader … could not be loaded` 与 `GL_INVALID`；开与不开效果的 F3 `ms` 差 < 3 ms；`/effect clear` 后 1 刻内恢复彩色。
 - [ ] **F-83 剪影三条件**：站 5 格内直视一只猪、65 格外、墙前 / 墙后各一次；再把**带拴绳的生物**拉进 64 格内（V-58 的崩溃场景）。**并且必须人工看图**：剪影与本体轮廓贴合、**没有倒挂、没有悬空 1.5 格**（V-50 的两个变换），**无光洞穴里亮度不变**（`FULL_BRIGHT`）——红色像素计数只能证明「有没有红」，不能判断「像不像」。通过的样子：只有「≤ 64 格 + 无遮挡 + 非己方」的生物被画红色剪影，自己与同队玩家不画；客户端日志无 `StackOverflowError`，F3 `ms` 差 < 3 ms；把 `highlightRadius` 改成 `8.0` 后 10 格外的生物不再被画。

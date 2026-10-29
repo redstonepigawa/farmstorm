@@ -15,7 +15,9 @@ import net.minecraft.server.level.ServerPlayer;
  *   <li><b>swing 跃变</b>：{@code LivingEntity.swinging} 由假变真，或 {@code swingTime} 归零/回退；</li>
  *   <li><b>冲刺位移</b>：本刻水平位移 ≥ {@link #DASH_SPEED}（客户端冲刺约 0.93 格/刻，正常疾跑约 0.36）。</li>
  * </ol>
- * 两个信号同时成立才结算——只用信号 1 会把右键使用 / 挖掘 / 放置也算进来，只用信号 2 会把爆炸击退、末影珍珠算进来。
+ * 两个信号都要有，但<b>允许跨 tick 配对</b>（{@link #SWING_WINDOW} = 2 刻）：{@code ServerboundSwingPacket}
+ * 与位移包不同 tick 到达、位移常晚 1–2 刻，要求同刻会让判据在真实链路里永远不成立（V-66）。
+ * 单用信号 1 会把右键使用 / 挖掘 / 放置也算进来，单用信号 2 会把爆炸击退、末影珍珠算进来。
  * <p>判定仍然全走 {@link WildHunterCombat#resolveTarget}（5 格球 + 30° 锥），没有放宽。
  */
 public final class WildHunterSwingSettler {

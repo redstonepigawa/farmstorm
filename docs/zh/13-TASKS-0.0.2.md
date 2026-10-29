@@ -385,12 +385,13 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-78
-- **交付物**：`combat/WildHunterCombat` 的服务端入口（用与客户端同一套 `resolveTarget` 独立算目标，结算伤害并在「成功造成伤害」时调原版 `LivingEntity#knockback` 默认强度）。**服务端拿不到 `ServerboundSwingPacket` 的公开事件**（NeoForge 1.21.1 没有，且 D-40 禁 Mixin、D-50 禁自订包）：改为在 `PlayerTickEvent.Post` 用「swing 状态跃变 + 冲刺水平位移」双信号感知，并与 `AttackEntityEvent` 去抖，同一次挥击只结算一次（裁决 V-44）
+- **交付物**：`combat/WildHunterCombat` 的服务端入口（用与客户端同一套 `resolveTarget` 独立算目标，结算伤害并在「成功造成伤害」时调原版 `LivingEntity#knockback` 默认强度）。**服务端拿不到 `ServerboundSwingPacket` 的公开事件**（NeoForge 1.21.1 没有，且 D-40 禁 Mixin、D-50 禁自订包）：改为在 `PlayerTickEvent.Post` 用「swing 状态跃变 + 冲刺水平位移」双信号感知——**两者允许跨 tick 配对**（记 `swingTick`，`SWING_WINDOW = 2` 刻内都算配对；不能要求同刻，位移常晚 1–2 刻，V-66）——并与 `AttackEntityEvent` 去抖（`DEDUPE_TICKS = 1` + `lastDirectHit`），同一次挥击只结算一次（裁决 V-44 / V-66）
 - **验收**：
   1. 攻击 30° 内的猪一次：`/data get entity <target> Health` 的减少量等于 `/attribute @s minecraft:generic.attack_damage get` 的加成后读数（**F3 面板不显示属性数值**，裁决 V-61）。
   2. 结算后目标被推开：`/data get entity <target> Pos` 前后差 >= 0.2 格（D-75 原版默认强度，不自订数值）。
   3. 攻击 30° 外的生物：正常攻击、无吸附，玩家坐标不变。
   4. 目标是同队伍玩家时既不吸附也不掉血。
+  5. **跨 tick 配对（V-66）**：开效果后从 5 格外**真的冲过去**打一次（不是直接调 `tick()`、不是站着空挥）。通过的样子：日志出现 `狂野猎人 吸附挥击 速度 {S}`（`S ≥ 0.55`），目标掉血；**位移比 swing 晚 1–2 刻到达时也必须结算**——这一条直接卡 `SWING_WINDOW = 2`，写成同刻判据就是零结算。同一次挥击只出**一条**该日志（`DEDUPE_TICKS = 1` + `lastDirectHit`）。
 
 #### F-81 · 击杀续时无次数上限
 

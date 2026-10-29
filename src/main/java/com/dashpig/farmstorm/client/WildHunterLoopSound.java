@@ -1,5 +1,6 @@
 package com.dashpig.farmstorm.client;
 
+import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.registry.FarmstormMobEffects;
 import com.dashpig.farmstorm.registry.FarmstormSounds;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -58,6 +59,7 @@ public final class WildHunterLoopSound extends AbstractTickableSoundInstance {
                 instance = new WildHunterLoopSound(player);
                 ACTIVE.put(player.getUUID(), instance);
                 minecraft.getSoundManager().play(instance);
+                Farmstorm.LOGGER.info("狂野猎人 循环音 起 {}", player.getScoreboardName());
             }
             instance.follow();
             instance.updateVolume();
@@ -68,6 +70,7 @@ public final class WildHunterLoopSound extends AbstractTickableSoundInstance {
             Player owner = level.getPlayerByUUID(entry.getKey());
             if (owner == null || !owner.hasEffect(FarmstormMobEffects.WILD_HUNTER)) {
                 Minecraft.getInstance().getSoundManager().stop(entry.getValue());
+                Farmstorm.LOGGER.info("狂野猎人 循环音 停 {}", entry.getValue().owner.getScoreboardName());
                 iterator.remove();
             }
         }
@@ -84,6 +87,7 @@ public final class WildHunterLoopSound extends AbstractTickableSoundInstance {
     private static void stopFor(Player player) {
         WildHunterLoopSound instance = ACTIVE.remove(player.getUUID());
         if (instance != null) {
+            Farmstorm.LOGGER.info("狂野猎人 循环音 停 {}", player.getScoreboardName());
             Minecraft.getInstance().getSoundManager().stop(instance);
         }
     }

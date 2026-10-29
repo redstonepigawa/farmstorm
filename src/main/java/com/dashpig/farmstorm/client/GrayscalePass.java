@@ -1,6 +1,9 @@
 package com.dashpig.farmstorm.client;
 
 import com.dashpig.farmstorm.Farmstorm;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -15,6 +18,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.neoforged.neoforge.client.event.RegisterShadersEvent;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 import org.joml.Matrix4fStack;
 
 /**
@@ -24,6 +29,9 @@ import org.joml.Matrix4fStack;
  */
 public final class GrayscalePass {
     private static ShaderInstance shader;
+    /** ping-pong 的临时 target：先 main → temp，再用 temp 作采样写回 main，避免读写同一个 target。 */
+    private static RenderTarget temp;
+    private static int frames;
 
     private GrayscalePass() {}
 
@@ -45,8 +53,19 @@ public final class GrayscalePass {
         float height = window.getHeight();
         RenderSystem.assertOnRenderThread();
 
-        shader.setSampler("Sampler0", minecraft.getMainRenderTarget().getColorTextureId());
+        RenderTarget main = minecraft.getMainRenderTarget();
+        RenderTarget source = ensureTemp(main.width, main.height);
+        GlStateManager._glBindFramebuffer(GL30.GL_READ_FRAMEBUFFER, main.frameBufferId);
+        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, source.frameBufferId);
+        GlStateManager._glBlitFrameBuffer(0, 0, main.width, main.height, 0, 0, main.width, main.height,
+                GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
+        main.bindWrite(true);
+
+        shader.setSampler("Sampler0", source.getColorTextureId());
         RenderSystem.setShader(() -> shader);
+        if (++frames % 240 == 0) {
+            Farmstorm.LOGGER.info("灰度 pass 第 {} 帧执行（active={}）", frames, WildHunterClientState.active());
+        }
 
         Matrix4fStack stack = RenderSystem.getModelViewStack();
         stack.pushMatrix();
@@ -67,5 +86,15 @@ public final class GrayscalePass {
 
         stack.popMatrix();
         RenderSystem.applyModelViewMatrix();
+    }
+
+    private static RenderTarget ensureTemp(int width, int height) {
+        if (temp == null || temp.width != width || temp.height != height) {
+            if (temp != null) {
+                temp.destroyBuffers();
+            }
+            temp = new TextureTarget(width, height, false, Minecraft.ON_OSX);
+        }
+        return temp;
     }
 }

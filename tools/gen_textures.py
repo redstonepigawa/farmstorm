@@ -119,6 +119,9 @@ class Spec:
     fit: int = TEXTURE_SIZE
     tint: tuple[int, int, int] | None = None
     overlay: SourceRef | None = None
+    # TECH §6.5：压缩干草块必须是「原版干草块侧面的灰度版」——R=G=B 的纯灰度，
+    # 不是「降低饱和度」（那会留色偏），所以走 convert("L") 再回 RGBA。
+    monochrome: bool = False
 
 
 @dataclass(frozen=True)
@@ -242,21 +245,23 @@ STAGE_CROPS: tuple[tuple[str, str, tuple[tuple[SourceRef, ...], ...], tuple[int,
 # --- 5 个部署方块 + 3 张转换器面 ---
 # FIX-5 起模型只引用 converter_top 与四个作物侧面；converter_side / converter_front 仍照旧生成，
 # 保留给「以后想换回旧外观」的场合（与 R-42 同口径），不删条目以免输出集合缺文件。
-BLOCK_TEXTURES: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
-    ("blast_carrot", "部署·胡罗贝", (("block", "carrots_stage3"),)),
-    ("pumpkin_turret", "部署·man瓜", (("block", "carved_pumpkin"), ("block", "pumpkin_side"))),
-    ("awakened_torchflower", "部署·激活的火把花", (("block", "torchflower"),)),
+BLOCK_TEXTURES: tuple[tuple[str, str, tuple[tuple[str, str], ...], bool], ...] = (
+    ("blast_carrot", "部署·胡罗贝", (("block", "carrots_stage3"),), False),
+    ("pumpkin_turret", "部署·man瓜", (("block", "carved_pumpkin"), ("block", "pumpkin_side")), False),
+    ("awakened_torchflower", "部署·激活的火把花", (("block", "torchflower"),), False),
     ("awakened_pitcher_plant", "部署·激活的瓶子草",
-     (("item", "pitcher_plant"), ("block", "pitcher_crop_top"))),
-    ("fang_trap_cactus", "部署·赢过输过没死过", (("block", "cactus_side"),)),
+     (("item", "pitcher_plant"), ("block", "pitcher_crop_top")), False),
+    ("fang_trap_cactus", "部署·赢过输过没死过", (("block", "cactus_side"),), False),
     # V-23：F-65 注册了这两个方块却没建外观，导致 runData --all 从 F-65 起就抛「贴图不存在」。
     # 陷阱类部署方块在世界里不渲染几何，这张 PNG 只作破坏粒子；压缩干草块则是 cubeAll 的正式贴图。
-    ("zangief_cane", "部署·桑吉尔蔗（仅作破坏粒子）", (("block", "sugar_cane"),)),
-    ("compressed_hay_block", "压缩干草块", (("block", "hay_block_side"),)),
+    ("zangief_cane", "部署·桑吉尔蔗（仅作破坏粒子）", (("block", "sugar_cane"),), False),
+    # 第 4 个元素 = 是否灰度化。D-57 要求「材质 = 原版干草块侧面的灰度版」（TECH §6.5），
+    # 这里必须 True：直接拿原色 hay_block_side 出来色相不为 0，验收 3 过不了。
+    ("compressed_hay_block", "压缩干草块", (("block", "hay_block_side"),), True),
     # 顶面兼底面：原版 crafting_table 模型的 up / down 都用 crafting_table_top，这里照抄同一个口径。
-    ("converter_top", "转换器·顶面（兼底面）", (("block", "crafting_table_top"),)),
-    ("converter_side", "转换器·净工作台侧面（模型已不引用）", (("block", "crafting_table_side"),)),
-    ("converter_front", "转换器·正面（模型已不引用）", (("block", "furnace_front"),)),
+    ("converter_top", "转换器·顶面（兼底面）", (("block", "crafting_table_top"),), False),
+    ("converter_side", "转换器·净工作台侧面（模型已不引用）", (("block", "crafting_table_side"),), False),
+    ("converter_front", "转换器·正面（模型已不引用）", (("block", "furnace_front"),), False),
 )
 
 # --- 转换器四个作物侧面（FIX-5）：原版 crafting_table_side 作底，中央叠一个作物图标 ---
@@ -342,13 +347,14 @@ def build_specs() -> tuple[Spec, ...]:
                 )
             )
 
-    for name, zh_name, chain in BLOCK_TEXTURES:
+    for name, zh_name, chain, monochrome in BLOCK_TEXTURES:
         specs.append(
             Spec(
                 rel_path=f"textures/block/{name}.png",
                 kind=KIND_BLOCK,
                 zh_name=zh_name,
                 candidates=refs(*chain),
+                monochrome=monochrome,
             )
         )
 
@@ -561,6 +567,9 @@ def compose(spec: Spec, resolved: Resolved, marker: Image.Image) -> Image.Image:
     base = resolved.image if resolved.image is not None else make_placeholder()
     if spec.tint is not None:
         base = apply_tint(base, spec.tint)
+    if spec.monochrome:
+        # TECH §6.5 指定写法：L 通道取亮度再回 RGBA ⇒ R=G=B（色相 0），尺寸与 alpha 不变。
+        base = base.convert("RGBA").convert("L").convert("RGBA")
     if spec.kind == KIND_STAGE:
         return fit_bottom_center(base, spec.fit)
     if spec.add_plus:
@@ -598,6 +607,8 @@ def print_listing(specs: tuple[Spec, ...]) -> None:
         chain = " → ".join(ref.label() for ref in spec.candidates) or "（程序绘制）"
         if spec.tint is not None:
             chain = f"{chain} [tint]"
+        if spec.monochrome:
+            chain = f"{chain} [gray]"
         print(f"{spec.kind:<6} {spec.rel_path:<46} {chain:<40} {spec.zh_name}")
 
 
@@ -709,6 +720,8 @@ def main(argv: list[str] | None = None) -> int:
                     action += " + 绿色「+」"
                 if spec.tint is not None:
                     action += " + 染色"
+                if spec.monochrome:
+                    action += " + 灰度化"
                 print(f"[dry-run] {spec.rel_path:<46} => {target}（{action}）")
                 report.planned += 1
                 continue

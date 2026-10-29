@@ -46,6 +46,7 @@ public final class FarmstormBlockEntities {
             case AWAKENED_TORCHFLOWER -> AWAKENED_TORCHFLOWER.get();
             case AWAKENED_PITCHER_PLANT -> AWAKENED_PITCHER_PLANT.get();
             case FANG_TRAP_CACTUS -> FANG_TRAP_CACTUS.get();
+            case ZANGIEF_CANE -> FANG_TRAP_CACTUS.get();        // 复用既有 type：block_entities 仍 6
         };
     }
 }

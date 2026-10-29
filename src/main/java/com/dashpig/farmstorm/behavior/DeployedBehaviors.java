@@ -5,9 +5,10 @@ import com.dashpig.farmstorm.behavior.impl.FangTrapCactusTrap;
 import com.dashpig.farmstorm.behavior.impl.PitcherPlantAura;
 import com.dashpig.farmstorm.behavior.impl.PumpkinTurret;
 import com.dashpig.farmstorm.behavior.impl.TorchflowerAura;
+import com.dashpig.farmstorm.behavior.impl.ZangiefCaneTrap;
 
 /**
- * 5 个部署行为单例的工厂（TECH §4.6）。
+ * 6 个部署行为单例的工厂（TECH §4.6）。
  * 用 switch 表达式而不是 Map：枚举新增成员时编译器会直接报「不完整」，不会漏登记。
  */
 public final class DeployedBehaviors {
@@ -16,6 +17,7 @@ public final class DeployedBehaviors {
     private static final PumpkinTurret PUMPKIN_TURRET_BEHAVIOR = new PumpkinTurret();
     private static final TorchflowerAura TORCHFLOWER_AURA = new TorchflowerAura();
     private static final PitcherPlantAura PITCHER_PLANT_AURA = new PitcherPlantAura();
+    private static final ZangiefCaneTrap ZANGIEF_CANE_TRAP = new ZangiefCaneTrap();
 
     private DeployedBehaviors() {}
 
@@ -27,6 +29,7 @@ public final class DeployedBehaviors {
             case PUMPKIN_TURRET -> PUMPKIN_TURRET_BEHAVIOR;
             case AWAKENED_TORCHFLOWER -> TORCHFLOWER_AURA;
             case AWAKENED_PITCHER_PLANT -> PITCHER_PLANT_AURA;
+            case ZANGIEF_CANE -> ZANGIEF_CANE_TRAP;
         };
     }
 }

@@ -88,15 +88,11 @@ public record CropProfile(
             Farmstorm.id("molotov"), CropType.THROWABLE,
             categorySet(CropCategory.DAMAGE, CropCategory.CONSTRUCTION),
             null, null, null, Set.of(), THROWABLE_STACK_TIER);
-    /**
-     * D-51：桑吉尔蔗不可种植，作物方块与播种物为空；纯 TRAP，没有 DAMAGE 标签。
-     * kind 暂为 null：{@code DeployedKind.ZANGIEF_CANE} 由 F-63 加入；F-63 必须回填本字段，
-     * 否则 F-65 的 {@link #byKind(DeployedKind)} 会抛 {@code IllegalArgumentException}。
-     */
+    /** D-51：桑吉尔蔗不可种植，作物方块与播种物为空；纯 TRAP，没有 DAMAGE 标签。 */
     public static final CropProfile ZANGIEF_CANE = new CropProfile(
             Farmstorm.id("zangief_cane"), CropType.DEPLOYABLE,
             categorySet(CropCategory.TRAP),
-            null, null, null, Set.of(AttachFace.FLOOR), OTHER_STACK_TIER);
+            null, null, DeployedKind.ZANGIEF_CANE, Set.of(AttachFace.FLOOR), OTHER_STACK_TIER);
     /** D-51：狂野苹果不可种植，作物方块与播种物为空；食用型、纯 BUFF。 */
     public static final CropProfile WILD_APPLE = new CropProfile(
             Farmstorm.id("wild_apple"), CropType.EDIBLE,
@@ -140,7 +136,7 @@ public record CropProfile(
         return profile;
     }
 
-    /** 部署方块按 kind 反查档案：5 个方块的行为参数（附着面）只有这一处来源。 */
+    /** 部署方块按 kind 反查档案：6 个方块的行为参数（附着面）只有这一处来源。 */
     public static CropProfile byKind(DeployedKind kind) {
         return ALL.stream()
                 .filter(profile -> profile.kind() == kind)

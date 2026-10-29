@@ -198,7 +198,8 @@ ICONS: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
     ("converter", "转换器", (("item", "converter"), ("block", "crafting_table_front"))),
     # V-23：F-65 注册的 4 个新作物物品没有图标，客户端 datagen 从 F-65 起跑不通。
     # 源贴图是临时起手，最终外观由 F-95 审定（届时只改这一张表即可）。
-    ("molotov", "莫洛托夫！", (("item", "splash_potion"),)),
+    # 原型是绯红菌（转换配方的原料也是 minecraft:crimson_fungus），不是药水瓶。
+    ("molotov", "莫洛托夫！", (("item", "crimson_fungus"), ("block", "crimson_fungus"))),
     ("zangief_cane", "桑吉尔蔗", (("item", "sugar_cane"),)),
     ("wild_apple", "狂野苹果", (("item", "apple"),)),
     ("compressed_puffed_wheat", "压缩膨胀麦", (("block", "hay_block_side"),)),

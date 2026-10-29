@@ -16,14 +16,20 @@ public final class WildHunterClientHooks {
         WildHunterClientState.refresh();
         WildHunterDashClient.onClientTick();
         WildHunterLoopSound.onClientTick();
+        // F-82 改走官方 PostChain 机制（GameRenderer#loadEffect），不再需要 RegisterShadersEvent / RenderGuiEvent。
+        GrayscalePass.tick();
     }
 
+    /** @deprecated F-82 改用 PostChain 后不再注册 ShaderInstance；接线可删（调度者下次接线时移除）。 */
+    @Deprecated
     public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
-        GrayscalePass.onRegisterShaders(event);
+        // no-op
     }
 
+    /** @deprecated F-82 改用 PostChain 后不再跑 GUI 后的全屏 pass；接线可删（调度者下次接线时移除）。 */
+    @Deprecated
     public static void onRenderGuiPost() {
-        GrayscalePass.onRenderGuiPost();
+        // no-op
     }
 
     public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {

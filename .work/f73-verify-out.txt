@@ -1,0 +1,142 @@
+### RCON 已连接 127.0.0.1:25620
+
+## 0. 清场与基线（V-16：forceload 用方块坐标；V-17：清场 + 基线断言）
+> forceload add 96 96 112 112
+    | Marked 4 chunks in Overworld from [6, 6] to [7, 7] to be force loaded
+> fill 96 96 96 112 112 112 minecraft:air
+    | No blocks were filled
+> kill @e[type=minecraft:item]
+    | No entity was found
+> execute if block 104 100 100 minecraft:air
+    | Test passed
+  [PASS] 清场基线：104,100,100 为空
+> setblock 104 99 100 minecraft:stone
+    | Changed the block at 104, 99, 100
+
+## 1. 探针 setup：摆转换器 + FakePlayer 起步经验
+> f73probe setup 104 100 100
+    | [F73PROBE] === F73PROBE SETUP === 104, 100, 100 维度=minecraft:overworld
+    | [F73PROBE] setblock 104, 100, 100 -> farmstorm:converter
+    | [F73PROBE] FakePlayer 41c82c87-7afb-4024-ba57-13d2c99cae77 起点：levels=11 points=12 total=200
+    | [F73PROBE]   /xp query @s levels -> [Minecraft] has 11 experience levels [rc=11]
+    | [F73PROBE]   /xp query @s points -> [Minecraft] has 12 experience points [rc=12]
+  [PASS] setup 无 FAIL
+
+## 2. 验收 2 主体：真实 ConverterMenu + clickMenuButton(BUTTON_CONVERT)
+> f73probe convert 104 100 100 wild_forward
+    | [F73PROBE] ## case=wild_forward
+    | [F73PROBE] 菜单：输入槽=minecraft:golden_apple canConvert=true xpCost=3 reverse=0
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：菜单报告 canConvert=true
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：菜单报告 xpCost=3
+    | [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 12 experience points [rc=12] ／ total=200
+    | [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+    | [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 9 experience points [rc=9] ／ total=197
+    | [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+    | [F73PROBE] 背包：farmstorm:wild_apple x1
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：clickMenuButton 返回 true
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：背包里出现 farmstorm:wild_apple
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：total 减少 3（200 -> 197）
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：经验点减少 3（12 -> 9）
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：未跨级，levels 11 -> 11
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：输入槽已清空
+    | [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：转换后 canConvert=false
+    | [F73PROBE] 〔/xp query 文案〕[Minecraft] has 11 experience levels [rc=11] ／ [Minecraft] has 11 experience levels [rc=11]
+    | [F73PROBE] 〔/xp query 文案〕[Minecraft] has 12 experience points [rc=12] ／ [Minecraft] has 9 experience points [rc=9]
+    | [F73PROBE] ### case=wild_forward 全部断言通过
+  [PASS] case wild_forward：无 [FAIL]
+  [PASS] case wild_forward：整体通过
+  [PASS] case wild_forward：已记录 /xp query 读数
+> f73probe convert 104 100 100 wild_reverse
+    | [F73PROBE] ## case=wild_reverse
+    | [F73PROBE] 菜单：输入槽=farmstorm:wild_apple canConvert=true xpCost=3 reverse=1
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：菜单报告 canConvert=true
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：菜单报告 xpCost=3
+    | [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 9 experience points [rc=9] ／ total=197
+    | [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+    | [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 6 experience points [rc=6] ／ total=194
+    | [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+    | [F73PROBE] 背包：farmstorm:wild_apple x1, minecraft:golden_apple x1
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：clickMenuButton 返回 true
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：背包里出现 minecraft:golden_apple
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：total 减少 3（197 -> 194）
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：经验点减少 3（9 -> 6）
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：未跨级，levels 11 -> 11
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：输入槽已清空
+    | [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：转换后 canConvert=false
+    | [F73PROBE] 〔/xp query 文案〕[Minecraft] has 11 experience levels [rc=11] ／ [Minecraft] has 11 experience levels [rc=11]
+    | [F73PROBE] 〔/xp query 文案〕[Minecraft] has 9 experience points [rc=9] ／ [Minecraft] has 6 experience points [rc=6]
+    | [F73PROBE] ### case=wild_reverse 全部断言通过
+  [PASS] case wild_reverse：无 [FAIL]
+  [PASS] case wild_reverse：整体通过
+  [PASS] case wild_reverse：已记录 /xp query 读数
+> f73probe convert 104 100 100 molotov
+    | [F73PROBE] ## case=molotov
+    | [F73PROBE] 菜单：输入槽=minecraft:crimson_fungus canConvert=true xpCost=3 reverse=0
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：菜单报告 canConvert=true
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：菜单报告 xpCost=3
+    | [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 6 experience points [rc=6] ／ total=194
+    | [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+    | [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 3 experience points [rc=3] ／ total=191
+    | [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+    | [F73PROBE] 背包：farmstorm:wild_apple x1, minecraft:golden_apple x1, farmstorm:molotov x1
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：clickMenuButton 返回 true
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：背包里出现 farmstorm:molotov
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：total 减少 3（194 -> 191）
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：经验点减少 3（6 -> 3）
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：未跨级，levels 11 -> 11
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：输入槽已清空
+    | [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：转换后 canConvert=false
+    | [F73PROBE] 〔/xp query 文案〕[Minecraft] has 11 experience levels [rc=11] ／ [Minecraft] has 11 experience levels [rc=11]
+    | [F73PROBE] 〔/xp query 文案〕[Minecraft] has 6 experience points [rc=6] ／ [Minecraft] has 3 experience points [rc=3]
+    | [F73PROBE] ### case=molotov 全部断言通过
+  [PASS] case molotov：无 [FAIL]
+  [PASS] case molotov：整体通过
+  [PASS] case molotov：已记录 /xp query 读数
+> f73probe convert 104 100 100 zangief
+    | [F73PROBE] ## case=zangief
+    | [F73PROBE] 菜单：输入槽=minecraft:sugar_cane canConvert=true xpCost=3 reverse=0
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：菜单报告 canConvert=true
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：菜单报告 xpCost=3
+    | [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 3 experience points [rc=3] ／ total=191
+    | [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+    | [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 0 experience points [rc=0] ／ total=188
+    | [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+    | [F73PROBE] 背包：farmstorm:wild_apple x1, minecraft:golden_apple x1, farmstorm:molotov x1, farmstorm:zangief_cane x1
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：clickMenuButton 返回 true
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：背包里出现 farmstorm:zangief_cane
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：total 减少 3（191 -> 188）
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：经验点减少 3（3 -> 0）
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：未跨级，levels 11 -> 11
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：输入槽已清空
+    | [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：转换后 canConvert=false
+    | [F73PROBE] 〔/xp query 文案〕[Minecraft] has 11 experience levels [rc=11] ／ [Minecraft] has 11 experience levels [rc=11]
+    | [F73PROBE] 〔/xp query 文案〕[Minecraft] has 3 experience points [rc=3] ／ [Minecraft] has 0 experience points [rc=0]
+    | [F73PROBE] ### case=zangief 全部断言通过
+  [PASS] case zangief：无 [FAIL]
+  [PASS] case zangief：整体通过
+  [PASS] case zangief：已记录 /xp query 读数
+
+## 3. 附加：跨级边界（11 级 / 进度 0 点 / total 187 时再扣 3 点）
+> f73probe convert 104 100 100 boundary
+    | [F73PROBE] ## case=boundary
+    | [F73PROBE] （boundary）把状态摆到 11 级、进度 0 点、total=187
+    | [F73PROBE] 菜单：输入槽=minecraft:crimson_fungus canConvert=true xpCost=3 reverse=0
+    | [F73PROBE]   [PASS] boundary：minecraft:crimson_fungus -> farmstorm:molotov：菜单报告 canConvert=true
+    | [F73PROBE]   [PASS] boundary：minecraft:crimson_fungus -> farmstorm:molotov：菜单报告 xpCost=3
+    | [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 0 experience points [rc=0] ／ total=187
+    | [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+    | [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 10 experience levels [rc=10] ／ /xp query @s points -> [Minecraft] has 24 experience points [rc=24] ／ total=184
+    | [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+    | [F73PROBE] 背包：farmstorm:wild_apple x1, minecraft:golden_apple x1, farmstorm:molotov x2, farmstorm:zangief_cane x1
+    | [F73PROBE] （boundary）levels 11 -> 10，total 187 -> 184
+    | [F73PROBE]   [PASS] boundary：3 点扣除跨级时 levels 正好掉 1 级
+    | [F73PROBE]   [PASS] boundary：total 仍然只减 3
+  [PASS] boundary：无 [FAIL]
+
+## 4. 收尾清场
+> kill @e[type=minecraft:item]
+    | No entity was found
+> fill 96 96 96 112 112 112 minecraft:air
+    | Successfully filled 2 block(s)
+
+### 全部断言通过 (0 FAIL)

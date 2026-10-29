@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:crimson_fungus"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:molotov"
+  },
+  "reverse_xp_cost": 3
+}

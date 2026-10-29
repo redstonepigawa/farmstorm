@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:sugar_cane"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:zangief_cane"
+  },
+  "reverse_xp_cost": 3
+}

@@ -24,7 +24,7 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 /**
- * 21 条农产品转换配方（TECH §6.7 / D-11 / D-12）+ 1 条转换器合成配方（D-52 / F-71）
+ * 24 条农产品转换配方（TECH §6.7 / D-11 / D-12；F-73 补 3 条，D-54）+ 1 条转换器合成配方（D-52 / F-71）
  * + 1 条压缩膨胀麦无序合成配方（D-67 / F-72）。
  *
  * <p>转换配方全部共用自定义类型 {@code farmstorm:converting}，字段口径见 {@link ConverterRecipe} 的
@@ -86,6 +86,10 @@ public final class ModRecipeProvider extends RecipeProvider {
         twoWay(recipeOutput, "awakened_torchflower_seeds", Items.TORCHFLOWER_SEEDS,
                 FarmstormItems.AWAKENED_TORCHFLOWER_SEEDS);
         twoWay(recipeOutput, "awakened_pitcher_plant_pod", Items.PITCHER_POD, FarmstormItems.AWAKENED_PITCHER_PLANT_POD);
+        // 22-24：F-73 新增三条作物本体双向（D-54），与上面同形：无催化剂、正反向同价
+        twoWay(recipeOutput, "molotov", Items.CRIMSON_FUNGUS, FarmstormItems.MOLOTOV);
+        twoWay(recipeOutput, "zangief_cane", Items.SUGAR_CANE, FarmstormItems.ZANGIEF_CANE);
+        twoWay(recipeOutput, "wild_apple", Items.GOLDEN_APPLE, FarmstormItems.WILD_APPLE);
     }
 
     /**

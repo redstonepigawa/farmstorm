@@ -1,0 +1,194 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 38 busy and 2 incompatible and 30 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :writeServerLegacyClasspath UP-TO-DATE
+> Task :prepareServerRun UP-TO-DATE
+
+> Task :runServer
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[16:38:26] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[16:38:26] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[16:38:26] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[16:38:26] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[16:38:26] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[16:38:26] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[16:38:26] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.2 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[16:38:27] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[16:38:27] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[16:38:27] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[16:38:27] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[16:38:28] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[16:38:33] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[16:38:33] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[16:38:33] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[16:38:33] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[16:38:33] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[16:38:33] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[16:38:33] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[16:38:33] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[16:38:33] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[16:38:33] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[16:38:33] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[16:38:33] [modloading-worker-0/INFO] [farmstorm/]: 自检 注册对象 77 个：items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1 → OK
+[16:38:33] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[16:38:33] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[16:38:33] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[16:38:33] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[16:38:34] [main/INFO] [minecraft/RecipeManager]: Loaded 1316 recipes
+[16:38:34] [main/INFO] [minecraft/AdvancementTree]: Loaded 1411 advancements
+[16:38:34] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[16:38:35] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.1
+[16:38:35] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[16:38:35] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[16:38:35] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[16:38:35] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25619
+[16:38:35] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using default channel type
+[16:38:35] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[16:38:35] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[16:38:35] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[16:38:35] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[16:38:35] [Server thread/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[16:38:35] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[16:38:35] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[16:38:35] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[16:38:36] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 210 ms
+[16:38:36] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.417s)! For help, type "help"
+[16:38:36] [Server thread/INFO] [minecraft/DedicatedServer]: Starting remote control listener
+[16:38:36] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Listener started
+[16:38:36] [Server thread/INFO] [minecraft/RconThread]: RCON running on 0.0.0.0:25620
+[16:38:36] [Server thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[16:38:36] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[16:38:42] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[16:38:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Marked 4 chunks in Overworld from [6, 6] to [7, 7] to be force loaded]
+[16:38:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 104, 99, 100]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] === F73PROBE SETUP === 104, 100, 100 维度=minecraft:overworld
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] setblock 104, 100, 100 -> farmstorm:converter
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] FakePlayer 41c82c87-7afb-4024-ba57-13d2c99cae77 起点：levels=11 points=12 total=200
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   /xp query @s levels -> [Minecraft] has 11 experience levels [rc=11]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   /xp query @s points -> [Minecraft] has 12 experience points [rc=12]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ## case=wild_forward
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:golden_apple canConvert=true xpCost=3 reverse=0
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：菜单报告 canConvert=true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：菜单报告 xpCost=3
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 12 experience points [rc=12] ／ total=200
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 9 experience points [rc=9] ／ total=197
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 背包：farmstorm:wild_apple x1
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：clickMenuButton 返回 true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：背包里出现 farmstorm:wild_apple
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：total 减少 3（200 -> 197）
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：经验点减少 3（12 -> 9）
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：未跨级，levels 11 -> 11
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：输入槽已清空
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_forward：minecraft:golden_apple -> farmstorm:wild_apple：转换后 canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 〔/xp query 文案〕[Minecraft] has 11 experience levels [rc=11] ／ [Minecraft] has 11 experience levels [rc=11]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 〔/xp query 文案〕[Minecraft] has 12 experience points [rc=12] ／ [Minecraft] has 9 experience points [rc=9]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ### case=wild_forward 全部断言通过
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ## case=wild_reverse
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=farmstorm:wild_apple canConvert=true xpCost=3 reverse=1
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：菜单报告 canConvert=true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：菜单报告 xpCost=3
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 9 experience points [rc=9] ／ total=197
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 6 experience points [rc=6] ／ total=194
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 背包：farmstorm:wild_apple x1, minecraft:golden_apple x1
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：clickMenuButton 返回 true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：背包里出现 minecraft:golden_apple
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：total 减少 3（197 -> 194）
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：经验点减少 3（9 -> 6）
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：未跨级，levels 11 -> 11
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：输入槽已清空
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] wild_reverse：farmstorm:wild_apple -> minecraft:golden_apple：转换后 canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 〔/xp query 文案〕[Minecraft] has 11 experience levels [rc=11] ／ [Minecraft] has 11 experience levels [rc=11]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 〔/xp query 文案〕[Minecraft] has 9 experience points [rc=9] ／ [Minecraft] has 6 experience points [rc=6]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ### case=wild_reverse 全部断言通过
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ## case=molotov
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:crimson_fungus canConvert=true xpCost=3 reverse=0
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：菜单报告 canConvert=true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：菜单报告 xpCost=3
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 6 experience points [rc=6] ／ total=194
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 3 experience points [rc=3] ／ total=191
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 背包：farmstorm:wild_apple x1, minecraft:golden_apple x1, farmstorm:molotov x1
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：clickMenuButton 返回 true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：背包里出现 farmstorm:molotov
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：total 减少 3（194 -> 191）
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：经验点减少 3（6 -> 3）
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：未跨级，levels 11 -> 11
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：输入槽已清空
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] molotov：minecraft:crimson_fungus -> farmstorm:molotov：转换后 canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 〔/xp query 文案〕[Minecraft] has 11 experience levels [rc=11] ／ [Minecraft] has 11 experience levels [rc=11]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 〔/xp query 文案〕[Minecraft] has 6 experience points [rc=6] ／ [Minecraft] has 3 experience points [rc=3]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ### case=molotov 全部断言通过
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ## case=zangief
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:sugar_cane canConvert=true xpCost=3 reverse=0
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：菜单报告 canConvert=true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：菜单报告 xpCost=3
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 3 experience points [rc=3] ／ total=191
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 0 experience points [rc=0] ／ total=188
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 背包：farmstorm:wild_apple x1, minecraft:golden_apple x1, farmstorm:molotov x1, farmstorm:zangief_cane x1
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：clickMenuButton 返回 true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：背包里出现 farmstorm:zangief_cane
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：total 减少 3（191 -> 188）
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：经验点减少 3（3 -> 0）
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：未跨级，levels 11 -> 11
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：输入槽已清空
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] zangief：minecraft:sugar_cane -> farmstorm:zangief_cane：转换后 canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 〔/xp query 文案〕[Minecraft] has 11 experience levels [rc=11] ／ [Minecraft] has 11 experience levels [rc=11]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 〔/xp query 文案〕[Minecraft] has 3 experience points [rc=3] ／ [Minecraft] has 0 experience points [rc=0]
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ### case=zangief 全部断言通过
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] ## case=boundary
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] （boundary）把状态摆到 11 级、进度 0 点、total=187
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:crimson_fungus canConvert=true xpCost=3 reverse=0
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] boundary：minecraft:crimson_fungus -> farmstorm:molotov：菜单报告 canConvert=true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] boundary：minecraft:crimson_fungus -> farmstorm:molotov：菜单报告 xpCost=3
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换前：/xp query @s levels -> [Minecraft] has 11 experience levels [rc=11] ／ /xp query @s points -> [Minecraft] has 0 experience points [rc=0] ／ total=187
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] clickMenuButton(player, BUTTON_CONVERT) = true
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 转换后：/xp query @s levels -> [Minecraft] has 10 experience levels [rc=10] ／ /xp query @s points -> [Minecraft] has 24 experience points [rc=24] ／ total=184
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 菜单：输入槽=minecraft:air 预览槽=minecraft:air canConvert=false
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] 背包：farmstorm:wild_apple x1, minecraft:golden_apple x1, farmstorm:molotov x2, farmstorm:zangief_cane x1
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE] （boundary）levels 11 -> 10，total 187 -> 184
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] boundary：3 点扣除跨级时 levels 正好掉 1 级
+[16:38:42] [Server thread/INFO] [farmstorm/]: [F73PROBE]   [PASS] boundary：total 仍然只减 3
+[16:38:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 2 block(s)]
+[16:38:42] [RCON Client /127.0.0.1 #2/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[16:38:49] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[16:38:49] [RCON Client /127.0.0.1 #3/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[16:38:49] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[16:38:49] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Listener stopped
+
+BUILD SUCCESSFUL in 34s
+7 actionable tasks: 1 executed, 6 up-to-date

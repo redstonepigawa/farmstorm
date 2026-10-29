@@ -1,6 +1,7 @@
 package com.dashpig.farmstorm.effect;
 
 import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.config.FarmstormConfig;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -26,23 +27,24 @@ public class WildHunterEffect extends MobEffect {
     public static final ResourceLocation ATTACK_SPEED_ID = Farmstorm.id("wild_hunter_attack_speed");
     public static final ResourceLocation ATTACK_DAMAGE_ID = Farmstorm.id("wild_hunter_attack_damage");
 
-    /**
-     * 三项加成的百分比，取 BRIEF §8 的默认值。
-     * F-61 落键后由 F-76 换成 {@code wild_hunter.speedBonusPercent} 等三个 config 读——本类是唯一入口。
-     */
-    private static final double SPEED_BONUS_PERCENT = 30.0;
-    private static final double ATTACK_SPEED_BONUS_PERCENT = 30.0;
-    private static final double ATTACK_DAMAGE_BONUS_PERCENT = 40.0;
-
     public WildHunterEffect() {
         super(MobEffectCategory.BENEFICIAL, 0x8B1A1A);
     }
 
+    /**
+     * 三项百分比的唯一来源是 config（F-61 / V-13）：{@code wild_hunter.speedBonusPercent}（30.0）、
+     * {@code attackSpeedBonusPercent}（30.0）、{@code attackDamageBonusPercent}（40.0）。
+     * 取的是 {@code FarmstormConfig.bake()} 的快照而不是 {@code .get()}——本方法在两侧都会被调用（TECH §3.5），
+     * 而 SERVER config 在客户端读不到，快照在未 bake 时回落到 §8.1 的默认值。
+     */
     @Override
     public void addAttributeModifiers(AttributeMap attributes, int amplifier) {
-        apply(attributes, Attributes.MOVEMENT_SPEED, SPEED_ID, SPEED_BONUS_PERCENT, amplifier);
-        apply(attributes, Attributes.ATTACK_SPEED, ATTACK_SPEED_ID, ATTACK_SPEED_BONUS_PERCENT, amplifier);
-        apply(attributes, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE_ID, ATTACK_DAMAGE_BONUS_PERCENT, amplifier);
+        apply(attributes, Attributes.MOVEMENT_SPEED, SPEED_ID,
+                FarmstormConfig.wildHunterSpeedBonus(), amplifier);
+        apply(attributes, Attributes.ATTACK_SPEED, ATTACK_SPEED_ID,
+                FarmstormConfig.wildHunterAttackSpeedBonus(), amplifier);
+        apply(attributes, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE_ID,
+                FarmstormConfig.wildHunterAttackDamageBonus(), amplifier);
     }
 
     @Override

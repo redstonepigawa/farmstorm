@@ -1,0 +1,134 @@
+[29Oct2026 14:36:06.082] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[29Oct2026 14:36:06.085] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[29Oct2026 14:36:06.085] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[29Oct2026 14:36:06.153] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[29Oct2026 14:36:06.178] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[29Oct2026 14:36:06.414] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[29Oct2026 14:36:06.415] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.2 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[29Oct2026 14:36:06.958] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[29Oct2026 14:36:07.445] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[29Oct2026 14:36:07.474] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[29Oct2026 14:36:07.490] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[29Oct2026 14:36:07.833] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[29Oct2026 14:36:12.288] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[29Oct2026 14:36:12.288] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[29Oct2026 14:36:12.291] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[29Oct2026 14:36:12.292] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[29Oct2026 14:36:12.292] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[29Oct2026 14:36:12.344] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[29Oct2026 14:36:12.380] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[29Oct2026 14:36:12.381] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[29Oct2026 14:36:12.381] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[29Oct2026 14:36:12.381] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[29Oct2026 14:36:12.382] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[29Oct2026 14:36:12.382] [modloading-worker-0/INFO] [farmstorm/]: 自检 注册对象 77 个：items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1 → OK
+[29Oct2026 14:36:12.384] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[29Oct2026 14:36:12.619] [main/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[29Oct2026 14:36:12.655] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[29Oct2026 14:36:12.656] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[29Oct2026 14:36:13.068] [main/INFO] [net.minecraft.server.Main/]: No existing world data, creating new world
+[29Oct2026 14:36:13.072] [main/ERROR] [net.minecraft.server.dedicated.DedicatedServerProperties/]: No key layers in MapLike[{}]
+[29Oct2026 14:36:13.549] [main/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1311 recipes
+[29Oct2026 14:36:13.720] [main/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1411 advancements
+[29Oct2026 14:36:13.722] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[29Oct2026 14:36:14.587] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting minecraft server version 1.21.1
+[29Oct2026 14:36:14.587] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Loading properties
+[29Oct2026 14:36:14.588] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Default game type: SURVIVAL
+[29Oct2026 14:36:14.588] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[29Oct2026 14:36:14.669] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting Minecraft server on *:25567
+[29Oct2026 14:36:14.713] [Server thread/INFO] [net.minecraft.server.network.ServerConnectionListener/]: Using default channel type
+[29Oct2026 14:36:14.756] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[29Oct2026 14:36:14.756] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: The server will make no attempt to authenticate usernames. Beware.
+[29Oct2026 14:36:14.756] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[29Oct2026 14:36:14.756] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: To change this, set "online-mode" to "true" in the server.properties file.
+[29Oct2026 14:36:14.790] [Server thread/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[29Oct2026 14:36:14.810] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Preparing level "world"
+[29Oct2026 14:36:15.391] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[29Oct2026 14:36:15.426] [worldgen/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 2%
+[29Oct2026 14:36:15.638] [Server thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 246 ms
+[29Oct2026 14:36:15.639] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (0.864s)! For help, type "help"
+[29Oct2026 14:36:15.639] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting remote control listener
+[29Oct2026 14:36:15.641] [Server thread/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Listener started
+[29Oct2026 14:36:15.641] [Server thread/INFO] [net.minecraft.server.rcon.thread.RconThread/]: RCON running on 0.0.0.0:25607
+[29Oct2026 14:36:15.665] [Server thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
+[29Oct2026 14:36:15.670] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[29Oct2026 14:37:13.525] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:37:13.537] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Reloading!]
+[29Oct2026 14:37:13.887] [FileWatcher-1-thread-1/WARN] [net.neoforged.fml.config.ConfigTracker/CONFIG]: Failed to load config farmstorm-server.toml: com.electronwill.nightconfig.core.io.ParsingException: Invalid bare key: '﻿[converter'. Attempting to recreate
+[29Oct2026 14:37:13.890] [Server thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1311 recipes
+[29Oct2026 14:37:13.901] [FileWatcher-1-thread-1/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[29Oct2026 14:37:13.954] [Server thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1411 advancements
+[29Oct2026 14:37:13.955] [Server thread/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 2)
+[29Oct2026 14:37:14.411] [FileWatcher-1-thread-1/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[29Oct2026 14:37:14.589] [RCON Client /127.0.0.1 #2/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:37:32.671] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:37:32.675] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Reloading!]
+[29Oct2026 14:37:32.936] [Server thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1311 recipes
+[29Oct2026 14:37:32.985] [Server thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1411 advancements
+[29Oct2026 14:37:32.985] [Server thread/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 3)
+[29Oct2026 14:37:33.092] [FileWatcher-1-thread-1/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=50.0%（余下 50.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[29Oct2026 14:37:33.564] [RCON Client /127.0.0.1 #3/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:38:00.126] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:38:00.129] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Reloading!]
+[29Oct2026 14:38:00.464] [Server thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1311 recipes
+[29Oct2026 14:38:00.514] [Server thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1411 advancements
+[29Oct2026 14:38:00.516] [Server thread/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 4)
+[29Oct2026 14:38:00.526] [FileWatcher-1-thread-1/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[29Oct2026 14:38:01.138] [RCON Client /127.0.0.1 #4/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:38:39.909] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:38:39.913] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Marked chunk [0, 0] in Overworld to be force loaded]
+[29Oct2026 14:38:40.013] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Summoned new Villager]
+[29Oct2026 14:38:40.370] [RCON Client /127.0.0.1 #5/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:38:51.645] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:38:51.646] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Set the time to 18000]
+[29Oct2026 14:38:51.652] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Summoned new Husk]
+[29Oct2026 14:38:51.656] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Applied effect effect.farmstorm.wild_hunter to Husk]
+[29Oct2026 14:38:51.965] [RCON Client /127.0.0.1 #6/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:39:13.776] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:39:13.780] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Summoned new Iron Golem]
+[29Oct2026 14:39:13.782] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Summoned new Ravager]
+[29Oct2026 14:39:13.810] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Summoned new Warden]
+[29Oct2026 14:39:13.824] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Killed Iron Golem]
+[29Oct2026 14:39:13.831] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Killed Ravager]
+[29Oct2026 14:39:13.833] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Killed Warden]
+[29Oct2026 14:39:14.147] [RCON Client /127.0.0.1 #7/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:43:44.532] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:43:44.537] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Reloading!]
+[29Oct2026 14:43:44.769] [Server thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1311 recipes
+[29Oct2026 14:43:44.861] [Server thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1411 advancements
+[29Oct2026 14:43:44.862] [Server thread/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 5)
+[29Oct2026 14:43:44.926] [FileWatcher-1-thread-1/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 200.0% / 攻速 300.0% / 攻击 100.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[29Oct2026 14:43:45.488] [RCON Client /127.0.0.1 #8/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:43:58.385] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:43:58.388] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Killed Husk]
+[29Oct2026 14:43:58.389] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Summoned new Husk]
+[29Oct2026 14:43:58.390] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Applied effect effect.farmstorm.wild_hunter to Husk]
+[29Oct2026 14:43:58.394] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Removed every effect from Husk]
+[29Oct2026 14:43:58.704] [RCON Client /127.0.0.1 #9/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:44:08.425] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:44:08.429] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Reloading!]
+[29Oct2026 14:44:08.636] [Server thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1311 recipes
+[29Oct2026 14:44:08.684] [Server thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1411 advancements
+[29Oct2026 14:44:08.684] [Server thread/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 6)
+[29Oct2026 14:44:08.845] [FileWatcher-1-thread-1/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[29Oct2026 14:44:09.338] [RCON Client /127.0.0.1 #10/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:44:12.440] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[29Oct2026 14:44:12.443] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Stopping the server]
+[29Oct2026 14:44:12.476] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[29Oct2026 14:44:12.477] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[29Oct2026 14:44:12.477] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[29Oct2026 14:44:12.762] [RCON Client /127.0.0.1 #11/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[29Oct2026 14:44:12.947] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[29Oct2026 14:44:12.963] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[29Oct2026 14:44:12.971] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[29Oct2026 14:44:12.980] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[29Oct2026 14:44:12.981] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[29Oct2026 14:44:12.981] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[29Oct2026 14:44:12.981] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
+[29Oct2026 14:44:12.998] [Server thread/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Listener stopped

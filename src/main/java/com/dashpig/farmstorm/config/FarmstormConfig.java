@@ -6,7 +6,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * 服务端配置（DEC D-21 / D-22，TECH §4.11）。
- * 117 个键是封闭集合（HC-07）：键名与默认值逐字对齐 01-DESIGN.md §3.8，不接受「差不多」。
+ * 键是封闭集合（HC-07）：v0.0.1 的 117 个逐字对齐 01-DESIGN.md §3.8，v0.0.2 新增的 22 个逐字对齐
+ * 12-TECH-0.0.2.md §8.1（即 BRIEF §8 的唯一清单），合计 139——不接受「差不多」。
  * 字段不能是 final——值在静态块里赋值。
  */
 public final class FarmstormConfig {
@@ -161,6 +162,33 @@ public final class FarmstormConfig {
     public static ModConfigSpec.DoubleValue luckyBerryChanceGodlikeBuff;
     public static ModConfigSpec.DoubleValue luckyBerryChanceCreativeMode;
 
+    // ---- 12-TECH §8.1：v0.0.2 新增 4 组（22）----
+    public static ModConfigSpec.DoubleValue molotovEffectRadius;
+    public static ModConfigSpec.DoubleValue molotovFireChance;
+    public static ModConfigSpec.IntValue molotovTriggerExplosionPower;
+
+    public static ModConfigSpec.IntValue wildAppleNutrition;
+    public static ModConfigSpec.DoubleValue wildAppleSaturationModifier;
+
+    public static ModConfigSpec.IntValue wildHunterDurationTicks;
+    public static ModConfigSpec.IntValue wildHunterKillExtensionTicks;
+    public static ModConfigSpec.DoubleValue wildHunterKillHealPoints;
+    public static ModConfigSpec.DoubleValue wildHunterSearchRadius;
+    public static ModConfigSpec.DoubleValue wildHunterSearchAngleDegrees;
+    public static ModConfigSpec.IntValue wildHunterDashTicks;
+    public static ModConfigSpec.DoubleValue wildHunterSpeedBonusPercent;
+    public static ModConfigSpec.DoubleValue wildHunterAttackSpeedBonusPercent;
+    public static ModConfigSpec.DoubleValue wildHunterAttackDamageBonusPercent;
+    public static ModConfigSpec.DoubleValue wildHunterHighlightRadius;
+    public static ModConfigSpec.DoubleValue wildHunterLoopSoundRange;
+
+    public static ModConfigSpec.DoubleValue zangiefCaneTriggerRadius;
+    public static ModConfigSpec.IntValue zangiefCaneStageDelayTicks;
+    public static ModConfigSpec.IntValue zangiefCaneLevitationLevel;
+    public static ModConfigSpec.IntValue zangiefCaneLevitationDurationTicks;
+    public static ModConfigSpec.IntValue zangiefCaneFallTicks;
+    public static ModConfigSpec.DoubleValue zangiefCaneSpinDegreesPerTick;
+
     // ---- 烘焙快照 ----
     /** 概率表条目数（§4.11.4 / §4.12）。 */
     public static final int LUCKY_OUTCOME_COUNT = 8;
@@ -184,6 +212,16 @@ public final class FarmstormConfig {
     private static double sliceResistThreshold = 6.0;
     private static double grenadeResistThreshold = 6.0;
     private static String untamedFallback = "self";
+
+    /**
+     * v0.0.2 的派生快照（12-TECH §8.1 / §8.3）：molotov 放火概率的百分数（余下的百分比自动归岩浆块，A-01），
+     * 与狂野猎人三项属性加成的百分数（{@code WildHunterEffect} 按 amplifier + 1 倍换算成修饰器量值）。
+     * 初值就是 §8.1 的默认值：SERVER config 在客户端读不到，未 bake 时快照必须有可用值。
+     */
+    private static double fireChance = 85.0;
+    private static double wildHunterSpeedBonus = 30.0;
+    private static double wildHunterAttackSpeedBonus = 30.0;
+    private static double wildHunterAttackDamageBonus = 40.0;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -657,6 +695,85 @@ public final class FarmstormConfig {
         b.pop();
         b.pop();
 
+        // ---- 12-TECH §8.1：v0.0.2 新增 4 组，按字母序追加在文件末尾 ----
+        b.push("molotov");
+        molotovEffectRadius = b.comment("D-58：落点球半径；球内每个「上表面接触空气」的方块独立掷一次")
+                .translation(tr("molotov.effectRadius"))
+                .defineInRange("effectRadius", 4.0, 0.0, 16.0);
+        molotovFireChance = b.comment("D-58：每格放火的概率（%）；余下的百分比自动放岩浆块，不设第二个键（A-01）")
+                .translation(tr("molotov.fireChance"))
+                .defineInRange("fireChance", 85.0, 0.0, 100.0);
+        molotovTriggerExplosionPower = b.comment("D-58：落点触发爆炸的威力；0 = 只当落点触发器（A-10：任何威力都不破坏方块）")
+                .translation(tr("molotov.triggerExplosionPower"))
+                .defineInRange("triggerExplosionPower", 0, 0, 100);
+        b.pop();
+
+        b.push("wild_apple");
+        wildAppleNutrition = b.comment("D-54：营养值（取原版金苹果同值）")
+                .translation(tr("wild_apple.nutrition"))
+                .defineInRange("nutrition", 4, 0, 20);
+        wildAppleSaturationModifier = b.comment("D-54：饱和度修正（取原版金苹果同值）")
+                .translation(tr("wild_apple.saturationModifier"))
+                .defineInRange("saturationModifier", 1.2, 0.0, 10.0);
+        b.pop();
+
+        b.push("wild_hunter");
+        wildHunterDurationTicks = b.comment("效果基础时长（700 刻 = 35 秒）；狂野苹果授予的就是这个时长（A-02）")
+                .translation(tr("wild_hunter.durationTicks"))
+                .defineInRange("durationTicks", 700, 1, 72000);
+        wildHunterKillExtensionTicks = b.comment("D-74：效果期间每击杀一个生物的续时（160 刻 = 8 秒，无次数上限）")
+                .translation(tr("wild_hunter.killExtensionTicks"))
+                .defineInRange("killExtensionTicks", 160, 0, 72000);
+        wildHunterKillHealPoints = b.comment("D-74：每次击杀回复的生命点数")
+                .translation(tr("wild_hunter.killHealPoints"))
+                .defineInRange("killHealPoints", 10.0, 0.0, 40.0);
+        wildHunterSearchRadius = b.comment("D-64：索敌球半径")
+                .translation(tr("wild_hunter.searchRadius"))
+                .defineInRange("searchRadius", 5.0, 0.0, 32.0);
+        wildHunterSearchAngleDegrees = b.comment("D-64：候选与视线方向的夹角上限")
+                .translation(tr("wild_hunter.searchAngleDegrees"))
+                .defineInRange("searchAngleDegrees", 30.0, 0.0, 180.0);
+        wildHunterDashTicks = b.comment("D-65：吸附冲刺跨越到位所用的刻数")
+                .translation(tr("wild_hunter.dashTicks"))
+                .defineInRange("dashTicks", 3, 1, 20);
+        wildHunterSpeedBonusPercent = b.comment("移动速度加成（%）")
+                .translation(tr("wild_hunter.speedBonusPercent"))
+                .defineInRange("speedBonusPercent", 30.0, 0.0, 1000.0);
+        wildHunterAttackSpeedBonusPercent = b.comment("攻击速度加成（%）")
+                .translation(tr("wild_hunter.attackSpeedBonusPercent"))
+                .defineInRange("attackSpeedBonusPercent", 30.0, 0.0, 1000.0);
+        wildHunterAttackDamageBonusPercent = b.comment("攻击伤害加成（%）")
+                .translation(tr("wild_hunter.attackDamageBonusPercent"))
+                .defineInRange("attackDamageBonusPercent", 40.0, 0.0, 1000.0);
+        wildHunterHighlightRadius = b.comment("D-62：红色剪影的最大距离")
+                .translation(tr("wild_hunter.highlightRadius"))
+                .defineInRange("highlightRadius", 64.0, 0.0, 256.0);
+        wildHunterLoopSoundRange = b.comment("D-76：循环音的可听距离")
+                .translation(tr("wild_hunter.loopSoundRange"))
+                .defineInRange("loopSoundRange", 16.0, 0.0, 64.0);
+        b.pop();
+
+        b.push("zangief_cane");
+        zangiefCaneTriggerRadius = b.comment("D-73：触发球半径（球形欧氏距离）")
+                .translation(tr("zangief_cane.triggerRadius"))
+                .defineInRange("triggerRadius", 1.5, 0.0, 8.0);
+        zangiefCaneStageDelayTicks = b.comment("D-69：相位 0（已倒转、等待漂浮）的时长")
+                .translation(tr("zangief_cane.stageDelayTicks"))
+                .defineInRange("stageDelayTicks", 14, 0, 200);
+        zangiefCaneLevitationLevel = b.comment("D-69：漂浮等级；amplifier = 等级 − 1 = 6")
+                .translation(tr("zangief_cane.levitationLevel"))
+                .defineInRange("levitationLevel", 7, 1, 255);
+        zangiefCaneLevitationDurationTicks = b.comment("D-69：漂浮时长 = 相位 1 时长")
+                .translation(tr("zangief_cane.levitationDurationTicks"))
+                .defineInRange("levitationDurationTicks", 20, 0, 72000);
+        zangiefCaneFallTicks = b.comment("相位 2 目标落地时长（刻）；服务端逐刻伺服向下速度以落在该时长内（A-03）")
+                .translation(tr("zangief_cane.fallTicks"))
+                .defineInRange("fallTicks", 40, 1, 200);
+        zangiefCaneSpinDegreesPerTick = b.comment("D-70：相位 2 水平自转（72 × 20 = 1440 度/秒，方向固定逆时针）")
+                .translation(tr("zangief_cane.spinDegreesPerTick"))
+                .defineInRange("spinDegreesPerTick", 72.0, 0.0, 360.0);
+        b.pop();
+
         SPEC = b.build();
     }
 
@@ -675,6 +792,15 @@ public final class FarmstormConfig {
         grenadeResistThreshold = explosionGrenadeResistThreshold.get();
         untamedFallback = teamsUntamedFallback.get();
         luckyPermille = bakeLuckyPermille();
+        fireChance = molotovFireChance.get();
+        wildHunterSpeedBonus = wildHunterSpeedBonusPercent.get();
+        wildHunterAttackSpeedBonus = wildHunterAttackSpeedBonusPercent.get();
+        wildHunterAttackDamageBonus = wildHunterAttackDamageBonusPercent.get();
+        // 每次加载 / 重载打一行，把派生快照的真值摊开：/reload 之后靠它证明快照重算过（F-61 验收 3）。
+        Farmstorm.LOGGER.info("bake() 派生快照：molotov.fireChance={}%（余下 {}% 归岩浆块）；"
+                        + "wild_hunter 加成 移速 {}% / 攻速 {}% / 攻击 {}%；爆炸抗性阈值 {} / {}；无队伍降级 {}",
+                fireChance, 100.0 - fireChance, wildHunterSpeedBonus, wildHunterAttackSpeedBonus,
+                wildHunterAttackDamageBonus, sliceResistThreshold, grenadeResistThreshold, untamedFallback);
     }
 
     public static void onLoading(ModConfigEvent.Loading event) {
@@ -738,6 +864,26 @@ public final class FarmstormConfig {
     /** G-8 口径快照，供 ScoreboardTeamResolver 在触发瞬间读取。 */
     public static String untamedFallback() {
         return untamedFallback;
+    }
+
+    /** molotov 放火概率的百分数快照；余下的百分比自动归岩浆块（A-01，落点结算见 MolotovProjectile）。 */
+    public static double fireChance() {
+        return fireChance;
+    }
+
+    /** 狂野猎人移动速度加成的百分数快照（{@code wild_hunter.speedBonusPercent}）。 */
+    public static double wildHunterSpeedBonus() {
+        return wildHunterSpeedBonus;
+    }
+
+    /** 狂野猎人攻击速度加成的百分数快照（{@code wild_hunter.attackSpeedBonusPercent}）。 */
+    public static double wildHunterAttackSpeedBonus() {
+        return wildHunterAttackSpeedBonus;
+    }
+
+    /** 狂野猎人攻击伤害加成的百分数快照（{@code wild_hunter.attackDamageBonusPercent}）。 */
+    public static double wildHunterAttackDamageBonus() {
+        return wildHunterAttackDamageBonus;
     }
 
     /**

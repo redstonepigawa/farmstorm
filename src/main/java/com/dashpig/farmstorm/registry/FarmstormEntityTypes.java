@@ -4,8 +4,10 @@ import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.entity.TurretBullet;
 import com.dashpig.farmstorm.entity.thrown.BambooFirecrackerProjectile;
 import com.dashpig.farmstorm.entity.thrown.BrownMushroomPuffProjectile;
+import com.dashpig.farmstorm.entity.thrown.CompressedPuffedWheatProjectile;
 import com.dashpig.farmstorm.entity.thrown.MelonGrenadeProjectile;
 import com.dashpig.farmstorm.entity.thrown.MelonSliceProjectile;
+import com.dashpig.farmstorm.entity.thrown.MolotovProjectile;
 import com.dashpig.farmstorm.entity.thrown.PuffedWheatProjectile;
 import com.dashpig.farmstorm.entity.thrown.RedMushroomPuffProjectile;
 import com.dashpig.farmstorm.entity.thrown.ToxicUbiServerProjectile;
@@ -17,7 +19,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 9 个实体类型（TECH §3.4）：8 个投掷物 + 1 个炮台导弹。
+ * 11 个实体类型（TECH §3.4）：10 个投掷物 + 1 个炮台导弹。
  * 全部 MISC、投影 0.25 格（导弹 0.3）、tracking 4 格、每 10 tick 同步一次。
  */
 public final class FarmstormEntityTypes {
@@ -40,6 +42,12 @@ public final class FarmstormEntityTypes {
             projectile("red_mushroom_puff", RedMushroomPuffProjectile::new);
     public static final DeferredHolder<EntityType<?>, EntityType<BrownMushroomPuffProjectile>> BROWN_MUSHROOM_PUFF =
             projectile("brown_mushroom_puff", BrownMushroomPuffProjectile::new);
+
+    // v0.0.2 的两条（TECH §2.2 #8/#9）：参数与上面 8 个逐字一致，行为分别在 F-69 / F-68。
+    public static final DeferredHolder<EntityType<?>, EntityType<MolotovProjectile>> MOLOTOV =
+            projectile("molotov", MolotovProjectile::new);
+    public static final DeferredHolder<EntityType<?>, EntityType<CompressedPuffedWheatProjectile>> COMPRESSED_PUFFED_WHEAT =
+            projectile("compressed_puffed_wheat", CompressedPuffedWheatProjectile::new);
 
     public static final DeferredHolder<EntityType<?>, EntityType<TurretBullet>> TURRET_BULLET =
             REGISTER.register("turret_bullet", () -> EntityType.Builder

@@ -5,6 +5,7 @@ import com.dashpig.farmstorm.event.FarmstormGameEvents;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.registry.FarmstormBlocks;
 import com.dashpig.farmstorm.registry.FarmstormCreativeTabs;
+import com.dashpig.farmstorm.registry.FarmstormDamageTypes;
 import com.dashpig.farmstorm.registry.FarmstormDataComponents;
 import com.dashpig.farmstorm.registry.FarmstormEntityTypes;
 import com.dashpig.farmstorm.registry.FarmstormItems;
@@ -16,6 +17,8 @@ import com.dashpig.farmstorm.team.ScoreboardTeamResolver;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.dashpig.farmstorm.util.CropProfile;
 import com.dashpig.farmstorm.util.DistanceMetrics;
+import java.util.List;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -60,6 +63,7 @@ public final class Farmstorm {
         FarmstormGameEvents.register(NeoForge.EVENT_BUS);
 
         logSelfCheck();
+        logRegistrySelfCheck();
         LOGGER.info("Farmstorm loading");
     }
 
@@ -108,6 +112,47 @@ public final class Farmstorm {
                         || profile == CropProfile.COMPRESSED_PUFFED_WHEAT);
         LOGGER.info("自检 幸运浆果池 {} 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ {}",
                 poolSize, poolOk ? "OK" : "FAIL");
+    }
+
+    /**
+     * 注册对象自检（F-66 / TECH §11 #2）：64 → 77 的那 12 类**当场数**（各 DeferredRegister 的条目数），
+     * 相加不等于 77、或任何一类的条目数与 §2.1 的小计不符，就打 FAIL——不写死常量再自己跟自己比。
+     * 伤害类型是数据驱动（R-02：代码侧只有 ResourceKey、没有 DeferredRegister），
+     * 因此这一类数的是 {@link FarmstormDamageTypes} 里声明的静态 ResourceKey 常量本身。
+     */
+    private static void logRegistrySelfCheck() {
+        int items = FarmstormItems.REGISTER.getEntries().size();
+        int blocks = FarmstormBlocks.REGISTER.getEntries().size();
+        int blockEntities = FarmstormBlockEntities.REGISTER.getEntries().size();
+        int entityTypes = FarmstormEntityTypes.REGISTER.getEntries().size();
+        int mobEffects = FarmstormMobEffects.REGISTER.getEntries().size();
+        int soundEvents = FarmstormSounds.REGISTER.getEntries().size();
+        int recipeTypes = FarmstormRecipes.TYPE_REGISTER.getEntries().size();
+        int recipeSerializers = FarmstormRecipes.SERIALIZER_REGISTER.getEntries().size();
+        int creativeTabs = FarmstormCreativeTabs.REGISTER.getEntries().size();
+        int damageTypes = damageTypeCount();
+        int dataComponents = FarmstormDataComponents.REGISTER.getEntries().size();
+        int menuTypes = FarmstormMenus.REGISTER.getEntries().size();
+        int total = items + blocks + blockEntities + entityTypes + mobEffects + soundEvents + recipeTypes
+                + recipeSerializers + creativeTabs + damageTypes + dataComponents + menuTypes;
+        boolean ok = total == 77
+                && items == 27 && blocks == 22 && blockEntities == 6 && entityTypes == 11
+                && mobEffects == 2 && soundEvents == 2 && recipeTypes == 1 && recipeSerializers == 1
+                && creativeTabs == 1 && damageTypes == 2 && dataComponents == 1 && menuTypes == 1;
+        LOGGER.info("自检 注册对象 {} 个：items {} / blocks {} / block_entities {} / entity_types {} / mob_effects {} / "
+                        + "sound_events {} / recipe_types {} / recipe_serializers {} / creative_tabs {} / damage_types {} / "
+                        + "data_components {} / menu_types {} → {}",
+                total, items, blocks, blockEntities, entityTypes, mobEffects, soundEvents, recipeTypes,
+                recipeSerializers, creativeTabs, damageTypes, dataComponents, menuTypes, ok ? "OK" : "FAIL");
+    }
+
+    /**
+     * 数据驱动的伤害类型没有 DeferredRegister，只能把声明出来的 ResourceKey 逐个列出来数。
+     * <p>新增伤害类型时**必须**同时加进这个列表：总数 77 的断言会因此失败，不会静默漂移。
+     * 不用反射，是因为 {@code getDeclaredFields()} 依赖字段形状，改名或换个同类型常量都会悄悄改变结果。
+     */
+    private static int damageTypeCount() {
+        return List.of(FarmstormDamageTypes.CROP_BLAST, FarmstormDamageTypes.VOID_BOLT).size();
     }
 
     /** 1.21 起 ResourceLocation 构造器私有，统一走这个入口（TECH §4.1）。 */

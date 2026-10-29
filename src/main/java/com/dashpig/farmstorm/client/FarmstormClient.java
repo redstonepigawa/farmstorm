@@ -20,7 +20,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
  */
 @EventBusSubscriber(modid = Farmstorm.MOD_ID, value = Dist.CLIENT)
 public final class FarmstormClient {
-    /** 9 个实体类型（8 投掷物 + 1 炮台导弹），顺序即日志顺序；自检用（FIX-1）。 */
+    /** 11 个实体类型（10 投掷物 + 1 炮台导弹），顺序即日志顺序；自检用（FIX-1）。 */
     private static final List<DeferredHolder<EntityType<?>, ? extends EntityType<?>>> ALL_ENTITY_TYPES = List.of(
             FarmstormEntityTypes.PUFFED_WHEAT,
             FarmstormEntityTypes.UBI_SERVER,
@@ -30,6 +30,8 @@ public final class FarmstormClient {
             FarmstormEntityTypes.BAMBOO_FIRECRACKER,
             FarmstormEntityTypes.RED_MUSHROOM_PUFF,
             FarmstormEntityTypes.BROWN_MUSHROOM_PUFF,
+            FarmstormEntityTypes.MOLOTOV,
+            FarmstormEntityTypes.COMPRESSED_PUFFED_WHEAT,
             FarmstormEntityTypes.TURRET_BULLET);
 
     private FarmstormClient() {}
@@ -40,8 +42,8 @@ public final class FarmstormClient {
     }
 
     /**
-     * 9 个实体类型缺一个，{@code EntityRenderDispatcher#shouldRender} 就会拿到 null 并在渲染期 NPE 崩客户端（FIX-1）。
-     * 8 个投掷物沿用原版雪球 / 鸡蛋的做法：{@link ThrownItemRenderer} 直接渲染 {@code ThrowableItemProjectile}
+     * 11 个实体类型缺一个，{@code EntityRenderDispatcher#shouldRender} 就会拿到 null 并在渲染期 NPE 崩客户端（FIX-1）。
+     * 10 个投掷物沿用原版雪球 / 鸡蛋的做法：{@link ThrownItemRenderer} 直接渲染 {@code ThrowableItemProjectile}
      * 同步过来的物品模型，因此不需要为本模组新增任何模型 JSON 或 PNG。
      */
     @SubscribeEvent
@@ -54,6 +56,8 @@ public final class FarmstormClient {
         event.registerEntityRenderer(FarmstormEntityTypes.BAMBOO_FIRECRACKER.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(FarmstormEntityTypes.RED_MUSHROOM_PUFF.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(FarmstormEntityTypes.BROWN_MUSHROOM_PUFF.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(FarmstormEntityTypes.MOLOTOV.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(FarmstormEntityTypes.COMPRESSED_PUFFED_WHEAT.get(), ThrownItemRenderer::new);
         event.registerEntityRenderer(FarmstormEntityTypes.TURRET_BULLET.get(), TurretBulletRenderer::new);
         logRendererSelfCheck();
     }

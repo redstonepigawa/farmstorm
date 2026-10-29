@@ -1,0 +1,101 @@
+[29Oct2026 14:09:46.041] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.213, --assetIndex, 17, --assetsDir, D:\\project_farm\\.tools\\gradle-home\\caches\\neoformruntime\\assets, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[29Oct2026 14:09:46.043] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[29Oct2026 14:09:46.044] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[29Oct2026 14:09:46.130] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[29Oct2026 14:09:46.238] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[29Oct2026 14:09:46.434] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[29Oct2026 14:09:46.543] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
+[29Oct2026 14:09:46.775] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 5070 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 573.22, NVIDIA Corporation
+[29Oct2026 14:09:46.866] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[29Oct2026 14:09:46.868] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.2 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[29Oct2026 14:09:47.594] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.213, --gameDir, ., --assetsDir, D:\project_farm\.tools\gradle-home\caches\neoformruntime\assets, --assetIndex, 17]
+[29Oct2026 14:09:48.980] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[29Oct2026 14:09:49.029] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[29Oct2026 14:09:49.044] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[29Oct2026 14:09:49.064] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 413 milliseconds
+[29Oct2026 14:09:49.086] [pool-5-thread-1/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[29Oct2026 14:09:54.114] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[29Oct2026 14:09:54.117] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[29Oct2026 14:09:54.120] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[29Oct2026 14:09:54.121] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[29Oct2026 14:09:54.123] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[29Oct2026 14:09:54.291] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23189!/assets/.mcassetsroot' uses unexpected schema
+[29Oct2026 14:09:54.291] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23189!/data/.mcassetsroot' uses unexpected schema
+[29Oct2026 14:09:54.314] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[29Oct2026 14:09:54.324] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
+[29Oct2026 14:09:54.395] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
+[29Oct2026 14:09:54.532] [Render thread/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[29Oct2026 14:09:54.538] [Render thread/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[29Oct2026 14:09:54.629] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[29Oct2026 14:09:54.681] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[29Oct2026 14:09:54.683] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[29Oct2026 14:09:54.683] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[29Oct2026 14:09:54.684] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[29Oct2026 14:09:54.684] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[29Oct2026 14:09:54.685] [modloading-worker-0/INFO] [farmstorm/]: 自检 注册对象 77 个：items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1 → OK
+[29Oct2026 14:09:54.685] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[29Oct2026 14:09:55.380] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
+[29Oct2026 14:09:55.520] [Render thread/INFO] [farmstorm/]: 自检 实体渲染器 11/11 → OK
+[29Oct2026 14:09:55.520] [Render thread/INFO] [farmstorm/]: 自检 已注册渲染器的实体 ID：[farmstorm:puffed_wheat, farmstorm:ubi_server, farmstorm:toxic_ubi_server, farmstorm:melon_slice_bomb, farmstorm:melon_grenade, farmstorm:bamboo_firecracker, farmstorm:red_mushroom_puff, farmstorm:brown_mushroom_puff, farmstorm:molotov, farmstorm:compressed_puffed_wheat, farmstorm:turret_bullet]
+[29Oct2026 14:09:55.694] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources, mod/farmstorm, mod/neoforge
+[29Oct2026 14:09:55.929] [Worker-Main-1/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
+[29Oct2026 14:09:56.237] [Worker-Main-1/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
+[29Oct2026 14:09:57.213] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=wall,facing=south,floating=true'
+[29Oct2026 14:09:57.214] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=ceiling,facing=north,floating=true'
+[29Oct2026 14:09:57.214] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=ceiling,facing=north,floating=false'
+[29Oct2026 14:09:57.214] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=floor,facing=south,floating=true'
+[29Oct2026 14:09:57.214] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=wall,facing=west,floating=false'
+[29Oct2026 14:09:57.214] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=floor,facing=west,floating=true'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=floor,facing=east,floating=true'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=ceiling,facing=south,floating=false'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=ceiling,facing=west,floating=true'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=ceiling,facing=east,floating=true'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=wall,facing=west,floating=true'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=floor,facing=east,floating=false'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=wall,facing=north,floating=false'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=wall,facing=east,floating=false'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=ceiling,facing=west,floating=false'
+[29Oct2026 14:09:57.216] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=floor,facing=south,floating=false'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=wall,facing=east,floating=true'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=ceiling,facing=east,floating=false'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=wall,facing=north,floating=true'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=floor,facing=north,floating=false'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=floor,facing=west,floating=false'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=ceiling,facing=south,floating=true'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=floor,facing=north,floating=true'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/zangief_cane.json' missing model for variant: 'farmstorm:zangief_cane#face=wall,facing=south,floating=false'
+[29Oct2026 14:09:57.217] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.BlockStateModelLoader/]: Exception loading blockstate definition: 'farmstorm:blockstates/compressed_hay_block.json' missing model for variant: 'farmstorm:compressed_hay_block#'
+[29Oct2026 14:09:57.221] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.ModelBakery/]: Unable to load model: 'farmstorm:item/compressed_puffed_wheat' referenced from: farmstorm:item/compressed_puffed_wheat: java.io.FileNotFoundException: farmstorm:models/item/compressed_puffed_wheat.json
+[29Oct2026 14:09:57.222] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.ModelBakery/]: Unable to load model: 'farmstorm:item/molotov' referenced from: farmstorm:item/molotov: java.io.FileNotFoundException: farmstorm:models/item/molotov.json
+[29Oct2026 14:09:57.222] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.ModelBakery/]: Unable to load model: 'farmstorm:item/wild_apple' referenced from: farmstorm:item/wild_apple: java.io.FileNotFoundException: farmstorm:models/item/wild_apple.json
+[29Oct2026 14:09:57.224] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.ModelBakery/]: Unable to load model: 'farmstorm:item/compressed_hay_block' referenced from: farmstorm:item/compressed_hay_block: java.io.FileNotFoundException: farmstorm:models/item/compressed_hay_block.json
+[29Oct2026 14:09:57.224] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.ModelBakery/]: Unable to load model: 'farmstorm:item/zangief_cane' referenced from: farmstorm:item/zangief_cane: java.io.FileNotFoundException: farmstorm:models/item/zangief_cane.json
+[29Oct2026 14:09:58.410] [Render thread/ERROR] [net.minecraft.client.sounds.SoundManager/]: Missing subtitle translation{key='subtitles.farmstorm.zangief_piledriver', args=[]} for sound event: farmstorm:zangief_piledriver
+[29Oct2026 14:09:58.411] [Render thread/ERROR] [net.minecraft.client.sounds.SoundManager/]: Missing subtitle translation{key='subtitles.farmstorm.wild_hunter_loop', args=[]} for sound event: farmstorm:wild_hunter_loop
+[29Oct2026 14:09:58.412] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
+[29Oct2026 14:09:58.412] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[29Oct2026 14:09:58.456] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on 扬声器 (DARKRIM SHADOW)
+[29Oct2026 14:09:58.456] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
+[29Oct2026 14:09:58.573] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[29Oct2026 14:09:58.579] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[29Oct2026 14:09:58.580] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[29Oct2026 14:09:58.580] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[29Oct2026 14:09:58.581] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[29Oct2026 14:09:58.583] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[29Oct2026 14:09:58.584] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[29Oct2026 14:09:58.584] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[29Oct2026 14:09:58.584] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[29Oct2026 14:09:58.653] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[29Oct2026 14:09:58.654] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[29Oct2026 14:09:58.655] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[29Oct2026 14:09:58.655] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[29Oct2026 14:09:58.655] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[29Oct2026 14:09:58.902] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[29Oct2026 14:09:59.372] [Render thread/INFO] [net.neoforged.neoforge.client.entity.animation.json.AnimationLoader/]: Loaded 0 entity animations
+[29Oct2026 14:10:39.679] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!

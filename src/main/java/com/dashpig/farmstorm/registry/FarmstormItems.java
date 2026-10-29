@@ -2,7 +2,6 @@ package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.config.FarmstormConfig;
-import com.dashpig.farmstorm.entity.ThrownCropEntity;
 import com.dashpig.farmstorm.item.DeployableCropItem;
 import com.dashpig.farmstorm.item.FoodCropItem;
 import com.dashpig.farmstorm.item.SeedItem;
@@ -13,10 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -71,7 +68,7 @@ public final class FarmstormItems {
 
     // ---- v0.0.2 新增的 4 条（TECH §2.2 #1–#4）；三条不可种植的作物因此都没有种子物品（D-51）----
     public static final DeferredItem<ThrowableCropItem> MOLOTOV = cropItem(CropProfile.MOLOTOV,
-            properties -> new ThrowableCropItem(CropProfile.MOLOTOV, projectile(CropProfile.MOLOTOV), properties));
+            properties -> new ThrowableCropItem(CropProfile.MOLOTOV, FarmstormEntityTypes.MOLOTOV::get, properties));
     public static final DeferredItem<DeployableCropItem> ZANGIEF_CANE = cropItem(CropProfile.ZANGIEF_CANE,
             properties -> new DeployableCropItem(CropProfile.ZANGIEF_CANE, FarmstormBlocks.ZANGIEF_CANE.get(), properties));
     /** 营养值与饱和度属 F-77（读 wild_apple.nutrition / wild_apple.saturationModifier），本任务只注册物品本体。 */
@@ -79,7 +76,7 @@ public final class FarmstormItems {
             properties -> new FoodCropItem(CropProfile.WILD_APPLE, properties));
     public static final DeferredItem<ThrowableCropItem> COMPRESSED_PUFFED_WHEAT = cropItem(CropProfile.COMPRESSED_PUFFED_WHEAT,
             properties -> new ThrowableCropItem(CropProfile.COMPRESSED_PUFFED_WHEAT,
-                    projectile(CropProfile.COMPRESSED_PUFFED_WHEAT), properties));
+                    FarmstormEntityTypes.COMPRESSED_PUFFED_WHEAT::get, properties));
 
     // ---- 6 个独立播种物 ----
     public static final DeferredItem<SeedItem> PUFFED_WHEAT_SEEDS = seedItem("puffed_wheat_seeds", CropProfile.PUFFED_WHEAT);
@@ -116,26 +113,6 @@ public final class FarmstormItems {
             throw new IllegalStateException("No item registered for crop " + profile.path());
         }
         return item;
-    }
-
-    /**
-     * 投掷物实体与作物物品同名（TECH §2.2 #1/#4 ↔ #8/#9）。entity_types 由 F-66 注册，
-     * 这里按注册 ID 懒取，与 {@code ThrownCropEntity#getDefaultItem()} 同一条路数：只在真正投掷时查一次。
-     */
-    private static Supplier<EntityType<? extends ThrownCropEntity>> projectile(CropProfile profile) {
-        return () -> {
-            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.get(profile.id());
-            if (!profile.id().equals(BuiltInRegistries.ENTITY_TYPE.getKey(type))) {
-                throw new IllegalStateException("No projectile entity type registered for " + profile.path());
-            }
-            return thrownProjectile(type);
-        };
-    }
-
-    /** 注册 ID 已对得上；注册工厂把类型界定在 ThrownCropEntity，因此这一次转型是恒成立的。 */
-    @SuppressWarnings("unchecked")
-    private static EntityType<? extends ThrownCropEntity> thrownProjectile(EntityType<?> type) {
-        return (EntityType<? extends ThrownCropEntity>) type;
     }
 
     private static <I extends Item> DeferredItem<I> cropItem(CropProfile profile,

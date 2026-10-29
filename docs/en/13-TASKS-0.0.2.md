@@ -1,7 +1,7 @@
 # 13 · v0.0.2 Task Breakdown & Roadmap
 
 > Project: Farmstorm · v0.0.2
-> Basis: `.work/v002-BRIEF.md` (finalized conventions) + `docs/zh/10-DECISIONS-0.0.2.md` (D-49 ~ D-78) + `docs/zh/11-DESIGN-0.0.2.md` (design specs of the 7 new features) + `docs/zh/12-TECH-0.0.2.md` (registered objects / class design / resources / config list)
+> Basis: `.work/v002-BRIEF.md` (finalized conventions) + `docs/zh/10-DECISIONS-0.0.2.md` (D-49 ~ D-79) + `docs/zh/11-DESIGN-0.0.2.md` (design specs of the 7 new features) + `docs/zh/12-TECH-0.0.2.md` (registered objects / class design / resources / config list)
 > This file breaks the 12-TECH spec into **40** tasks that can each be committed and verified independently, numbered **F-60 ~ F-99**, continuing from F-59 of `03-TASKS.md`. Phase 11 ~ Phase 15 map one-to-one onto M7 ~ M11 of `04-ROADMAP.md`.
 > Coverage: 13 new registered objects, 22 new config keys, 36 new resource files, 11 data entries (5 recipes + 3 advancements + 1 item tag + 2 spots in vanilla tags); 0 uncovered (item-by-item mapping in §9).
 > This file only reads upstream: it does not modify `03-TASKS.md`, `04-ROADMAP.md`, documents `10` / `11` / `12`, `.work/v002-BRIEF.md` or `src/`.

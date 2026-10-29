@@ -5,7 +5,7 @@
 | 文档编号 | 15-PROMPT-TASKS |
 | 版本 | v0.0.2 |
 | 读者 | 投喂编码代理的人 + 被投喂的 CLI 编码代理（Claude Code / Codex 一类） |
-| 上游 | `.work/v002-BRIEF.md`（唯一口径来源）、`docs/zh/10-DECISIONS-0.0.2.md`（D-49 ~ D-78）、`11-DESIGN-0.0.2.md`、`12-TECH-0.0.2.md`、`13-TASKS-0.0.2.md`（F-60 ~ F-99 的唯一来源） |
+| 上游 | `.work/v002-BRIEF.md`（唯一口径来源）、`docs/zh/10-DECISIONS-0.0.2.md`（D-49 ~ D-79）、`11-DESIGN-0.0.2.md`、`12-TECH-0.0.2.md`、`13-TASKS-0.0.2.md`（F-60 ~ F-99 的唯一来源） |
 | 同级 | `14-PROMPT-MAIN-0.0.2.md`（常驻主提示词；本文件**不重复**它的硬约束与完成定义） |
 | 装载方式 | 每个 Phase 投喂一次：`14-PROMPT-MAIN-0.0.2.md` 全文 + 本文件对应的那一节 |
 | 内容 | 5 个 Phase / 40 个任务（F-60 ~ F-99）；任务编号、标题、复杂度、人日、依赖逐字对齐 `13-TASKS-0.0.2.md` |

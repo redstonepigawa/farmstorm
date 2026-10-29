@@ -17,7 +17,7 @@
 |---|---|
 | Complexity tier | L2 (cross-registration layer / behavior layer / client rendering / media pipeline; multiple deliverables; 7 numbered risks) |
 | In scope for this document | Build baseline changes, per-category verification of the 77 registry objects, class design for the 13 new objects, the technical plan for three client subsystems, phase synchronization of Zangief Cane, the audio and texture pipeline, the resource and data file inventory, the full list of new config keys, the proof that the 0-packet constraint holds, the risk register RT-10…RT-16, the acceptance self-check table |
-| Out of scope for this document | Gameplay value statements (`11-DESIGN-0.0.2.md`), the itemization of D-49…D-78 (`10-DECISIONS-0.0.2.md`), task breakdown and dependency graph (`13-TASKS-0.0.2.md`), pixel drafts and the audio assets themselves (the `tools/` scripts that follow `06-TECH-SPEC.md`) |
+| Out of scope for this document | Gameplay value statements (`11-DESIGN-0.0.2.md`), the itemization of D-49…D-79 (`10-DECISIONS-0.0.2.md`), task breakdown and dependency graph (`13-TASKS-0.0.2.md`), pixel drafts and the audio assets themselves (the `tools/` scripts that follow `06-TECH-SPEC.md`) |
 | Readership | The people who will write `src/` straight from this document during implementation; and the people who verify item by item against §11 during acceptance |
 
 ### 0.2 Relation to `docs/zh/02-TECH-SPEC.md`
@@ -871,22 +871,26 @@ public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
 
 **Performance guardrail (added by this document)**: draw at most **32** entities per frame (nearest first); the rest are not drawn. Reason: `renderToBuffer` redraws the whole model, it is not a cheap outline pass, and a large brawl inside the default 64-block radius can hold hundreds of creatures.
 
-### 4.3 Input lock (D-60, only ESC survives) → RT-13
+### 4.3 Input lock (D-60 as revised by D-79, only ESC survives) → RT-13
+
+> **This section is revised by D-79.** The draft specified "cancel `InputEvent.Key`", which the sources show is **not implementable**; see `.work/FINDING-RT13-INPUT-LOCK.md` for the itemized evidence (sources taken from `neoforge-21.1.213-sources.jar`; line numbers refer to that jar).
 
 **Trigger condition**: `farmstorm:zangief_piledriver` is present on the local player, **and the amplifier is any of 0 / 1 / 2** (all three phases are inside the lock window; D-60's range is "from the trigger to just before landing").
 
-**Five events, one segment each — omitting one leaks** (the original table of BRIEF §7.3, kept word for word):
+**Seven mechanisms, one segment each — omitting one leaks** (the draft said "five events"; D-79 revises this because `InputEvent.Key` is not cancellable and the view path was missing entirely):
 
-| What to lock | Which event | How exactly |
+| What to lock | Which event / mechanism | How exactly |
 |---|---|---|
 | Movement / jump / sneak | `MovementInputUpdateEvent` | zero out `forwardImpulse` / `leftImpulse` / `jumping` / `shiftKeyDown` |
-| Attack / use | `InputEvent.InteractionKeyMappingTriggered` | `event.setCanceled(true)` |
-| Hotbar 1–9 | `InputEvent.Key` | let `GLFW_KEY_ESCAPE` through, cancel the rest |
+| Mouse left/right press | **`InputEvent.MouseButton.Pre`** | `event.setCanceled(true)`. Cancellable and runs first (`MouseHandler#onPress` returns straight away), earlier than `InteractionKeyMappingTriggered` |
+| Attack / use / **held left button mining** | `InputEvent.InteractionKeyMappingTriggered` | `event.setCanceled(true)` as the second net. `continueAttack` also fires it every tick, so it **does** stop continuous mining |
+| Hotbar 1–9 / Q / E / F / F5 | **`InputEvent.Key` + drain `consumeClick()`** | The event is **not cancellable** (`InputEvent.java:214` does not implement `ICancellableEvent`) and fires **after** `KeyMapping.set/click` (`KeyboardHandler.java:483-484` → `:485`). But `handleKeybinds()` only consumes in the tick (`Minecraft.java:1837` → `:1944`), so **draining the matching `KeyMapping.consumeClick()` inside the event is equivalent to blocking** |
 | Scroll-wheel hotbar switch | `InputEvent.MouseScrollingEvent` | cancel |
-| Inventory / chat | `ScreenEvent.Opening` | let only the ESC path through (`PauseScreen`); for the rest `setNewScreen(null)` or cancel |
+| **Mouse look** | **`CalculatePlayerTurnEvent`** | `event.setMouseSensitivity(0)` (`ClientHooks.java:368`; the setter is `CalculatePlayerTurnEvent.java:46`). **The only Mixin-free way to lock the view** |
+| Inventory / chat | `ScreenEvent.Opening` | let only `PauseScreen` through; for the rest `setNewScreen(null)` or cancel |
 
 ```java
-// client/input/InputLockHandler.java (skeleton)
+// client/input/InputLockHandler.java (skeleton, D-79 revision)
 private static boolean locked() {
     return Minecraft.getInstance().player != null
             && Minecraft.getInstance().player.hasEffect(FarmstormMobEffects.ZANGIEF_PILEDRIVER);
@@ -901,21 +905,37 @@ public static void onMovementInput(MovementInputUpdateEvent event) {
     input.jumping = false;
     input.shiftKeyDown = false;
 }
+
+// Keyboard: not cancellable, so steal the click instead (this event runs before handleKeybinds)
+@SubscribeEvent
+public static void onKey(InputEvent.Key event) {
+    if (!locked()) return;
+    Options o = Minecraft.getInstance().options;
+    for (KeyMapping hotbar : o.keyHotbarSlots) hotbar.consumeClick();
+    o.keyDrop.consumeClick();
+    o.keyInventory.consumeClick();
+    o.keySwapOffhand.consumeClick();
+    o.keyTogglePerspective.consumeClick();
+}
+
+// View: the only Mixin-free option
+@SubscribeEvent
+public static void onTurn(CalculatePlayerTurnEvent event) {
+    if (locked()) event.setMouseSensitivity(0.0D);
+}
 ```
 
 **Why the lock test is "is the effect present" and not "what is the amplifier"**: all three phases must be locked, so the single condition "present" is enough and there is one fewer number that can be written wrong. The phase number is read only where §4.1 / §4.4 need to distinguish it.
 
-**The full meaning of "ESC only"** (D-60): ESC must stay usable, because "locking ESC dead makes the player think the game has frozen". Concretely in code: in `InputEvent.Key`, `keyCode == GLFW.GLFW_KEY_ESCAPE` returns without cancelling; in `ScreenEvent.Opening`, `event.getNewScreen() instanceof PauseScreen` is let through.
+**What "ESC only" really means (D-79 revises the draft)**: the draft said "in `InputEvent.Key`, let ESC through and cancel the rest". In fact **ESC runs the `pauseGame` path inside `keyPress`, ahead of every NeoForge hook** — it takes effect whether you block it or not. So "let ESC through" is a **non-requirement**, and at the same time it means **blocking ESC is impossible**. Letting `PauseScreen` through in `ScreenEvent.Opening` is still required, otherwise the pause menu cannot even open.
 
-**Pending verification (BRIEF §7.3, verbatim)**: the relative order of `InputEvent.Key` and `KeyMapping` decides whether 1–9 can really be blocked.
+**Known limitations (not blockable without Mixin — do not record these as defects at acceptance)**: **F11 fullscreen, F2 screenshot, F3 debug, ESC pause** are all handled inside `KeyboardHandler#keyPress` **before** `ClientHooks.onKeyInput`, so no Mixin-free hook can reach them. They are outside D-60's scope.
 
-- **How to verify**: after entering the effect, **test key by key** and record: W / A / S / D / space / Shift / left button / right button / the nine digit keys 1–9 / wheel up / wheel down / E / T / slash / T / ESC. Write one line "key → blocked or not" per press.
-- **Verdict**: any key still taking effect (the character moves, the item is used, the hotbar switches, a GUI opens) means that event is hooked at the wrong level, and that path must be re-hooked to an earlier hook (for example `ScreenEvent.KeyPressed` before `InputEvent.Key`).
-- **RT attribution**: attached to **RT-13** (input interception has a gap and some key still penetrates).
+**State reset when the lock engages (added by D-79)**: if the player is **already holding the left button to mine** when the lock starts, no further "press" event arrives, `options.keyAttack.isDown()` stays true (`Minecraft.java:2035` passes exactly that into `continueAttack`) → mining continues. **The down-state must be cleared when entering the lock** (`o.keyAttack.setDown(false)`), or rely on the per-tick `InteractionKeyMappingTriggered` cancellation (`Minecraft.java:1630` does stop the actual block breaking).
 
-**Keys outside the lock scope (stated explicitly, so they are not mistaken for a missed test)**: the F1 / F2 / F3 function keys, F5 view, F11 fullscreen, and the operations inside the Esc menu. D-60's list has exactly 5 groups, and nothing outside these 5 groups is covered.
+**Settled (the former "pending verification" item)**: the relative order of `InputEvent.Key` and `KeyMapping` is now established — `onKeyInput` runs **after** `KeyMapping.click` and **before** `handleKeybinds`, so "drain the click" works while "cancel the event" does not. Evidence and reproduction steps are in `.work/FINDING-RT13-INPUT-LOCK.md`.
 
-**Release condition**: released on the **same tick** `zangief_piledriver` disappears (`locked()` queries live, there is no cache). Writing "wait for the next tick to unlock" is not allowed, otherwise the player stays locked 1 extra tick after landing, which feels like "a hitch".
+**Acceptance criteria (replacing the former key-by-key test, doing both is safer)**: besides testing each key by hand, the four **known-unblockable** keys must be re-tested and **recorded as expected** in the acceptance log, otherwise they will be mistaken for implementation defects.
 
 ### 4.4 Camera (D-59 / D-70, no risk ID assigned by BRIEF §7.4)
 
@@ -1627,7 +1647,7 @@ The numbering continues from RT-09 of `02-TECH-SPEC.md` §9. **Seven entries, co
 | **RT-10** | the mount point of the full-screen grayscale post-process does not hold | switching the render target in `RenderGuiEvent.Post` fights other mods' GUI post-processing: a fully black screen, only half the screen grayed, another mod's HUD gone; or the `ShaderInstance` registered in `RegisterShadersEvent` fails to compile | split into two passes, world + GUI (the AFTER stage of `RenderLevelStageEvent` + `RenderGuiEvent.Post`); if that still fails, fade the world only and register the degradation in the Release notes | world only + state "the GUI is not grayed" in the Release notes; if even the world pass does not hold, D-61 degrades to "fade the world only" and is registered as a known defect | ① after entering the effect, check whether the whole screen is gray (the title bar and the inventory must be gray too); ② install another mod that does GUI post-processing and check whether the two break each other; ③ check whether `[Render thread/ERROR]` lines in `latest.log` show GL or shader compile errors; ④ record the frame-time difference before and after (F3) |
 | **RT-11** | silhouette redraw recursion or frame drops | calling `EntityRenderDispatcher#render` by mistake inside `RenderLivingEvent`, causing recursion; or too many entities on screen blowing up the frame time; or `hasLineOfSight` being unavailable on the client | use `getModel().renderToBuffer` rather than a dispatcher redraw; draw only within ≤64 blocks and with line of sight | at most 32 per frame (nearest first); if that still fails, draw only the subset "distance ≤ 16 blocks" and state it in the Release notes | ① 30 creatures on screen with the effect on, check for a freeze or a frame drop > 3 ms; ② stand once in front of and once behind a wall and confirm no silhouette behind the wall; ③ confirm no silhouette beyond 65 blocks; ④ check the log for `StackOverflowError` |
 | **RT-12** | the driver of the dash displacement is misjudged, the player does not move or is pulled back | `setDeltaMovement` on the server does not produce a client displacement on `ServerPlayer`; or the client-predicted displacement is judged "moving too fast" by the server's movement validation and pulled back | client prediction + server decision; the alternative is a per-tick teleport | switch to the alternative: the server `teleportTo` ≤ 1 block per tick with collision detection; on switching, append a decision record to §4.5 | ① print a `setDeltaMovement` log line and see whether the client is displaced; ② while dashing, check `latest.log` for `moved too quickly!` / `moved wrongly!`; ③ dash at a wall and confirm the player stops in front of it without phasing through; ④ when the target is fully occupied by blocks, confirm no attraction happens |
-| **RT-13** | input interception has a gap and some key still penetrates | the relative order of `InputEvent.Key` and `KeyMapping` lets 1–9 through; or some GUI opening path does not go through `ScreenEvent.Opening` | all five events; during implementation test key by key once and keep the record | re-hook the leaking path to an earlier hook (e.g. add `ScreenEvent.KeyPressed`); if it still leaks, register "this key cannot be locked" in the Release notes | test key by key and fill the table: W/A/S/D/space/Shift/left button/right button/1–9/wheel up/wheel down/E/T/`/`/ESC, 21 items in total, recording "blocked / penetrated" for each; ESC must stay usable |
+| **RT-13** | input interception has a gap and some key still penetrates | the relative order of `InputEvent.Key` and `KeyMapping` lets 1–9 through (settled by D-79: the event is not cancellable, so its clicks are drained instead); or some GUI opening path does not go through `ScreenEvent.Opening` | all seven mechanisms (D-79); during implementation test key by key once and keep the record | re-hook the leaking path to an earlier hook (e.g. add `ScreenEvent.KeyPressed`); if it still leaks, register "this key cannot be locked" in the Release notes | test key by key and fill the table: W/A/S/D/space/Shift/left button/right button/1–9/wheel up/wheel down/E/T/`/`/ESC, 21 items in total, recording "blocked / penetrated" for each; ESC must stay usable |
 | **RT-14** | ffmpeg is not on PATH, or another machine / build has no ffmpeg with libvorbis, so the audio cannot be produced | `Get-Command ffmpeg` the script finds no usable ffmpeg — on this machine the 7.1 essentials build at `D:\dsh\default\sf6_audio\tools\ffmpeg.exe` is **usable**, while Trae CN's 6.1.1 has **no libvorbis** and is not; or the `attenuation_distance` of `sounds.json` does not mean "audible distance" on 1.21.1 | the conversion script errors out and exits when ffmpeg is missing or has no libvorbis; the audio task is scheduled first in the resource phase, so it fails early and is found early; the tool is in place and measured working (`tools/convert_media.ps1`) | pass the correct absolute `-Ffmpeg` path; on another machine, follow the guidance the script prints and use a build carrying libvorbis | ① without `-Ffmpeg` and with nothing on PATH, `-CheckOnly` must print the installation guidance and exit 1, while a usable path must report the environment as usable and exit 0; ② after a real run, check with `ffprobe` that channels = 1 and bitrate ≈ 64 kbps; ③ listen once each at 8 / 16 / 17 / 32 blocks in game; ④ use `jar tf` to confirm both `.ogg` files are inside the jar |
 | **RT-15** | the hidden MobEffect is disturbed by other mods' effect-clearing logic | a third-party mod's "clear all negative effects" (`/effect clear`, a potion, a command) strips `zangief_piledriver` early while the client stays at phase 2: the screen stays flipped forever and the keys stay locked forever | the client self-checks every tick whether "the phase effect is still there" and resets itself if not | the symmetric self-check on the server: `ACTIVE` has a record but `getEffect` is empty ⇒ `finish` + `warn`, no re-apply | ① `/effect give @s farmstorm:zangief_piledriver 10 2 false` and watch the screen flip + input lock + spin; ② after `/effect clear @s` everything must reset within 100 ms, with the log showing "state reset (effect cleared externally)"; ③ log on every phase switch and check whether the client reads `null` (the 1-tick gap of the hard switch) |
 | **RT-16** | full-screen grayscale is incompatible with shader mods (Oculus/Iris etc.) | with a shader mod installed, the grayscale pass conflicts with the shader's framebuffer chain: a fully black screen, shaders stop working, or grayscale only affects one layer before the final composite | registered in the documentation as a known incompatibility; no runtime detection | list Oculus / Iris in the "known incompatibilities" section of the Release notes and the README; no version probing, no automatic degradation | ① install Iris + any shader pack, enter the effect and check whether the screen goes black or the shaders break; ② with no shader pack installed, go back to step ① of RT-10 and confirm it is normal; ③ register it once in `12-TECH` and in this entry, and never re-check |

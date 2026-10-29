@@ -34,7 +34,7 @@ v0.0.2 走的是同一套「文档先行」流程，但深度不同：这一版�
 
 | 项 | 值 | 依据 |
 |---|---|---|
-| 新增决策 | **D-49 ~ D-78**，30 条 | `10-DECISIONS-0.0.2.md` |
+| 新增决策 | **D-49 ~ D-79**，30 条 | `10-DECISIONS-0.0.2.md` |
 | 裁决记录 | **A-01 ~ A-11**，11 条 | `13-TASKS-0.0.2.md` §0.4 + `15-PROMPT-TASKS-0.0.2.md` §0.4 |
 | 新增内容 | 7 项：转换器合成配方、莫洛托夫！、桑吉尔蔗、压缩干草块、压缩膨胀麦、狂 野 猎 人、狂野苹果 | `11-DESIGN-0.0.2.md` |
 | 任务 | **40 个**（F-60 ~ F-99），5 个 Phase（11 ~ 15） | `13-TASKS-0.0.2.md` |
@@ -266,7 +266,7 @@ v0.0.1 (implementation period, frozen — D-49):
 
 v0.0.2 delta:
 
-- `docs/en/10-DECISIONS-0.0.2.md` — **v0.0.2 source of truth**: 30 decisions (D-49…D-78), 19 crop profiles, scope clarifications for three v0.0.1 spots
+- `docs/en/10-DECISIONS-0.0.2.md` — **v0.0.2 source of truth**: 30 decisions (D-49…D-79), 19 crop profiles, scope clarifications for three v0.0.1 spots
 - `docs/en/11-DESIGN-0.0.2.md` — design delta: full specs for 7 new features, the Zangief Cane timing/phase tables, 8 sub-specs for Wild Hunter, 13 boundary cases
 - `docs/en/12-TECH-0.0.2.md` — tech delta: 77 registry objects verified, three client subsystems, 36 new resource files, 22 new config keys, RT-10…RT-16, 22 acceptance checks
 - `docs/en/13-TASKS-0.0.2.md` — 40 tasks (F-60…F-99), 5 phases, M7…M11, rulings A-01…A-09, four coverage tables

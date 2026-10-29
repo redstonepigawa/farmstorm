@@ -5,7 +5,7 @@
 | Document ID | 15-PROMPT-TASKS |
 | Version | v0.0.2 |
 | Audience | The person feeding the coding agent + the CLI coding agent being fed (Claude Code / Codex class) |
-| Upstream | `.work/v002-BRIEF.md` (the single source of wording), `docs/zh/10-DECISIONS-0.0.2.md` (D-49 ~ D-78), `11-DESIGN-0.0.2.md`, `12-TECH-0.0.2.md`, `13-TASKS-0.0.2.md` (the single source for F-60 ~ F-99) |
+| Upstream | `.work/v002-BRIEF.md` (the single source of wording), `docs/zh/10-DECISIONS-0.0.2.md` (D-49 ~ D-79), `11-DESIGN-0.0.2.md`, `12-TECH-0.0.2.md`, `13-TASKS-0.0.2.md` (the single source for F-60 ~ F-99) |
 | Peer | `14-PROMPT-MAIN-0.0.2.md` (the resident main prompt; this file does **not** repeat its hard constraints or its definition of done) |
 | Loading method | Feed once per Phase: the full text of `14-PROMPT-MAIN-0.0.2.md` + the matching section of this file |
 | Contents | 5 Phases / 40 tasks (F-60 ~ F-99); task IDs, titles, complexity, person-days, and dependencies align verbatim with `13-TASKS-0.0.2.md` |

@@ -1,7 +1,7 @@
 # 13 · v0.0.2 任务拆分与开发大纲（Task Breakdown & Roadmap）
 
 > 项目：农场风云 / Farmstorm · v0.0.2
-> 依据：`.work/v002-BRIEF.md`（口径定稿）+ `docs/zh/10-DECISIONS-0.0.2.md`（D-49 ~ D-78）+ `docs/zh/11-DESIGN-0.0.2.md`（7 个新功能的设计规格）+ `docs/zh/12-TECH-0.0.2.md`（注册对象 / 类设计 / 资源 / config 清单）
+> 依据：`.work/v002-BRIEF.md`（口径定稿）+ `docs/zh/10-DECISIONS-0.0.2.md`（D-49 ~ D-79）+ `docs/zh/11-DESIGN-0.0.2.md`（7 个新功能的设计规格）+ `docs/zh/12-TECH-0.0.2.md`（注册对象 / 类设计 / 资源 / config 清单）
 > 本文件把 12-TECH 的规格拆成 **40** 个「一次可独立提交、可独立验证」的任务，编号 **F-60 ~ F-99**，接 `03-TASKS.md` 的 F-59。Phase 11 ~ Phase 15 与 `04-ROADMAP.md` 的 M7 ~ M11 一一对应。
 > 覆盖：13 个新增注册对象、22 条新增 config 键、36 个新增资源文件、11 条数据条目（5 条配方 + 3 个进度 + 1 个物品标签 + 2 处 vanilla 标签），未覆盖 0 条（逐条对照见 §9）。
 > 本文件只读上游：不改 `03-TASKS.md`、`04-ROADMAP.md`、`10` / `11` / `12` 号文件、`.work/v002-BRIEF.md` 与 `src/`。

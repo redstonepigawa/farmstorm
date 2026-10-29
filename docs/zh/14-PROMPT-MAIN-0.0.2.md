@@ -7,7 +7,7 @@
 | 文档编号 | 14-PROMPT-MAIN-0.0.2 |
 | 版本 | v0.0.2 |
 | 读者 | CLI 编码代理（能读写仓库、能跑 `.tools\gw.cmd`） |
-| 上游 | `docs/zh/10-DECISIONS-0.0.2.md`（v0.0.2 唯一真相源，D-49 ~ D-78）、`11-DESIGN-0.0.2.md`、`12-TECH-0.0.2.md`、`13-TASKS-0.0.2.md`；施工期摊平稿 `.work/v002-BRIEF.md` |
+| 上游 | `docs/zh/10-DECISIONS-0.0.2.md`（v0.0.2 唯一真相源，D-49 ~ D-79）、`11-DESIGN-0.0.2.md`、`12-TECH-0.0.2.md`、`13-TASKS-0.0.2.md`；施工期摊平稿 `.work/v002-BRIEF.md` |
 | 同级 | `15-PROMPT-TASKS-0.0.2.md`（分阶段任务清单，**不在本文件**） |
 | 装载方式 | 本文件**只投一次**，随第一个 Phase 的任务书一起给，之后常驻；任务书一次只投一个 Phase |
 

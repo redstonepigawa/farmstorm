@@ -17,7 +17,7 @@
 |---|---|
 | 复杂度档位 | L2（跨注册层 / 行为层 / 客户端渲染 / 媒体管线，多交付物，含 7 条编号风险） |
 | 本文负责 | 构建基线变更、77 个注册对象的逐类核对、13 个新增对象的类设计、三个客户端子系统的技术方案、桑吉尔蔗相位同步、音频与贴图管线、资源与数据文件清单、config 新增键全量清单、0 包约束的维持证明、风险登记册 RT-10…RT-16、验收自检表 |
-| 本文不负责 | 玩法数值的策划表述（`11-DESIGN-0.0.2.md`）、D-49…D-78 的逐条成行（`10-DECISIONS-0.0.2.md`）、任务拆分与依赖图（`13-TASKS-0.0.2.md`）、像素稿与音频素材本体（`06-TECH-SPEC.md` 后的 `tools/` 脚本） |
+| 本文不负责 | 玩法数值的策划表述（`11-DESIGN-0.0.2.md`）、D-49…D-79 的逐条成行（`10-DECISIONS-0.0.2.md`）、任务拆分与依赖图（`13-TASKS-0.0.2.md`）、像素稿与音频素材本体（`06-TECH-SPEC.md` 后的 `tools/` 脚本） |
 | 读者 | 实现阶段直接照本文写 `src/` 的人；以及验收阶段按 §11 逐条核对的人 |
 
 ### 0.2 与 `docs/zh/02-TECH-SPEC.md` 的关系
@@ -870,22 +870,26 @@ public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
 
 **性能护栏（本文补充）**：每帧最多画 **32** 只（按距离近的优先），超出的不画。理由：`renderToBuffer` 是整模型重绘，不是便宜的描边 pass；默认 64 格半径里的一次大乱斗可能有上百只生物。
 
-### 4.3 输入锁（D-60，只留 ESC）→ RT-13
+### 4.3 输入锁（D-60 经 D-79 修订，只留 ESC）→ RT-13
+
+> **本节已由 D-79 修订**。原稿按「`InputEvent.Key` 取消」写，经源码核实**该方案不成立**；逐条证据见 `.work/FINDING-RT13-INPUT-LOCK.md`（源码取自 `neoforge-21.1.213-sources.jar`，行号为该 jar 内行号）。
 
 **触发条件**：本地玩家身上存在 `farmstorm:zangief_piledriver`，**且 amplifier 是 0 / 1 / 2 的任意一个**（三个相位都在锁定期内，D-60 的范围是「从触发到落地前」）。
 
-**五个事件各管一段，缺一个就会漏**（BRIEF §7.3 原表，逐字保留）：
+**七个机制各管一段，缺一个就会漏**（原稿写「五个事件」，D-79 修订：`InputEvent.Key` 不可取消、且视角那一路原先没有）：
 
-| 要锁的 | 用哪个事件 | 具体做法 |
+| 要锁的 | 用哪个事件/手段 | 具体做法 |
 |---|---|---|
 | 移动 / 跳跃 / 潜行 | `MovementInputUpdateEvent` | 把 `forwardImpulse` / `leftImpulse` / `jumping` / `shiftKeyDown` 全部清零 |
-| 攻击 / 使用 | `InputEvent.InteractionKeyMappingTriggered` | `event.setCanceled(true)` |
-| 快捷栏 1–9 | `InputEvent.Key` | 放行 `GLFW_KEY_ESCAPE`，其余取消 |
+| 鼠标左/右键按下 | **`InputEvent.MouseButton.Pre`** | `event.setCanceled(true)`。可取消且最先执行（`MouseHandler#onPress` 回调入口直接 return），比 `InteractionKeyMappingTriggered` 更早 |
+| 攻击 / 使用 / **按住左键持续挖掘** | `InputEvent.InteractionKeyMappingTriggered` | `event.setCanceled(true)`，作第二道网。`continueAttack` 每 tick 也会 fire 它，因此**能拦住持续挖掘** |
+| 快捷栏 1–9 / Q / E / F / F5 | **`InputEvent.Key` + 抽干 `consumeClick()`** | 该事件**不可取消**（`InputEvent.java:214` 未实现 `ICancellableEvent`），且触发在 `KeyMapping.set/click` **之后**（`KeyboardHandler.java:483-484` → `:485`）。但 `handleKeybinds()` 要到 tick 里才消费（`Minecraft.java:1837` → `:1944`），所以**在事件里把对应 `KeyMapping.consumeClick()` 抽干，等于拦截** |
 | 滚轮切栏 | `InputEvent.MouseScrollingEvent` | 取消 |
-| 背包 / 聊天 | `ScreenEvent.Opening` | 只放行 ESC 路径（`PauseScreen`），其余 `setNewScreen(null)` 或取消 |
+| **鼠标转视角** | **`CalculatePlayerTurnEvent`** | `event.setMouseSensitivity(0)`（`ClientHooks.java:368`，事件方法见 `CalculatePlayerTurnEvent.java:46`）。**这是唯一无 Mixin 的视角锁** |
+| 背包 / 聊天 | `ScreenEvent.Opening` | 只放行 `PauseScreen`，其余 `setNewScreen(null)` 或取消 |
 
 ```java
-// client/input/InputLockHandler.java（骨架）
+// client/input/InputLockHandler.java（骨架，D-79 版）
 private static boolean locked() {
     return Minecraft.getInstance().player != null
             && Minecraft.getInstance().player.hasEffect(FarmstormMobEffects.ZANGIEF_PILEDRIVER);
@@ -900,21 +904,37 @@ public static void onMovementInput(MovementInputUpdateEvent event) {
     input.jumping = false;
     input.shiftKeyDown = false;
 }
+
+// 键盘：不可取消，只能抢消费（必须在 handleKeybinds 之前跑完，本事件满足）
+@SubscribeEvent
+public static void onKey(InputEvent.Key event) {
+    if (!locked()) return;
+    Options o = Minecraft.getInstance().options;
+    for (KeyMapping hotbar : o.keyHotbarSlots) hotbar.consumeClick();
+    o.keyDrop.consumeClick();
+    o.keyInventory.consumeClick();
+    o.keySwapOffhand.consumeClick();
+    o.keyTogglePerspective.consumeClick();
+}
+
+// 视角：唯一可行的无 Mixin 手法
+@SubscribeEvent
+public static void onTurn(CalculatePlayerTurnEvent event) {
+    if (locked()) event.setMouseSensitivity(0.0D);
+}
 ```
 
 **为什么锁定判据是「效果在不在」而不是「amplifier 等于几」**：三个相位都要锁，用「在不在」一个条件就够，少一个可能写错的数字。相位号只在 §4.1 / §4.4 需要区分的地方才读。
 
-**只留 ESC 的完整含义**（D-60）：ESC 必须可用，因为「锁死 ESC 会让玩家以为游戏卡死」。具体到代码：`InputEvent.Key` 里 `keyCode == GLFW.GLFW_KEY_ESCAPE` 直接 return 不取消；`ScreenEvent.Opening` 里 `event.getNewScreen() instanceof PauseScreen` 放行。
+**ESC 的正确说法（D-79 修订原稿）**：原稿写「`InputEvent.Key` 里放行 ESC，其余取消」。实际上 **ESC 走的是 `keyPress` 内部的 `pauseGame` 流程，位置在所有 NeoForge 钩子之前**——拦不拦它都会生效。所以「放行 ESC」是**伪需求**，但同时意味着**想拦 ESC 也做不到**。`ScreenEvent.Opening` 里放行 `PauseScreen` 仍然需要（否则暂停菜单都打不开）。
 
-**待验证（BRIEF §7.3 原文）**：`InputEvent.Key` 与 `KeyMapping` 的先后顺序决定了 1–9 是否真能拦住。
+**已知限制（无 Mixin 拦不住，验收时不要当缺陷）**：**F11 全屏、F2 截图、F3 调试、ESC 暂停**——这四类在 `KeyboardHandler#keyPress` 内部、`ClientHooks.onKeyInput` **之前**就已执行完，任何 Mixin-free 钩子都够不着。D-60 的范围不含它们。
 
-- **怎么验**：进效果后**逐键手测**并记录：W / A / S / D / 空格 / Shift / 左键 / 右键 / 1–9 九个数字键 / 滚轮上 / 滚轮下 / E / T / 斜杠 / T / ESC。每按一个记一行「键 → 是否被拦」。
-- **判定**：任意一键仍生效（人物动了、物品用了、快捷栏换了、GUI 开了）即视为该事件挂错层级，需要把这一路改挂到更靠前的钩子（例如 `InputEvent.Key` 之前再加 `ScreenEvent.KeyPressed`）。
-- **RT 归属**：挂 **RT-13**（输入拦截有遗漏，某个键仍能穿透）。
+**锁定生效瞬间的状态复位（D-79 新增）**：若玩家在**按住左键挖掘的中途**被进入锁定，此后不会再有新的「按下」事件，`options.keyAttack.isDown()` 保持 true（`Minecraft.java:2035` 的 `continueAttack` 入参就是它）→ 挖掘不断。**必须在进入锁定时主动清零**（`o.keyAttack.setDown(false)`）；或者依赖 `InteractionKeyMappingTriggered` 的逐 tick 取消（`Minecraft.java:1630` 那条能拦住实际破坏）。
 
-**不在锁定范围的按键（明确写出来，免得被当成漏测）**：F1 / F2 / F3 功能键、F5 视角、F11 全屏、Esc 菜单里的操作。D-60 的清单只有 5 组，这 5 组之外不管。
+**已定论（原「待验证」条目的结论）**：`InputEvent.Key` 与 `KeyMapping` 的先后顺序已核实——`onKeyInput` 在 `KeyMapping.click` **之后**、`handleKeybinds` **之前**，因此「抽干消费」这条路成立；但「取消」这条路不成立。逐条证据与复现方式见 `.work/FINDING-RT13-INPUT-LOCK.md`。
 
-**解除条件**：`zangief_piledriver` 消失的**同一 tick** 就解除（`locked()` 是现查，没有缓存）。不许用「等下一次 tick 再解锁」的写法，否则落地后会多锁 1 刻，手感上是「卡了一下」。
+**验收口径（替代原「逐键手测」，两者都做更稳）**：除逐键手测外，必须复测下面四类**已知拦不住**的键并**在验收记录里写明属预期**，否则会被误判成实现缺陷。
 
 ### 4.4 相机（D-59 / D-70，BRIEF §7.4 未分配风险编号）
 
@@ -1627,7 +1647,7 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | **RT-10** | 整屏灰度后处理的挂载点不成立 | `RenderGuiEvent.Post` 里切换 render target 与其它模组的 GUI 后处理打架：画面全黑、只灰半个屏、其它模组 HUD 消失；或 `RegisterShadersEvent` 注册的 `ShaderInstance` 编译失败 | 拆成世界 + GUI 两次 pass（`RenderLevelStageEvent` 的 AFTER 阶段 + `RenderGuiEvent.Post`）；再不行只灰世界并在 Release 说明里降级登记 | 只灰世界 + 在 Release 说明写明「GUI 不灰」；若连世界 pass 都不成立，D-61 降级为「只褪世界」并登记为已知缺陷 | ① 进效果后看是否整屏灰度（标题栏与物品栏也必须灰）；② 同屏开另一个做 GUI 后处理的模组，看是否互相破坏；③ `latest.log` 里 `[Render thread/ERROR]` 是否出现 GL 或 shader 编译错误；④ 记录帧时间（F3）前后差 |
 | **RT-11** | 剪影重绘递归或掉帧 | 在 `RenderLivingEvent` 里误调 `EntityRenderDispatcher#render` 导致递归；或同屏生物过多导致帧时间暴涨；或 `hasLineOfSight` 在客户端不可用 | 用 `getModel().renderToBuffer` 而非 dispatcher 重绘；≤64 格 + 视线才画 | 同帧最多 32 只（按距离近的优先）；仍不行则只画「距离 ≤ 16 格」的一个子集，并在 Release 说明写明 | ① 30 只生物同屏 + 效果开启，看是否卡死或掉帧 > 3 ms；② 墙前 / 墙后各站一次，确认墙后无剪影；③ 65 格外确认无剪影；④ 看日志有无 `StackOverflowError` |
 | **RT-12** | 冲刺位移的驱动方判错，玩家不动或被拉回 | 服务端 `setDeltaMovement` 对 `ServerPlayer` 不产生客户端位移；或客户端预测位移被服务端的移动校验判成「移动过快」而拉回 | 走客户端预测 + 服务端判定；备选逐刻 teleport | 切到备选：服务端每刻 `teleportTo` ≤ 1 格、带碰撞检测；切换时在 §4.5 追加决策记录 | ① 打一条 `setDeltaMovement` 日志看客户端是否位移；② 冲刺时看 `latest.log` 有无 `moved too quickly!` / `moved wrongly!`；③ 对着墙冲刺确认停在墙前不穿墙；④ 目标被方块完全占据时确认本次不吸附 |
-| **RT-13** | 输入拦截有遗漏，某个键仍能穿透 | `InputEvent.Key` 与 `KeyMapping` 的先后顺序导致 1–9 没拦住；或某个 GUI 打开路径没走 `ScreenEvent.Opening` | 五个事件全上；实现阶段逐键手测一遍并留记录 | 对漏掉的那一路改挂更靠前的钩子（如再加 `ScreenEvent.KeyPressed`）；仍漏则在 Release 说明登记「该键不可锁」 | 逐键手测并填表：W/A/S/D/空格/Shift/左键/右键/1–9/滚轮上/滚轮下/E/T/`/`/ESC 共 21 项，每项记「拦住 / 穿透」；ESC 必须可用 |
+| **RT-13** | 输入拦截有遗漏，某个键仍能穿透 | `InputEvent.Key` 与 `KeyMapping` 的先后顺序导致 1–9 没拦住（**已定论**，见 D-79：该事件不可取消，改为抽干消费）；或某个 GUI 打开路径没走 `ScreenEvent.Opening` | 七个机制全上（D-79）；实现阶段逐键手测一遍并留记录 | 对漏掉的那一路改挂更靠前的钩子（如再加 `ScreenEvent.KeyPressed`）；仍漏则在 Release 说明登记「该键不可锁」 | 逐键手测并填表：W/A/S/D/空格/Shift/左键/右键/1–9/滚轮上/滚轮下/E/T/`/`/ESC 共 21 项，每项记「拦住 / 穿透」；ESC 必须可用 |
 | **RT-14** | ffmpeg 不在 PATH 上，或换机器 / 换构建后拿不到带 libvorbis 的 ffmpeg，音频产不出来 | 脚本拿不到可用 ffmpeg——本机现状：7.1 essentials 在 `D:\dsh\default\sf6_audio\tools\ffmpeg.exe`，**可用**；Trae CN 的 6.1.1 **无 libvorbis** 不可用；或 `sounds.json` 的 `attenuation_distance` 在 1.21.1 上语义不是「可听距离」 | 转换脚本缺 ffmpeg 或 ffmpeg 无 libvorbis 一律直接报错退出；音频任务排在资源阶段最前，早失败早发现；工具已就位并实测通过（`tools/convert_media.ps1`） | 传对 `-Ffmpeg` 绝对路径即可；换机器时按脚本打印的安装指引装一个带 libvorbis 的构建 | ① 不传 `-Ffmpeg` 且 PATH 上没有时必须打印安装指引并退出码 1，传入可用路径时打印环境可用并退出码 0；② 真跑后 `ffprobe` 回读校验声道 = 1、码率 ≈ 64 kbps；③ 游戏内站 8 / 16 / 17 / 32 格各听一次；④ `jar tf` 确认两个 `.ogg` 在 jar 里 |
 | **RT-15** | 隐藏 MobEffect 被其它模组的效果清理逻辑干扰 | 第三方模组「清除全部负面效果」（`/effect clear`、药水、命令）把 `zangief_piledriver` 提前清掉，客户端仍停在相位 2：画面永远倒着、键永远锁着 | 客户端每 tick 自检「阶段效果还在不在」，不在就自己复位 | 服务端一侧对称自检：`ACTIVE` 有记录但 `getEffect` 为空 ⇒ `finish` + `warn`，不重新施加 | ① `/effect give @s farmstorm:zangief_piledriver 10 2 false` 看画面倒转 + 输入锁 + 自转；② `/effect clear @s` 后 100 ms 内必须全部复位，日志出现「状态复位（效果被外部清除）」；③ 相位切换打日志看客户端是否读到 `null`（硬切换的 1 tick 空窗） |
 | **RT-16** | 整屏灰度与光影类模组（Oculus/Iris 等）不兼容 | 装了光影类模组时，灰度 pass 与光影的 framebuffer 链冲突：画面全黑、光影失效、或灰度只作用于最终合成前的一层 | 文档登记为已知不兼容，不做运行时检测 | Release 说明与 README 的「已知不兼容」节列出 Oculus / Iris；不做版本探测、不做自动降级 | ① 装 Iris + 任一光影，进效果看画面是否全黑或光影失效；② 不装光影时回到 RT-10 的第 ① 步确认正常；③ 在 `12-TECH` 与本条登记一次，不再复查 |

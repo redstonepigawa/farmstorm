@@ -1,6 +1,6 @@
 # 10 · v0.0.2 Decision Record
 
-> This file is the single source of truth for 'Farmstorm' v0.0.2: its numbering continues `00-DECISIONS.md` from D-48 and covers D-49 ~ D-78.
+> This file is the single source of truth for 'Farmstorm' v0.0.2: its numbering continues `00-DECISIONS.md` from D-48 and covers D-49 ~ D-79.
 > The existing content of v0.0.1 still follows `00-DECISIONS.md`, and this file does not override it; the new content of v0.0.2 follows this file.
 > Source: the author's v0.0.2 requirement text + the build fact card `.work/v002-BRIEF.md` (§2 decision summary, §3 registry object delta, §4 number-discipline table). The fact card is a flattened working draft of the build period and is not a deliverable.
 
@@ -12,12 +12,12 @@
 |---|---|
 | File | `docs/zh/10-DECISIONS-0.0.2.md` (English counterpart `docs/en/10-DECISIONS-0.0.2.md`) |
 | Version | 0.0.2 |
-| Decision number range | D-49 – D-78, 30 entries, consecutive with no gaps |
-| Subject matter covered | delivery and documentation, 4 new profiles and 5 new items, the three intrusive effects, the media pipeline, 4 new recipes, the Compressed Hay Block numbers, the Molotov landing semantics, and one scope clarification on the attribution of the demolition threshold (D-78) |
+| Decision number range | D-49 – D-79, 31 entries, consecutive with no gaps |
+| Subject matter covered | delivery and documentation, 4 new profiles and 5 new items, the three intrusive effects, the media pipeline, 4 new recipes, the Compressed Hay Block numbers, the Molotov landing semantics, one scope clarification on the attribution of the demolition threshold (D-78), and one revision of the input lock implementation (D-79) |
 | Subject matter not covered | D-01 – D-48 and C-1 – C-10 (inheritance in §7); anything in `docs/zh/00`–`09` and `docs/en/00`–`09` (frozen by D-49) |
 | Conflict ruling | existing v0.0.1 clauses → `00-DECISIONS.md`; new v0.0.2 clauses → this file |
 
-- **Force**: once these 30 entries are registered they are the final scope for v0.0.2. `11-DESIGN-0.0.2.md`, `12-TECH-0.0.2.md`, `13-TASKS-0.0.2.md`, `14-PROMPT-MAIN-0.0.2.md`, `15-PROMPT-TASKS-0.0.2.md` and the code of the implementation phase must all agree with this file; where they conflict, this file wins.
+- **Force**: once these 31 entries are registered they are the final scope for v0.0.2. `11-DESIGN-0.0.2.md`, `12-TECH-0.0.2.md`, `13-TASKS-0.0.2.md`, `14-PROMPT-MAIN-0.0.2.md`, `15-PROMPT-TASKS-0.0.2.md` and the code of the implementation phase must all agree with this file; where they conflict, this file wins.
 - **Relation to v0.0.1**: none of v0.0.1's numbers, recipes, classification or engineering constraints is changed (the forbidden list is in §6), so that content still follows `00-DECISIONS.md`. This file only states, item by item in §7, how D-01 – D-48 are inherited, refined and extended.
 - **Relation to the build fact card**: `.work/v002-BRIEF.md` is responsible for flattening the author's text into a fact card; this file is responsible for turning it into formal decision lines. The 'Decision' wording and numbers here are therefore transcribed verbatim from fact card §2, with no rewriting and no recalculation; the 'Rationale' gives numbers, source symbols or fact card sections.
 - **Marking of additions**: content that is not in the fact card and is supplied by this file is marked 'supplemented by this document'. There are exactly three such places: the Chinese category names set against the enum constant names in §4, the way the scope clarification is expanded in §5, and the 48-row inheritance table in §7 — none of them introduces a new number.
@@ -35,7 +35,7 @@ D:\project_farm\docs\zh\
 ├── 00-DECISIONS.md              v0.0.1 decision record (frozen, D-49)
 ├── 01-DESIGN.md  …  09-IMPL-VS-PLAN.md
 │                                 the other 9 v0.0.1 files (frozen, D-49)
-├── 10-DECISIONS-0.0.2.md        this file: D-49 … D-78
+├── 10-DECISIONS-0.0.2.md        this file: D-49 … D-79
 ├── 11-DESIGN-0.0.2.md           full design specs for the 7 new features
 ├── 12-TECH-0.0.2.md             new registry objects, class design, resource list, three client subsystems, risk register
 ├── 13-TASKS-0.0.2.md            task breakdown from F-60 + dependency graph + milestones + effort
@@ -47,12 +47,12 @@ D:\project_farm\docs\zh\
 
 | File | Content it owns | Decisions in this file that define it |
 |---|---|---|
-| `10-DECISIONS-0.0.2.md` | D-49 … D-78 one line each; the scope clarification section; the 19-entry profile summary table; what is explicitly not done; the inheritance relation to v0.0.1 | all 30 |
+| `10-DECISIONS-0.0.2.md` | D-49 … D-79 one line each; the scope clarification section; the 19-entry profile summary table; what is explicitly not done; the inheritance relation to v0.0.1 | all 31 |
 | `11-DESIGN-0.0.2.md` | number tables, state machines, boundaries and anomalies, config references for the 7 new features | D-57 (the consequences of 6.0 must be written into the design document), D-58, D-59, D-64, D-65, D-70, D-73, D-74 |
 | `12-TECH-0.0.2.md` | item-by-item table of new registry objects, class design, resource list, three client subsystem plans, risk register RT-10…RT-16, new config keys, acceptance self-check | D-50, D-53, D-60, D-61, D-62, D-66, D-68, D-69, D-76 |
 | `13-TASKS-0.0.2.md` | task breakdown from F-60, dependency graph, outline, effort, critical path | D-51, D-52, D-63, D-67 (task ownership of the new advancements and the new recipes) |
-| `14-PROMPT-MAIN-0.0.2.md` | one main prompt | all 30 |
-| `15-PROMPT-TASKS-0.0.2.md` | one staged task list | all 30 |
+| `14-PROMPT-MAIN-0.0.2.md` | one main prompt | all 31 |
+| `15-PROMPT-TASKS-0.0.2.md` | one staged task list | all 31 |
 | `README.md` index section | v0.0.2 documentation navigation | D-49, D-66 (asset provenance and the non-commercial personal use statement) |
 
 ---
@@ -148,7 +148,7 @@ The number range of this group is D-59 ~ D-77. The main line is the three intrus
 | Screen takeover (camera) | D-59, D-70 | `ViewportEvent.ComputeCameraAngles`, render-layer angles only |
 | Full-screen grayscale | D-61 | one full-screen pass in `RenderGuiEvent.Post` |
 | Red silhouette | D-62 | redraw of the model in `RenderLivingEvent.Post` |
-| Input lock | D-60 | five events, each covering one segment |
+| Input lock | D-60 | five events, each covering one segment (**revised by D-79 to seven mechanisms**) |
 | Wild Hunter target acquisition and displacement | D-64, D-65 | client-side prediction + server-side ruling |
 | State sync | D-50, D-69 | the hidden `MobEffect` amplifier used as the phase number |
 | The Zangief Cane itself | D-68, D-71, D-72, D-73 | deployment block and spherical trigger check |
@@ -314,6 +314,22 @@ The number range of this group is D-59 ~ D-77. The main line is the three intrus
 - **Where it lands**: §5 of this file (expansion and blast radius); the demolition scope of `11-DESIGN-0.0.2.md` and `12-TECH-0.0.2.md` written item by item per §5.3; `02-TECH-SPEC.md` unchanged per D-49.
 
 ---
+
+### 3.5 Revision of the input lock implementation (D-79)
+
+> This section registers D-79: `12-TECH-0.0.2.md` §4.3 originally specified "cancel `InputEvent.Key`", which the sources show is **not implementable**. Itemized evidence in `.work/FINDING-RT13-INPUT-LOCK.md`.
+
+#### D-79 · The input lock steals clicks instead of cancelling, and gains a view lock
+
+- **ID**: D-79
+- **Decision**: D-60's "five events, one segment each (**revised by D-79 to seven mechanisms**, see §3.5; original wording: " becomes **seven mechanisms**, and three concrete mechanisms change:
+  1. **Keyboard (hotbar 1–9 / Q / E / F / F5 etc.)**: `InputEvent.Key` is **not cancellable** (`InputEvent.java:214` does not implement `ICancellableEvent`), and `ClientHooks.onKeyInput` is the **last statement** of `KeyboardHandler#keyPress` (`:485`), i.e. after `KeyMapping.set/click` (`:483-484`). → drain `consumeClick()` inside that event instead: `handleKeybinds()` (`Minecraft.java:1837`) only consumes in the tick (`:1944`), so draining first is equivalent to blocking.
+  2. **Mouse left/right**: use `InputEvent.MouseButton.Pre` (cancellable and runs first, `MouseHandler.java:82`); keep `InteractionKeyMappingTriggered` as the second net, covering `startAttack` / `startUseItem` / `continueAttack`.
+  3. **View (missing from the draft)**: add `CalculatePlayerTurnEvent#setMouseSensitivity(0)` (`ClientHooks.java:368`) — the **only Mixin-free view lock**.
+- **Known limitations**: F11 fullscreen, F2 screenshot, F3 debug and ESC pause are handled inside `keyPress` **before** `onKeyInput`, unreachable without Mixin; the draft's "let ESC through" is a non-requirement (it takes effect either way).
+- **State reset**: if the left button is already held when the lock engages, `keyAttack.isDown()` stays true (`Minecraft.java:2035`) and mining never stops; the down-state must be cleared explicitly.
+- **Basis**: `.work/FINDING-RT13-INPUT-LOCK.md` (sources from `neoforge-21.1.213-sources.jar`, every conclusion citing `file:line`).
+- **Where it lands**: the event table and explanatory paragraphs of `12-TECH-0.0.2.md` §4.3.
 
 ## 4. Crop registry name summary (19 entries)
 

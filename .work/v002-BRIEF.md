@@ -53,7 +53,7 @@ docs/en/00–06,09            上述对应英文版（07/08 无英文版）
 
 ---
 
-## 2. 决策总表 D-49 ~ D-78
+## 2. 决策总表 D-49 ~ D-79
 
 编号接 `00-DECISIONS.md` 的 D-48。每条都要在 10-DECISIONS 里成行，格式与 v0.0.1 一致（编号 / 结论 / 依据 / 落地位置）。
 
@@ -185,6 +185,9 @@ v0.0.1 文档按 D-49 冻结不改，本条只登记在 v0.0.2 文档内。
 
 ---
 
+**D-79 · 输入锁改按「抽干消费」实现，并补视角锁（修订 D-60）**
+`InputEvent.Key` **不可取消**（`InputEvent.java:214` 未实现 `ICancellableEvent`）且触发在 `KeyMapping.set/click` 之后（`KeyboardHandler:483-485`）→ 键盘一路改为在该事件里抽干 `consumeClick()`（`handleKeybinds` 到 tick 才消费，`Minecraft:1837/1944`）。鼠标改用 `InputEvent.MouseButton.Pre`（最先且可取消，`MouseHandler:82`），`InteractionKeyMappingTriggered` 保留作第二道网（覆盖 `continueAttack`）。**新增视角锁**：`CalculatePlayerTurnEvent#setMouseSensitivity(0)`（`ClientHooks:368`）——唯一无 Mixin 方案。已知拦不住：F11/F2/F3/ESC（在 `onKeyInput` 之前执行）。锁定中途若左键已按住，须主动清 `keyAttack` 状态。依据见 `.work/FINDING-RT13-INPUT-LOCK.md`。
+
 ## 3. 注册对象增量全量表
 
 ### 3.1 `CropProfile` 新增 4 条（15 → 19）
@@ -315,7 +318,7 @@ v0.0.1 文档按 D-49 冻结不改，本条只登记在 v0.0.2 文档内。
 
 | 文件 | 负责内容 | 主要读什么 |
 |---|---|---|
-| `docs/zh/10-DECISIONS-0.0.2.md` | D-49…D-78 逐条成行；对 v0.0.1 文档的勘误节；19 条档案总表（增量）；明确不做的事 | 本文 §2 §3 `00-DECISIONS.md` |
+| `docs/zh/10-DECISIONS-0.0.2.md` | D-49…D-79 逐条成行；对 v0.0.1 文档的勘误节；19 条档案总表（增量）；明确不做的事 | 本文 §2 §3 `00-DECISIONS.md` |
 | `docs/zh/11-DESIGN-0.0.2.md` | 7 个新功能的完整设计规格：数值表、状态机、边界与异常、config 引用 | `01-DESIGN.md` 文风 + 本文 |
 | `docs/zh/12-TECH-0.0.2.md` | 新增注册对象逐项表、类设计、资源清单、三个客户端子系统的技术方案、风险登记册、config 全量新增键、验收自检 | `02-TECH-SPEC.md` 文风 + 实际源码 |
 | `docs/zh/13-TASKS-0.0.2.md` | 任务拆分 F-60 起 + 依赖图 + 大纲（Milestone）+ 工作量 + 关键路径 | `03-TASKS.md` `04-ROADMAP.md` 文风 |

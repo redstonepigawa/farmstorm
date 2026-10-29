@@ -7,7 +7,7 @@
 | Document ID | 14-PROMPT-MAIN-0.0.2 |
 | Version | v0.0.2 |
 | Audience | CLI coding agent (can read and write the repository, can run `.tools\gw.cmd`) |
-| Upstream | `docs/zh/10-DECISIONS-0.0.2.md` (the single source of truth for v0.0.2, D-49 ~ D-78), `11-DESIGN-0.0.2.md`, `12-TECH-0.0.2.md`, `13-TASKS-0.0.2.md`; the flattened construction-period draft `.work/v002-BRIEF.md` |
+| Upstream | `docs/zh/10-DECISIONS-0.0.2.md` (the single source of truth for v0.0.2, D-49 ~ D-79), `11-DESIGN-0.0.2.md`, `12-TECH-0.0.2.md`, `13-TASKS-0.0.2.md`; the flattened construction-period draft `.work/v002-BRIEF.md` |
 | Peer | `15-PROMPT-TASKS-0.0.2.md` (the phased task list, **not in this file**) |
 | Loading method | This file is fed **once only**, with the task prompt of the first Phase, and stays resident afterwards; a task prompt feeds one Phase at a time |
 

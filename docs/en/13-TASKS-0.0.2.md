@@ -336,7 +336,7 @@ Phase subtotal: **9 tasks, 10.5 person-days** (S 3 / M 6 / L 0).
 
 Phase goal: land two of the three invasive effects (world-only grayscale D-61, red outline D-62) together with the whole Wild Hunter gameplay (attributes, targeting, dash, damage knockback, kill extension, loop sound, the Wild Apple entry point).
 
-Phase exit criteria: within 700 ticks of eating one Wild Apple — the three attribute readings are queryable, an attack on a creature within 5 blocks and 30° snaps the player onto it, the effect survives 6 kills in a row, the whole screen is black and white including the GUI, visible creatures carry a red outline, and the loop sound follows; after `/effect clear` all seven reset.
+Phase exit criteria: within 700 ticks of eating one Wild Apple — the three attribute readings are queryable, an attack on a creature within 5 blocks and 30° snaps the player onto it, the effect survives 6 kills in a row, the world goes black and white with the HUD keeping its original colours, visible creatures carry a red outline, and the loop sound follows; after `/effect clear` all seven reset.
 
 #### F-76 · Wild Hunter's Three Attribute Bonuses
 
@@ -550,7 +550,7 @@ Phase subtotal: **8 tasks, 11.5 person-days** (S 2 / M 5 / L 1).
 
 Phase goal: fill in the remaining part of the 40 resource deliverables, the 39 language keys and the 3 advancements, and complete the four-count cross-check of 302 / 263 / 139 / 77 together with the three-mode regression and the packaging release.
 
-Phase exit criteria: `src/{main,generated}/resources` holds 302 files in total (the 11 `.cache` files excluded); both language files carry 263 keys each with equal key sets; `config/farmstorm-server.toml` has 139 keys; all 22 self-checks of `12-TECH-0.0.2.md §11` pass; `dist/farmstorm-0.0.2+mc1.21.1.jar` exists.
+Phase exit criteria: `src/{main,generated}/resources` holds 302 files in total (the 11 `.cache` files excluded); both language files carry 263 keys each with equal key sets; `config/farmstorm-server.toml` has 139 keys; all 23 self-checks of `12-TECH-0.0.2.md §11` pass; `dist/farmstorm-0.0.2+mc1.21.1.jar` exists.
 
 #### F-94 · Audio and Effect Icon Pipeline
 
@@ -615,10 +615,11 @@ Phase exit criteria: `src/{main,generated}/resources` holds 302 files in total (
 - **Acceptance**:
   1. **302** resources (JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1), minus the 11 extensionless `.cache` files (run the checking method of `12-TECH-0.0.2.md §7.4` item by item).
   2. Both language files carry **263** keys with equal key sets; `config/farmstorm-server.toml` has **139** keys; the startup log carries both the `自检 注册对象 77 个` line and the `自检 实体渲染器 11/11 → OK` line.
-  3. All 22 self-checks of `12-TECH-0.0.2.md §11` pass, with a reading kept for each.
+  3. All 23 self-checks of `12-TECH-0.0.2.md §11` pass, with a reading kept for each.
   4. `grep -r CustomPacketPayload src/main/java` matches 0 times; for Mixin, check the **actual usage** (`@Mixin` annotations, `mixins*.json`, `org.spongepowered`, `build.gradle` dependencies all 0, with the 5 literal hits all being explanatory comments, V-47).
   5. Dedicated server started + client connected: the server log has no `NoClassDefFoundError` and the effect-related features work (`12-TECH-0.0.2.md §11 #22`).
   6. `jar tf dist/farmstorm-0.0.2+mc1.21.1.jar` shows both `.ogg` files, `sounds.json`, the 6 grayscale-related resource files (`shaders/post/grayscale.json`, `shaders/program/grayscale.json`, `shaders/program/grayscale.fsh`, `shaders/core/grayscale.json` / `.vsh` / `.fsh`) and `post_effect/grayscale.json` (kept, but it has no loader, V-49).
+  7. Temporary-enchantment expiry is reproducible: step into the `farmstorm:awakened_torchflower` aura → fire aspect appears on the sword → move beyond the 20-block radius → 20 seconds later `/data get entity @s SelectedItem` no longer carries either `farmstorm:temporary_enchantments` or `fire_aspect`; a sword that natively has fire aspect I is **not downgraded**.
 
 Phase subtotal: **6 tasks, 11.5 person-days** (S 2 / M 1 / L 3).
 
@@ -826,7 +827,7 @@ M7 ~ M11 map one-to-one onto Phase 11 ~ Phase 15. Each milestone gives two workl
 
 ### M11 · Resources, Advancements and Acceptance (Phase 15)
 
-- **Completion criteria**: ① resources 302 / JSON 195 / PNG 100 / OGG 2 / GLSL 3; ② both language files carry 263 keys each with equal key sets, and `tooltip.farmstorm.*` is still 16 entries; ③ `config/farmstorm-server.toml` has 139 keys; ④ all 22 self-checks of `12-TECH-0.0.2.md §11` pass; ⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` exists and `jar tf` shows both `.ogg` files.
+- **Completion criteria**: ① resources 302 / JSON 195 / PNG 100 / OGG 2 / GLSL 3; ② both language files carry 263 keys each with equal key sets, and `tooltip.farmstorm.*` is still 16 entries; ③ `config/farmstorm-server.toml` has 139 keys; ④ all 23 self-checks of `12-TECH-0.0.2.md §11` pass; ⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` exists and `jar tf` shows both `.ogg` files.
 - **What is playable at the end of this milestone**: the all-Chinese interface shows no missing glyphs and all 9 new icons display correctly; each of the three new advancements pops one toast; drop the jar into a dedicated server and players need only the mod itself to take part — the client does not crash on a missing class.
 
 ---

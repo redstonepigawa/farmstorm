@@ -94,7 +94,7 @@ Two reminders on the wording:
 | Phase 12 | Compressed Items and Molotov! | 9 | F-67 ~ F-75 | 10.5 | Phase 11 | the 5 new recipes work; throwing a Molotov only appends fire / magma block and not one original block goes missing; Compressed Hay Block does not break to the Melon Grenade or the Melon Slice Bomb and does break to the Ubi Server and to TNT |
 | Phase 13 | Wild Hunter | 10 | F-76 ~ F-85 | 16.0 | Phase 11 | after eating one Wild Apple, seven abilities are observable (attributes / attraction / damage knockback / time extension / world-only grayscale / red silhouette / loop sound), and `/effect clear` resets all of them |
 | Phase 14 | Zangief Cane | 8 | F-86 ~ F-93 | 11.5 | Phase 11 | the three phases run through in order; landing time from all three heights falls within 40 ± 2 ticks; of the 21 hand-tested key bindings only ESC is the exception; `Rotation` is never written back |
-| Phase 15 | Resources, Audio, Advancements and Acceptance | 6 | F-94 ~ F-99 | 11.5 | Phase 11 + 12 + 13 + 14 | 302 / 263 / 139 / 77 all line up; all 22 self-checks of `12-TECH` §11 pass; `dist/farmstorm-0.0.2+mc1.21.1.jar` is produced |
+| Phase 15 | Resources, Audio, Advancements and Acceptance | 6 | F-94 ~ F-99 | 11.5 | Phase 11 + 12 + 13 + 14 | 302 / 263 / 139 / 77 all line up; all 23 self-checks of `12-TECH` §11 pass; `dist/farmstorm-0.0.2+mc1.21.1.jar` is produced |
 | **Total** | **5 Phases** | **40** | **F-60 ~ F-99** | **60.5** | | |
 
 Reading notes:
@@ -389,14 +389,14 @@ Land the Deployable trap Zangief Cane and its three-phase presentation (inversio
 ### 6.1 Prerequisites
 
 - Every exit criterion of Phase 12 / 13 / 14 passes: `F-99` depends on `F-75` / `F-85` / `F-93` / `F-94` / `F-96` / `F-97`, and if any one of those has not passed, F-99 may not start.
-- `12-TECH-0.0.2.md` §6.1–§6.4 (the three source files with their conversion parameters, and the conversion script), §7.1–§7.4 (the 36-line resource list / the 41-line language keys / the checking method), and the 22-item self-check table of §11 have been read and copied into a check-off list.
+- `12-TECH-0.0.2.md` §6.1–§6.4 (the three source files with their conversion parameters, and the conversion script), §7.1–§7.4 (the 36-line resource list / the 41-line language keys / the checking method), and the 23-item self-check table of §11 have been read and copied into a check-off list.
 - **This machine has ffmpeg, but it is not on PATH** (BRIEF §2's D-53 measurement: the usable build is `D:\dsh\default\sf6_audio\tools\ffmpeg.exe`, 7.1 essentials with libvorbis; Trae CN's 6.1.1 has no libvorbis and is unusable; and all three sources — npm / maven / mirror — are unreachable). Running `F-94` therefore requires passing an absolute `-Ffmpeg` path. `F-94` still comes first in this phase so that failure shows up early (RT-14); the agent may not hunt for a substitute source or change the conversion spec on its own.
 - The provenance and use of the three assets are confirmed (D-66): `Animals.mp3` → the `wild_hunter` loop sound; the SF6 clip `BV1qu411W7ha_846-850.mp3` → the Zangief Cane trigger sound; the desktop JPG → the Wild Hunter effect icon. The provenance statement goes into `README.md` (an F-99 deliverable).
 - This phase may change whitelisted files only; everything under `src/generated/` is produced by Providers alone and must not be edited by hand.
 
 ### 6.2 Goal
 
-Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG files, 1 effect icon, 9 model-side JSONs, 3 advancements) plus the 41 language keys, then align the **302 / 263 / 139 / 77** counts, run all 22 self-checks of `12-TECH` §11, and produce a releasable jar.
+Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG files, 1 effect icon, 9 model-side JSONs, 3 advancements) plus the 41 language keys, then align the **302 / 263 / 139 / 77** counts, run all 23 self-checks of `12-TECH` §11, and produce a releasable jar.
 
 ### 6.3 Task list
 
@@ -407,7 +407,7 @@ Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG
 | F-96 | Blockstates and models: 9 JSONs | M / 1.5 | F-65, F-67, F-95 | 2 blockstates + 2 block models + 5 item models (the Zangief Cane model has only `textures.particle` and no `elements`) |
 | F-97 | The 41 language entries and Chinese-English equality | S / 0.5 | F-61, F-64, F-65, F-98 | `ModLangProvider` lands 41 entries → 263 keys in each of the two files with equal key sets; `tooltip.farmstorm.*` still has 16 |
 | F-98 | Three new advancements | S / 0.5 | F-69, F-76, F-87 | `first_molotov` / `zangief_hit` / `first_wild_hunter` with parents `first_throw` / `first_deploy` / `root`, bringing the advancement total to 15 |
-| F-99 | Confirming the four counts, the three-mode regression, and packaging | L / 3.0 | F-75, F-85, F-93, F-94, F-96, F-97 | 302 / 263 / 139 / 77 aligned + a reading recorded for each of the 22 self-checks + the `dist` jar + the index section and the asset-attribution section of `README.md` |
+| F-99 | Confirming the four counts, the three-mode regression, and packaging | L / 3.0 | F-75, F-85, F-93, F-94, F-96, F-97 | 302 / 263 / 139 / 77 aligned + a reading recorded for each of the 23 self-checks + the `dist` jar + the index section and the asset-attribution section of `README.md` |
 
 ### 6.4 Phase exit criteria
 
@@ -424,7 +424,7 @@ Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG
 - [ ] **F-98 JSON shape**: read the three files. Passing looks like: `parent` is `farmstorm:first_throw` / `farmstorm:first_deploy` / `farmstorm:root` respectively, `frame` is `task`, `show_toast` is true.
 - [ ] **F-99 302 resources**: `git ls-files 'src/main/resources' 'src/generated/resources'`, then deduct the 11 extensionless files under `.cache` and the 3 `.gitkeep` files. Passing looks like: **302** in total; JSON **195**, PNG **100**, OGG **2**, GLSL **3**, TOML 1, `pack.mcmeta` 1.
 - [ ] **F-99 the other three numbers**: language keys, toml, self-check lines. Passing looks like: **263** keys in each language file with equal key sets; **139** keys in `config/farmstorm-server.toml`; both the `自检 注册对象 77 个 …` and `自检 实体渲染器 11/11 → OK` lines are in the log (self-check: 77 registered objects / entity renderers 11/11).
-- [ ] **F-99 the 22 self-checks**: run them item by item per `12-TECH` §11. Passing looks like: all 22 pass, each with a recorded reading (one line each: ID / verdict / evidence location).
+- [ ] **F-99 the 23 self-checks**: run them item by item per `12-TECH` §11. Passing looks like: all 23 pass, each with a recorded reading (one line each: ID / verdict / evidence location).
 - [ ] **F-99 known cosmetic defect**: `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3 is **fixed** in this version (`RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder`, V-67) — confirm the warning no longer appears and that the README does not list it as a known limitation.
 - [ ] **F-99 structure and dedicated server**: run the two `grep` commands and start a server once. Passing looks like: `grep -r "CustomPacketPayload" src/main/java` returns 0; Mixin is checked by **actual usage** (`@Mixin` annotations, `mixins*.json`, `org.spongepowered`, `build.gradle` dependencies all 0, with the 5 literal hits all being explanatory comments, V-47); the dedicated server logs no `NoClassDefFoundError` and effect-related features work after a client connects.
 - [ ] **F-99 jar contents**: `jar tf dist/farmstorm-0.0.2+mc1.21.1.jar`. Passing looks like: both `.ogg` files, `assets/farmstorm/sounds.json`, and the 4 grayscale-related resources (`shaders/core/grayscale.json` / `.vsh` / `.fsh`, `post_effect/grayscale.json`) are visible.
@@ -443,7 +443,7 @@ Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG
 - The commands and results for the four counts (302 / 263 / 139 / 77) and the six-way breakdown of the resources (JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1).
 - The key counts of the two language files, the empty verdict of the key-set diff, and the 16 of `tooltip.farmstorm.*`.
 - The three verbatim `ffprobe` lines of the two `.ogg` files (codec / channels / bitrate), plus the script's exit code and message text when ffmpeg is missing.
-- A reading for each of the 22 self-checks (one line each: ID / verdict / evidence location).
+- A reading for each of the 23 self-checks (one line each: ID / verdict / evidence location).
 - The toasts of the three advancements and the `/advancement` query results; the `parent` line of each of the three JSONs.
 - The presence in `jar tf dist/farmstorm-0.0.2+mc1.21.1.jar` of the two `.ogg` files, `sounds.json`, and the 4 grayscale resources.
 - The verbatim lines showing 0 matches for the two `grep` commands.
@@ -469,7 +469,7 @@ Five ready-to-paste instances:
 | Phase 12 → 13 | The previous phase (Phase 12 · Compressed Items and Molotov!) is complete: the 5 new recipes work, throwing a Molotov only appends fire and magma blocks with not one original block missing, Compressed Hay Block does not break to the Melon Grenade or the Melon Slice Bomb but does break to the Ubi Server and to TNT, and the conversion recipe total is 24. This phase begins: Phase 13 · Wild Hunter — follow the "Phase 13" section of 15-PROMPT-TASKS-0.0.2.md, do only F-76 ~ F-85, and hand the report back in the report format of 14. |
 | Phase 13 → 14 | The previous phase (Phase 13 · Wild Hunter) is complete: all seven are observable — the three attribute bonuses, the 5-block 30° attraction dash, damage and knockback, kill extension without a cap, world-only grayscale (the HUD keeps its original colours), red silhouettes on visible mobs, and the 16-block looping sound; everything resets after `/effect clear`; `CustomPacketPayload` and `Mixin` match counts are both 0. This phase starts Phase 14 · Zangief Cane; follow section 5 of 15-PROMPT-TASKS-0.0.2.md … |
 | Phase 14 → 15 | The previous phase (Phase 14 · Zangief Cane) is complete: the three phases (inversion → levitation VII for 20 ticks → falling self-rotation) run through in order, landing time from all three heights (flat ground / two blocks / four blocks) falls within 40 ± 2 ticks, only ESC is the exception in the 21-item key hand test, and `/data get entity @s Rotation` never changes throughout. This phase begins: Phase 15 · Resources, Audio, Advancements and Acceptance — follow the "Phase 15" section of 15-PROMPT-TASKS-0.0.2.md, work in the internal order F-94 → F-95 → F-96 → F-98 → F-97 → F-99, and hand the report back in the report format of 14. |
-| Phase 15 → closing | The previous phase (Phase 15 · Resources, Audio, Advancements and Acceptance) is complete: 302 resources / 263 language keys (Chinese and English equal) / 139 config / 77 registered objects all line up, all 22 self-checks of `12-TECH` §11 have a recorded reading, and `dist/farmstorm-0.0.2+mc1.21.1.jar` exists |
+| Phase 15 → closing | The previous phase (Phase 15 · Resources, Audio, Advancements and Acceptance) is complete: 302 resources / 263 language keys (Chinese and English equal) / 139 config / 77 registered objects all line up, all 23 self-checks of `12-TECH` §11 have a recorded reading, and `dist/farmstorm-0.0.2+mc1.21.1.jar` exists |
 
 ---
 
@@ -490,7 +490,7 @@ Project close-out. Perform one complete delivery check on farmstorm v0.0.2: veri
    Each of the two language files has 263 keys and set(zh) == set(en) is True; among them tooltip.farmstorm.* is still 16.
    config/farmstorm-server.toml has 139 leaf nodes, and the language keys carrying the farmstorm.configuration. prefix are also 139.
 
-3. The 22 acceptance self-checks
+3. The 23 acceptance self-checks
    Open docs/zh/12-TECH-0.0.2.md §11, run #1 ~ #22 item by item, and output a 22-row check table
    with three columns per row: ID / verdict / evidence location (log line, command return value, or file path).
    #1 ~ #4 are verbatim comparisons against the startup log (19 crops / 77 registered objects / 16 berry pool entries / 11-11 renderers),
@@ -518,7 +518,7 @@ Project close-out. Perform one complete delivery check on farmstorm v0.0.2: veri
    If any row is "not met", stop and report; do not declare it releasable.
 
 7. Report format
-   Output in the report format of 14-PROMPT-MAIN-0.0.2.md, and append three small tables: the resource inventory table, the 22-item self-check table, and the 40-row task check table.
+   Output in the report format of 14-PROMPT-MAIN-0.0.2.md, and append three small tables: the resource inventory table, the 23-item self-check table, and the 40-row task check table.
    Do not paste complete logs (for each command paste only the conclusion line and the first error); write "unverified" for anything you did not run or did not verify,
    and never write it as "passed".
 ~~~

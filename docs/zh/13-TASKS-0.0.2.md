@@ -552,7 +552,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 阶段目标：补齐 40 个资源交付里剩下的部分、41 条语言键与 3 个进度，并完成 302 / 263 / 139 / 77 四项计数核对与三模式回归、打包发布。
 
-阶段出口判据：`src/{main,generated}/resources` 共 302 个文件（扣 `.cache` 的 11 个与 3 个 `.gitkeep`）；两份语言文件各 263 键且键集相等；`config/farmstorm-server.toml` 139 键；`12-TECH-0.0.2.md §11` 的 22 条自检全过；`dist/farmstorm-0.0.2+mc1.21.1.jar` 存在。
+阶段出口判据：`src/{main,generated}/resources` 共 302 个文件（扣 `.cache` 的 11 个与 3 个 `.gitkeep`）；两份语言文件各 263 键且键集相等；`config/farmstorm-server.toml` 139 键；`12-TECH-0.0.2.md §11` 的 23 条自检全过；`dist/farmstorm-0.0.2+mc1.21.1.jar` 存在。
 
 #### F-94 · 音频与效果图标管线
 
@@ -619,10 +619,11 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **验收**：
   1. 资源 **302** 个（JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1），扣 `.cache` 的 11 个无扩展名文件与 3 个 `.gitkeep`（`12-TECH-0.0.2.md §7.4` 的核对方法逐条跑）。
   2. 两份语言文件各 **263** 键且键集相等；`config/farmstorm-server.toml` **139** 键；启动日志的 `自检 注册对象 77 个` 行与 `自检 实体渲染器 11/11 → OK` 行都在。
-  3. `12-TECH-0.0.2.md §11` 的 22 条自检全过，逐条留读数。
+  3. `12-TECH-0.0.2.md §11` 的 23 条自检全过，逐条留读数。
   4. `grep -r "CustomPacketPayload" src/main/java` 为 0 处；`grep -rn "Mixin" src/main/java` 为 0 处。
   5. 专用服务器起服 + 客户端连接：服务端日志无 `NoClassDefFoundError`，效果相关功能正常（`12-TECH-0.0.2.md §11 #22`）。
   6. `jar tf dist/farmstorm-0.0.2+mc1.21.1.jar` 里能看到两个 `.ogg`、`sounds.json` 与 4 个灰度相关资源文件。
+  7. 临时附魔到期撤销可复现：站进 `farmstorm:awakened_torchflower` 光环 → 剑上出现火焰附加 → 移出 20 格半径 → 20 秒后 `/data get entity @s SelectedItem` 里 `farmstorm:temporary_enchantments` 与 `fire_aspect` 同时消失；带原生火焰附加 I 的剑不降级。
 
 阶段小计：**6 个任务、11.5 人日**（S 2 / M 1 / L 3）。
 
@@ -830,7 +831,7 @@ M7 ~ M11 与 Phase 11 ~ Phase 15 一一对应。每个里程碑给两个工作�
 
 ### M11 · 资源、进度与验收（Phase 15）
 
-- **完成判据**：① 资源 302 / JSON 195 / PNG 100 / OGG 2 / GLSL 3；② 两份语言文件各 263 键且键集相等、`tooltip.farmstorm.*` 仍 16 条；③ `config/farmstorm-server.toml` 139 键；④ `12-TECH-0.0.2.md §11` 的 22 条自检全过；⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` 存在，且 `jar tf` 里能看到两个 `.ogg`。
+- **完成判据**：① 资源 302 / JSON 195 / PNG 100 / OGG 2 / GLSL 3；② 两份语言文件各 263 键且键集相等、`tooltip.farmstorm.*` 仍 16 条；③ `config/farmstorm-server.toml` 139 键；④ `12-TECH-0.0.2.md §11` 的 23 条自检全过；⑤ `dist/farmstorm-0.0.2+mc1.21.1.jar` 存在，且 `jar tf` 里能看到两个 `.ogg`。
 - **该里程碑结束时能做什么**：全程中文界面无缺字、9 个新图标都正常；三条新进度各弹一次 toast；把 jar 丢进专用服务器，玩家只装模组本体就能参与，客户端不会因为缺类而崩。
 
 ---

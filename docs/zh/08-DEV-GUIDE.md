@@ -130,6 +130,7 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 | `runData` 只生成 0 个文件 | `runs.data` 缺 `programArguments` | `--mod <id> --all --output ... --existing ...`（已在 `build.gradle` 里） |
 | 材质生成后竹子图标变了 | 用了 1.21.1 客户端 jar | 材质脚本必须指向 `26.3` 客户端 jar（`gen_textures.py --vanilla-assets`） |
 | 1.21.1 编译不过的常用签名 | 文档按旧版写的 | `MobEffects.DAMAGE_BOOST/DAMAGE_RESISTANCE/JUMP/MOVEMENT_SPEED/DIG_SPEED`；`PushReaction`；`ColorParticleOption.create(...)`；`Creeper` 无 `setPowered` |
+| 临时附魔到期后附魔还在（如火焰附加永不消失） | `TempEnchantHandler.grant` 遇到「已过期但 20 刻扫描器还没清掉」的旧记录会 `continue` 跳过，随后 `previous = stack.getEnchantmentLevel(...)` 读到的是**当前（临时）等级 1**，新记录写成 `previous=1`，到期只会「还原」成 1 | `grant()` **开头先 `revokeExpired(stack, now)`**，再读 `previous`；`previous` 必须是玩家真实等级（干净物品 = 0）。V-77 |
 
 ## 8. 调试手法
 
@@ -190,6 +191,8 @@ Get-Process java | Where-Object { $_.MainWindowTitle } | Select-Object Id, MainW
 |---|---|---|
 | 相位 2 期间鼠标转视角只降速、不锁死 | `CalculatePlayerTurnEvent#setMouseSensitivity(0)` 后系数仍为 0.2（慢约 15.6 倍），无 Mixin 归不了零 | 已知限制，验收按「转速降至约 1/15.6」记（V-31） |
 | 1×1 石柱构型的相位 2 落地时长偏短（约 23 刻） | 漂浮段的横向漂移把玩家挪出柱顶，下坠中途被自己站的柱子截住；≥3×3 台面是 40 ± 2 刻 | 真实几何结果，不作缺陷；验收用的「高台」指 ≥3×3 台面（V-46） |
+| 狂野猎人期间打开设置界面，亮度滑条显示为满 | 水下可视性需要临时抬高 `options.gamma()`，而原版选项系统没有「临时覆盖」 | 已知限制；关闭界面 / 效果结束后滑条与亮度都恢复原值 |
+| 火把花光环：离开范围后火焰附加最多再留 15 秒 | `TempEnchantHandler.revokeAll()` 目前**没有调用者**，离开光环不会立刻撤销，只由 300 刻到期撤销 | 已知限制（验收口径是「15 秒内消失」）；若要「离开立即撤销」需加「上一刻在光环内、这一刻不在」的边沿检测 |
 
 > `Unknown recipe category: farmstorm:convert`（`WARN ClientRecipeBook` ×3）**已由 `client/ConverterRecipeBookCategory` 修掉**（走 `RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder`，V-67），**不再列为已知限制**。
 

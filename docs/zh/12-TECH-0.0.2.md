@@ -1103,6 +1103,18 @@ public final class WildHunterLoopSound extends SoundInstance {
 
 ---
 
+### 4.7 狂野猎人的伽马提升（作者补充，无决策编号）
+
+**职责**：效果在身期间把客户端 `options.gamma()` 抬到 1.0，覆盖「水下 / 洞穴完全看不见」；**只改内存值，绝不 `options.save()`**。
+
+**实现**：`client/GammaBoost.java`，由 `WildHunterClientHooks#onClientTick` 每刻驱动；`originalGamma` 用 `Double` 判空保证幂等。
+
+**还原路径（必须全覆盖，漏一条就永久改掉玩家本地亮度）**：效果到期 / `/effect clear` / 死亡（原版清效果）/ 退出世界（`level == null`）/ 掉线（`ClientPlayerNetworkEvent.LoggingOut`，**静态块自注册，不依赖 tick 兜底**）。
+
+**为什么不用夜视**：夜视会改变玩法口径（看见实体轮廓），伽马只是亮度。
+
+**已知暴露面**：① 抬升期间打开设置界面会看到亮度滑条为满，关闭后恢复（原版无临时覆盖机制）；② 与 `PostChain` 灰度同帧存在时，伽马只影响亮度、不影响灰度链。
+
 ## 5. 桑吉尔蔗的相位同步方案
 
 本节把 BRIEF §7.5 展开成可实现的时序。核心约束是 D-50：**不许新增 `CustomPacketPayload`**，因此「服务端告诉客户端现在是哪个相位」这件事只能靠 `farmstorm:zangief_piledriver` 的 amplifier。
@@ -1783,8 +1795,9 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 20 | 5 条新配方的形状与数量 | 工作台里做转换器（中心工作台 + 八格农作物）；无序放 4 个膨胀麦；转换器里转换 molotov / zangief_cane / wild_apple 各一次（槽 1 放 1 个下界之星做对照） | 转换器得 1 个；4 个膨胀麦得 1 个压缩膨胀麦；三条转换各扣 3 点经验且双向可用（金苹果 ⇄ 狂野苹果 正反各一次）；**槽 1 的星星数量不变**——只有 `awakened_torchflower` / `awakened_pitcher_plant` 的正向转换消耗 1 个（V-29） |
 | 21 | 0 个自定义网络包 | `grep -r "CustomPacketPayload" src/main/java` | **0 处匹配**（v0.0.1 也是 0；v0.0.2 不许首次出现） |
 | 22 | 客户端在专用服务器上不崩 | `启动服务器.cmd` 起服，再用客户端连 | 服务端启动无 `NoClassDefFoundError`（客户端 6 个类全部由 `Dist.CLIENT` 隔离）；连接后效果相关功能正常 |
+| 23 | 临时附魔到期真的撤销 | 站进激活的 `farmstorm:awakened_torchflower` 20 格内等到剑上出现火焰附加（`/data get entity @s SelectedItem` 里出现 `farmstorm:temporary_enchantments`）→ `/tp` 到 30 格外 → 等 20 秒 | 到期后 `SelectedItem` 里 **`farmstorm:temporary_enchantments` 与 `minecraft:enchantments.fire_aspect` 同时消失**；换成「本来就带火焰附加 I」的剑重复一次，**等级仍是 1（不降级）** |
 
-**22 条，全部可用一次具体动作判定。** 其中 #1–#6 是启动日志（自动化程度最高），#21/#22 是结构性断言（一条命令就能证伪），其余是手测。
+**23 条，全部可用一次具体动作判定。** 其中 #1–#6 是启动日志（自动化程度最高），#21–#23 是结构性断言（一条命令就能证伪），其余是手测。
 
 ## 校订注
 

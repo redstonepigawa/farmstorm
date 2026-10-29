@@ -63,6 +63,8 @@ v0.0.2 走的是同一套「文档先行」流程，但深度不同：这一版�
 | **相位 2 的「视角锁定」只是降速，不是锁死** | `CalculatePlayerTurnEvent#setMouseSensitivity(0)` 之后 `MouseHandler#turnPlayer` 的系数仍是 `0×0.6+0.2 = 0.2`，相对默认 0.5 约慢 **15.6 倍**；无 Mixin 无法归零 | V-31；`12-TECH §4.3` |
 | **F11 / F2 / F3 / ESC 拦不住** | 这四个键的原版处理在 `KeyboardHandler#keyPress` 内部、早于任何 NeoForge 钩子，Mixin-free 够不着；D-60 的锁定范围本来也不含它们 | `12-TECH §4.3` |
 | **1×1 石柱构型的落地时长偏短** | 3×3 及以上台面三个地形都是 40 ± 2 刻；1×1 石柱会让玩家漂浮段的横向漂移把自己挪出柱顶、下坠中途被柱体截住（实测 23 刻），属真实几何结果，不作缺陷 | V-46；`12-TECH §11 #10` |
+| **狂野猎人期间打开设置界面，亮度滑条显示为满** | 水下可视性需要临时抬高 `options.gamma()`，而原版选项系统没有「临时覆盖」 | 已知限制；关闭界面 / 效果结束后滑条与亮度都恢复原值（V-78） |
+| **火把花光环：离开范围后火焰附加最多再留 15 秒** | `TempEnchantHandler.revokeAll()` 目前**没有调用者**，离开光环不会立刻撤销，只由 300 刻到期撤销 | 已知限制（验收口径是「15 秒内消失」）；若要「离开立即撤销」需加「上一刻在光环内、这一刻不在」的边沿检测（V-77） |
 
 > 之前登记过的「配方书分类 `Unknown recipe category: farmstorm:convert`」**已在 v0.0.2 修掉**（`client/ConverterRecipeBookCategory` 走 `RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder`），不再列为已知限制。
 
@@ -347,6 +349,8 @@ Seven additions on top of a frozen v0.0.1: the converter finally gets a crafting
 - **The phase-2 "look lock" only slows the camera down (~1/15.6), it does not freeze it.** `setMouseSensitivity(0)` still leaves a factor of `0.2` in `MouseHandler#turnPlayer` (V-31).
 - **F11 / F2 / F3 / ESC cannot be blocked** — their vanilla handling happens inside `KeyboardHandler#keyPress`, before any NeoForge hook.
 - **The 1×1 pillar landing time is short** (~23 ticks vs 40 ± 2 on a ≥3×3 platform): the player drifts off the pillar top and is caught by the pillar itself. Geometric, not a defect (V-46).
+- **With Wild Hunter active, the brightness slider in the settings screen shows as full** — underwater visibility needs a temporary raise of `options.gamma()`, and the vanilla options system has no "temporary override". Known limitation; closing the screen / the effect restores both the slider and the brightness (V-78).
+- **Torchflower aura: fire aspect lingers up to 15 more seconds after leaving the radius** — `TempEnchantHandler.revokeAll()` currently has **no caller**, so leaving the aura does not revoke immediately and only the 300-tick expiry does. Known limitation (acceptance is "gone within 15 seconds"); an immediate revoke would need an edge check of "inside the aura last tick, outside this tick" (V-77).
 
 The former "`Unknown recipe category: farmstorm:convert`" warning is **fixed** in v0.0.2 (`RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder`) and is no longer a known limitation.
 

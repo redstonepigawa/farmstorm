@@ -751,7 +751,7 @@ The editable-file list of BRIEF §3.3 already includes the three files below (`D
 | `registry/FarmstormBlockEntities.java` | same as above: `deployedOf(DeployedKind)` is also an exhaustive `switch` | +1 `case ZANGIEF_CANE -> FANG_TRAP_CACTUS.get();` + add `FarmstormBlocks.ZANGIEF_CANE.get()` to the block list of the `BlockEntityType.Builder.of(…)` of `FANG_TRAP_CACTUS` | the `block_entities` count stays 6 (one type takes two blocks); **pending verification (attached to RT-04)**: whether `BlockEntityType.Builder#of` accepts `Block...` varargs |
 | `entity/thrown/PuffedWheatProjectile.java` | see §3.8: extract the written block into an extension point, which is the only way D-77's "fully carried over" is one code path instead of two copies | +1 `protected BlockState fillBlock()` + 1 line changed to use it (`fillHay` turns from `private static` into an instance method) | none |
 
-None of the three changes produces a new registry object, a new resource file or a new config key: the 77 of §2, the 36 of §7 and the 22 of §8 all stay the same.
+None of the three changes produces a new registry object, a new resource file or a new config key: the 77 of §2, the 40 of §7 and the 22 of §8 all stay the same.
 
 ---
 
@@ -1095,6 +1095,18 @@ public final class WildHunterLoopSound extends SoundInstance {
 **The two events of sounds.json** are in §6.3; the conversion parameters of the two `.ogg` files are in §6.2.
 
 ---
+
+### 4.7 Wild Hunter gamma boost (added by the author, no decision ID)
+
+**Responsibility**: while the effect is present, raise the client's `options.gamma()` to 1.0 to cover "underwater / in caves you cannot see anything"; **the in-memory value only — never call `options.save()`**.
+
+**Implementation**: `client/GammaBoost.java`, driven every tick from `WildHunterClientHooks#onClientTick`; `originalGamma` is a `Double` (null means "not raised") so the boost is idempotent.
+
+**Restore paths (all of them are required; miss one and the player's local brightness is changed forever)**: effect expiry / `/effect clear` / death (vanilla clears the effect) / leaving the world (`level == null`) / disconnect (`ClientPlayerNetworkEvent.LoggingOut`, **registered from a static block so it does not rely on the tick fallback**).
+
+**Why not night vision**: night vision changes the gameplay rules (entity outlines become visible), whereas gamma only changes brightness.
+
+**Known exposure**: ① while the boost is active the brightness slider in the settings screen reads as full, and it recovers once the screen is closed (the vanilla options system has no temporary override); ② when the effect is present and the game exits, the boost must not reach the file — the `LoggingOut` hook covers that path.
 
 ## 5. Phase Synchronization Plan for Zangief Cane
 
@@ -1620,7 +1632,7 @@ spinDegreesPerTick = 72.0          # D-70: 1440 degrees/second ÷ 20
 | new `farmstorm.configuration.*` language keys | **22** | #18–#39 of §7.3, corresponding one by one to #1–#22 of §8.1 |
 | the two are equal | `22 == 22` | `ModLangProvider` writes both files column by column from the same `ENTRIES` table, so the key sets are equal by construction |
 | new total | **139** | `117 + 22` |
-| new total of language keys | **263** | `222 + 39` (22 of them config) |
+| new total of language keys | **263** | `222 + 41` (22 of them config, 2 entity names) |
 
 The mechanical comparison during implementation: the number of leaf nodes in `run/config/farmstorm-server.toml` must be **139**, and the number of keys in `zh_cn.json` carrying the `farmstorm.configuration.` prefix must also be **139**. If the two numbers differ, some keys were not generated.
 
@@ -1769,8 +1781,9 @@ Every item can be decided by one **concrete action**; "looks fine" is not accept
 | 20 | the shape and count of the 5 new recipes | craft the converter at the crafting table (center crafting table + eight crops); place 4 Puffed Wheat shapeless; convert molotov / zangief_cane / wild_apple once each in the converter | the converter yields 1; 4 Puffed Wheat yield 1 Compressed Puffed Wheat; each of the three conversions costs 3 experience points and works in both directions (golden apple ⇄ Wild Apple, once each way) |
 | 21 | 0 custom network packets | `grep -r "CustomPacketPayload" src/main/java` | **0 matches** (v0.0.1 was also 0; v0.0.2 must not introduce the first one) |
 | 22 | the client does not crash on a dedicated server | start the server with `启动服务器.cmd` and connect with the client | server startup shows no `NoClassDefFoundError` (all 6 client classes are isolated by `Dist.CLIENT`); after connecting, the effect-related features work |
+| 23 | temporary enchantments are really revoked on expiry | stand within 20 blocks of an active `farmstorm:awakened_torchflower` until fire aspect shows on the sword (`farmstorm:temporary_enchantments` appears in `/data get entity @s SelectedItem`) → `/tp` beyond 30 blocks → wait 20 seconds | after expiry, **both `farmstorm:temporary_enchantments` and `minecraft:enchantments.fire_aspect` disappear from `SelectedItem`**; repeat with a sword that natively has fire aspect I and the **level stays 1 (no downgrade)** |
 
-**22 entries, all decidable with one concrete action.** Of these, #1–#6 are startup log lines (the most automatable), #21/#22 are structural assertions (a single command can disprove them), and the rest are manual tests.
+**23 entries, all decidable with one concrete action.** Of these, #1–#6 are startup log lines (the most automatable), #21–#23 are structural assertions (a single command can disprove them), and the rest are manual tests.
 
 ---
 

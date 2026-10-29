@@ -676,6 +676,16 @@ Three prohibitions (BRIEF §7.1, copied verbatim): ① faking greyscale with a c
 
 **Why the first draft asked for the GUI, and why this version accepts leaving it out**: D-61's original intent is 'the whole picture the player sees losing its colour'; greying only the world leaves a colourful ring of hotbar and health bar behind. But on 21.1.213 the only mechanism that lands is the vanilla `PostChain`, whose execution point precedes GUI rendering (`GameRenderer:1027` < `:1073`); including the GUI would mean taking over the framebuffer and hand-writing the target lifecycle — v0.0.2 went down that road once and got 'grey at the wrong moment' (V-48). Between the two evils, V-56 settles on 'world-only grayscale, HUD keeps its colours', written into the Release notes.
 
+#### 7.6.1 Underwater visibility (gamma boost)
+
+| Item | Specification | Basis |
+|---|---|---|
+| Trigger | `farmstorm:wild_hunter` is present on the local player | author feedback: "underwater you cannot see the picture at all" |
+| What it does | the client raises `options.gamma()` to **1.0**, **in memory only — never written to `options.txt`** | 【本文补充】 |
+| Restore | all five paths: effect expiry / `/effect clear` / death / leaving the world / disconnect (`ClientPlayerNetworkEvent.LoggingOut`) | 【本文补充】 |
+| Why not night vision | night vision changes the gameplay rules (entity outlines become visible); gamma only changes brightness | 【本文补充】 |
+| Known exposure | ① while the boost is active the brightness slider in the settings screen reads as full (it recovers when closed); ② exiting the game with the effect present could once have written 1.0 into `options.txt`, which the `LoggingOut` hook now prevents | 【本文补充】 |
+
 ### 7.7 Red highlight
 
 | Item | Specification | Basis |

@@ -1,0 +1,115 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 47 busy and 44 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :writeClientLegacyClasspath UP-TO-DATE
+> Task :prepareClientRun
+
+> Task :runClient
+[quickplay-init] port=25631 tail=[# quickplay, --quickPlayMultiplayer, 127.0.0.1:25631]
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+ERROR StatusConsoleListener Unable to delete file D:\project_farm\run-p13\logs\latest.log: java.nio.file.FileSystemException D:\project_farm\run-p13\logs\latest.log: ��һ����������ʹ�ô��ļ��������޷����ʡ�
+ERROR StatusConsoleListener Unable to delete file D:\project_farm\run-p13\logs\debug.log: java.nio.file.FileSystemException D:\project_farm\run-p13\logs\debug.log: ��һ����������ʹ�ô��ļ��������޷����ʡ�
+[21:01:47] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.213, --assetIndex, 17, --assetsDir, D:\\project_farm\\.tools\\gradle-home\\caches\\neoformruntime\\assets, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430, --quickPlayMultiplayer, 127.0.0.1:25631]
+[21:01:47] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[21:01:47] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[21:01:47] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[21:01:47] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[21:01:47] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[21:01:47] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
+[21:01:47] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 5070 Laptop GPU/PCIe/SSE2 GL version 4.6.0 NVIDIA 573.22, NVIDIA Corporation
+[21:01:47] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[21:01:47] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.2 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[21:01:48] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.213, --gameDir, ., --assetsDir, D:\project_farm\.tools\gradle-home\caches\neoformruntime\assets, --assetIndex, 17, --quickPlayMultiplayer, 127.0.0.1:25631]
+[21:01:49] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[21:01:50] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[21:01:50] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[21:01:50] [Datafixer Bootstrap/INFO] [mojang/DataFixerBuilder]: 229 Datafixer optimizations took 465 milliseconds
+[21:01:50] [pool-5-thread-1/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[21:01:55] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21:01:55] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21:01:55] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[21:01:55] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[21:01:55] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[21:01:55] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23189!/assets/.mcassetsroot' uses unexpected schema
+[21:01:55] [Render thread/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23189!/data/.mcassetsroot' uses unexpected schema
+[21:01:55] [Render thread/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[21:01:55] [Render thread/INFO] [minecraft/Minecraft]: Setting user: Dev
+[21:01:55] [Render thread/INFO] [minecraft/Minecraft]: Backend library: LWJGL version 3.3.3+5
+[21:01:55] [Render thread/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[21:01:55] [Render thread/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[21:01:56] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[21:01:56] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[21:01:56] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[21:01:56] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[21:01:56] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[21:01:56] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[21:01:56] [modloading-worker-0/INFO] [farmstorm/]: 自检 注册对象 77 个：items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1 → OK
+[21:01:56] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[21:01:56] [Render thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[21:01:57] [Render thread/INFO] [farmstorm/]: 自检 实体渲染器 11/11 → OK
+[21:01:57] [Render thread/INFO] [farmstorm/]: 自检 已注册渲染器的实体 ID：[farmstorm:puffed_wheat, farmstorm:ubi_server, farmstorm:toxic_ubi_server, farmstorm:melon_slice_bomb, farmstorm:melon_grenade, farmstorm:bamboo_firecracker, farmstorm:red_mushroom_puff, farmstorm:brown_mushroom_puff, farmstorm:molotov, farmstorm:compressed_puffed_wheat, farmstorm:turret_bullet]
+[21:01:57] [Render thread/INFO] [minecraft/ReloadableResourceManager]: Reloading ResourceManager: vanilla, mod_resources, mod/farmstorm, mod/neoforge
+[21:01:57] [Worker-Main-1/INFO] [minecraft/UnihexProvider]: Found unifont_all_no_pua-15.1.05.hex, loading
+[21:01:57] [Worker-Main-1/INFO] [minecraft/UnihexProvider]: Found unifont_jp_patch-15.1.05.hex, loading
+[21:01:59] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:item.goat_horn.play
+[21:01:59] [Render thread/WARN] [minecraft/SoundEngine]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[21:01:59] [Render thread/INFO] [mojang/Library]: OpenAL initialized on device OpenAL Soft on 扬声器 (DARKRIM SHADOW)
+[21:01:59] [Render thread/INFO] [minecraft/SoundEngine]: Sound engine started
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[21:01:59] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[21:02:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[21:02:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[21:02:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[21:02:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[21:02:00] [Render thread/INFO] [minecraft/TextureAtlas]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[21:02:00] [Render thread/WARN] [minecraft/ShaderInstance]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[21:02:00] [Render thread/INFO] [ne.ne.ne.cl.en.an.js.AnimationLoader/]: Loaded 0 entity animations
+[21:02:00] [Render thread/INFO] [minecraft/ConnectScreen]: Connecting to 127.0.0.1, 25631
+[21:02:02] [Render thread/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[21:02:04] [Render thread/INFO] [minecraft/AdvancementTree]: Loaded 101 advancements
+[21:04:31] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Dev: Played sound farmstorm:wild_hunter_loop to Dev]
+[21:04:31] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Dev: Played sound farmstorm:zangief_piledriver to Dev]
+[21:04:31] [Render thread/WARN] [minecraft/SoundEngine]: Unable to play unknown soundEvent: farmstorm:no_such_sound
+[21:04:31] [Render thread/INFO] [minecraft/ChatComponent]: [System] [CHAT] [Dev: Played sound farmstorm:no_such_sound to Dev]
+
+> Task :runClient FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':runClient'.
+> Process 'command 'D:\project_farm\.tools\jdk21\bin\java.exe'' finished with non-zero exit value -1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 3m 43s
+7 actionable tasks: 2 executed, 5 up-to-date

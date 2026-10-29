@@ -1,0 +1,8 @@
+=== start 21:04:31 ===
+> /execute as Dev at @s run playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1   @21:04:31
+    "Played sound farmstorm:wild_hunter_loop to Dev"
+> /execute as Dev at @s run playsound farmstorm:zangief_piledriver master @s ~ ~ ~ 1 1   @21:04:31
+    "Played sound farmstorm:zangief_piledriver to Dev"
+> /execute as Dev at @s run playsound farmstorm:no_such_sound master @s ~ ~ ~ 1 1   @21:04:31
+    "Played sound farmstorm:no_such_sound to Dev"
+=== end 21:04:34 ===

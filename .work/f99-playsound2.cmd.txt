@@ -1,0 +1,4 @@
+execute as Dev at @s run playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1
+execute as Dev at @s run playsound farmstorm:zangief_piledriver master @s ~ ~ ~ 1 1
+execute as Dev at @s run playsound farmstorm:no_such_sound master @s ~ ~ ~ 1 1
+#SLEEP 3000

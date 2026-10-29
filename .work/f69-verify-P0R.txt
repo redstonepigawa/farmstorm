@@ -1,0 +1,74 @@
+RCON connected 127.0.0.1:25610  phase=P0R  mode=shipped  pad=minecraft:stone
+
+===== 基线（清场 + 断言） =====
+> forceload add 96 96 104 104
+    "No chunks were marked for force loading\n"
+> gamerule doDaylightCycle false
+    "Gamerule doDaylightCycle is now set to: false\n"
+> gamerule mobGriefing true
+    "Gamerule mobGriefing is now set to: true\n"
+> gamerule doMobLoot false
+    "Gamerule doMobLoot is now set to: false\n"
+> time set noon
+    "Set the time to 6000\n"
+> weather clear
+    "Set the weather to clear\n"
+    [pad] fill minecraft:stone -> "No blocks were filled\n" | fill air -> "No blocks were filled\n"
+> execute if block 100 9 100 minecraft:stone
+    "Test passed\n"
+> execute if block 100 10 100 minecraft:air
+    "Test passed\n"
+    [pre] 区域 567 格（x 96..104 / y 6..12 / z 96..104）不符格数 = 0
+    [pre] @e[type=item] -> "Test failed\n"（Test failed = 0 个）
+    [pre] @e[type=farmstorm:molotov] -> "Test failed\n"（Test failed = 0 个）
+
+===== 探测实体（armor_stand 击退探针 + pig 血量探针，全部 NoGravity） =====
+> summon minecraft:armor_stand 103.5 10.0 100.5 {NoGravity:1b,Invulnerable:1b,Tags:["f69probe"]}
+    "Summoned new Armor Stand\n"
+> summon minecraft:pig 100.5 11.0 102.5 {NoAI:1b,NoGravity:1b,Silent:1b,PersistenceRequired:1b,Health:20.0f,Tags:["f69mob"]}
+    "Summoned new Pig\n"
+    [probe before] armor_stand Pos    -> "Armor Stand has the following entity data: [103.5d, 10.0d, 100.5d]\n"
+    [probe before] armor_stand Motion -> "Armor Stand has the following entity data: [0.0d, 0.0d, 0.0d]\n"
+    [probe before] pig Pos            -> "Pig has the following entity data: [100.5d, 11.0d, 102.5d]\n"
+    [probe before] pig Motion         -> "Pig has the following entity data: [0.0d, 0.0d, 0.0d]\n"
+    [probe before] pig Health         -> "Pig has the following entity data: 10.0f\n"
+> tp @p 102.5 10.0 100.5
+    "Teleported Dev to 102.500000, 10.000000, 100.500000\n"
+> gamemode survival @p
+    ""
+    [player] 在线，已 tp 到 102.5 10.0 100.5
+
+===== 投掷 =====
+> summon farmstorm:molotov 100.5 12.0 100.5 {Motion:[0.0d,0.0d,0.0d]}
+    "Summoned new entity.farmstorm.molotov\n"
+    molotov 实体消失于 620 ms
+    [log] 本次新增 莫洛托夫 落点 行数 = 1
+    [log] [29Oct2026 15:40:48.647] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0
+
+===== 投掷后（方块 / 实体 / 血量 / 击退） =====
+    [post] 区域 567 格（x 96..104 / y 6..12 / z 96..104）不符格数 = 0
+    [cube3] 落点为心 3x3x3 共 27 格：投前不符 0 / 投后不符 0
+    [post] @e[type=item] -> "Test failed\n"（Test failed = 0 个掉落）
+    [probe after] armor_stand Pos    -> "Armor Stand has the following entity data: [103.5d, 10.0d, 100.5d]\n"
+    [probe after] armor_stand Motion -> "Armor Stand has the following entity data: [0.0d, 0.0d, 0.0d]\n"
+    [probe after] pig Pos            -> "Pig has the following entity data: [100.5d, 11.0d, 102.5d]\n"
+    [probe after] pig Motion         -> "Pig has the following entity data: [0.0d, 0.0d, 0.0d]\n"
+    [probe after] pig Health         -> "Pig has the following entity data: 10.0f\n"
+    [probe late(+1s)] armor_stand Pos    -> "Armor Stand has the following entity data: [103.5d, 10.0d, 100.5d]\n"
+    [probe late(+1s)] armor_stand Motion -> "Armor Stand has the following entity data: [0.0d, 0.0d, 0.0d]\n"
+    [probe late(+1s)] pig Pos            -> "Pig has the following entity data: [100.5d, 11.0d, 102.5d]\n"
+    [probe late(+1s)] pig Motion         -> "Pig has the following entity data: [0.0d, 0.0d, 0.0d]\n"
+    [probe late(+1s)] pig Health         -> "Pig has the following entity data: 10.0f\n"
+    [player] @p Health before -> "Dev has the following entity data: 20.0f\n"
+    [player] @p Health after  -> "Dev has the following entity data: 20.0f\n"
+
+===== 汇总 phase=P0R（mode=shipped） =====
+基线不符 = 0 | 投后区域不符 = 0 | 区域格数 = 567
+3x3x3 投前不符 = 0 / 投后不符 = 0
+日志行 = ["[29Oct2026 15:40:48.647] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0"]
+armor_stand Motion 投前 [0,0,0] → 投后 [0,0,0] → +1s [0,0,0]
+armor_stand 位移(+1s) = 0.000
+pig Motion 投前 [0,0,0] → 投后 [0,0,0] → +1s [0,0,0]
+pig 位移(+1s) = 0.000
+pig Health 投前 "Pig has the following entity data: 10.0f\n" → 投后 "Pig has the following entity data: 10.0f\n" → +1s "Pig has the following entity data: 10.0f\n"
+@p Health 投前 "Dev has the following entity data: 20.0f\n" → 投后 "Dev has the following entity data: 20.0f\n"

@@ -1,0 +1,70 @@
+RCON connected 127.0.0.1:25610  phase=PR4  mode=probe  pad=minecraft:dirt
+
+===== 基线（清场 + 断言） =====
+> forceload add 96 96 104 104
+    "Marked chunk [6, 6] in Overworld to be force loaded\n"
+> gamerule doDaylightCycle false
+    "Gamerule doDaylightCycle is now set to: false\n"
+> gamerule mobGriefing true
+    "Gamerule mobGriefing is now set to: true\n"
+> gamerule doMobLoot false
+    "Gamerule doMobLoot is now set to: false\n"
+> time set noon
+    "Set the time to 6000\n"
+> weather clear
+    "Set the weather to clear\n"
+    [pad] fill minecraft:dirt -> "Successfully filled 405 block(s)\n" | fill air -> "No blocks were filled\n"
+> execute if block 100 9 100 minecraft:dirt
+    "Test passed\n"
+> execute if block 100 10 100 minecraft:air
+    "Test passed\n"
+    [pre] 区域 567 格（x 96..104 / y 6..12 / z 96..104）期望值不符（= 被破坏）格数 = 0
+    [pre] @e[type=item] -> "Test failed\n"（Test failed = 0 个）
+    [pre] @e[type=farmstorm:molotov] -> "Test failed\n"（Test failed = 0 个）
+
+===== 探测实体（armor_stand 击退探针 + pig 血量探针，全部 NoGravity） =====
+> summon minecraft:armor_stand 103.5 10.0 100.5 {NoGravity:1b,Invulnerable:1b,Tags:["f69probe"]}
+    "Summoned new Armor Stand\n"
+> summon minecraft:pig 100.5 11.0 102.5 {NoAI:1b,NoGravity:1b,Silent:1b,PersistenceRequired:1b,Health:20.0f,Tags:["f69mob"]}
+    "Summoned new Pig\n"
+    [probe before] armor_stand Pos    -> "Armor Stand has the following entity data: [103.5d, 10.0d, 100.5d]\n"
+    [probe before] armor_stand Motion -> "Armor Stand has the following entity data: [0.0d, 0.0d, 0.0d]\n"
+    [probe before] pig Pos            -> "Pig has the following entity data: [100.5d, 11.0d, 102.5d]\n"
+    [probe before] pig Motion         -> "Pig has the following entity data: [0.0d, 0.0d, 0.0d]\n"
+    [probe before] pig Health         -> "Pig has the following entity data: 10.0f\n"
+
+===== 投掷 =====
+> summon farmstorm:molotov 100.5 12.0 100.5 {Motion:[0.0d,0.0d,0.0d]}
+    "Summoned new entity.farmstorm.molotov\n"
+    molotov 实体消失于 779 ms
+    [log] 本次新增 莫洛托夫 落点 行数 = 1
+    [log] [29Oct2026 15:37:23.884] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 4
+
+===== 投掷后（方块 / 实体 / 血量 / 击退） =====
+    [post] 区域 567 格（x 96..104 / y 6..12 / z 96..104）期望值不符（= 被破坏）格数 = 107
+    [post] 坐标（前 40）: 97,8,99 97,8,100 97,9,98 97,9,99 97,9,100 97,9,101 97,9,102 98,7,98 98,7,99 98,7,100 98,7,101 98,8,98 98,8,99 98,8,100 98,8,101 98,8,102 98,9,98 98,9,99 98,9,100 98,9,101 98,9,102 98,9,103 99,7,98 99,7,99 99,7,100 99,7,101 99,7,102 99,8,98 99,8,99 99,8,100 99,8,101 99,8,102 99,8,103 99,9,97 99,9,98 99,9,99 99,9,100 99,9,101 99,9,102 99,9,103
+    [cube3] 落点为心 3x3x3 共 27 格：投前不符 0 / 投后不符 9
+    [post] @e[type=item] -> "Test failed\n"（Test failed = 0 个掉落）
+    [probe after] armor_stand Pos    -> "Armor Stand has the following entity data: [103.5d, 10.0d, 100.5d]\n"
+    [probe after] armor_stand Motion -> "Armor Stand has the following entity data: [0.4249838678279989d, 0.244719881952745d, 0.0d]\n"
+    [probe after] pig Pos            -> "Pig has the following entity data: [100.5d, 11.0d, 102.5d]\n"
+    [probe after] pig Motion         -> "Pig has the following entity data: [0.0d, 0.36943282288864027d, 0.43082545302640707d]\n"
+    [probe after] pig Health         -> "Pig has the following entity data: 10.0f\n"
+    [probe late(+1s)] armor_stand Pos    -> "Armor Stand has the following entity data: [103.5d, 10.0d, 100.5d]\n"
+    [probe late(+1s)] armor_stand Motion -> "Armor Stand has the following entity data: [0.2837226180292854d, 0.1633769440386182d, 0.0d]\n"
+    [probe late(+1s)] pig Pos            -> "Pig has the following entity data: [100.5d, 11.0d, 102.5d]\n"
+    [probe late(+1s)] pig Motion         -> "Pig has the following entity data: [0.0d, 0.2466362975884441d, 0.28762250687542923d]\n"
+    [probe late(+1s)] pig Health         -> "Pig has the following entity data: 10.0f\n"
+    [player] @p Health before -> "No entity was found\n"
+    [player] @p Health after  -> "No entity was found\n"
+
+===== 汇总 phase=PR4（mode=probe） =====
+基线不符 = 0 | 投后区域不符 = 107 | 区域格数 = 567
+3x3x3 投前不符 = 0 / 投后不符 = 9
+日志行 = ["[29Oct2026 15:37:23.884] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 4"]
+armor_stand Motion 投前 [0,0,0] → 投后 [0.4249838678279989,0.244719881952745,0] → +1s [0.2837226180292854,0.1633769440386182,0]
+armor_stand 位移(+1s) = 0.000
+pig Motion 投前 [0,0,0] → 投后 [0,0.36943282288864027,0.43082545302640707] → +1s [0,0.2466362975884441,0.28762250687542923]
+pig 位移(+1s) = 0.000
+pig Health 投前 "Pig has the following entity data: 10.0f\n" → 投后 "Pig has the following entity data: 10.0f\n" → +1s "Pig has the following entity data: 10.0f\n"
+@p Health 投前 "No entity was found\n" → 投后 "No entity was found\n"

@@ -1,0 +1,3 @@
+RCON connected 127.0.0.1:25610  phase=STOP  mode=shipped  pad=minecraft:stone
+> stop
+    "Stopping the server\n"

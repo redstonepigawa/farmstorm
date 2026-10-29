@@ -81,14 +81,27 @@ Phase 13 / 14 的任务都是代码改动，不需要新生成物。
 两条 lane 都不提交。调度者按任务做**路径限定提交**，保证「一个任务一次提交」。
 因此**不要把无关文件的改动混进来**——混进来会让提交无法拆分。
 
-### 3.4 每次收尾必须清场
+### 3.4 每次收尾必须清场，但**只清自己的**
+
+> ⚠️ **禁止 `Get-Process java | Stop-Process -Force` 这种一刀切**（V-37）。
+> 这台机器上同时跑着另一条 lane 的服务端/客户端，加上 Gradle daemon，一刀切会把**别人的进程**杀掉。
+> 症状极具迷惑性：对方看到的是「客户端/服务端无崩溃栈、无 crash report，直接 exit -1」，会误判成自己的代码问题。
+> v0.0.2 施工期真发生过：Lane A 的客户端两次「18:04 还在收聊天回显，18:06 就 No entity was found」。
+
+**正确做法：起进程时记下 PID，收尾只杀那个 PID。**
 
 ```powershell
-Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force
-if (Test-Path "D:\project_farm\.tools\runserver.lock") { Remove-Item -Recurse -Force "D:\project_farm\.tools\runserver.lock" }
+# 起服务端/客户端时用 Start-Process 拿 PID，或起完立刻记录：
+$srv = Start-Process -PassThru -FilePath ...   # 或从任务管理器记下
+# 收尾：只杀自己的
+Stop-Process -Id $srv.Id -Force -ErrorAction SilentlyContinue
+
+# 服务端优雅停机优先用 RCON stop，不要靠 kill
 ```
 
-留下进程会让另一个 lane 在锁上干等（v0.0.2 施工期真发生过一次，等了 20 分钟）。
+**只有在你确认全机没有别的 lane 在跑时**（先 `Get-Process java` 看一遍），才允许清理残留；即便如此也要先看清窗口标题（`Minecraft server` / `Minecraft NeoForge*`）判断归属。
+
+锁文件同理：默认锁是 `.tools/runserver.lock`，你自己的 lane 锁是 `.tools/runserver-<FS_RUN_LOCK>.lock`——**只删自己那把**。
 
 ### 3.5 探针必须能自我关闭，且必须删净
 

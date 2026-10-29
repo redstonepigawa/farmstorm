@@ -1,0 +1,292 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 38 busy and 1 incompatible and 33 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :writeServerLegacyClasspath UP-TO-DATE
+> Task :prepareServerRun UP-TO-DATE
+
+> Task :runServer
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[17:14:27] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[17:14:27] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[17:14:27] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[17:14:27] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[17:14:27] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[17:14:27] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[17:14:27] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.2 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[17:14:28] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[17:14:28] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[17:14:28] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[17:14:28] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[17:14:29] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[17:14:34] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[17:14:34] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[17:14:34] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[17:14:34] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[17:14:34] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[17:14:34] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[17:14:34] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[17:14:34] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[17:14:34] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[17:14:34] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[17:14:34] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[17:14:34] [modloading-worker-0/INFO] [farmstorm/]: 自检 注册对象 77 个：items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1 → OK
+[17:14:34] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[17:14:34] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[17:14:34] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[17:14:34] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[17:14:35] [main/INFO] [minecraft/Main]: No existing world data, creating new world
+[17:14:35] [main/ERROR] [minecraft/DedicatedServerProperties]: No key layers in MapLike[{}]
+[17:14:35] [main/INFO] [minecraft/RecipeManager]: Loaded 1316 recipes
+[17:14:35] [main/INFO] [minecraft/AdvancementTree]: Loaded 1411 advancements
+[17:14:35] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[17:14:36] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.1
+[17:14:36] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[17:14:36] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[17:14:36] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[17:14:37] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25631
+[17:14:37] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using default channel type
+[17:14:37] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[17:14:37] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[17:14:37] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[17:14:37] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[17:14:37] [Server thread/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[17:14:37] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[17:14:37] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[17:14:37] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 2%
+[17:14:37] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 211 ms
+[17:14:37] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.656s)! For help, type "help"
+[17:14:37] [Server thread/INFO] [minecraft/DedicatedServer]: Starting remote control listener
+[17:14:37] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Listener started
+[17:14:37] [Server thread/INFO] [minecraft/RconThread]: RCON running on 0.0.0.0:25632
+[17:14:37] [Server thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[17:14:37] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[17:14:39] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[17:14:39] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Gamerule sendCommandFeedback is now set to: true]
+[17:14:39] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Gamerule doMobSpawning is now set to: false]
+[17:14:39] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Gamerule randomTickSpeed is now set to: 3]
+[17:14:39] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: The difficulty has been set to Peaceful]
+[17:14:39] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Marked 9 chunks in Overworld from [6, 6] to [8, 8] to be force loaded]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 169 block(s)]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 81 block(s)]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 81 block(s)]
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] setup name=F75Probe dim=minecraft:overworld pos=102.50,100.00,102.50 gameMode=SURVIVAL health=20.00 totalExperience=0
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:crafting_table 1" reply=Gave 1 [Crafting Table] to F75Probe | inv=minecraft:crafting_tablex1
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:wheat 1" reply=Gave 1 [Wheat] to F75Probe | inv=minecraft:wheatx1
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:carrot 1" reply=Gave 1 [Carrot] to F75Probe | inv=minecraft:carrotx1
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:potato 1" reply=Gave 1 [Potato] to F75Probe | inv=minecraft:potatox1
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:beetroot 1" reply=Gave 1 [Beetroot] to F75Probe | inv=minecraft:beetrootx1
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:melon_slice 1" reply=Gave 1 [Melon Slice] to F75Probe | inv=minecraft:melon_slicex1
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:cactus 1" reply=Gave 1 [Cactus] to F75Probe | inv=minecraft:cactusx1
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:bamboo 1" reply=Gave 1 [Bamboo] to F75Probe | inv=minecraft:bamboox1
+[17:14:41] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:sweet_berries 1" reply=Gave 1 [Sweet Berries] to F75Probe | inv=minecraft:sweet_berriesx1
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 100, 100, 100]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Crafting Table]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Wheat]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Carrot]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Potato]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Beetroot]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Melon Slice]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Cactus]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Bamboo]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 100 with [Sweet Berries]]
+[17:14:41] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 101, 100, 100]
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 101, 100, 100]
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 104, 100, 100]
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Killed Converter]
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] xp requested=200 total=200 points=F75Probe has 12 experience points levels=F75Probe has 11 experience levels
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:nether_star 1" reply=Gave 1 [Nether Star] to F75Probe | inv=minecraft:nether_starx1
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:crimson_fungus 1" reply=Gave 1 [Crimson Fungus] to F75Probe | inv=minecraft:crimson_fungusx1
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:sugar_cane 1" reply=Gave 1 [Sugar Cane] to F75Probe | inv=minecraft:sugar_canex1
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:golden_apple 1" reply=Gave 1 [Golden Apple] to F75Probe | inv=minecraft:golden_applex1
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s minecraft:torchflower 1" reply=Gave 1 [Torchflower] to F75Probe | inv=minecraft:torchflowerx1
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] convert input=minecraft:crimson_fungus catalyst=minecraft:nether_starx1 xpCost=3 canConvertBefore=true preview=farmstorm:molotovx1 clickMenuButton=true marginXp=200->197 points=F75Probe has 12 experience points -> F75Probe has 9 experience points inputSlotAfter=empty catalystSlotAfter=minecraft:nether_starx1 inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex1,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1}
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] convert input=minecraft:sugar_cane catalyst=nonex0 xpCost=3 canConvertBefore=true preview=farmstorm:zangief_canex1 clickMenuButton=true marginXp=197->194 points=F75Probe has 9 experience points -> F75Probe has 6 experience points inputSlotAfter=empty catalystSlotAfter=minecraft:nether_starx1 inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex1,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1}
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] convert input=minecraft:golden_apple catalyst=nonex0 xpCost=3 canConvertBefore=true preview=farmstorm:wild_applex1 clickMenuButton=true marginXp=194->191 points=F75Probe has 6 experience points -> F75Probe has 3 experience points inputSlotAfter=empty catalystSlotAfter=minecraft:nether_starx1 inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex1,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1,slot16=farmstorm:wild_applex1}
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] convert input=farmstorm:wild_apple catalyst=nonex0 xpCost=3 canConvertBefore=true preview=minecraft:golden_applex1 clickMenuButton=true marginXp=191->188 points=F75Probe has 3 experience points -> F75Probe has 0 experience points inputSlotAfter=empty catalystSlotAfter=minecraft:nether_starx1 inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex2,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1,slot16=farmstorm:wild_applex1}
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] convert input=minecraft:torchflower catalyst=nonex0 xpCost=3 canConvertBefore=true preview=farmstorm:awakened_torchflowerx1 clickMenuButton=true marginXp=188->185 points=F75Probe has 0 experience points -> F75Probe has 24 experience points inputSlotAfter=empty catalystSlotAfter=empty inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex2,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1,slot16=farmstorm:wild_applex1,slot17=farmstorm:awakened_torchflowerx1}
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] inv {slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex2,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1,slot16=farmstorm:wild_applex1,slot17=farmstorm:awakened_torchflowerx1}
+[17:14:42] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s farmstorm:puffed_wheat 4" reply=Gave 4 [Puffed Wheat] to F75Probe | inv=farmstorm:puffed_wheatx4
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 100, 100, 104]
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:42] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 101, 100, 104]
+[17:14:43] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 101, 100, 104]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Killed item.farmstorm.compressed_puffed_wheat]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 101, 100, 104]
+[17:14:44] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 101, 100, 104]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Puffed Wheat]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 101, 100, 104]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 101, 100, 104]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Replaced a slot at 100, 100, 104 with [Air]]
+[17:14:45] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s farmstorm:molotov 1" reply=Gave 1 [item.farmstorm.molotov] to F75Probe | inv=farmstorm:molotovx2
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new Cow]
+[17:14:45] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:46] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:46] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+[17:14:48] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:14:48] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:49] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:49] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+[17:14:49] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:14:49] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:50] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:50] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 43 岩浆 6
+[17:14:51] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:14:51] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:52] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:52] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+[17:14:52] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:14:52] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:53] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:53] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 43 岩浆 6
+[17:14:54] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:14:54] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:55] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:55] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 41 岩浆 8
+[17:14:55] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:14:55] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:56] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:56] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+[17:14:57] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:14:57] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:58] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:58] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+[17:14:58] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:14:58] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:14:59] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:14:59] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+[17:15:00] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:00] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:01] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:01] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+[17:15:01] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:02] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:02] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:02] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+[17:15:03] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:03] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:04] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:04] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+[17:15:05] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:05] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:06] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:06] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+[17:15:06] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:06] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:07] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:07] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+[17:15:08] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:08] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:09] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:09] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+[17:15:09] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:09] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:10] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:10] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 43 岩浆 6
+[17:15:11] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:11] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:12] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:12] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+[17:15:12] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:12] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:13] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:13] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+[17:15:14] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:14] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:15] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:15] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 40 岩浆 9
+[17:15:15] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:16] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:16] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:16] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 41 岩浆 8
+[17:15:17] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:17] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.molotov]
+[17:15:18] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+[17:15:18] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 40 岩浆 9
+[17:15:18] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 49 block(s)]
+[17:15:18] [Server thread/INFO] [farmstorm/]: [F75PROBE] give command="/give @s farmstorm:compressed_puffed_wheat 1" reply=Gave 1 [item.farmstorm.compressed_puffed_wheat] to F75Probe | inv=farmstorm:compressed_puffed_wheatx1
+[17:15:18] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Killed item.farmstorm.compressed_puffed_wheat]
+[17:15:18] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 9 block(s)]
+[17:15:18] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 9 block(s)]
+[17:15:19] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.compressed_puffed_wheat]
+[17:15:21] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 27 block(s)]
+[17:15:21] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 9 block(s)]
+[17:15:21] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new Puffed Wheat]
+[17:15:23] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 27 block(s)]
+[17:15:23] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 9 block(s)]
+[17:15:23] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.compressed_puffed_wheat]
+[17:15:25] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 27 block(s)]
+[17:15:25] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 9 block(s)]
+[17:15:26] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 115, 100, 100]
+[17:15:26] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new Puffed Wheat]
+[17:15:28] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 27 block(s)]
+[17:15:28] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 9 block(s)]
+[17:15:28] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 115, 100, 100]
+[17:15:28] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Summoned new entity.farmstorm.compressed_puffed_wheat]
+[17:15:30] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Changed the block at 115, 100, 100]
+[17:15:30] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 26 block(s)]
+[17:15:30] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 9 block(s)]
+[17:15:30] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Killed Cow]
+[17:15:31] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Killed 2 entities]
+[17:15:31] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Successfully filled 334 block(s)]
+[17:15:31] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Unmarked 9 chunks in Overworld from [6, 6] to [8, 8] for force loading]
+[17:15:31] [RCON Client /127.0.0.1 #2/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[17:15:40] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[17:15:40] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[17:15:40] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Listener stopped
+[17:15:40] [RCON Client /127.0.0.1 #3/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[17:15:40] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 stopped
+
+BUILD SUCCESSFUL in 1m 25s
+7 actionable tasks: 1 executed, 6 up-to-date

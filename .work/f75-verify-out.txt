@@ -1,0 +1,376 @@
+=== F-75 出口回归 · 五步闭环 ===
+RCON 127.0.0.1:25632  输出 D:/project_farm/.work/f75-verify-out.txt
+> /gamerule sendCommandFeedback true
+    "Gamerule sendCommandFeedback is now set to: true"
+> /gamerule doMobSpawning false
+    "Gamerule doMobSpawning is now set to: false"
+> /gamerule randomTickSpeed 3
+    "Gamerule randomTickSpeed is now set to: 3"
+> /difficulty peaceful
+    "The difficulty has been set to Peaceful"
+
+--- S0 环境与基线 ---
+> /forceload add 96 96 128 128
+    "Marked 9 chunks in Overworld from [6, 6] to [8, 8] to be force loaded"
+> /kill @e[type=minecraft:item]
+    "No entity was found"
+> /kill @e[type=minecraft:cow]
+    "No entity was found"
+> /kill @e[type=minecraft:item]
+    "No entity was found"
+> /fill 96 96 96 128 112 128 minecraft:air
+    "No blocks were filled"
+> /fill 96 99 96 108 99 108 minecraft:stone
+    "Successfully filled 169 block(s)"
+> /fill 96 99 112 104 99 120 minecraft:stone
+    "Successfully filled 81 block(s)"
+> /fill 110 99 96 118 99 104 minecraft:stone
+    "Successfully filled 81 block(s)"
+> /execute if block 96 96 96 minecraft:air
+    "Test passed"
+> /execute if block 100 100 116 minecraft:air
+    "Test passed"
+> /execute if block 114 99 100 minecraft:stone
+    "Test passed"
+> /execute if block 100 99 100 minecraft:stone
+    "Test passed"
+  [PASS] 基线：清场后 (96,96,96) 是空气
+  [PASS] 基线：莫洛托夫台 y=100 层是空气
+  [PASS] 基线：膨胀麦台 (114,99,100) 是石头
+  [PASS] 基线：合成区 (100,99,100) 是石头
+  [PASS] 基线：世界里没有掉落物
+
+--- S1 做转换器（crafter = 3×3 工作台等价路径）---
+> /f75probe setup 102.5 100.0 102.5
+    "[F75PROBE] setup name=F75Probe dim=minecraft:overworld pos=102.50,100.00,102.50 gameMode=SURVIVAL health=20.00 totalExperience=0"
+  [PASS] S1 探针玩家就位  ([F75PROBE] setup name=F75Probe dim=minecraft:overworld pos=102.50,100.00,102.50 gameMode=SURVIVAL health=20.00 totalExperience=0)
+> /f75probe give minecraft:crafting_table 1
+    "[F75PROBE] give command="/give @s minecraft:crafting_table 1" reply=Gave 1 [Crafting Table] to F75Probe | inv=minecraft:crafting_tablex1"
+  [PASS] S1 /give minecraft:crafting_table  ([F75PROBE] give command="/give @s minecraft:crafting_table 1" reply=Gave 1 [Crafting Table] to F75Probe | inv=minecraft:crafting_tablex1)
+> /f75probe give minecraft:wheat 1
+    "[F75PROBE] give command="/give @s minecraft:wheat 1" reply=Gave 1 [Wheat] to F75Probe | inv=minecraft:wheatx1"
+  [PASS] S1 /give minecraft:wheat  ([F75PROBE] give command="/give @s minecraft:wheat 1" reply=Gave 1 [Wheat] to F75Probe | inv=minecraft:wheatx1)
+> /f75probe give minecraft:carrot 1
+    "[F75PROBE] give command="/give @s minecraft:carrot 1" reply=Gave 1 [Carrot] to F75Probe | inv=minecraft:carrotx1"
+  [PASS] S1 /give minecraft:carrot  ([F75PROBE] give command="/give @s minecraft:carrot 1" reply=Gave 1 [Carrot] to F75Probe | inv=minecraft:carrotx1)
+> /f75probe give minecraft:potato 1
+    "[F75PROBE] give command="/give @s minecraft:potato 1" reply=Gave 1 [Potato] to F75Probe | inv=minecraft:potatox1"
+  [PASS] S1 /give minecraft:potato  ([F75PROBE] give command="/give @s minecraft:potato 1" reply=Gave 1 [Potato] to F75Probe | inv=minecraft:potatox1)
+> /f75probe give minecraft:beetroot 1
+    "[F75PROBE] give command="/give @s minecraft:beetroot 1" reply=Gave 1 [Beetroot] to F75Probe | inv=minecraft:beetrootx1"
+  [PASS] S1 /give minecraft:beetroot  ([F75PROBE] give command="/give @s minecraft:beetroot 1" reply=Gave 1 [Beetroot] to F75Probe | inv=minecraft:beetrootx1)
+> /f75probe give minecraft:melon_slice 1
+    "[F75PROBE] give command="/give @s minecraft:melon_slice 1" reply=Gave 1 [Melon Slice] to F75Probe | inv=minecraft:melon_slicex1"
+  [PASS] S1 /give minecraft:melon_slice  ([F75PROBE] give command="/give @s minecraft:melon_slice 1" reply=Gave 1 [Melon Slice] to F75Probe | inv=minecraft:melon_slicex1)
+> /f75probe give minecraft:cactus 1
+    "[F75PROBE] give command="/give @s minecraft:cactus 1" reply=Gave 1 [Cactus] to F75Probe | inv=minecraft:cactusx1"
+  [PASS] S1 /give minecraft:cactus  ([F75PROBE] give command="/give @s minecraft:cactus 1" reply=Gave 1 [Cactus] to F75Probe | inv=minecraft:cactusx1)
+> /f75probe give minecraft:bamboo 1
+    "[F75PROBE] give command="/give @s minecraft:bamboo 1" reply=Gave 1 [Bamboo] to F75Probe | inv=minecraft:bamboox1"
+  [PASS] S1 /give minecraft:bamboo  ([F75PROBE] give command="/give @s minecraft:bamboo 1" reply=Gave 1 [Bamboo] to F75Probe | inv=minecraft:bamboox1)
+> /f75probe give minecraft:sweet_berries 1
+    "[F75PROBE] give command="/give @s minecraft:sweet_berries 1" reply=Gave 1 [Sweet Berries] to F75Probe | inv=minecraft:sweet_berriesx1"
+  [PASS] S1 /give minecraft:sweet_berries  ([F75PROBE] give command="/give @s minecraft:sweet_berries 1" reply=Gave 1 [Sweet Berries] to F75Probe | inv=minecraft:sweet_berriesx1)
+> /setblock 100 100 100 minecraft:crafter
+    "Changed the block at 100, 100, 100"
+> /item replace block 100 100 100 container.4 with minecraft:crafting_table
+    "Replaced a slot at 100, 100, 100 with [Crafting Table]"
+> /item replace block 100 100 100 container.0 with minecraft:wheat
+    "Replaced a slot at 100, 100, 100 with [Wheat]"
+> /item replace block 100 100 100 container.1 with minecraft:carrot
+    "Replaced a slot at 100, 100, 100 with [Carrot]"
+> /item replace block 100 100 100 container.2 with minecraft:potato
+    "Replaced a slot at 100, 100, 100 with [Potato]"
+> /item replace block 100 100 100 container.3 with minecraft:beetroot
+    "Replaced a slot at 100, 100, 100 with [Beetroot]"
+> /item replace block 100 100 100 container.5 with minecraft:melon_slice
+    "Replaced a slot at 100, 100, 100 with [Melon Slice]"
+> /item replace block 100 100 100 container.6 with minecraft:cactus
+    "Replaced a slot at 100, 100, 100 with [Cactus]"
+> /item replace block 100 100 100 container.7 with minecraft:bamboo
+    "Replaced a slot at 100, 100, 100 with [Bamboo]"
+> /item replace block 100 100 100 container.8 with minecraft:sweet_berries
+    "Replaced a slot at 100, 100, 100 with [Sweet Berries]"
+> /setblock 101 100 100 minecraft:redstone_block
+    "Changed the block at 101, 100, 100"
+> /setblock 101 100 100 minecraft:air
+    "Changed the block at 101, 100, 100"
+> /data get entity @e[type=minecraft:item,nbt={Item:{id:"farmstorm:converter"}},limit=1]
+    "Converter has the following entity data: {Motion: [-1.851376343893175E-4d, -0.08d, -0.002146058427687131d], Health: 5s, Invulnerable: 0b, Air: 300s, OnGround: 1b, PortalCooldown: 0, Rotation: [225.66609f, 0.0f], FallDistance: 0.0f, Item: {count: 1, id: "farmstorm:converter"}, Pos: [100.22728276950359d, 100.0d, 96.63874587242738d], PickupDelay: 0s, Fire: -1s, UUID: [I; -1819483074, 1360478931, -1101002043, -1177315181], Lifespan: 6000, Age: 20s}"
+> /execute if entity @e[type=minecraft:item,nbt={Item:{id:"farmstorm:converter"}}]
+    "Test passed, count: 1"
+  [PASS] S1 合成产出 farmstorm:converter（item 实体）  (Test passed, count: 1)
+> /execute if entity @e[type=minecraft:item,nbt={Item:{id:"farmstorm:converter",count:1}}]
+    "Test passed, count: 1"
+  [PASS] S1 转换器数量 = 1  (Test passed, count: 1)
+> /setblock 104 100 100 farmstorm:converter
+    "Changed the block at 104, 100, 100"
+> /execute if block 104 100 100 farmstorm:converter
+    "Test passed"
+  [PASS] S1 /execute if block：转换器已放置  (Test passed)
+> /kill @e[type=minecraft:item]
+    "Killed Converter"
+
+--- S2 换出三件新物品（真实 ConverterMenu 按钮）---
+> /f75probe xp 200
+    "[F75PROBE] xp requested=200 total=200 points=F75Probe has 12 experience points levels=F75Probe has 11 experience levels"
+> /f75probe give minecraft:nether_star 1
+    "[F75PROBE] give command="/give @s minecraft:nether_star 1" reply=Gave 1 [Nether Star] to F75Probe | inv=minecraft:nether_starx1"
+> /f75probe give minecraft:crimson_fungus 1
+    "[F75PROBE] give command="/give @s minecraft:crimson_fungus 1" reply=Gave 1 [Crimson Fungus] to F75Probe | inv=minecraft:crimson_fungusx1"
+> /f75probe give minecraft:sugar_cane 1
+    "[F75PROBE] give command="/give @s minecraft:sugar_cane 1" reply=Gave 1 [Sugar Cane] to F75Probe | inv=minecraft:sugar_canex1"
+> /f75probe give minecraft:golden_apple 1
+    "[F75PROBE] give command="/give @s minecraft:golden_apple 1" reply=Gave 1 [Golden Apple] to F75Probe | inv=minecraft:golden_applex1"
+> /f75probe give minecraft:torchflower 1
+    "[F75PROBE] give command="/give @s minecraft:torchflower 1" reply=Gave 1 [Torchflower] to F75Probe | inv=minecraft:torchflowerx1"
+> /f75probe convert 104 100 100 minecraft:crimson_fungus minecraft:nether_star 1
+    "[F75PROBE] convert input=minecraft:crimson_fungus catalyst=minecraft:nether_starx1 xpCost=3 canConvertBefore=true preview=farmstorm:molotovx1 clickMenuButton=true marginXp=200->197 points=F75Probe has 12 experience points -> F75Probe has 9 experience points inputSlotAfter=empty catalystSlotAfter=minecraft:nether_starx1 inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex1,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1}"
+  [PASS] S2 转换器 A：crimson_fungus → molotov（按钮返回 true）  ([F75PROBE] convert input=minecraft:crimson_fungus catalyst=minecraft:nether_starx1 xpCost=3 canConvertBefore=true preview=farmstorm:molotovx1 clickMenuButton=true marginXp=200->197 points=F75Probe has)
+  [PASS] S2 转换器 A：canConvert=true 且 xpCost=3  (canConvert=true xpCost=3)
+  [PASS] S2 转换器 A：扣 3 点经验（totalExperience 200→197）  (200->197)
+  [PASS] S2 转换器 A：输入槽清空、催化剂槽仍是下界之星×1（该配方无催化剂）  (input=empty catalyst=minecraft:nether_starx1)
+  [PASS] S2 转换器 A：背包出现 molotov  ({slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=mine)
+> /f75probe convert 104 100 100 minecraft:sugar_cane none 0
+    "[F75PROBE] convert input=minecraft:sugar_cane catalyst=nonex0 xpCost=3 canConvertBefore=true preview=farmstorm:zangief_canex1 clickMenuButton=true marginXp=197->194 points=F75Probe has 9 experience points -> F75Probe has 6 experience points inputSlotAfter=empty catalystSlotAfter=minecraft:nether_starx1 inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex1,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1}"
+  [PASS] S2 转换器 B：sugar_cane → zangief_cane（按钮返回 true）  ([F75PROBE] convert input=minecraft:sugar_cane catalyst=nonex0 xpCost=3 canConvertBefore=true preview=farmstorm:zangief_canex1 clickMenuButton=true marginXp=197->194 points=F75Probe has 9 experience po)
+  [PASS] S2 转换器 B：扣 3 点经验（197→194）  (197->194)
+  [PASS] S2 转换器 B：催化剂量未变（仍 ×1）  (minecraft:nether_starx1)
+  [PASS] S2 转换器 B：背包出现 zangief_cane  ({slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8)
+> /f75probe convert 104 100 100 minecraft:golden_apple none 0
+    "[F75PROBE] convert input=minecraft:golden_apple catalyst=nonex0 xpCost=3 canConvertBefore=true preview=farmstorm:wild_applex1 clickMenuButton=true marginXp=194->191 points=F75Probe has 6 experience points -> F75Probe has 3 experience points inputSlotAfter=empty catalystSlotAfter=minecraft:nether_starx1 inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex1,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1,slot16=farmstorm:wild_applex1}"
+  [PASS] S2 转换器 C：golden_apple → wild_apple（按钮返回 true）  ([F75PROBE] convert input=minecraft:golden_apple catalyst=nonex0 xpCost=3 canConvertBefore=true preview=farmstorm:wild_applex1 clickMenuButton=true marginXp=194->191 points=F75Probe has 6 experience po)
+  [PASS] S2 转换器 C：扣 3 点经验（194→191）  (194->191)
+  [PASS] S2 转换器 C：背包出现 wild_apple  ({slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_ber)
+> /f75probe convert 104 100 100 farmstorm:wild_apple none 0
+    "[F75PROBE] convert input=farmstorm:wild_apple catalyst=nonex0 xpCost=3 canConvertBefore=true preview=minecraft:golden_applex1 clickMenuButton=true marginXp=191->188 points=F75Probe has 3 experience points -> F75Probe has 0 experience points inputSlotAfter=empty catalystSlotAfter=minecraft:nether_starx1 inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex2,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1,slot16=farmstorm:wild_applex1}"
+  [PASS] S2 转换器 D（反向）：wild_apple → golden_apple（双向可用）  ([F75PROBE] convert input=farmstorm:wild_apple catalyst=nonex0 xpCost=3 canConvertBefore=true preview=minecraft:golden_applex1 clickMenuButton=true marginXp=191->188 points=F75Probe has 3 experience po)
+  [PASS] S2 转换器 D（反向）：反向同样扣 3 点经验（191→188）  (191->188)
+> /f75probe convert 104 100 100 minecraft:torchflower none 0
+    "[F75PROBE] convert input=minecraft:torchflower catalyst=nonex0 xpCost=3 canConvertBefore=true preview=farmstorm:awakened_torchflowerx1 clickMenuButton=true marginXp=188->185 points=F75Probe has 0 experience points -> F75Probe has 24 experience points inputSlotAfter=empty catalystSlotAfter=empty inv={slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex2,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1,slot16=farmstorm:wild_applex1,slot17=farmstorm:awakened_torchflowerx1}"
+  [PASS] S2 补充：torchflower 正向转换消耗 1 个下界之星（D-47 催化剂槽路径）  (click=true catalystAfter=empty)
+> /execute if block 104 100 100 farmstorm:converter
+    "Test passed"
+  [PASS] S2 /execute if block：转换器仍在原位  (Test passed)
+> /f75probe inv
+    "[F75PROBE] inv {slot0=minecraft:crafting_tablex1,slot1=minecraft:wheatx1,slot2=minecraft:carrotx1,slot3=minecraft:potatox1,slot4=minecraft:beetrootx1,slot5=minecraft:melon_slicex1,slot6=minecraft:cactusx1,slot7=minecraft:bamboox1,slot8=minecraft:sweet_berriesx1,slot9=minecraft:nether_starx1,slot10=minecraft:crimson_fungusx1,slot11=minecraft:sugar_canex1,slot12=minecraft:golden_applex2,slot13=minecraft:torchflowerx1,slot14=farmstorm:molotovx1,slot15=farmstorm:zangief_canex1,slot16=farmstorm:wild_applex1,slot17=farmstorm:awakened_torchflowerx1}"
+
+--- S3 4 合 1（4 × puffed_wheat → compressed_puffed_wheat）---
+> /f75probe give farmstorm:puffed_wheat 4
+    "[F75PROBE] give command="/give @s farmstorm:puffed_wheat 4" reply=Gave 4 [Puffed Wheat] to F75Probe | inv=farmstorm:puffed_wheatx4"
+  [PASS] S3 /give 4 × puffed_wheat  ([F75PROBE] give command="/give @s farmstorm:puffed_wheat 4" reply=Gave 4 [Puffed Wheat] to F75Probe | inv=farmstorm:puffed_wheatx4)
+> /setblock 100 100 104 minecraft:crafter
+    "Changed the block at 100, 100, 104"
+> /item replace block 100 100 104 container.0 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.1 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.2 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.3 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /setblock 101 100 104 minecraft:redstone_block
+    "Changed the block at 101, 100, 104"
+> /setblock 101 100 104 minecraft:air
+    "Changed the block at 101, 100, 104"
+> /data get entity @e[type=minecraft:item,nbt={Item:{id:"farmstorm:compressed_puffed_wheat"}},limit=1]
+    "item.farmstorm.compressed_puffed_wheat has the following entity data: {Motion: [4.7353211429484874E-4d, -0.08d, -0.001104269588766568d], Health: 5s, Invulnerable: 0b, Air: 300s, OnGround: 1b, PortalCooldown: 0, Rotation: [219.5922f, 0.0f], FallDistance: 0.0f, Item: {count: 1, id: "farmstorm:compressed_puffed_wheat"}, Pos: [101.12994150174768d, 100.0d, 102.33098613149437d], PickupDelay: 0s, Fire: -1s, UUID: [I; 402368305, 340740382, -2085384356, -837054013], Lifespan: 6000, Age: 20s}"
+> /execute if entity @e[type=minecraft:item,nbt={Item:{id:"farmstorm:compressed_puffed_wheat"}}]
+    "Test passed, count: 1"
+  [PASS] S3 4 个膨胀麦 → 1 个压缩膨胀麦  (Test passed, count: 1)
+> /execute if entity @e[type=minecraft:item,nbt={Item:{id:"farmstorm:compressed_puffed_wheat",count:1}}]
+    "Test passed, count: 1"
+  [PASS] S3 压缩膨胀麦数量 = 1  (Test passed, count: 1)
+> /execute if block 100 100 104 minecraft:crafter
+    "Test passed"
+  [PASS] S3 /execute if block：工作格方块是 crafter  (Test passed)
+> /kill @e[type=minecraft:item]
+    "Killed item.farmstorm.compressed_puffed_wheat"
+> /item replace block 100 100 104 container.0 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.1 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.2 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.3 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.4 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.0 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.1 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.2 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /setblock 101 100 104 minecraft:redstone_block
+    "Changed the block at 101, 100, 104"
+> /setblock 101 100 104 minecraft:air
+    "Changed the block at 101, 100, 104"
+  [PASS] S3 反例：3 个膨胀麦无产物
+> /item replace block 100 100 104 container.0 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.1 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.2 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.3 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.4 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.0 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.1 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.2 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.3 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /item replace block 100 100 104 container.4 with farmstorm:puffed_wheat
+    "Replaced a slot at 100, 100, 104 with [Puffed Wheat]"
+> /setblock 101 100 104 minecraft:redstone_block
+    "Changed the block at 101, 100, 104"
+> /setblock 101 100 104 minecraft:air
+    "Changed the block at 101, 100, 104"
+  [PASS] S3 反例：5 个膨胀麦无产物
+> /item replace block 100 100 104 container.0 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.1 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.2 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.3 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+> /item replace block 100 100 104 container.4 with minecraft:air
+    "Replaced a slot at 100, 100, 104 with [Air]"
+
+--- S4 投莫洛托夫点火（默认 fireChance=85.0）---
+> /f75probe give farmstorm:molotov 1
+    "[F75PROBE] give command="/give @s farmstorm:molotov 1" reply=Gave 1 [item.farmstorm.molotov] to F75Probe | inv=farmstorm:molotovx2"
+  [PASS] S4 /give farmstorm:molotov  ([F75PROBE] give command="/give @s farmstorm:molotov 1" reply=Gave 1 [item.farmstorm.molotov] to F75Probe | inv=farmstorm:molotovx2)
+> /summon minecraft:cow 96.5 100.0 112.5 {NoAI:1b,Silent:1b}
+    "Summoned new Cow"
+> /data get entity @e[type=minecraft:cow,limit=1] Health
+    "Cow has the following entity data: 10.0f"
+  [PASS] S4 对照牛已就位（Health 10.0）  (Cow has the following entity data: 10.0f)
+  [PASS] S4 投掷前无掉落物
+> /summon farmstorm:molotov 100.5 104.0 116.5 {Motion:[0.0d,0.0d,0.0d]}
+    "Summoned new entity.farmstorm.molotov"
+    [扫描] y=100 层半径 4 圆盘 49 格：火 44 岩浆 5 空气 0 其它 0
+  [PASS] S4 候选格全部被写入火/岩浆（49 格无遗漏）  (fire=44 magma=5 other=[])
+  [PASS] S4 原方块一个都没少：y=99 平台 81 格全是石头  (stone=81/81)
+  [PASS] S4 半径外 32 格一块没动（仍是空气）  (air=32 bad=[])
+> /data get entity @e[type=minecraft:cow,limit=1] Health
+    "Cow has the following entity data: 10.0f"
+  [PASS] S4 无爆炸伤害：牛 Health 投前投后相同  (Cow has the following entity data: 10.0f vs Cow has the following entity data: 10.0f)
+> /execute if block 100 100 116 minecraft:fire
+    "Test failed"
+> /execute if block 100 100 116 minecraft:magma_block
+    "Test passed"
+  [PASS] S4 /execute if block：落点正上方那格确实是火或岩浆块  (fire=Test failed magma=Test passed)
+    服务端日志：[17:14:46] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0
+    服务端日志：[17:14:46] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+  [PASS] S4 日志：落点威力 0（默认 molotov.triggerExplosionPower=0）  ([17:14:46] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 100.05, 116.50) 威力 0)
+  [PASS] S4 日志：候选 49 = 火 + 岩浆  ([17:14:46] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5)
+
+--- S4b 连投 20 颗，火 : 岩浆块 ≈ 85 : 15 ---
+    第 5 投：火 41 岩浆 8
+    第 10 投：火 44 岩浆 5
+    第 15 投：火 43 岩浆 6
+    第 20 投：火 40 岩浆 9
+    20 投合计：候选 980 火 851 岩浆 129
+  [PASS] S4b 每投候选恰好 49 且火+岩浆=候选  ([])
+  [PASS] S4b 岩浆块占比落在 10 %–20 %  (13.16%（129/980）)
+    日志最近 21 条「候选」行（首条为上面的单投）：
+      [17:14:46] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+      [17:14:49] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+      [17:14:50] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 43 岩浆 6
+      [17:14:52] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+      [17:14:53] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 43 岩浆 6
+      [17:14:55] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 41 岩浆 8
+      [17:14:56] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+      [17:14:58] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+      [17:14:59] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+      [17:15:01] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+      [17:15:02] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 44 岩浆 5
+      [17:15:04] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+      [17:15:06] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+      [17:15:07] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+      [17:15:09] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+      [17:15:10] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 43 岩浆 6
+      [17:15:12] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+      [17:15:13] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 42 岩浆 7
+      [17:15:15] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 40 岩浆 9
+      [17:15:16] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 41 岩浆 8
+      [17:15:18] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 49 火 40 岩浆 9
+    日志 20 投合计：候选 980 火 851 岩浆 129
+  [PASS] S4b 日志合计与逐格扫描合计一致  (log=851/129 scan=851/129)
+> /data get entity @e[type=minecraft:cow,limit=1] Health
+    "Cow has the following entity data: 10.0f"
+  [PASS] S4b 20 投后对照牛仍在且未受伤（Health 10.0）  (Cow has the following entity data: 10.0f)
+  [PASS] S4b 20 投期间没有额外掉落物
+
+--- S5 投压缩膨胀麦铺压缩干草块 ---
+> /f75probe give farmstorm:compressed_puffed_wheat 1
+    "[F75PROBE] give command="/give @s farmstorm:compressed_puffed_wheat 1" reply=Gave 1 [item.farmstorm.compressed_puffed_wheat] to F75Probe | inv=farmstorm:compressed_puffed_wheatx1"
+  [PASS] S5 /give farmstorm:compressed_puffed_wheat  ([F75PROBE] give command="/give @s farmstorm:compressed_puffed_wheat 1" reply=Gave 1 [item.farmstorm.compressed_puffed_wheat] to F75Probe | inv=farmstorm:compres)
+  [PASS] §8 基线（S5 首投前）：立方体已复位（石头 9 / 空气 18）  (stone=9 air=18 bad=[])
+    投后 3×3×3 立方体 27 格：compressed_hay_block 27 / ["farmstorm:compressed_hay_block"]
+  [PASS] S5 落点立方体 27 格全部写成 farmstorm:compressed_hay_block  (count=27)
+> /execute if block 114 99 100 farmstorm:compressed_hay_block
+    "Test passed"
+  [PASS] S5 /execute if block：中心格是压缩干草块  (Test passed)
+> /execute if block 114 100 100 farmstorm:compressed_hay_block
+    "Test passed"
+  [PASS] S5 /execute if block：平台上方那格也被写满  (Test passed)
+  [PASS] S5 写入无掉落物
+
+--- §11 #8 压缩膨胀麦完全沿用膨胀麦（同坐标两颗）---
+  [PASS] §8 基线（膨胀麦一投前）：立方体已复位（石头 9 / 空气 18）  (stone=9 air=18 bad=[])
+    膨胀麦写入：hay_block 27 / ["minecraft:hay_block"]
+  [PASS] §8 基线（压缩膨胀麦一投前）：立方体已复位（石头 9 / 空气 18）  (stone=9 air=18 bad=[])
+    膨胀麦写入格集合 = 27 格；压缩膨胀麦写入格集合 = 27 格
+  [PASS] §11 #8 两次立方体边长一致（干态 3 → 27 格）  (hay=27 compressed=27)
+  [PASS] §11 #8 写入位置集合完全相同  (haySetN=27 compressedSetN=27)
+  [PASS] §11 #8 唯一差异是方块 ID（hay_block vs compressed_hay_block）  (hay=27 compressed=27)
+> /execute if block 114 99 100 minecraft:hay_block
+    "Test failed"
+> /execute if block 113 98 99 minecraft:hay_block
+    "Test failed"
+
+--- §11 #8 抗性 3.6e6 的格被挡住（基岩），两颗行为一致 ---
+  [PASS] §8 基线（基岩对照 · puffed_wheat 前）：立方体已复位（石头 9 / 空气 18）  (stone=9 air=18 bad=[])
+> /execute if block 115 100 100 minecraft:bedrock
+    "Test passed"
+  [PASS] §8 基线（基岩对照 · compressed_puffed_wheat 前）：立方体已复位（石头 9 / 空气 18）  (stone=9 air=18 bad=[])
+> /execute if block 115 100 100 minecraft:bedrock
+    "Test passed"
+    基岩位读数：膨胀麦前 true 后 true；压缩膨胀麦前 true 后 true
+    绕开基岩的写入格：膨胀麦 26 格 / 压缩膨胀麦 26 格
+  [PASS] §11 #8 两颗都被基岩挡住（基岩位置前后都是 bedrock）  (hay=true compressed=true)
+  [PASS] §11 #8 被挡住的格一致：两次都写 26 格  (hay=26 compressed=26)
+  [PASS] §11 #8 被挡住的格集合相同  (haySet=["113,100,100","113,100,101","113,100,99","113,98,100","113,98,101","113,98,99","113,99,100","113,99,101","113,99,99","1)
+  [PASS] §8 基线（收尾前）：立方体已复位（石头 9 / 空气 18）  (stone=9 air=18 bad=[])
+
+--- 收尾清场 ---
+> /kill @e[type=minecraft:item]
+    "No entity was found"
+> /kill @e[type=minecraft:cow]
+    "Killed Cow"
+> /kill @e[type=minecraft:item]
+    "Killed 2 entities"
+> /execute if block 96 96 96 minecraft:air
+    "Test passed"
+> /execute if block 100 99 100 minecraft:air
+    "Test passed"
+> /execute if block 114 99 100 minecraft:air
+    "Test passed"
+  [PASS] 收尾：三处清场断言全 Test passed  (Test passed | Test passed | Test passed)
+  [PASS] 收尾：无残留掉落物
+> /execute if entity @e[type=farmstorm:molotov]
+    "Test failed"
+  [PASS] 收尾：无残留莫洛托夫实体  (Test failed)
+> /forceload remove 96 96 128 128
+    "Unmarked 9 chunks in Overworld from [6, 6] to [8, 8] for force loading"
+
+### 断言合计：PASS 75 / FAIL 0
+### 全部断言通过 (0 FAIL)

@@ -1,0 +1,32 @@
+=== §11 #8 湿态补充：同一坐标投膨胀麦 / 压缩膨胀麦，立方体边长应为 5（125 格）===
+> /forceload add 110 96 118 104
+    "Marked 2 chunks in Overworld from [6, 6] to [7, 6] to be force loaded"
+  [PASS] 湿态基线（膨胀麦前）：水源方块在位  (water=true)
+  [PASS] 湿态基线（膨胀麦前）：水源六面被石头包住（不流走）  (aroundStone=true)
+  [PASS] 湿态基线（膨胀麦前）：落点方块是石头、正上方是空气  (top=true above=true)
+  [PASS] 湿态基线：干态 27 格里只有 1 格是水（117 以外的输入条件干净）  (["minecraft:air","minecraft:stone","minecraft:water"])
+    膨胀麦写入（5³ 立方体 125 格）：hay_block 125 / ["minecraft:hay_block"]
+  [PASS] 膨胀麦：遇水边长扩到 5（125 格 hay_block）  (hay=125)
+  [PASS] 膨胀麦：水源格被 hay_block 覆盖（写入不是跳过）  (waterLeft=false)
+  [PASS] 湿态基线（压缩膨胀麦前）：水源方块在位  (water=true)
+  [PASS] 湿态基线（压缩膨胀麦前）：水源六面被石头包住（不流走）  (aroundStone=true)
+  [PASS] 湿态基线（压缩膨胀麦前）：落点方块是石头、正上方是空气  (top=true above=true)
+    压缩膨胀麦写入（5³ 立方体 125 格）：compressed_hay_block 125 / ["farmstorm:compressed_hay_block"]
+  [PASS] 压缩膨胀麦：遇水边长同样是 5（125 格）  (compressed=125)
+  [PASS] §11 #8（湿态）：两次写入的位置集合完全相同  (haySetN=125 compressedSetN=125)
+  [PASS] §11 #8（湿态）：唯一差异是方块 ID  (hay=125 compressed=125)
+    干 3 / 湿 5 两组：干态 27 格（本脚本前序 dry 读数来自其它脚本）、湿态 125 格
+    湿态写入格样例（前 5 格）：112,100,100 | 112,100,101 | 112,100,102 | 112,100,98 | 112,100,99
+> /execute if block 114 99 100 minecraft:air
+    "Test passed"
+> /execute if block 115 98 100 minecraft:air
+    "Test passed"
+  [PASS] 收尾：湿态台清空（两处基线断言 Test passed）  (Test passed | Test passed)
+> /execute if entity @e[type=minecraft:item]
+    "Test failed"
+  [PASS] 收尾：无残留掉落物  (Test failed)
+> /forceload remove 110 96 118 104
+    "Unmarked 2 chunks in Overworld from [6, 6] to [7, 6] for force loading"
+
+### 湿态补充断言：PASS 14 / FAIL 0
+### 全部断言通过 (0 FAIL)

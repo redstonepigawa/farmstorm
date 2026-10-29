@@ -71,7 +71,13 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "awakened_torchflower_seeds", "激活的火把花种子", "Awakened Torchflower Seeds");
         item(entries, "awakened_pitcher_plant_pod", "激活的瓶子草豆荚", "Awakened Pitcher Plant Pod");
         item(entries, "converter", "农产品转换器", "Converter");
-        // ---- 20 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
+        // ---- v0.0.2 的 5 个新物品（TECH §7.3 #1–#5，文案逐字）----
+        item(entries, "molotov", "莫洛托夫！", "Molotov");
+        item(entries, "zangief_cane", "桑吉尔蔗", "Zangief Cane");
+        item(entries, "wild_apple", "狂野苹果", "Wild Apple");
+        item(entries, "compressed_puffed_wheat", "压缩膨胀麦", "Compressed Puffed Wheat");
+        item(entries, "compressed_hay_block", "压缩干草块", "Compressed Hay Block");
+        // ---- 22 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
         block(entries, "puffed_wheat_crop", "膨胀麦", "Puffed Wheat");
         block(entries, "blast_carrot_crop", "胡罗贝", "Blast Carrot");
         block(entries, "ubi_server_crop", "育碧服务器", "Ubi Server");
@@ -92,7 +98,10 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "awakened_pitcher_plant", "激活的瓶子草", "Awakened Pitcher Plant");
         block(entries, "fang_trap_cactus", "赢过输过没死过", "Fang Trap Cactus");
         block(entries, "converter", "农产品转换器", "Converter");
-        // ---- 9 个实体类型（TECH §3.4）----
+        // ---- v0.0.2 的 2 个新方块（TECH §7.3 #6–#7）----
+        block(entries, "zangief_cane", "桑吉尔蔗", "Zangief Cane");
+        block(entries, "compressed_hay_block", "压缩干草块", "Compressed Hay Block");
+        // ---- 11 个实体类型（TECH §3.4）----
         entity(entries, "puffed_wheat", "膨胀麦", "Puffed Wheat");
         entity(entries, "ubi_server", "育碧服务器", "Ubi Server");
         entity(entries, "toxic_ubi_server", "毒育碧服务器", "Toxic Ubi Server");
@@ -102,6 +111,15 @@ public final class ModLangProvider extends LanguageProvider {
         entity(entries, "red_mushroom_puff", "？！菇菇！？", "Red Mushroom Puff");
         entity(entries, "brown_mushroom_puff", "？！棕色菇菇色棕！？", "Brown Mushroom Puff");
         entity(entries, "turret_bullet", "炮台导弹", "Turret Bullet");
+        // ---- v0.0.2 的 2 个新投掷物实体（F-66；实体名会出现在召唤反馈与死亡信息里）----
+        entity(entries, "molotov", "莫洛托夫！", "Molotov");
+        entity(entries, "compressed_puffed_wheat", "压缩膨胀麦", "Compressed Puffed Wheat");
+        // ---- 2 个 mob_effect（TECH §7.3 #8–#9；隐藏效果的键只用于 /effect 补全）----
+        plain(entries, "effect.farmstorm.wild_hunter", "狂 野 猎 人", "Wild Hunter");
+        plain(entries, "effect.farmstorm.zangief_piledriver", "桑吉尔蔗打桩", "Zangief Piledriver");
+        // ---- 2 条字幕（TECH §7.3 #10–#11；键名必须与 sounds.json 的 subtitle 逐字一致）----
+        plain(entries, "subtitles.farmstorm.wild_hunter_loop", "狩猎主题响起", "Hunting theme plays");
+        plain(entries, "subtitles.farmstorm.zangief_piledriver", "打桩机启动", "Piledriver hits");
         // ---- 固定键：创造标签页 / GUI / 提示 / 死亡信息（TECH §7.2 逐条）----
         plain(entries, "itemGroup.farmstorm.main", "农场风云", "Farmstorm");
         plain(entries, "container.farmstorm.converter", "农产品转换器", "Converter");
@@ -147,7 +165,12 @@ public final class ModLangProvider extends LanguageProvider {
         advancement(entries, "aura_bath", "光环洗浴", "Aura Bath", "从激活的火把花或瓶子草获得一次光环效果", "Receive an aura effect from an Awakened Torchflower or Awakened Pitcher Plant");
         advancement(entries, "fang_dance", "最扎人的一集", "The Itchiest Episode", "触发一次「赢过输过没死过」", "Trigger a Fang Trap Cactus once");
         advancement(entries, "lucky_jackpot", "老实发育，很枯燥吧", "Playing It Safe Is Boring", "食用幸运浆果并抽中 0.1% 的创造模式分支", "Eat a Lucky Berry and hit the 0.1% creative mode branch");
-        // ---- 117 个配置项（键路径 = run/config/farmstorm-server.toml 的段/键）----
+        // ---- v0.0.2 的 3 条新进度（DEC A-09 的短句；TECH §7.3 #12–#17）----
+        // 进度 JSON 由 F-98 生成，键先在这里立好，F-98 落地时不必再改语言表。
+        advancement(entries, "first_molotov", "火了！", "It's Lit!", "初次投出莫洛托夫！", "Throw a Molotov for the first time");
+        advancement(entries, "zangief_hit", "手摇重 360", "Hand-Cranked 360", "桑吉尔蔗首次命中一名玩家", "Land a Zangief Cane on a player for the first time");
+        advancement(entries, "first_wild_hunter", "狂野猎人", "Wild Hunter", "首次获得「狂 野 猎 人」效果", "Obtain the Wild Hunter effect for the first time");
+        // ---- 139 个配置项（键路径 = run/config/farmstorm-server.toml 的段/键）----
         config(entries, "converter.xpCost", "每次转换扣除的经验点数", "Experience points spent per conversion");
         config(entries, "converter.netherStarForwardCost", "正向转换额外消耗的下界之星个数", "Nether stars consumed per forward conversion");
         config(entries, "converter.netherStarOnReverse", "反向转换是否也消耗下界之星", "Whether reverse conversions consume a nether star too");
@@ -265,6 +288,29 @@ public final class ModLangProvider extends LanguageProvider {
         config(entries, "power_beet.haste.durationTicks", "急迫时长（0 = 不施加）", "Haste duration in ticks (0 = not applied)");
         config(entries, "power_beet.resistance.level", "抗性提升等级（1 = I 级）", "Resistance level (1 = level I)");
         config(entries, "power_beet.resistance.durationTicks", "抗性提升时长（0 = 不施加）", "Resistance duration in ticks (0 = not applied)");
+        // ---- v0.0.2 的 4 个新分组 22 条（F-61 / TECH §7.3 #18–#39，文案逐字照 §7.3）----
+        config(entries, "molotov.effectRadius", "落点球半径（格）", "Impact sphere radius (blocks)");
+        config(entries, "molotov.fireChance", "每个候选方块被点火的概率（%）", "Chance (%) to place fire on each candidate block");
+        config(entries, "molotov.triggerExplosionPower", "落点触发爆炸的威力（0 = 只当触发器）", "Power of the landing trigger explosion (0 = trigger only)");
+        config(entries, "wild_apple.nutrition", "营养值", "Nutrition");
+        config(entries, "wild_apple.saturationModifier", "饱和度修正", "Saturation modifier");
+        config(entries, "wild_hunter.durationTicks", "效果基础时长（tick）", "Base effect duration (ticks)");
+        config(entries, "wild_hunter.killExtensionTicks", "每次击杀延长的时长（tick）", "Duration added per kill (ticks)");
+        config(entries, "wild_hunter.killHealPoints", "每次击杀回复的生命点数", "Health restored per kill");
+        config(entries, "wild_hunter.searchRadius", "索敌球半径（格）", "Target search radius (blocks)");
+        config(entries, "wild_hunter.searchAngleDegrees", "索敌视线夹角上限（度）", "Target search view angle limit (degrees)");
+        config(entries, "wild_hunter.dashTicks", "吸附冲刺跨越的刻数", "Ticks the dash takes");
+        config(entries, "wild_hunter.speedBonusPercent", "移动速度加成（%）", "Movement speed bonus (%)");
+        config(entries, "wild_hunter.attackSpeedBonusPercent", "攻击速度加成（%）", "Attack speed bonus (%)");
+        config(entries, "wild_hunter.attackDamageBonusPercent", "攻击伤害加成（%）", "Attack damage bonus (%)");
+        config(entries, "wild_hunter.highlightRadius", "红色剪影的最大距离（格）", "Maximum silhouette distance (blocks)");
+        config(entries, "wild_hunter.loopSoundRange", "循环音的可听距离（格）", "Looping sound audible range (blocks)");
+        config(entries, "zangief_cane.triggerRadius", "触发球半径（格）", "Trigger sphere radius (blocks)");
+        config(entries, "zangief_cane.stageDelayTicks", "相位 0 的等待刻数", "Ticks spent in phase 0");
+        config(entries, "zangief_cane.levitationLevel", "漂浮等级（1 = I 级）", "Levitation level (1 = level I)");
+        config(entries, "zangief_cane.levitationDurationTicks", "漂浮时长（tick）", "Levitation duration (ticks)");
+        config(entries, "zangief_cane.fallTicks", "相位 2 的目标落地时长（tick）", "Target landing duration of phase 2 (ticks)");
+        config(entries, "zangief_cane.spinDegreesPerTick", "水平自转速度（度/刻）", "Horizontal spin speed (degrees/tick)");
         return List.copyOf(entries);
     }
 

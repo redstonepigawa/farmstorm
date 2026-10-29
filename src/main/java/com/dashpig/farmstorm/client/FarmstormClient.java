@@ -10,10 +10,14 @@ import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import java.io.IOException;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterShadersEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 /**
@@ -55,10 +59,31 @@ public final class FarmstormClient {
         }
     }
 
-    /** 冲刺只在生效的头几个 tick 内推进，逐刻推进由这里驱动。 */
+    /**
+     * 狂野猎人的客户端逐刻驱动：冲刺推进（F-79）+ 循环音跟随（F-84）+ 状态快照。
+     * 三个功能的钩子都汇合在 {@link WildHunterClientHooks}，本类只做事件接线。
+     */
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
-        WildHunterDashClient.onClientTick();
+        WildHunterClientHooks.onClientTick();
+    }
+
+    /** 灰度后处理（F-82）的 shader 必须在资源重载期注册，否则 pass 无从创建。 */
+    @SubscribeEvent
+    public static void onRegisterShaders(RegisterShadersEvent event) throws IOException {
+        WildHunterClientHooks.onRegisterShaders(event);
+    }
+
+    /** 整屏灰度要连 GUI 一起变灰（F-82 验收 2），所以挂在 RenderGuiEvent.Post。 */
+    @SubscribeEvent
+    public static void onRenderGuiPost(RenderGuiEvent.Post event) {
+        WildHunterClientHooks.onRenderGuiPost();
+    }
+
+    /** 红色剪影（F-83）：只对可见且 64 格内的目标生效。 */
+    @SubscribeEvent
+    public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
+        WildHunterClientHooks.onRenderLivingPost(event);
     }
 
     /**

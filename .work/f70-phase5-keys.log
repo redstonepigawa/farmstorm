@@ -1,0 +1,16 @@
+=== (a) effectRadius 已改回 4.0 ===
+  [radius4.0] 基线(100,9,100 stone=true / 100,10,100 air=true)
+  [log] [29Oct2026 15:53:39.555] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0
+  [log] [29Oct2026 15:53:39.556] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 115 火 95 岩浆 20
+=== (b) fireChance 85 -> 0（余量语义：应全岩浆块）===
+  [fireChance0] toml fireChance = 85.0 -> fireChance = 0.0；bake() 行数 3 -> 4
+  [fireChance0] 基线(100,9,100 stone=true / 100,10,100 air=true)
+  [log] [29Oct2026 15:53:41.455] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0
+  [log] [29Oct2026 15:53:41.456] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 115 火 0 岩浆 115
+=== (c) fireChance 0 -> 100（应全火）===
+  [fireChance100] toml fireChance = 0.0 -> fireChance = 100.0；bake() 行数 4 -> 5
+  [fireChance100] 基线(100,9,100 stone=true / 100,10,100 air=true)
+  [log] [29Oct2026 15:53:43.356] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0
+  [log] [29Oct2026 15:53:43.357] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 115 火 115 岩浆 0
+=== (d) 改回 85.0 ===
+  [fireChance85] toml fireChance = 100.0 -> fireChance = 85.0；bake() 行数 5 -> 6

@@ -1,0 +1,25 @@
+> fill 96 4 96 104 15 104 minecraft:air -> "No blocks were filled\n"
+> fill 96 5 96 104 5 104 minecraft:stone -> "Successfully filled 81 block(s)\n"
+> fill 96 7 96 104 7 104 minecraft:stone -> "Successfully filled 81 block(s)\n"
+> fill 96 9 96 104 9 104 minecraft:stone -> "Successfully filled 81 block(s)\n"
+> fill 96 11 96 104 11 104 minecraft:stone -> "Successfully filled 81 block(s)\n"
+> fill 96 13 96 104 13 104 minecraft:stone -> "Successfully filled 81 block(s)\n"
+> fill 99 11 99 101 11 101 minecraft:air -> "Successfully filled 9 block(s)\n"
+> fill 99 13 99 101 13 101 minecraft:air -> "Successfully filled 9 block(s)\n"
+  [pre] execute if block 100 9 100 minecraft:stone -> "Test passed\n"
+  [pre] execute if block 100 10 100 minecraft:air -> "Test passed\n"
+  [pre] execute if block 100 8 100 minecraft:air -> "Test passed\n"
+  [pre] execute if block 100 12 100 minecraft:air -> "Test passed\n"
+  [pre] execute if block 99 11 100 minecraft:air -> "Test passed\n"
+  [pre] execute if block 98 11 100 minecraft:stone -> "Test passed\n"
+  [pre] execute if block 100 13 100 minecraft:air -> "Test passed\n"
+  [pre] execute if block 100 14 100 minecraft:air -> "Test passed\n"
+  [predict] 候选 115 格，按 y 分布 {"5":1,"7":37,"9":49,"11":28}
+> summon farmstorm:molotov 100.5 16.0 100.5 {Motion:[0.0d,0.0d,0.0d]} -> "Summoned new entity.farmstorm.molotov\n"
+  [throw] 实体消失用时 1107 ms
+> tick query -> "The game is running normally\nTarget tick rate: 20.0 per second.\nAverage time per tick: 0.9ms (Target: 50.0ms)\nPercentiles: P50: 0.3ms P95: 2.4ms P99: 24.2ms, sample: 100\n"
+  [log] [29Oct2026 15:51:18.912] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0
+  [log] [29Oct2026 15:51:18.920] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 115 火 94 岩浆 21
+  [scan] 区域 810 格（x 96..104 / y 5..14 / z 96..104）用时 144 ms
+  [scan] 命中候选上方：火 94 / 岩浆 21（预测 115）
+  [scan] 不符格数 = 0

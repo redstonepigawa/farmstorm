@@ -1,0 +1,30 @@
+> fill 96 5 96 104 15 104 minecraft:air -> "Successfully filled 408 block(s)\n"
+> fill 96 9 96 104 9 104 minecraft:stone -> "Successfully filled 81 block(s)\n"
+> setblock 98 10 100 minecraft:stone_slab[type=bottom] -> "Changed the block at 98, 10, 100\n"
+> setblock 102 10 100 minecraft:stone_slab[type=top] -> "Changed the block at 102, 10, 100\n"
+> setblock 100 10 98 minecraft:snow[layers=1] -> "Changed the block at 100, 10, 98\n"
+> setblock 100 10 102 minecraft:snow[layers=4] -> "Changed the block at 100, 10, 102\n"
+  [pre] execute if block 98 10 100 minecraft:stone_slab[type=bottom] -> "Test passed\n"
+  [pre] execute if block 98 11 100 minecraft:air -> "Test passed\n"
+  [pre] execute if block 102 10 100 minecraft:stone_slab[type=top] -> "Test passed\n"
+  [pre] execute if block 102 11 100 minecraft:air -> "Test passed\n"
+  [pre] execute if block 100 10 98 minecraft:snow[layers=1] -> "Test passed\n"
+  [pre] execute if block 100 11 98 minecraft:air -> "Test passed\n"
+  [pre] execute if block 100 10 102 minecraft:snow[layers=4] -> "Test passed\n"
+  [pre] execute if block 100 11 102 minecraft:air -> "Test passed\n"
+  [predict] 候选 45 格（平地圆盘 49 减去 4 个非实心方块的上方格）
+> summon farmstorm:molotov 100.5 16.0 100.5 -> "Summoned new entity.farmstorm.molotov\n"
+  [throw] 实体消失用时 1098 ms
+  [log] [29Oct2026 15:51:37.557] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0
+  [log] [29Oct2026 15:51:37.557] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 45 火 43 岩浆 2
+  [post] 上方一格 98 11 100 仍是空气 -> "Test passed\n"
+  [post] 非实心方块 98 10 100 没被替换 -> "Test passed\n"
+  [post] 上方一格 102 11 100 仍是空气 -> "Test passed\n"
+  [post] 非实心方块 102 10 100 没被替换 -> "Test passed\n"
+  [post] 上方一格 100 11 98 仍是空气 -> "Test passed\n"
+  [post] 非实心方块 100 10 98 没被替换 -> "Test passed\n"
+  [post] 上方一格 100 11 102 仍是空气 -> "Test passed\n"
+  [post] 非实心方块 100 10 102 没被替换 -> "Test passed\n"
+  [scan] 区域 486 格（x 96..104 / y 9..14 / z 96..104）
+  [scan] 命中候选上方：火 43 / 岩浆 2（预测 45）
+  [scan] 不符格数 = 0

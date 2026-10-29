@@ -1,0 +1,6 @@
+  [config] 新 bake() 行: <未出现>
+  [baseline] 100,9,100 stone=true / 100,10,100 air=true
+  [log@radius1.0] [29Oct2026 15:52:55.505] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0
+  [log@radius1.0] [29Oct2026 15:52:55.506] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 5 火 4 岩浆 1
+  [scan@radius1.0] 落点周围 5 格(y=10)：火 4 / 岩浆 1；未写: 无
+  [scan@radius1.0] 4 格外 100,10,104 仍是空气 -> "Test passed\n"

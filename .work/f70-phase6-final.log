@@ -1,0 +1,15 @@
+> gamerule doFireTick -> "Gamerule doFireTick is currently set to: true"
+  [pre] execute if block 100 9 100 minecraft:stone -> "Test passed"
+  [pre] execute if block 100 10 100 minecraft:air -> "Test passed"
+  [pre] execute if block 100 8 100 minecraft:air -> "Test passed"
+  [pre] execute if block 98 11 100 minecraft:stone -> "Test passed"
+  [pre] execute if block 99 11 100 minecraft:air -> "Test passed"
+  [pre] @e[type=item] -> "Test failed"
+> summon farmstorm:molotov 100.5 16.0 100.5 {Motion:[0.0d,0.0d,0.0d]}
+  [throw] 实体结算消失 1073 ms
+  [post] @e[type=item] -> "Test failed"
+> tick query -> "The game is running normally\nTarget tick rate: 20.0 per second.\nAverage time per tick: 0.3ms (Target: 50.0ms)\nPercentiles: P50: 0.2ms P95: 0.5ms P99: 3.5ms, sample: 100"
+  [log] [29Oct2026 15:54:04.554] [Server thread/INFO] [farmstorm/]: 莫洛托夫 落点 (100.50, 10.05, 100.50) 威力 0
+  [log] [29Oct2026 15:54:04.555] [Server thread/INFO] [farmstorm/]: 莫洛托夫 候选 115 火 102 岩浆 13
+  [scan] 区域 810 格；预测候选 115；实测 火 102 + 岩浆 13 = 115
+  [scan] 不符格数 = 0

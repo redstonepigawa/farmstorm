@@ -137,7 +137,6 @@ public final class WildHunterOutline {
         }
         MultiBufferSource.BufferSource buffers = minecraft.renderBuffers().bufferSource();
         Vec3 cameraPos = capturedCamera.getPosition();
-        Quaternionf cameraRotation = capturedCamera.rotation().conjugate(new Quaternionf());
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(capturedProjection, VertexSorting.DISTANCE_TO_ORIGIN);
         Matrix4fStack stack = RenderSystem.getModelViewStack();
@@ -149,8 +148,9 @@ public final class WildHunterOutline {
         rendering = true;
         try {
             for (LivingEntity entity : targets) {
+                // modelview 已经是相机旋转（capturedModelView），所以 PoseStack 只做世界平移。
+                // 之前这里还 mulPose(cameraRotation)，等于把旋转应用了两次 → 剪影画到错误位置。
                 PoseStack poseStack = new PoseStack();
-                poseStack.mulPose(cameraRotation);
                 poseStack.translate(entity.getX() - cameraPos.x, entity.getY() - cameraPos.y, entity.getZ() - cameraPos.z);
                 poseStack.scale(OUTLINE_SCALE, OUTLINE_SCALE, OUTLINE_SCALE);
                 LivingEntityRenderer renderer =

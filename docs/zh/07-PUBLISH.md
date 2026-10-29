@@ -138,3 +138,13 @@ gh release create v0.0.2 "dist\farmstorm-0.0.2+mc1.21.1.jar" \
    git remote set-url origin https://github.com/redstonepigawa/farmstorm.git   # 用完立刻还原
    ```
    在**你自己的终端**里不需要这一步，直接 `git push` 即可（GCM / gh 助手都正常）。
+   3. **`github.com:443` 可能被单独阻断**（`api.github.com` 通、`github.com` 超时是典型表现）。
+      此时 `git push` 会报 `Failed to connect to github.com:443`，但 `gh api ...` 仍然正常。应急做法是把 git 的 HTTPS 流量通过本地 CONNECT 隧道导到一个可达的 GitHub 边缘 IP：
+      ```powershell
+      # 先挑一个 443 可达的 IP（示例：140.82.113.4 / 140.82.112.4 / 20.27.177.113）
+      # 起本地隧道（脚本见 .scratch/connect-proxy.mjs，不入库）
+      node .scratch/connect-proxy.mjs
+      # 推送时指定代理，其余照旧
+      git -c http.proxy=http://127.0.0.1:8888 push origin main
+      ```
+      这只影响本机网络环境，与仓库内容无关；网络恢复后直接 `git push` 即可。

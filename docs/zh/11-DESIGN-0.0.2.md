@@ -769,15 +769,15 @@ BRIEF 只给了口径「原版农作物 + 本模组全部改良作物（19 条�
 | 项 | 规格 | 依据 |
 |---|---|---|
 | 资源 | `farmstorm:wild_hunter_loop`（`sounds.json` 里声明为循环事件） | BRIEF §7.7 |
-| 源文件 | `Animals.mp3` 转换后的 mono / 64 kbps Ogg Vorbis | D-53、D-66 |
+| 源文件 | `Animals_from_3m04s.mp3`（3m04s 起的剪辑，47.14 s）转换后的 mono / 64 kbps Ogg Vorbis | D-53、D-66 + V-51 |
 | 播放方 | 客户端一个循环 `SoundInstance`，不是服务端逐刻重发 | D-76 |
-| 位置 | 每刻把音源更新到玩家身上，音源跟随玩家移动 | D-76 |
+| 位置 | **自己的那条**：`relative=true`、坐标**归零**、`Attenuation.NONE`，音量恒 1.0；**别人的那条**：`relative=false`、每刻更新到其世界坐标、`Attenuation.LINEAR`（V-53） | D-76 |
 | 可听距离 | 16 格 | D-76 |
 | 声音分类 | `SoundSource.PLAYERS` | D-76 |
 | 起播条件 | 客户端检测到本地玩家身上出现 `farmstorm:wild_hunter` | D-50 |
 | 停播条件 | 效果消失 / 玩家死亡 / 退出世界，立即 stop | 【本文补充】 |
 
-三条口径（照抄 D-76 与 BRIEF §7.7）：① 不占用 `MUSIC` 分类，**不打断原版背景音乐**；② 服务端**不**每刻重发播放指令，只在效果本身的状态变化上同步；③ 16 格的可听距离在 1.21.1 上究竟压 `getVolume` 还是走可听距离钩子，属实现阶段实测项（对应 RT-14 的同类风险），文档层面只锁「16 格」这个数字。
+三条口径（照抄 D-76 与 BRIEF §7.7）：① 不占用 `MUSIC` 分类，**不打断原版背景音乐**；② 服务端**不**每刻重发播放指令，只在效果本身的状态变化上同步；③ 16 格的可听距离**不压 `getVolume`**（会与引擎衰减叠成双重衰减）：别人的那条用 `Attenuation.LINEAR` 交给引擎按 16 格算，自己的那条用 `Attenuation.NONE` + 归零坐标；这条已由 V-53 定论，不再是实测项。
 
 **出处登记**（D-66，必须同时在 README 与 Release 说明里出现）：`Animals.mp3` 的音源按非商业自用登记，转换后打包进 jar。
 

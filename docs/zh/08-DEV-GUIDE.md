@@ -184,6 +184,13 @@ Get-Process java | Where-Object { $_.MainWindowTitle } | Select-Object Id, MainW
 
 **临时探针规则**：验证完必须删干净——源码、`build/classes`、jar 三处都不能留 `*Probe*`；日志里不要留高频 `LOGGER.info`。**证据要落 `.work/`，不要只留在 `run-*/logs/latest.log`**：run 目录的日志重启就轮转，前一版的矩阵结果就是从 `.log.gz` 里捞回来的（V-15）。验收前先查 `git status` 有无 `debug/`、`*Probe*` 残留。
 
+## 8.5 已知限制（玩家可见，不是缺陷）
+
+| 现象 | 原因 | 处置 |
+|---|---|---|
+| 客户端日志 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3 | 自定义配方类型 `farmstorm:converting` 没有对应的配方书分类 | **只影响配方书的分组显示**，不影响配方可用性与转换器本身；登记进 README 的已知限制，F-99 出口验收一并处理（V-63） |
+| 相位 2 期间鼠标转视角只降速、不锁死 | `CalculatePlayerTurnEvent#setMouseSensitivity(0)` 后系数仍为 0.2（慢约 15.6 倍），无 Mixin 归不了零 | 已知限制，验收按「转速降至约 1/15.6」记（V-31） |
+
 ## 9. 提交与发版
 
 日常：`git add -A && git commit -m "..." && git push`。

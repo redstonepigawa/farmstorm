@@ -219,7 +219,7 @@
 - [ ] **F-71 配方形状**：看两个生成物。通过的样子：`data/farmstorm/recipe/converter.json` 的 `type` 为 `minecraft:crafting_shaped`、八个 `key` 位置指向同一个 tag、`result` 为 `farmstorm:converter` 且 `count` 为 1；`data/farmstorm/tags/item/converter_fuel.json` 的 `values` 覆盖 4 个原版农作物（`minecraft:wheat` / `carrot` / `potato` / `beetroot`）与 19 条档案里能当农作物的物品。
 - [ ] **F-71 摆一次**：工作台按配方摆一次，再把任一格换成 `minecraft:diamond`。通过的样子：前者得 1 个 `farmstorm:converter`，后者无产物；既有 21 条转换配方 JSON 的 `git diff` 为空。
 - [ ] **F-72 无序合成**：看 JSON 与三次摆放。通过的样子：`type` 为 `minecraft:crafting_shapeless`、`ingredients` 为 4 组同一物品、`result.count` 为 1；放 4 个得 1 个，放 3 个与 5 个均无产物。
-- [ ] **F-73 三条转换**：看三个 JSON 与两次转换。通过的样子：三个 JSON 的 `type` 为 `farmstorm:converting`，`bidirectional` / `experience` / 催化剂**省略即默认**（codec 用 `optionalFieldOf`，生成物里没有这三个键，既有 21 条同样如此，V-25）；金苹果 ⇄ 狂野苹果正反各一次都成功，`/xp query @s points` 两次各少 3 点、`/xp query @s levels` **不变**（扣点数不扣等级，D-12 / V-24）；`farmstorm:converting` 配方在 `src/generated/resources/data/farmstorm/recipe/` 下共 **24** 条。
+- [ ] **F-73 三条转换**：看三个 JSON 与两次转换。通过的样子：三个 JSON 的 `type` 为 `farmstorm:converting`，`bidirectional` / `experience` / 催化剂**省略即默认**（codec 用 `optionalFieldOf`，生成物里没有这三个键，既有 21 条同样如此，V-25）；金苹果 ⇄ 狂野苹果正反各一次都成功（催化剂槽里放 1 个下界之星做对照——三条新配方**不占用**它，转完星星原样还在；只有火把花 / 瓶子草的正向转换消耗 1 个，V-29），`/xp query @s points` 两次各少 3 点、`/xp query @s levels` **不变**（扣点数不扣等级，D-12 / V-24）；`farmstorm:converting` 配方在 `src/generated/resources/data/farmstorm/recipe/` 下共 **24** 条。
 - [ ] **F-74 两张表两条标签**：看 `src/generated/resources` 与两次挖掘。通过的样子：钻石镐挖掉本体；木镐挖 600 tick 后进度 0.400、方块仍在、掉落 0（「没挖穿」≠「破了没掉」，V-28）；`data/minecraft/tags/block/needs_diamond_tool.json` 的 `values` 为 `["farmstorm:compressed_hay_block"]`；`mineable/pickaxe.json` 是追加（既有条目逐条仍在）不是覆盖；`data/farmstorm/tags/block/deployed_crops.json` 含 `farmstorm:zangief_cane`，`data/farmstorm/loot_table/blocks/zangief_cane.json` 存在且掉自身。
 - [ ] **F-75 五步闭环**：单人存档里一次跑通做转换器 → 换出三件 → 4 合 1 → 投莫洛托夫 → 投压缩膨胀麦。通过的样子：每步各留一条 `/give` 或 `/execute if block` 读数；`12-TECH` §11 #7 / #8 / #20 三条全过。
 - [ ] **F-75 产物**：比较两个 jar 的体积。通过的样子：`build/libs/farmstorm-0.0.2+mc1.21.1.jar` 存在且体积大于 `dist/farmstorm-0.0.1+mc1.21.1.jar`。
@@ -274,7 +274,7 @@
 | F-81 | 击杀续时无次数上限 | S / 0.5 | F-80 | 每杀一个生物剩余时长 +160 刻、回复 10 点生命，不写任何计数器（D-74） |
 | F-82 | 世界灰度（HUD 保持原色） | L / 3.0 | F-60、F-76 | 原版 `PostChain`：`GameRenderer#loadEffect` 加载 `shaders/post/grayscale.json`（`targets` 必须是数组）+ `shaders/program/grayscale.json` + `shaders/core/grayscale.fsh`；`post_effect/grayscale.json` 保留为预留挂载点（当前无加载器） |
 | F-83 | 红色剪影：可见 + 不超过 64 格 | M / 1.5 | F-76 | `RenderLivingEvent.Post` 用 `LivingEntityRenderer#render(...)` 重绘、`MultiBufferSource` **按顶点格式过滤**（V-58）+ `hasLineOfSight` + 距离 ≤ 64；颜色烘进 `textures/misc/wild_hunter_red.png`（V-60）；`AFTER_ENTITIES` 捕获相机、`RenderGuiEvent.Pre` 在灰度之后重画 |
-| F-84 | 循环音 `SoundInstance` | M / 1.5 | F-76 | 客户端循环音实例，`isLooping() = true`、每刻跟随玩家位置、可听距离 16 格、`SoundSource.PLAYERS` |
+| F-84 | 循环音 `SoundInstance` | M / 1.5 | F-76 | 客户端循环音实例，`isLooping() = true`、可听距离 16 格、`SoundSource.PLAYERS`；自己那条 `relative=true` + 坐标归零 + `Attenuation.NONE`、别人的 `relative=false` + 世界坐标 + `LINEAR`，音量恒 1.0（V-53） |
 | F-85 | Phase 13 出口回归 | S / 0.5 | F-77、F-79、F-80、F-81、F-82、F-83、F-84 | 七项能力一次跑通 + `§11 #13 / #14 / #15` 三条自检 + 0 包 0 Mixin |
 
 ### 4.4 本阶段出口判据
@@ -291,8 +291,8 @@
 - [ ] **F-80 对照两组**：攻击 30° 外的生物；攻击同队玩家。通过的样子：前者正常攻击、无吸附、玩家坐标不变；后者既不吸附也不掉血。
 - [ ] **F-81 连杀 6 只**：每次击杀后读 `/effect`。通过的样子：每只剩余时长 **+160 刻**、日志出现 6 行 `狂野猎人 续时`；第 6 次之后效果仍在；生命每次 +10 点；`git grep -nE "killCount|maxKill"` 无输出。
 - [ ] **F-82 世界灰度**：开效果后截一张带物品栏与聊天栏的 F3 图。通过的样子：**世界黑白、HUD 保持原色**（方块 / 实体 / 粒子为灰度，红心、绿色经验条、聊天栏彩色文字不变，V-56）；客户端日志无 `Could not load program` / `Shader … could not be loaded` 与 `GL_INVALID`；开与不开效果的 F3 `ms` 差 < 3 ms；`/effect clear` 后 1 刻内恢复彩色。
-- [ ] **F-83 剪影三条件**：站 5 格内直视一只猪、65 格外、墙前 / 墙后各一次；再把**带拴绳的生物**拉进 64 格内（V-58 的崩溃场景）。通过的样子：只有「≤ 64 格 + 无遮挡 + 非己方」的生物被画红色剪影，自己与同队玩家不画；客户端日志无 `StackOverflowError`，F3 `ms` 差 < 3 ms；把 `highlightRadius` 改成 `8.0` 后 10 格外的生物不再被画。
-- [ ] **F-84 循环音**：双人实测距离，再同时 `/playsound minecraft:music.game`。通过的样子：距 8 格能听到、20 格听不到（16 格衰减）；原版背景音乐不被切断（分类是 `PLAYERS` 不是 `MUSIC`）；`/effect clear` 后 1 刻内停；死亡重生不残留；整段效果期间 `latest.log` 里 `wild_hunter_loop` 不超过 2 行。
+- [ ] **F-83 剪影三条件**：站 5 格内直视一只猪、65 格外、墙前 / 墙后各一次；再把**带拴绳的生物**拉进 64 格内（V-58 的崩溃场景）。**并且必须人工看图**：剪影与本体轮廓贴合、**没有倒挂、没有悬空 1.5 格**（V-50 的两个变换），**无光洞穴里亮度不变**（`FULL_BRIGHT`）——红色像素计数只能证明「有没有红」，不能判断「像不像」。通过的样子：只有「≤ 64 格 + 无遮挡 + 非己方」的生物被画红色剪影，自己与同队玩家不画；客户端日志无 `StackOverflowError`，F3 `ms` 差 < 3 ms；把 `highlightRadius` 改成 `8.0` 后 10 格外的生物不再被画。
+- [ ] **F-84 循环音**：双人实测距离，**再让 A 自己左右平移跑一遍**，同时 `/playsound minecraft:music.game`。通过的样子：距 8 格能听到、20 格听不到（16 格衰减）；**A 自己横向平移时声音不卡顿、声像不来回跳**（V-53：`relative=true` + 归零坐标）；原版背景音乐不被切断（分类是 `PLAYERS` 不是 `MUSIC`）；`/effect clear` 后 1 刻内停；死亡重生不残留；整段效果期间 `latest.log` 里 `wild_hunter_loop` 不超过 2 行。
 - [ ] **F-85 出口回归**：跑一遍七项 + 两条结构性断言。通过的样子：`12-TECH` §11 #13 / #14 / #15 三条全过；`/effect clear @s` 后七项全部复位；`grep -r "CustomPacketPayload" src/main/java` 为 0 处；Mixin 查**实际用法**——`@Mixin` 注解 0 处、`mixins*.json` 0 个、`org.spongepowered` 引用 0 处、`build.gradle` 无 mixin 依赖（`grep -rn "Mixin"` 的 5 处命中全是解释性 javadoc，保留，V-47）。
 
 ### 4.5 常见翻车点
@@ -411,8 +411,8 @@
 
 ### 6.4 本阶段出口判据
 
-- [ ] **F-94 两个 OGG**：对两个 `.ogg` 各跑一次 `ffprobe`。通过的样子：编码 `vorbis`、声道 1（单声道）、码率 ≈ 64 kbps、时长 > 0 秒。
-- [ ] **F-94 缺 ffmpeg 的失败路径**：在没有 ffmpeg 的机器上跑脚本。通过的样子：退出码非 0，stdout 打印安装指引，**不回退扩展名、不静默跳过**（D-53）。
+- [ ] **F-94 两个 OGG**：对两个 `.ogg` 各跑一次 `ffprobe`。通过的样子：编码 `vorbis`、声道 1（单声道）、码率 ≈ 64 kbps、时长 > 0 秒（`wild_hunter_loop` 47.14 s / 48 kHz、`zangief_piledriver` 44.1 kHz；源已按 V-51 换成 `Animals_from_3m04s.mp3`）。
+- [ ] **F-94 缺 ffmpeg 的失败路径**：在没有 ffmpeg 的机器上跑脚本。通过的样子：退出码非 0，stdout 打印安装指引，**不回退扩展名、不静默跳过**（D-53）。本机跑法：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File …` + 输出重定向到文件（`pwsh` 不在子进程 PATH、ExecutionPolicy 为 Restricted、管道捕获失败），且**不加 `-Force`**（会重编 `zangief_piledriver.ogg`，Ogg 流序列号随机、字节不可复现，V-51）。
 - [ ] **F-94 `sounds.json` 与图标**：读文件并进游戏。通过的样子：2 个事件各带 `subtitle`、引用的两个文件都存在（`processResources` 不报缺文件）；`wild_hunter.png` 尺寸 18×18，HUD 图标可见且不是紫黑。
 - [ ] **F-94 声音可听与来源声明**：游戏内两条 `/playsound`，再读 `README.md`。通过的样子：两条都能听到；`README` 与 Release 说明里三个素材的来源与非商业自用声明齐全（D-66）。
 - [ ] **F-95 六张 PNG**：逐张读尺寸。通过的样子：6 个文件都在且都是 16×16；创造栏 4 个新作物图标不是紫黑；压缩干草块六面贴图一致、色相 0（灰度）、与原版 `hay_block_side` 同形、亮度差 ≤ 8 %。
@@ -425,6 +425,7 @@
 - [ ] **F-99 资源 299**：`git ls-files 'src/main/resources' 'src/generated/resources'`，再扣掉 `.cache` 的 11 个无扩展名文件与 3 个 `.gitkeep`。通过的样子：总数 **299**；JSON **192**、PNG **99**、OGG **2**、GLSL **2**、TOML 1、`pack.mcmeta` 1。
 - [ ] **F-99 其余三数**：语言键、toml、自检行。通过的样子：两份语言文件各 **263** 键且键集相等；`config/farmstorm-server.toml` **139** 键；日志里 `自检 注册对象 77 个 …` 与 `自检 实体渲染器 11/11 → OK` 两行都在。
 - [ ] **F-99 22 条自检**：按 `12-TECH` §11 逐条跑。通过的样子：22 条全过，逐条留读数（一条一行：编号 / 结论 / 证据位置）。
+- [ ] **F-99 已知外观缺陷**：客户端日志里 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3。通过的样子：确认它**只影响配方书分组**、不影响配方可用性与转换器本身，并把这一条写进 README 的「已知限制」（V-63）。
 - [ ] **F-99 结构与专用服务器**：跑两条 `grep` 与一次起服。通过的样子：`grep -r "CustomPacketPayload" src/main/java` 为 0 处；Mixin 查**实际用法**（`@Mixin` 注解、`mixins*.json`、`org.spongepowered`、`build.gradle` 依赖全为 0，字面命中 5 处全是解释性注释，V-47）；专用服务器启动无 `NoClassDefFoundError`，客户端连入后效果相关功能正常。
 - [ ] **F-99 jar 内容**：`jar tf dist/farmstorm-0.0.2+mc1.21.1.jar`。通过的样子：能看到两个 `.ogg`、`assets/farmstorm/sounds.json`、以及 6 个灰度相关资源（`shaders/post/grayscale.json`、`shaders/program/grayscale.json`、`shaders/program/grayscale.fsh`、`shaders/core/grayscale.json` / `.vsh` / `.fsh`），外加 `post_effect/grayscale.json`（V-49：保留但当前无加载器）。
 

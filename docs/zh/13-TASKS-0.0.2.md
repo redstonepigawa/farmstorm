@@ -302,7 +302,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-65、F-71
 - **交付物**：`datagen/ModRecipeProvider.java` 三条 `ConverterRecipe`（`minecraft:crimson_fungus` ⇄ `farmstorm:molotov`；`minecraft:sugar_cane` ⇄ `farmstorm:zangief_cane`；`minecraft:golden_apple` ⇄ `farmstorm:wild_apple`），双向、经验成本读既有键（默认 3）、无催化剂；产物 `data/farmstorm/recipe/molotov.json`、`zangief_cane.json`、`wild_apple.json`
 - **验收**：
-  1. 三个 JSON 的 `type` 为 `farmstorm:converting`；`bidirectional`（默认 `true`）、`experience`（默认 3）、催化剂三项**省略即默认**——`ConverterRecipeSerializer` 用 `optionalFieldOf`，生成物里本来就没有这三个键，既有 21 条同样如此（裁决 V-25）。运行期值（`xpCost = 3`、反向命中）以实测为准，不要为了「字面落盘」改 codec。
+  1. 三个 JSON 的 `type` 为 `farmstorm:converting`；`bidirectional`（默认 `true`）、`experience`（默认 3）、催化剂三项**省略即默认**。**催化剂槽的真相（V-29）**：槽还在（槽 1 只收下界之星），但**三条新配方不占用它**——带 1 个下界之星进槽连转三次，星星原样还在；真正消耗星星的只有 `awakened_torchflower` / `awakened_pitcher_plant` 的**正向**转换（D-12）——`ConverterRecipeSerializer` 用 `optionalFieldOf`，生成物里本来就没有这三个键，既有 21 条同样如此（裁决 V-25）。运行期值（`xpCost = 3`、反向命中）以实测为准，不要为了「字面落盘」改 codec。
   2. 转换器 GUI 里金苹果 → 狂野苹果正反各一次都成功；`/xp query @s points` 两次各少 3 点（扣的是**经验点数**不是等级，D-12；`/xp query @s levels` 读数**不变**）。边界用例：当前级内进度点耗尽时仍只扣 3 点、等级随之掉 1 级（裁决 V-24）。
   3. 转换类配方（`farmstorm:converting`）在 `src/generated/resources/data/farmstorm/recipe/` 下共 **24** 条（21 + 3，`BRIEF §4`）。
   4. 既有 21 条转换配方与转换成本键的默认值一个都没改（`git diff` 只含新增行）。
@@ -324,7 +324,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-68、F-70、F-71、F-72、F-73、F-74
 - **交付物**：回归记录（`logs/latest.log` 摘录 + 手测表）；若发现问题，修复补丁只落 `BRIEF §3.3` 白名单文件
 - **验收**：
-  1. 五步闭环在单人存档内一次跑通：做转换器 → 换出三件新物品 → 4 合 1 → 投莫洛托夫点火 → 投压缩膨胀麦铺压缩干草块，每步 `/give` 与 `/execute if block` 各留一条读数。
+  1. 五步闭环在单人存档内一次跑通：做转换器 → 换出三件新物品 → 4 合 1 → 投莫洛托夫点火 → 投压缩膨胀麦铺压缩干草块，每步 `/give` 与 `/execute if block` 各留一条读数。**催化剂对账（V-29）**：三条新配方各转一次前后，槽 1 的下界之星数量不变；对照组用火把花正向转换，星星各少 1（说明只有那两条消耗）。
   2. `12-TECH-0.0.2.md §11` 的 #7（落点语义）、#8（完全沿用膨胀麦）、#20（5 条配方形状与数量）三条全过。
   3. `build/libs/farmstorm-0.0.2+mc1.21.1.jar` 存在，且体积大于 v0.0.1 的 `dist/farmstorm-0.0.1+mc1.21.1.jar`。
 
@@ -419,7 +419,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 - **依赖**：F-76
 - **交付物**：`client/WildHunterOutline.java`（`RenderLivingEvent.Post` 里用 `LivingEntityRenderer#render(...)` 重画，`MultiBufferSource` **按顶点格式过滤**——只把 `DefaultVertexFormat.NEW_ENTITY` 换成 `RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE)`，其余原样放行（V-58：拴绳是 `POSITION_COLOR_LIGHTMAP`，硬塞进 entity 缓冲即崩）；红色烘进贴图而不是 `setShaderColor`（该着色器忽略 ColorModulator，V-60）；`AFTER_ENTITIES` 捕获相机 / 投影，`RenderGuiEvent.Pre` 在灰度之后重画；距离读 `wild_hunter.highlightRadius` 64.0；`player.hasLineOfSight` 过滤）；`assets/farmstorm/textures/misc/wild_hunter_red.png`（1×1 RGBA (255,38,38,115)）
 - **验收**：
-  1. 5 格内直视一只猪：出现红色剪影；65 格外：不画。
+  1. 5 格内直视一只猪：出现红色剪影；65 格外：不画。**必须人工看图**：剪影与本体轮廓贴合、**没有倒挂、没有悬空 1.5 格**（V-50 的两个变换：`scale(-1,-1,1)` 与 `translate(0,-1.501,0)`）；「中心区红色最大值」这类指标只能证明「有没有红」，不能判断「像不像」。另在**无光洞穴**里看一次：剪影亮度不随环境变暗（`LightTexture.FULL_BRIGHT`）。
   2. 墙后的生物不画（`hasLineOfSight` 为假）；自己与同队伍玩家不画。
   3. 不触发递归重绘：客户端日志无 `StackOverflowError`，且 F3 `ms` 与不画剪影时差 **< 3 ms**（RT-11）。
   4. 把 `wild_hunter.highlightRadius` 改成 `8.0` 后重进，10 格外的生物不再被画。
@@ -429,11 +429,11 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-76
-- **交付物**：`client/WildHunterLoopSound.java`（`isLooping() = true`、每 tick 把位置更新到玩家身上、`SoundSource.PLAYERS`、可听距离读 `wild_hunter.loopSoundRange` 16.0，在 `attributes()` 里设距离衰减）
+- **交付物**：`client/WildHunterLoopSound.java`（`isLooping() = true`、`SoundSource.PLAYERS`、可听距离读 `wild_hunter.loopSoundRange` 16.0；**位置口径按 V-53**：自己那条 `relative = true` + 坐标**归零** + `Attenuation.NONE` + `getVolume()` 恒 1.0，别人的那条 `relative = false` + 世界坐标 + `Attenuation.LINEAR` 交给引擎按 16 格衰减——不要每刻手写音量，否则与引擎衰减叠成双重衰减）
 - **验收**：
-  1. 双人实测：A 开效果，B 距 8 格能听到、20 格听不到（16 格衰减生效）。
+  1. 双人实测：A 开效果，B 距 8 格能听到、20 格听不到（16 格衰减生效）；**A 自己横向左右平移时声音不卡顿、声像不来回跳**（`relative=true` + 归零坐标，V-53）。
   2. 原版背景音乐不被切断：同时 `/playsound minecraft:music.game` 与循环音并存（分类是 `PLAYERS` 不是 `MUSIC`，D-76）。
-  3. `/effect clear @s farmstorm:wild_hunter` 后 1 刻内停止；玩家死亡重生后不残留循环音。
+  3. `/effect clear @s farmstorm:wild_hunter` 后 1 刻内停止；玩家死亡重生后不残留循环音；音量恒 1.0（改 `loopSoundRange` 只影响别人的可听距离，不影响自己的音量）。
   4. 服务端不逐刻重发播放指令：`logs/latest.log` 里 `wild_hunter_loop` 整段效果期间不超过 2 行。
 
 #### F-85 · Phase 13 出口回归
@@ -557,10 +557,10 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：L ｜ **折算人日**：3.0
 - **依赖**：F-60、F-64、F-84
-- **交付物**：`tools/convert_media.ps1`（缺 `ffmpeg` 直接报错退出并打印安装指引，不静默跳过、不回退扩展名）；`assets/farmstorm/sounds/wild_hunter_loop.ogg`、`assets/farmstorm/sounds/zangief_piledriver.ogg`（mono / 64 kbps / Ogg Vorbis）；`assets/farmstorm/sounds.json`（2 个声音事件，各带 subtitle）；`assets/farmstorm/textures/mob_effect/wild_hunter.png`（18×18）
+- **交付物**：`tools/convert_media.ps1`（缺 `ffmpeg` 直接报错退出并打印安装指引，不静默跳过、不回退扩展名；默认源已按 V-51 改为 `D:\dsh\default\Animals_from_3m04s.mp3`）；`assets/farmstorm/sounds/wild_hunter_loop.ogg`、`assets/farmstorm/sounds/zangief_piledriver.ogg`（mono / 64 kbps / Ogg Vorbis）；`assets/farmstorm/sounds.json`（2 个声音事件，各带 subtitle）；`assets/farmstorm/textures/mob_effect/wild_hunter.png`（18×18）
 - **验收**：
-  1. 两个 `.ogg` 的 `ffprobe` 输出都是 `vorbis`、单声道、64 kbps，文件时长大于 0 秒。
-  2. 在没有 `ffmpeg` 的机器上跑脚本：退出码非 0，stdout 打印安装指引（`12-TECH-0.0.2.md §6.4` 与 D-53）。
+  1. 两个 `.ogg` 的 `ffprobe` 输出都是 `vorbis`、单声道、64 kbps，文件时长大于 0 秒（本轮：`wild_hunter_loop` = 47.14 s / 48 kHz、`zangief_piledriver` = 44.1 kHz；体积 `1,782,670 → 352,061` 字节）。
+  2. 在没有 `ffmpeg` 的机器上跑脚本：退出码非 0，stdout 打印安装指引（`12-TECH-0.0.2.md §6.4` 与 D-53）。**本机的运行姿势**：`powershell.exe -NoProfile -ExecutionPolicy Bypass -File …` 且输出重定向到文件（`pwsh` 不在子进程 PATH、ExecutionPolicy 为 Restricted、管道捕获在沙箱下失败）；**不要加 `-Force`**（会重编 `zangief_piledriver.ogg`，Ogg 流序列号随机、字节不可复现，V-51）。
   3. `assets/farmstorm/sounds.json` 的 2 个事件各带 `subtitle`，引用的两个文件都存在；`processResources` 阶段不报缺文件（`12-TECH-0.0.2.md §1.3`）。
   4. `/playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1` 与 `/playsound farmstorm:zangief_piledriver master @s ~ ~ ~ 1 1` 都成功且都能听到。
   5. `wild_hunter.png` 尺寸为 18×18，效果图标在 HUD 上可见、不是紫黑。
@@ -609,6 +609,8 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
   3. 三个 JSON 的 `parent` 分别为 `farmstorm:first_throw` / `farmstorm:first_deploy` / `farmstorm:root`，`frame` 为 `task`、`show_toast` 为 true（`11-DESIGN-0.0.2.md §9.1`）。
 
 #### F-99 · 四项计数核对、三模式回归与打包
+
+> **已知外观缺陷**：客户端日志 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3——自定义配方类型 `farmstorm:converting` 没有配方书分类，**只影响配方书分组**。本轮不修，写进 README 的「已知限制」，在本任务出口验收时一并确认（V-63）。
 
 - **复杂度**：L ｜ **折算人日**：3.0
 - **依赖**：F-75、F-85、F-93、F-94、F-96、F-97

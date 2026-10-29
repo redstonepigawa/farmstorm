@@ -864,7 +864,7 @@ public static void onRenderGuiPre() {
         poseStack.scale(1.008F, 1.008F, 1.008F);                      // 避免与本体 z-fighting
         renderer.render(entity, yaw, partialTick, poseStack, shellSource(buffers), LightTexture.FULL_BRIGHT);
     }
-    buffers.endBatch();
+    buffers.endBatch();   // 一次性提交，别每只都 endBatch
 }
 ```
 
@@ -878,6 +878,22 @@ public static void onRenderGuiPre() {
 | 距离 ≤ `wild_hunter.highlightRadius`（默认 64.0 格，范围 0.0–256.0） | `distanceToSqr <= r * r`（比较平方，不开方）；`r` 取 §4.4 的客户端镜像常量 | D-62 |
 | 视线可见 | `self.hasLineOfSight(entity)`；**不穿墙** | D-62 |
 
+**为什么「让渲染器自己再画一遍」而不是重放变换链（V-52）**：重放这条路走不通——`LivingEntityRenderer#scale(entity, poseStack, partialTick)` 是 **protected**，各渲染器在画 model 之前还有自己的平移 / 缩放；照抄一份等于把每个子类的变换都复制一遍，改一个漏一个。做法是给 `renderer.render(...)` 包一层 `MultiBufferSource`（把请求的 `RenderType` 换成纯色类型）再调一次，**变换链由渲染器自己执行，几何必然重合**。代价是 `render()` 内部会再触发 `RenderLivingEvent`，所以 `rendering` 重入守卫是**必需的**，不是保险。
+
+**三个必须照抄的细节（V-50，漏一条剪影就是错的）**：
+
+| 细节 | 原版源码 | 漏了会怎样 |
+|---|---|---|
+| 画 model 前的 `poseStack.scale(-1, -1, 1)` | `LivingEntityRenderer:101` | 红模型**上下左右倒挂** |
+| 画 model 前的 `poseStack.translate(0, -1.501, 0)` | `LivingEntityRenderer:103` | 红模型**悬空 1.5 格** |
+| 光照传 `LightTexture.FULL_BRIGHT` | —（BRIEF §7.2 的「任意亮度可见」） | 暗处剪影跟着变暗，等于只在白天看得见 |
+
+前两条之所以会漏，是因为 `RenderLivingEvent.Post` 在 `poseStack.popPose()`（`:137`）**之后**才触发（`:139`）——事件给你的 poseStack 已经不是模型坐标系了。让渲染器重画就自动带回这两个变换；如果你自己在世界阶段重画，**必须**自己补上。
+
+**指标陷阱（V-50，方法论）**：「中心区红色像素最大值」这类指标在模型**倒挂且悬空**时同样成立——它只能证明「**有没有红**」，不能判断「**像不像**」。剪影的验收必须配**人工看图**（截图里剪影与本体轮廓贴合、脚底对齐地面），指标只用来兜「完全没画」这种退化。
+
+**为什么重画放在 GUI 阶段（V-57）**：灰度是**世界级**后处理，执行在世界渲染之后——世界阶段画的红色层必然跟着一起变灰。所以世界阶段只捕获状态（`AFTER_ENTITIES`），真正重画放在 `RenderGuiEvent.Pre`（灰度之后）。`RenderLevelStageEvent.Stage.AFTER_LEVEL`（`GameRenderer:1273`）**在灰度之前**，不能用。
+
 **禁止（BRIEF §7.2 原文）**：
 
 - 不许在 `RenderLivingEvent` 里调 `EntityRenderDispatcher#render` 重绘整只实体——会递归触发自身事件，直接栈溢出（实现调的是 `LivingEntityRenderer#render`，并带 `rendering` 重入守卫）。
@@ -890,6 +906,8 @@ public static void onRenderGuiPre() {
 | `hasLineOfSight` 在客户端实体上的可用性与开销 | 在墙后 / 墙前各站一次，看是否只对墙前的生物画剪影；同时 `/debug profile` 看 tick 与帧时间 | 墙后有剪影 = 不可用，需退回「按距离 + 视线粗略采样」 |
 | 颜色能否靠 `setShaderColor` 加上（BRIEF §7.2 的原稿做法） | 进效果后看剪影是不是红色 | **已证伪**：`entityTranslucentEmissive` 的着色器忽略 ColorModulator → 改成把 RGBA(255,38,38,115) 烘进 `wild_hunter_red.png`（V-60） |
 | 大量实体时的帧时间 | 30 只生物同屏 × 效果开启 | 帧时间增量 > 3 ms 视为不可接受，需要加「同帧最多 32 只」的熔断 |
+
+**已知外观缺陷（V-63）**：客户端对自定义配方类型报 `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3——`farmstorm:converting` 没有对应的配方书分类。它**只影响配方书的分组显示**，不影响配方可用性、也不影响转换器本身；本轮不修，登记在 `08-DEV-GUIDE` 的已知限制里，F-99 出口验收一并处理。
 
 **性能护栏（本文补充）**：每帧最多画 **32** 只（按距离近的优先），超出的不画。理由：`renderToBuffer` 是整模型重绘，不是便宜的描边 pass；默认 64 格半径里的一次大乱斗可能有上百只生物。
 
@@ -1033,28 +1051,46 @@ MC 里玩家位置本来就是客户端权威（服务端只做速度校验）�
 
 **触发条件**：本地玩家身上存在 `wild_hunter`。
 
-**实现**：客户端一个自写的 `SoundInstance` 子类，`isLooping() = true`，每 tick 把位置更新到玩家身上，可听距离取 `WildHunterClientState.loopRange()`（= `wild_hunter.loopSoundRange`，默认 16.0 格，范围 0.0–64.0），声音分类 `SoundSource.PLAYERS`。
+**实现**：客户端一个自写的 `SoundInstance` 子类，`isLooping() = true`，可听距离取 `WildHunterClientState.loopRange()`（= `wild_hunter.loopSoundRange`，默认 16.0 格，范围 0.0–64.0），声音分类 `SoundSource.PLAYERS`。**位置口径是本节最容易写错的地方，按 V-53 的字面落地**：
+
+| 谁 | `relative` | 坐标 | 衰减 | 音量 |
+|---|---|---|---|---|
+| **自己**（持有 `wild_hunter` 的那个客户端） | **`true`** | **归零**（`0, 0, 0`）——相对声源的坐标是「相对听者的偏移」，不是世界坐标 | `Attenuation.NONE` | 恒 `1.0` |
+| **别人**（同服其他玩家） | `false` | 每 tick 更新到该玩家的世界坐标 | `Attenuation.LINEAR`，交给引擎按 16 格衰减 | 恒 `1.0` |
 
 ```java
 // client/audio/WildHunterLoopSound.java
 public final class WildHunterLoopSound extends SoundInstance {
+    private final boolean self;
+
     @Override public boolean isLooping() { return true; }
     @Override public boolean canPlaySound() { return true; }
     @Override public SoundSource getSource() { return SoundSource.PLAYERS; }   // 不占 MUSIC，不打断背景音乐
+    @Override public float getVolume() { return 1.0F; }                        // 不要每刻手写音量，否则与引擎衰减叠加成双重衰减
+
+    public WildHunterLoopSound(boolean self) {
+        this.self = self;
+        // 自己的光环：relative + Attenuation.NONE；坐标必须归零，写世界坐标等于把声源扔到几百格外的「相对偏移」处
+        this.relative = self;
+        if (self) { this.x = 0.0; this.y = 0.0; this.z = 0.0; }
+        this.attenuation = self ? Attenuation.NONE : Attenuation.LINEAR;
+    }
 
     @Override
     public void tick() {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) { stop(); return; }
-        this.x = player.getX(); this.y = player.getY(); this.z = player.getZ();   // 音源跟随玩家
         if (!player.hasEffect(FarmstormMobEffects.WILD_HUNTER)) stop();          // 效果没了立刻停
+        if (!self) { this.x = player.getX(); this.y = player.getY(); this.z = player.getZ(); }
     }
 }
 ```
 
+**为什么 `relative=false` 会左右卡顿（V-53 / V-57）**：`SoundEngine` 每 tick 才 `setSelfPosition` 一次（`:245-253`），而听者位置按**帧**更新。`relative=false` 时 OpenAL 仍按「听者 → 声源」的向量算左右声像，**横向移动时这个向量每帧都在跳**——症状就是「走路还行、左右平移时明显卡顿」。`relative=true` 把声源钉在听者身上，声像不再变化；代价是它只能是「自己的声音」，别人的那份必须用世界坐标 + `LINEAR` 交给引擎。
+
 **为什么不用服务端每刻重发播放指令**（D-76 原文）：服务端每刻发 `ClientboundSoundPacket` 是 20 包/秒/玩家，而循环音的生命周期恰好等于效果的生命周期——效果的存在本身就已经告诉客户端「该播」。客户端自己起一个 `SoundInstance` 是 0 包。
 
-**待验证（BRIEF §7.7 原文）**：16 格衰减在 1.21.1 上到底该压 `SoundInstance#getVolume` 还是它的可听距离钩子。
+**16 格衰减的落点（V-53 已定论）**：不压 `getVolume()`——那会与引擎衰减叠成双重衰减；自己那条用 `Attenuation.NONE` + 归零坐标，别人的那条用 `Attenuation.LINEAR` 让引擎按 `sounds.json` 的 `attenuation_distance`（16）算。原稿的「该压 volume 还是可听距离钩子」这个待验证项就此关闭。
 
 - **怎么验**：站到 8 / 16 / 17 / 32 格处各听一次，记录「能听到 / 听不到 / 音量是否随距离变小」。同时把 `getVolume()` 从 1.0 调到 4.0 看远处是否变响（体积放大会不会被当作「传得更远」）。
 - **判定**：17 格仍清楚听到 = 衰减半径没生效，需要改压 `sounds.json` 里该事件的 `attenuation_distance`（若该字段存在，**待验证，挂 RT-14**）或改用 `getVolume()` 的手工距离衰减。
@@ -1196,7 +1232,7 @@ RT-15 的风险是「隐藏 MobEffect 被其它模组的效果清理逻辑干扰
 
 | # | 源路径（绝对） | 大小/形态 | 用途 | 目标路径 |
 |---|---|---|---|---|
-| 1 | `C:\Users\DASHpig\Downloads\Animals.mp3` | mp3 音频 | 狂野猎人循环音 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` |
+| 1 | `D:\dsh\default\Animals_from_3m04s.mp3` | mp3 音频（作者指定的 3m04s 起剪辑，**47.14 s**） | 狂野猎人循环音 | `assets/farmstorm/sounds/wild_hunter_loop.ogg` |
 | 2 | `D:\dsh\default\sf6_audio\out\BV1qu411W7ha_846-850.mp3` | mp3 音频（SF6 片段） | 桑吉尔蔗触发音 | `assets/farmstorm/sounds/zangief_piledriver.ogg` |
 | 3 | `C:\Users\DASHpig\Desktop\e91bb6997d8e24cda1f596267c41da97500924726.jpg` | 桌面 JPG | 狂野猎人效果图标 | `assets/farmstorm/textures/mob_effect/wild_hunter.png` |
 
@@ -1260,13 +1296,19 @@ BRIEF §7.7 要求「`sounds.json` 两个事件：`wild_hunter_loop`（循环）
 | PowerShell | 5.1 或 7.x | 满足 |
 | 网络 | **不需要**。脚本不许自己下载 ffmpeg | 本机 npm / maven / 镜像三个源全部不可达（D-53 的实测记录） |
 
-**参数**：三种调用形态——不带参数（ffmpeg 在 PATH 上时全量转换）、`-Ffmpeg <绝对路径>`（ffmpeg 不在 PATH 上）、`-CheckOnly`（只校验环境与三个源文件，一个字节都不写）。
+**参数**：三种调用形态——不带参数（ffmpeg 在 PATH 上时全量转换）、`-Ffmpeg <绝对路径>`（ffmpeg 不在 PATH 上）、`-CheckOnly`（只校验环境与三个源文件，一个字节都不写）。`-Force` 会重编全部目标，按 V-51 不要用（见下）。
 
 ```powershell
-pwsh -File tools/convert_media.ps1
-pwsh -File tools/convert_media.ps1 -Ffmpeg "D:\dsh\default\sf6_audio\tools\ffmpeg.exe"
-pwsh -File tools/convert_media.ps1 -CheckOnly
+# 本机必须这么跑（V-51）：pwsh 不在子进程 PATH 上，且 ExecutionPolicy 是 Restricted
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/convert_media.ps1 `
+    -Ffmpeg "D:\dsh\default\sf6_audio\tools\ffmpeg.exe" *> .work\convert.log
 ```
+
+**运行姿势的三条硬约束（V-51）**：
+
+1. `pwsh -File …` 在本机**跑不起来**：`pwsh` 不在子进程 PATH 上，且 ExecutionPolicy 为 `Restricted`。必须 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File`。
+2. **输出必须重定向到文件**（`*> .work\convert.log`）：管道捕获在沙箱下失败，直接看 stdout 会拿不到内容。
+3. **不要加 `-Force`**：它会连带重编 `zangief_piledriver.ogg`，而 Ogg 每次编码的**流序列号是随机的**、字节不可复现，等于把已验收的产物换成不可比对的版本——本轮已因此退回。需要重编就单文件跑一次，并保留新旧两份的 `ffprobe` 读数。
 
 **失败行为（D-53 的硬要求，逐条不可放宽）**：
 
@@ -1474,6 +1516,8 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 列名对应关系：**键** ↔ 键名；**`zh_cn` / `en_us` 两列** ↔ 值（语言文件没有「范围」，两份文本互为对照）；**类别**由键前缀给出（`item.` / `block.` / `effect.` / `subtitles.` / `advancements.` / `farmstorm.configuration.`）；**依据**见最后一列。
 
 **行数核对**：`41` 行 = 物品 5（#1–#5）+ 方块 2（#6–#7）+ 效果 2（#8–#9）+ 字幕 2（#10–#11）+ 进度 6（#12–#17）+ config 22（#18–#39）+ 实体名 2（#40–#41）。`222 + 41 = 263`。
+
+**踩过的坑（V-63）**：第一版生成的语言文件里 `subtitles.*` **一条都没有**，客户端启动时报 `ERROR SoundManager: Missing subtitle translation` ×2。日志只报得出「当前播到的那两条」，穷举推导实际缺 **35 条**——已由 F-97 一次补齐。落 `ENTRIES` 后必须做一次「键集 vs 代码里所有 `subtitles.*` 字面量」的比对，不能等日志报。
 
 **没有新增的两类，写明理由**：
 
@@ -1733,7 +1777,7 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 17 | 资源文件 299 且分类对得上 | `git ls-files` 出清单后扣 `.cache` 的 11 个与 3 个 `.gitkeep` | 总数 **299**；JSON **192**、PNG **100**、OGG **2**、GLSL **2**、TOML 1、`pack.mcmeta` 1 |
 | 18 | 语言键 263 且中英相等 | `ModLangProvider` 跑完后比两份 `.json` 的键集 | 两份都 **263** 键（222 + 41）；`set(zh) == set(en)` 为 `True`；其中 `tooltip.farmstorm.*` 仍是 **16** 条（没有误加） |
 | 19 | 三个新进度能解锁 | 分别：投出莫洛托夫 / 让桑吉尔蔗命中一名玩家 / 获得狂野猎人效果 | 三个进度各弹一次 toast；`/advancement` 里能看到 `farmstorm:first_molotov`、`farmstorm:zangief_hit`、`farmstorm:first_wild_hunter` |
-| 20 | 5 条新配方的形状与数量 | 工作台里做转换器（中心工作台 + 八格农作物）；无序放 4 个膨胀麦；转换器里转换 molotov / zangief_cane / wild_apple 各一次 | 转换器得 1 个；4 个膨胀麦得 1 个压缩膨胀麦；三条转换各扣 3 点经验且双向可用（金苹果 ⇄ 狂野苹果 正反各一次） |
+| 20 | 5 条新配方的形状与数量 | 工作台里做转换器（中心工作台 + 八格农作物）；无序放 4 个膨胀麦；转换器里转换 molotov / zangief_cane / wild_apple 各一次（槽 1 放 1 个下界之星做对照） | 转换器得 1 个；4 个膨胀麦得 1 个压缩膨胀麦；三条转换各扣 3 点经验且双向可用（金苹果 ⇄ 狂野苹果 正反各一次）；**槽 1 的星星数量不变**——只有 `awakened_torchflower` / `awakened_pitcher_plant` 的正向转换消耗 1 个（V-29） |
 | 21 | 0 个自定义网络包 | `grep -r "CustomPacketPayload" src/main/java` | **0 处匹配**（v0.0.1 也是 0；v0.0.2 不许首次出现） |
 | 22 | 客户端在专用服务器上不崩 | `启动服务器.cmd` 起服，再用客户端连 | 服务端启动无 `NoClassDefFoundError`（客户端 6 个类全部由 `Dist.CLIENT` 隔离）；连接后效果相关功能正常 |
 

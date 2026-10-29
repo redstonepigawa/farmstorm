@@ -19,7 +19,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.joml.Quaternionf;
@@ -62,48 +61,6 @@ public final class WildHunterOutline {
                 ? buffers.getBuffer(RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE))
                 : buffers.getBuffer(type);
     }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
-        if (rendering || !WildHunterClientState.active()) {
-            return;
-        }
-        LivingEntity entity = event.getEntity();
-        Minecraft minecraft = Minecraft.getInstance();
-        Player self = minecraft.player;
-        if (self == null || entity == self || !entity.isAlive()) {
-            return;
-        }
-        if (entity instanceof Player other && self.isAlliedTo(other)) {
-            return;
-        }
-        double radius = WildHunterClientState.highlightRadius();
-        if (self.distanceToSqr(entity) > radius * radius) {
-            return;
-        }
-        if (!self.hasLineOfSight(entity)) {
-            return;
-        }
-        MultiBufferSource buffers = event.getMultiBufferSource();
-        if (buffers == null) {
-            return;
-        }
-        LivingEntityRenderer renderer = (LivingEntityRenderer) event.getRenderer();
-        PoseStack poseStack = event.getPoseStack();
-        MultiBufferSource shell = shellSource(buffers);
-        float yaw = Mth.lerp(event.getPartialTick(), entity.yRotO, entity.getYRot());
-        rendering = true;
-        try {
-            poseStack.pushPose();
-            poseStack.scale(OUTLINE_SCALE, OUTLINE_SCALE, OUTLINE_SCALE);
-            renderer.render(entity, yaw, event.getPartialTick(), poseStack, shell, LightTexture.FULL_BRIGHT);
-            poseStack.popPose();
-        } finally {
-            rendering = false;
-        }
-    }
-
-    // ---- F-83c：把剪影挪到灰度之后（GUI 阶段重画）----
 
     /** 世界阶段捕获投影 / modelview / 相机 / partialTick：{@code AFTER_ENTITIES} 时这些都还是对的。 */
     public static void onRenderStage(RenderLevelStageEvent event) {

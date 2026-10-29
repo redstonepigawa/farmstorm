@@ -34,7 +34,4 @@ public final class WildHunterClientState {
         return DEFAULT_HIGHLIGHT_RADIUS;
     }
 
-    public static double loopRange() {
-        return DEFAULT_LOOP_SOUND_RANGE;
-    }
 }

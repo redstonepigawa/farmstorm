@@ -12,12 +12,15 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 /**
  * F-84 的循环音（D-76 / D-53）：客户端 {@code SoundInstance}，{@code isLooping() = true}，
- * 每 tick 把位置更新到「带着效果的玩家」身上，可听距离读 {@link WildHunterClientState#loopRange()}（16 格）。
+ * <p>距离衰减交给音频引擎（{@link SoundInstance.Attenuation#LINEAR} + {@code sounds.json} 的
+ * {@code attenuation_distance: 16}），不再每刻手写 volume。
+ * <p><b>自己的</b>实例：{@code relative = true}、坐标归零、<b>不跟随</b>（相对声源没有世界位置，
+ * 也就没有「听者→声源」向量，从根上消除左右声像抖动）。
+ * <p><b>别人的</b>实例：{@code relative = false}、世界坐标、位移 &gt; 0.1 格才更新坐标（减少 AL_POSITION 抖动）。
  * <p>为什么不在服务端每刻重发包：效果的存在本身就已经告诉每个客户端「该播」——原版
  * {@code ClientboundUpdateMobEffectPacket} 会把效果同步给所有追踪该玩家的客户端，
  * 所以别人（B）也能听到 A 的循环音，而服务端一包都不用发。

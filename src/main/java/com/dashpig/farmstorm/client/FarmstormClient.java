@@ -17,7 +17,6 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterRecipeBookCategoriesEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import net.neoforged.neoforge.client.event.RenderLivingEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 /**
@@ -77,12 +76,6 @@ public final class FarmstormClient {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         WildHunterClientHooks.onClientTick();
-    }
-
-    /** 红色剪影（F-83）：只对可见且 64 格内的目标生效。 */
-    @SubscribeEvent
-    public static void onRenderLivingPost(RenderLivingEvent.Post<?, ?> event) {
-        WildHunterClientHooks.onRenderLivingPost(event);
     }
 
     /**

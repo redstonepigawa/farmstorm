@@ -1,0 +1,29 @@
+=== start 20:40:01 ===
+> /gamemode creative Dev   @20:40:01
+    ""
+> /time set noon   @20:40:01
+    "Set the time to 6000"
+> /weather clear   @20:40:01
+    "Set the weather to clear"
+> /effect clear Dev   @20:40:01
+    "Removed every effect from Dev"
+> /kill @e[type=minecraft:pig]   @20:40:01
+    "Killed Pig"
+> /tp Dev 0.5 150 0.5 0 0   @20:40:01
+    "Teleported Dev to 0.500000, 150.000000, 0.500000"
+> /summon minecraft:pig 0.5 150 3.5 {NoAi:1b,PersistenceRequired:1b,Silent:1b}   @20:40:01
+    "Summoned new Pig"
+> /effect give Dev farmstorm:wild_hunter 1200 0   @20:40:01
+    "Applied effect Wild Hunter to Dev"
+--- mark 20:40:03 MARK before_fire
+> /data get entity Dev Pos   @20:40:03
+    "Dev has the following entity data: [0.5d, 150.0d, 0.5d]"
+> /data get entity @e[type=minecraft:pig,limit=1] Health   @20:40:03
+    "Pig has the following entity data: 10.0f"
+--- touch 20:40:03 D:\project_farm\run-p13\f85-fire.enabled
+> /data get entity Dev Pos   @20:40:09
+    "Dev has the following entity data: [0.5d, 150.0d, 3.636754511501454d]"
+> /data get entity @e[type=minecraft:pig,limit=1] Health   @20:40:09
+    "Pig has the following entity data: 8.6f"
+--- mark 20:40:09 MARK after_fire
+=== end 20:40:11 ===

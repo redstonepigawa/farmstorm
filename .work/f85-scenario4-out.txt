@@ -1,0 +1,20 @@
+=== start 20:41:18 ===
+> /tp Dev 0.5 150 0.5 0 0   @20:41:18
+    "Teleported Dev to 0.500000, 150.000000, 0.500000"
+> /kill @e[type=minecraft:pig]   @20:41:18
+    "Killed Pig"
+> /summon minecraft:pig 0.5 150 3.5 {NoAi:1b,PersistenceRequired:1b,Silent:1b}   @20:41:18
+    "Summoned new Pig"
+> /execute as Dev run attribute @s minecraft:generic.attack_damage get   @20:41:18
+    "Value of attribute Attack Damage for entity Dev is 1.4"
+--- mark 20:41:18 MARK seven_items_frame
+> /effect clear Dev   @20:41:24
+    "Removed every effect from Dev"
+--- mark 20:41:24 MARK reset_frame
+> /execute as Dev run attribute @s minecraft:generic.attack_damage get   @20:41:29
+    "Value of attribute Attack Damage for entity Dev is 1.0"
+> /execute as Dev run attribute @s minecraft:generic.movement_speed get   @20:41:29
+    "Value of attribute Speed for entity Dev is 0.10000000149011612"
+> /data get entity Dev active_effects   @20:41:29
+    "Found no elements matching active_effects"
+=== end 20:41:29 ===

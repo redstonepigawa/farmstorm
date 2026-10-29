@@ -1,0 +1,16 @@
+fill 0 149 -2 2 149 10 minecraft:stone
+kill @e[type=minecraft:pig]
+effect clear Dev
+tp Dev 0.5 150 0.5 0 0
+summon minecraft:pig 0.5 150 3.5 {NoAi:1b,PersistenceRequired:1b,Silent:1b}
+effect give Dev farmstorm:wild_hunter 1200 0
+#SLEEP 2500
+data get entity Dev Pos
+data get entity @e[type=minecraft:pig,limit=1] Health
+#MARK fire2
+#TOUCH D:\project_farm\run-p13\f85-fire.enabled
+#SLEEP 6000
+data get entity Dev Pos
+data get entity @e[type=minecraft:pig,limit=1] Health
+#MARK done2
+#SLEEP 2000

@@ -1,0 +1,25 @@
+=== start 20:34:24 ===
+> /fill 0 149 -2 2 149 10 minecraft:stone   @20:34:24
+    "Successfully filled 39 block(s)"
+> /kill @e[type=minecraft:pig]   @20:34:24
+    "Killed 5 entities"
+> /effect clear Dev   @20:34:24
+    "Target has no effects to remove"
+> /tp Dev 0.5 150 0.5 0 0   @20:34:24
+    "Teleported Dev to 0.500000, 150.000000, 0.500000"
+> /summon minecraft:pig 0.5 150 3.5 {NoAi:1b,PersistenceRequired:1b,Silent:1b}   @20:34:24
+    "Summoned new Pig"
+> /effect give Dev farmstorm:wild_hunter 1200 0   @20:34:24
+    "Applied effect Wild Hunter to Dev"
+> /data get entity Dev Pos   @20:34:26
+    "Dev has the following entity data: [0.5d, 150.0d, 0.5d]"
+> /data get entity @e[type=minecraft:pig,limit=1] Health   @20:34:26
+    "Pig has the following entity data: 10.0f"
+--- mark 20:34:26 MARK fire2
+--- touch 20:34:26 D:\project_farm\run-p13\f85-fire.enabled
+> /data get entity Dev Pos   @20:34:32
+    "Dev has the following entity data: [0.5d, 150.0d, 3.824456590315929d]"
+> /data get entity @e[type=minecraft:pig,limit=1] Health   @20:34:32
+    "Pig has the following entity data: 10.0f"
+--- mark 20:34:32 MARK done2
+=== end 20:34:34 ===

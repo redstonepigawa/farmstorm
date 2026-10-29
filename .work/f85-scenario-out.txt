@@ -1,0 +1,65 @@
+=== start 20:32:35 ===
+> /gamemode creative Dev   @20:32:35
+    ""
+> /time set noon   @20:32:35
+    "Set the time to 6000"
+> /weather clear   @20:32:35
+    "Set the weather to clear"
+> /effect clear Dev   @20:32:35
+    "Removed every effect from Dev"
+> /kill @e[type=minecraft:pig]   @20:32:35
+    "Killed 6 entities"
+> /tp Dev 0.5 150 0.5 0 0   @20:32:35
+    "Teleported Dev to 0.500000, 150.000000, 0.500000"
+> /summon minecraft:pig 0.5 150 3.5 {NoAi:1b,NoGravity:1b,PersistenceRequired:1b,Silent:1b}   @20:32:35
+    "Summoned new Pig"
+> /effect give Dev farmstorm:wild_hunter 700 0   @20:32:38
+    "Applied effect Wild Hunter to Dev"
+--- mark 20:32:38 MARK seven_item_frame
+> /execute as Dev run attribute @s minecraft:generic.attack_damage get   @20:32:43
+    "Value of attribute Attack Damage for entity Dev is 1.4"
+> /execute as Dev run attribute @s minecraft:generic.movement_speed get   @20:32:43
+    "Value of attribute Speed for entity Dev is 0.13000000193715097"
+> /execute as Dev run attribute @s minecraft:generic.attack_speed get   @20:32:43
+    "Value of attribute Attack Speed for entity Dev is 5.2"
+> /data get entity @e[type=minecraft:pig,limit=1] Health   @20:32:43
+    "Pig has the following entity data: 10.0f"
+--- mark 20:32:43 MARK fire_real_swing
+--- touch 20:32:43 D:\project_farm\run-p13\f85-fire.enabled
+> /data get entity @e[type=minecraft:pig,limit=1] Health   @20:32:49
+    "Pig has the following entity data: 10.0f"
+--- mark 20:32:49 MARK killchain
+> /summon minecraft:pig 0.5 150 4.5 {NoAi:1b,NoGravity:1b}   @20:32:50
+    "Summoned new Pig"
+> /summon minecraft:pig 0.5 150 5.0 {NoAi:1b,NoGravity:1b}   @20:32:50
+    "Summoned new Pig"
+> /summon minecraft:pig 0.5 150 5.5 {NoAi:1b,NoGravity:1b}   @20:32:50
+    "Summoned new Pig"
+> /summon minecraft:pig 0.5 150 6.0 {NoAi:1b,NoGravity:1b}   @20:32:50
+    "Summoned new Pig"
+> /summon minecraft:pig 0.5 150 6.5 {NoAi:1b,NoGravity:1b}   @20:32:50
+    "Summoned new Pig"
+> /summon minecraft:pig 0.5 150 7.0 {NoAi:1b,NoGravity:1b}   @20:32:50
+    "Summoned new Pig"
+> /damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev   @20:32:51
+    "Applied 1000.0 damage to Pig"
+> /damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev   @20:32:51
+    "Applied 1000.0 damage to Pig"
+> /damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev   @20:32:51
+    "Applied 1000.0 damage to Pig"
+> /damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev   @20:32:51
+    "Applied 1000.0 damage to Pig"
+> /damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev   @20:32:51
+    "Applied 1000.0 damage to Pig"
+> /damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev   @20:32:51
+    "Applied 1000.0 damage to Pig"
+> /data get entity Dev ActiveEffects   @20:32:53
+    "Found no elements matching ActiveEffects"
+--- mark 20:32:53 MARK clear_reset
+> /effect clear Dev   @20:32:53
+    "Removed every effect from Dev"
+> /execute as Dev run attribute @s minecraft:generic.attack_damage get   @20:32:57
+    "Value of attribute Attack Damage for entity Dev is 1.0"
+> /data get entity Dev ActiveEffects   @20:32:57
+    "Found no elements matching ActiveEffects"
+=== end 20:32:57 ===

@@ -1,0 +1,41 @@
+gamemode creative Dev
+time set noon
+weather clear
+effect clear Dev
+kill @e[type=minecraft:pig]
+tp Dev 0.5 150 0.5 0 0
+summon minecraft:pig 0.5 150 3.5 {NoAi:1b,NoGravity:1b,PersistenceRequired:1b,Silent:1b}
+#SLEEP 2000
+effect give Dev farmstorm:wild_hunter 700 0
+#MARK seven_item_frame
+#SLEEP 5000
+execute as Dev run attribute @s minecraft:generic.attack_damage get
+execute as Dev run attribute @s minecraft:generic.movement_speed get
+execute as Dev run attribute @s minecraft:generic.attack_speed get
+data get entity @e[type=minecraft:pig,limit=1] Health
+#MARK fire_real_swing
+#TOUCH D:\project_farm\run-p13\f85-fire.enabled
+#SLEEP 6000
+data get entity @e[type=minecraft:pig,limit=1] Health
+#MARK killchain
+#SLEEP 1000
+summon minecraft:pig 0.5 150 4.5 {NoAi:1b,NoGravity:1b}
+summon minecraft:pig 0.5 150 5.0 {NoAi:1b,NoGravity:1b}
+summon minecraft:pig 0.5 150 5.5 {NoAi:1b,NoGravity:1b}
+summon minecraft:pig 0.5 150 6.0 {NoAi:1b,NoGravity:1b}
+summon minecraft:pig 0.5 150 6.5 {NoAi:1b,NoGravity:1b}
+summon minecraft:pig 0.5 150 7.0 {NoAi:1b,NoGravity:1b}
+#SLEEP 1000
+damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev
+damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev
+damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev
+damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev
+damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev
+damage @e[type=minecraft:pig,limit=1,sort=nearest] 1000 minecraft:player_attack by Dev
+#SLEEP 2000
+data get entity Dev ActiveEffects
+#MARK clear_reset
+effect clear Dev
+#SLEEP 4000
+execute as Dev run attribute @s minecraft:generic.attack_damage get
+data get entity Dev ActiveEffects

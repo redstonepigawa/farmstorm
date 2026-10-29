@@ -23,6 +23,8 @@ public final class WildHunterSwingSettler {
     static final double DASH_SPEED = 0.55;
     /** 去抖窗口（刻）：同一次挥击在真命中后不再重复结算。 */
     private static final long DEDUPE_TICKS = 1L;
+    /** swing 跃变与冲刺位移允许的最大间隔（刻）：实测位移常晚 1–2 刻到达。 */
+    private static final long SWING_WINDOW = 2L;
 
     private static final Map<UUID, State> STATES = new Object2ObjectOpenHashMap<>();
 
@@ -40,8 +42,14 @@ public final class WildHunterSwingSettler {
         boolean newSwing = swinging && (!state.prevSwinging || player.swingTime <= state.prevSwingTime);
         double speed = Math.hypot(player.getX() - state.lastX, player.getZ() - state.lastZ);
         long now = player.level().getGameTime();
+        if (newSwing) {
+            state.swingTick = now;
+        }
+        // 客户端的挥击包与位移包不一定同 tick 到达（实测位移常晚 1–2 刻），
+        // 所以「swing 跃变」与「冲刺位移」允许在 SWING_WINDOW 刻的窗口内配对。
+        boolean swingWithinWindow = now - state.swingTick <= SWING_WINDOW;
 
-        if (newSwing && speed >= DASH_SPEED
+        if (swingWithinWindow && speed >= DASH_SPEED
                 && player.hasEffect(FarmstormMobEffects.WILD_HUNTER)
                 && !player.hasEffect(FarmstormMobEffects.ZANGIEF_PILEDRIVER)
                 && now - state.lastDirectHit > DEDUPE_TICKS
@@ -68,6 +76,7 @@ public final class WildHunterSwingSettler {
         private int prevSwingTime;
         private long lastDirectHit = Long.MIN_VALUE / 2;
         private long lastSettle = Long.MIN_VALUE / 2;
+        private long swingTick = Long.MIN_VALUE / 2;
 
         private State(double x, double z) {
             this.lastX = x;

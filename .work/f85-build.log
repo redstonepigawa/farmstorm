@@ -1,0 +1,25 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 46 busy and 41 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava FROM-CACHE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :jarJar NO-SOURCE
+> Task :jar
+> Task :sourcesJar
+> Task :assemble
+> Task :compileTestJava NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+> Task :test NO-SOURCE
+> Task :check UP-TO-DATE
+> Task :build
+
+BUILD SUCCESSFUL in 9s
+5 actionable tasks: 2 executed, 1 from cache, 2 up-to-date

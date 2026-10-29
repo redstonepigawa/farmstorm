@@ -1517,7 +1517,7 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 **行数核对**：`41` 行 = 物品 5（#1–#5）+ 方块 2（#6–#7）+ 效果 2（#8–#9）+ 字幕 2（#10–#11）+ 进度 6（#12–#17）+ config 22（#18–#39）+ 实体名 2（#40–#41）。`222 + 41 = 263`。
 
-**踩过的坑（V-63）**：第一版生成的语言文件里 `subtitles.*` **一条都没有**，客户端启动时报 `ERROR SoundManager: Missing subtitle translation` ×2。日志只报得出「当前播到的那两条」，穷举推导实际缺 **35 条**——已由 F-97 一次补齐。落 `ENTRIES` 后必须做一次「键集 vs 代码里所有 `subtitles.*` 字面量」的比对，不能等日志报。
+**踩过的坑（V-63）**：第一版生成的语言文件里 `subtitles.*` **一条都没有**，客户端启动时报 `ERROR SoundManager: Missing subtitle translation` ×2。日志只报得出「当前播到的那两条」，而按源头穷举（config 的 `tr()`、`models/item`、`blockstates`、实体/效果注册、`sounds.json` 的 subtitle、advancement、`damage_type`、代码里的 `Component.translatable`）实际缺 **35 处裸键**（其中字幕只有那 2 条，其余 33 处不会报错、只在游戏里显示成裸键）——已由 F-97 一次补齐。落 `ENTRIES` 后必须做一次「键集 vs 代码里所有 `subtitles.*` 字面量」的比对，不能等日志报。
 
 **没有新增的两类，写明理由**：
 

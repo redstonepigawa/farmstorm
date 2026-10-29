@@ -7,12 +7,14 @@ import com.dashpig.farmstorm.explosion.BlastRule;
 import com.dashpig.farmstorm.explosion.FarmstormExplosion;
 import com.dashpig.farmstorm.registry.FarmstormDamageTypes;
 import com.dashpig.farmstorm.util.CropProfile;
+import com.dashpig.farmstorm.util.FarmstormAdvancements;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -57,6 +59,19 @@ public class MolotovProjectile extends ThrownCropEntity {
 
     public MolotovProjectile(EntityType<? extends MolotovProjectile> type, LivingEntity shooter, Level level) {
         super(type, shooter, level);
+    }
+
+    /**
+     * D-63 / DESIGN §9.1：**投出即判定**（不要求命中）——实体真正进入世界时判一次，授予投掷者。
+     * 用 {@code onAddedToLevel} 而不是构造器：{@code /summon} 走两参构造、没有归属者，天然不会推进；
+     * 而投掷路径在 {@code addFreshEntity} 之前就 {@code setOwner} 过了（{@code ThrowableCropItem#createProjectile}）。
+     */
+    @Override
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
+        if (!this.level().isClientSide() && this.getOwner() instanceof ServerPlayer thrower) {
+            FarmstormAdvancements.award(thrower, "first_molotov");
+        }
     }
 
     @Override

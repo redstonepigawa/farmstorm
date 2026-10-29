@@ -39,7 +39,8 @@ import net.minecraft.world.level.ItemLike;
 public final class ModAdvancementProvider {
     /**
      * 需要服务端 {@code award} 的进度（{@code minecraft:impossible} 触发器）。
-     * 原版 criteria 无法表达这些判定，当前代码里也还没有 award 调用点。
+     * 原版 criteria 无法表达这些判定，判定点全在服务端；清单的作用是让「进度」与「授予点」保持同步
+     * ——改这里就必须同时改 {@code util/FarmstormAdvancements} 的调用点。v0.0.2 收口时 11 条已全部接线。
      */
     public static final List<String> AWARD_REQUIRED = List.of(
             "farmstorm:first_conversion",
@@ -49,7 +50,11 @@ public final class ModAdvancementProvider {
             "farmstorm:turret_hit",
             "farmstorm:aura_bath",
             "farmstorm:fang_dance",
-            "farmstorm:lucky_jackpot");
+            "farmstorm:lucky_jackpot",
+            // v0.0.2 的三条（D-63 / DESIGN §9.1）
+            "farmstorm:first_molotov",
+            "farmstorm:zangief_hit",
+            "farmstorm:first_wild_hunter");
 
     /** 根进度的背景贴图（DESIGN §6）。 */
     private static final ResourceLocation BACKGROUND =
@@ -134,6 +139,19 @@ public final class ModAdvancementProvider {
         // 12. 食用幸运浆果并抽中 0.1% 的创造模式分支（分支判定在 LuckyBerryRoller，服务端 award）
         impossible("lucky_jackpot", root, FarmstormItems.LUCKY_BERRY.get(), true)
                 .save(output, "farmstorm:lucky_jackpot");
+
+        // ---- v0.0.2 的三条（D-63 / DESIGN §9.1：父进度、图标、口径逐条照该表）----
+        // 13. 初次投出莫洛托夫（投掷物实体生成即成立，不要求命中）
+        impossible("first_molotov", firstThrow, FarmstormItems.MOLOTOV.get(), false)
+                .save(output, "farmstorm:first_molotov");
+
+        // 14. 桑吉尔蔗首次命中：某名玩家被施加 amplifier 0 的 farmstorm:zangief_piledriver
+        impossible("zangief_hit", firstDeploy, FarmstormItems.ZANGIEF_CANE.get(), false)
+                .save(output, "farmstorm:zangief_hit");
+
+        // 15. 玩家首次获得 farmstorm:wild_hunter 效果（不限定来源）
+        impossible("first_wild_hunter", root, FarmstormItems.WILD_APPLE.get(), false)
+                .save(output, "farmstorm:first_wild_hunter");
     }
 
     /** 单个 {@code minecraft:impossible} 判定的进度：只有服务端 award 能授予。 */

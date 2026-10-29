@@ -7,6 +7,7 @@ import com.dashpig.farmstorm.behavior.ZangiefPiledriverController;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.registry.FarmstormSounds;
+import com.dashpig.farmstorm.util.FarmstormAdvancements;
 import java.util.Locale;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -64,6 +65,12 @@ public final class ZangiefCaneTrap implements TrapBehavior {
         BlockPos pos = be.getBlockPos();                                       // consume() 之前先取出坐标
         double distance = Math.sqrt(Vec3.atCenterOf(pos).distanceToSqr(player.position()));
         ZangiefPiledriverController.begin(player);                             // 相位 0 的施加与记账归状态机（§3.11）
+        // D-63 / DESIGN §9.1–9.2：zangief_hit 授予**陷阱的部署者**（父进度是 first_deploy，属于部署者那棵树），
+        // 不是被命中的玩家——「你布的东西打中了人」才是成就。归属者离线 / 无归属（/setblock）时跳过。
+        ServerPlayer deployer = be.owner(level);
+        if (deployer != null) {
+            FarmstormAdvancements.award(deployer, "zangief_hit");
+        }
         level.playSound(null, pos, FarmstormSounds.ZANGIEF_PILEDRIVER.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
         Farmstorm.LOGGER.info(String.format(Locale.ROOT, "桑吉尔蔗 触发 t=%d 玩家 %s 中心距 %.2f",
                 level.getGameTime(), player.getGameProfile().getName(), distance));

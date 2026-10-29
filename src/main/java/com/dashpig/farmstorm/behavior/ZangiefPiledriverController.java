@@ -87,11 +87,6 @@ public final class ZangiefPiledriverController {
                 FarmstormConfig.zangiefCaneStageDelayTicks.get() + PHASE_EFFECT_CUSHION);
     }
 
-    /** 相位期间为真（给「禁止冲刺吸附」这类判定用），只读。 */
-    public static boolean isActive(UUID playerId) {
-        return ACTIVE.containsKey(playerId);
-    }
-
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {

@@ -340,7 +340,7 @@ Land the Deployable trap Zangief Cane and its three-phase presentation (inversio
 | F-89 | Phase 1: levitation VII for 20 ticks | S / 0.5 | F-88 | `MobEffects.LEVITATION` with amplifier = level − 1 = 6 for 20 ticks, applied on tick 14 |
 | F-90 | Phase 2: tick-by-tick served fall and landing detection | M / 1.5 | F-89 | Every tick reset the downward velocity to remaining height ÷ remaining ticks; clear the effect on landing; the target duration is `fallTicks` 40 ticks (A-03) |
 | F-91 | Camera: roll 180 + pitch negated + yaw self-rotation | M / 1.5 | F-61, F-88 | `ViewportEvent.ComputeCameraAngles`: `setRoll(180f)` + `setPitch(-pitch)` taking effect together; in phase 2 accumulate `yaw += 72.0` every tick |
-| F-92 | Input lock: leave only ESC | L / 3.0 | F-88 | Five events each cover one area (movement / attack and use / 1–9 / scroll wheel / inventory and chat), letting `GLFW_KEY_ESCAPE` through, accepted against a 21-item key-by-key hand-test table |
+| F-92 | Input lock: leave only ESC | L / 3.0 | F-88 | Seven mechanisms each cover one area (movement / mouse buttons / attack and use / 1–9 / scroll wheel / inventory and chat), letting `GLFW_KEY_ESCAPE` through, accepted against a 21-item key-by-key hand-test table |
 | F-93 | Phase 14 exit regression | S / 0.5 | F-90, F-91, F-92 | Three-phase timing + landing time from three heights + the 21-item key table + 0 packets |
 
 ### 5.4 Phase exit criteria

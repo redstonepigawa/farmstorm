@@ -255,7 +255,7 @@ Every class gets five items: **responsibility / key methods / which config keys 
 | `WildHunterCombat` | **new** | server-side target re-check, damage and knockback, kill extension | none |
 | `GrayscalePass` | **new** | client world-only grayscale (vanilla `PostChain`, HUD excluded) | none |
 | `WildHunterOutline` | **new** | client red silhouette | none |
-| `InputLockHandler` | **new** | client input lock (5 events) | none |
+| `InputLockHandler` | **new** | client input lock (7 mechanisms, see §4.3) | none |
 | `ZangiefCameraController` | **new** | client render-layer angles (roll / pitch / yaw) | none |
 | `WildHunterLoopSound` | **new** | client looping `SoundInstance` | none |
 | `WildHunterDashClient` | **new** | client dash prediction | none |
@@ -677,7 +677,7 @@ How to verify during implementation: the log line `桑吉尔蔗 落地耗时 {} 
 |---|---|---|
 | `resolveTarget(Player)` | candidates = `LivingEntity` within `wild_hunter.searchRadius` (5.0 blocks) of the player as sphere center, with an angle of at most `wild_hunter.searchAngleDegrees` (30.0°) to the view direction; exclude self, same-team players (`player.isAlliedTo(other)`), spectators | D-64 |
 | Ordering | smallest angle first; on equal angles the nearer one (`Comparator.comparingDouble(angle).thenComparingDouble(distSqr)`) | D-64 |
-| `onSwing(ServerPlayer)` | hooking `PlayerInteractEvent.LeftClickEmpty` is not enough (that covers empty swings only); the real entry is the server-side handling path of `ServerboundSwingPacket` ⇒ re-check the target at the **server-side settlement point** of `PlayerEvent` / the vanilla attack flow; on a hit, settle damage with the player's own attack power | D-65 + BRIEF §7.6 |
+| `onSwing(ServerPlayer)` | hooking `PlayerInteractEvent.LeftClickEmpty` is not enough (that covers empty swings only), and NeoForge 1.21.1 has **no public event** for `ServerboundSwingPacket` ⇒ the server has to observe the swing sideways, see "How the server knows the player swung" below; on a hit, settle damage with the player's own attack power | D-65 + BRIEF §7.6 + V-44 |
 | Knockback | on a successful hit, call `target.knockback(0.4, dx, dz)` with the vanilla default strength; no custom value | D-75 |
 | `onKill(ServerPlayer)` | in `LivingDeathEvent`, test that the killer is a player carrying the effect ⇒ remaining duration + `killExtensionTicks` (160 ticks = 8 seconds), restore `killHealPoints` (10 health points); **no cap on the number of kills** | D-74 |
 | Mutual exclusion with phases | no attraction while `ZangiefPiledriverController.isActive(uuid)` is true | added by this document: all input is locked during a piledriver, so attracting on top of that would be self-contradictory |
@@ -685,6 +685,15 @@ How to verify during implementation: the log line `桑吉尔蔗 落地耗时 {} 
 **How the "attack damage" item lands**: D-75 only says knockback uses the vanilla default strength and gives no extra damage number. The rule here: **the attraction itself deals no damage**; damage comes from the player's own ordinary attack (through vanilla `Player#attack`), so no key such as `wild_hunter.attackDamage` is needed. The `attackDamageBonusPercent` attribute (+40 %) is provided by the `MobEffect` of §3.5 and is a bonus of the effect itself, unrelated to the attraction.
 
 **Key point: the server computes independently and does not listen to the client**. BRIEF §7.6's original text is "the client, when 'the attack key is pressed locally + the player has the effect + a legal target is computed locally', immediately gives velocity toward the target, and the server, on receiving `ServerboundSwingPacket`, independently runs the same deterministic algorithm to compute the target and settle damage and knockback". "The same" means: there is **only one copy** of the `resolveTarget` code, and both client and server call it, except that the client copy runs on `ClientLevel` (it must be generic over `Level` or take a `LivingEntity` list; `ServerLevel` must not be hard-coded).
+
+**How the server knows the player swung (the mechanism V-44 landed)**: NeoForge 1.21.1 has **no** public event for `ServerboundSwingPacket`, and D-40 forbids Mixin while D-50 forbids a custom packet, so the server can only sense it **sideways**, not through an event:
+
+1. Hang on `PlayerTickEvent.Post` and watch two signals every tick: ① a swing state transition (`swinging` / `swingTime` / `attackAnim`, `LivingEntity:185/188/195`); ② the horizontal displacement of this tick (the dash).
+2. **Both signals are required, but they may pair across ticks** (V-66): using ① alone turns right-click / mining into a swing, using ② alone turns explosion knockback or an ender pearl into a dash. **They must not be required to fall in the same tick** — `ServerboundSwingPacket` and the movement packet **arrive in different ticks, with the displacement typically 1–2 ticks late**, so a same-tick criterion never holds on the real wire (zero settlements on the server). The implementation records `swingTick` and treats a swing and a dash within `SWING_WINDOW = 2` ticks as a pair.
+3. **De-duplication is unchanged (`DEDUPE_TICKS = 1` + the `lastDirectHit` marker)**: a real hit also fires `AttackEntityEvent` (which records the marker via `recordDirectHit`), and one swing may be settled only once.
+4. **The initial value must be `Long.MIN_VALUE / 2`** (`swingTick` / `lastDirectHit` / `lastSettle`): with 0, or with `now - 0`, the window stays open when there was no swing at all, i.e. every dash settles for free. **Lesson (V-66)**: synthesised state can fool acceptance — from a probe that calls `tick()` directly a same-tick criterion looks right, and only the **real packets** (the client actually swinging and actually dashing) expose it; whenever a criterion depends on the relationship between two packets, acceptance must go through the real wire.
+5. The decision still goes through `resolveTarget`; neither the 5 blocks nor the 30° may be relaxed, and an illegal target does nothing.
+6. Hence "a successful attraction check means a guaranteed hit": as long as a legal target is inside the cone and this swing was sensed by the server, damage is settled with the player's own attack power regardless of whether the vanilla hit actually touched the entity.
 
 **Which config keys it reads**: `wild_hunter.searchRadius`, `wild_hunter.searchAngleDegrees`, `wild_hunter.killExtensionTicks`, `wild_hunter.killHealPoints`, `wild_hunter.dashTicks`.
 **Which registry objects it writes**: none.
@@ -696,8 +705,8 @@ Client code lives only under the `client/` package and **must** enter through th
 | Class | Responsibility | Key methods / mount point | Which config keys it reads | Which registry objects it writes |
 |---|---|---|---|---|
 | `GrayscalePass` | world-only grayscale (the HUD keeps its original colours) | `GameRenderer#loadEffect` / `shutdownEffect` load the vanilla `PostChain`, switched per client tick according to whether the effect is present | none | none |
-| `WildHunterOutline` | red silhouette | `RenderLivingEvent.Post` → `getModel().renderToBuffer(...)` | none | none |
-| `InputLockHandler` | keyboard and mouse lock (ESC only) | 5 events, see §4.3 | none | none |
+| `WildHunterOutline` | red silhouette | `RenderLivingEvent.Post` redraws through `LivingEntityRenderer#render(...)` with `MultiBufferSource` filtered by vertex format; `AFTER_ENTITIES` captures the camera and `RenderGuiEvent.Pre` redraws after grayscale | none | none |
+| `InputLockHandler` | keyboard and mouse lock (ESC only) | 7 mechanisms, see §4.3 | none | none |
 | `ZangiefCameraController` | render-layer roll / pitch / yaw | `ViewportEvent.ComputeCameraAngles` | `zangief_cane.spinDegreesPerTick` (used only for the spin accumulator; **the client cannot read the server config, see the degradation rule in §4.4**) | none |
 | `WildHunterLoopSound` | looping sound that follows the player | a hand-written `SoundInstance` with `isLooping() = true` | none | none |
 | `WildHunterDashClient` | dash prediction | gives velocity locally when the attack key is pressed | a **mirror of the default values** of the same 5 keys as `WildHunterCombat` (§4.5) | none |
@@ -723,7 +732,7 @@ The source of state for all six classes is **the effect on the player itself**, 
 | `config/FarmstormConfig.java` | +4 groups with 22 keys in total (`molotov` / `wild_apple` / `wild_hunter` / `zangief_cane`) + the baked snapshot | §8 |
 | `datagen/ModRecipeProvider.java` | +5 recipes: 1 shaped crafting, 1 shapeless crafting, 3 converting | §7.2 |
 | `datagen/ModItemModelProvider.java` | 4 `basicItem` + 1 `withExistingParent(compressed_hay_block → block/compressed_hay_block)` | §7.2 |
-| `datagen/ModBlockStateProvider.java` | add `"zangief_cane"` to `DEPLOYED_INVISIBLE`; add the `cubeAll` compressed hay block | D-68 |
+| `datagen/ModBlockStateProvider.java` | add `"zangief_cane"` to `DEPLOYED_INVISIBLE`; add the `cubeAll` compressed hay block; **the dispatch inside `registerStatesAndModels` must gain an `else { simpleBlock(block); }` branch** — without the else a plain block is **silently skipped** and not even a blockstate is generated, which surfaces as `deployedModel` throwing `deployed block is missing its appearance definition` (the root cause of V-23) | D-68 |
 | `datagen/ModLootTableProvider.java` | +2 block loot tables (deployed-block conventions + ordinary-block conventions) | §7.2 |
 | `datagen/ModLangProvider.java` | +39 entries (see §7.3) | §7.3 |
 | `datagen/ModAdvancementProvider.java` | +3 advancements; append `first_molotov` / `zangief_hit` / `first_wild_hunter` to `AWARD_REQUIRED` | D-63 |
@@ -1038,28 +1047,46 @@ In MC the player position is client-authoritative to begin with (the server only
 
 **Trigger condition**: `farmstorm:wild_hunter` present on the local player.
 
-**Implementation**: one hand-written `SoundInstance` subclass on the client, `isLooping() = true`, updating its position to the player every tick, taking the audible range from `WildHunterClientState.loopRange()` (= `wild_hunter.loopSoundRange`, default 16.0 blocks, range 0.0–64.0), with the sound category `SoundSource.PLAYERS`.
+**Implementation**: one hand-written `SoundInstance` subclass on the client, `isLooping() = true`, audible range from `WildHunterClientState.loopRange()` (= `wild_hunter.loopSoundRange`, default 16.0 blocks, range 0.0–64.0), sound category `SoundSource.PLAYERS`. **The position convention is the easiest thing to get wrong in this section; land it literally as V-53 says**:
+
+| Who | `relative` | Coordinates | Attenuation | Volume |
+|---|---|---|---|---|
+| **Yourself** (the client carrying `wild_hunter`) | **`true`** | **zeroed** (`0, 0, 0`) — a relative source's coordinates are an offset from the listener, not world coordinates | `Attenuation.NONE` | fixed at `1.0` |
+| **Everyone else** (other players on the server) | `false` | updated to that player's world position every tick | `Attenuation.LINEAR`, letting the engine attenuate over 16 blocks | fixed at `1.0` |
 
 ```java
 // client/audio/WildHunterLoopSound.java
 public final class WildHunterLoopSound extends SoundInstance {
+    private final boolean self;
+
     @Override public boolean isLooping() { return true; }
     @Override public boolean canPlaySound() { return true; }
     @Override public SoundSource getSource() { return SoundSource.PLAYERS; }   // does not take MUSIC, does not interrupt background music
+    @Override public float getVolume() { return 1.0F; }                        // do not hand-write the volume every tick, or it stacks with the engine attenuation
+
+    public WildHunterLoopSound(boolean self) {
+        this.self = self;
+        // your own aura: relative + Attenuation.NONE; the coordinates must be zeroed, since world coordinates would place the source hundreds of blocks away as an offset
+        this.relative = self;
+        if (self) { this.x = 0.0; this.y = 0.0; this.z = 0.0; }
+        this.attenuation = self ? Attenuation.NONE : Attenuation.LINEAR;
+    }
 
     @Override
     public void tick() {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) { stop(); return; }
-        this.x = player.getX(); this.y = player.getY(); this.z = player.getZ();   // the source follows the player
         if (!player.hasEffect(FarmstormMobEffects.WILD_HUNTER)) stop();          // stop at once when the effect is gone
+        if (!self) { this.x = player.getX(); this.y = player.getY(); this.z = player.getZ(); }
     }
 }
 ```
 
+**Why `relative=false` stutters left and right (V-53 / V-57)**: `SoundEngine` only calls `setSelfPosition` once per tick (`:245-253`) while the listener position updates **per frame**. With `relative=false` OpenAL still computes the left/right image from the "listener → source" vector, and **that vector jumps every frame while strafing** — the symptom is "walking is fine, strafing stutters badly". `relative=true` pins the source to the listener so the image stops changing; the price is that it can only be "your own sound", and the copies for others must use world coordinates + `LINEAR` and let the engine do the work.
+
 **Why not re-send a play instruction from the server every tick** (D-76, verbatim): sending `ClientboundSoundPacket` every tick from the server is 20 packets/second/player, whereas the lifetime of the looping sound is exactly the lifetime of the effect — the presence of the effect already tells the client "play it". A client-side `SoundInstance` is 0 packets.
 
-**Pending verification (BRIEF §7.7, verbatim)**: whether the 16-block attenuation on 1.21.1 should be driven through `SoundInstance#getVolume` or through its audible-range hook.
+**Where the 16-block attenuation lands (settled by V-53)**: it does not drive `getVolume()` — that would stack with the engine attenuation into double attenuation; your own copy uses `Attenuation.NONE` with zeroed coordinates, and everyone else's uses `Attenuation.LINEAR` so the engine applies the `attenuation_distance` (16) from `sounds.json`. The original pending item ("volume or the audible-range hook") is closed.
 
 - **How to verify**: stand at 8 / 16 / 17 / 32 blocks and listen once at each, recording "audible / not audible / does the volume fall with distance". Also raise `getVolume()` from 1.0 to 4.0 and check whether it gets louder at distance (whether a larger volume is treated as "carrying farther").
 - **Verdict**: still clearly audible at 17 blocks means the attenuation radius is not taking effect, and it must instead drive `attenuation_distance` of that event in `sounds.json` (if the field exists, **pending verification, attached to RT-14**) or switch to a manual distance attenuation through `getVolume()`.
@@ -1213,16 +1240,16 @@ Provenance and the non-commercial personal-use statement go into the README and 
 
 | Target | ffmpeg arguments | Criterion |
 |---|---|---|
-| audio → Ogg Vorbis | `-ac 1 -ar 44100 -c:a libvorbis -b:a 64k` | **mono** (1 channel), **64 kbps** (D-53) |
+| audio → Ogg Vorbis | `-ac 1 -c:a libvorbis -b:a 64k` (**no `-ar`**: keep the source sample rate) | **mono** (1 channel), **64 kbps** (D-53), sample rate following the source (this version: `zangief_piledriver` 44.1 kHz, `wild_hunter_loop` 48 kHz, both chosen by the author's edit) |
 | icon → PNG | `-vf scale=18:18:flags=lanczos -pix_fmt rgba` | **18×18**, no alpha-channel requirement (D-53) |
 
 ```powershell
-ffmpeg -y -i "<source mp3>" -vn -ac 1 -ar 44100 -c:a libvorbis -b:a 64k "<target>.ogg"
+ffmpeg -y -i "<source mp3>" -vn -ac 1 -c:a libvorbis -b:a 64k "<target>.ogg"
 ffmpeg -y -i "<source jpg>" -vf "scale=18:18:flags=lanczos" -pix_fmt rgba "<target>.png"
 ```
 
 - `-vn` must be given: if the source mp3 carries cover art, omitting it writes the cover into the ogg as a video stream, and Minecraft refuses to load it outright.
-- `-ar 44100` fixes the sample rate: mixing sample rates from different sources makes the volume sound alternately loud and soft.
+- **The sample rate is not fixed** (V-62): the two sources keep the rates the author chose when editing (`zangief_piledriver` 44.1 kHz, `wild_hunter_loop` 48 kHz); forcing 44100 resamples them and departs from what the author heard. The criteria are duration / channels / bitrate, **never md5** — every Ogg re-encode randomises the stream serial number, so md5 can never match.
 - 18×18 rather than 16×16: the effect icon is drawn at 18×18 in the vanilla HUD (the icon area of `MobEffectInstance`), and 16×16 would be stretched 1.125×, blurring the edges.
 
 ### 6.3 `assets/farmstorm/sounds.json` (1 file, 2 events)
@@ -1268,9 +1295,14 @@ BRIEF §7.7 requires "two events in `sounds.json`: `wild_hunter_loop` (looping),
 **Parameters**: three invocation forms — no argument (convert everything when ffmpeg is on `PATH`), `-Ffmpeg <absolute path>` (ffmpeg not on `PATH`), `-CheckOnly` (validate only the environment and the three source files, not writing a single byte).
 
 ```powershell
-pwsh -File tools/convert_media.ps1
-pwsh -File tools/convert_media.ps1 -Ffmpeg "D:\dsh\default\sf6_audio\tools\ffmpeg.exe"
-pwsh -File tools/convert_media.ps1 -CheckOnly
+# On this machine it must be run like this (V-51): pwsh is not on the sub-process PATH and ExecutionPolicy is Restricted
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/convert_media.ps1 `
+    -Ffmpeg "D:\dsh\default\sf6_audio\tools\ffmpeg.exe" *> .work\convert.log
+
+# Three hard constraints on how to run it (V-51):
+# 1. `pwsh -File …` does not start here (not on the sub-process PATH, ExecutionPolicy Restricted) — use powershell.exe -NoProfile -ExecutionPolicy Bypass -File.
+# 2. Redirect the output to a file (`*> .work\convert.log`): capturing a pipe fails under the sandbox.
+# 3. Do not add `-Force`: it re-encodes `zangief_piledriver.ogg` too, and because the Ogg stream serial is random the bytes are not reproducible, i.e. an accepted artifact would be replaced by one that cannot be compared (already rolled back once).
 ```
 
 **Failure behavior (a hard requirement of D-53, not relaxable item by item)**:

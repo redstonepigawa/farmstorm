@@ -195,7 +195,7 @@ Phase exit criteria: `.tools\gw.cmd build` exits with code 0; all four startup-l
 - **Depends on**: F-60
 - **Deliverables**: `effect/WildHunterEffect.java` (visible, with an icon, attach and detach of three attribute modifiers), `effect/ZangiefPiledriverEffect.java` (hidden, amplifier as the phase number), `registry/FarmstormMobEffects.java`, `registry/FarmstormSounds.java`, `Farmstorm.java` (attach the two `REGISTER`s)
 - **Acceptance**:
-  1. `/effect give @s farmstorm:wild_hunter 10` succeeds and an effect icon appears in the HUD; `/effect give @s farmstorm:zangief_piledriver 10 2` succeeds with no icon in the HUD and no description in the inventory (`12-TECH-0.0.2.md §3.6`).
+  1. `/effect give @s farmstorm:wild_hunter 10` succeeds and an effect icon appears in the HUD; `/effect give @s farmstorm:zangief_piledriver 10 2 true` succeeds with no icon in the HUD and no inventory description (`12-TECH-0.0.2.md §3.6`). **The fifth argument `true` is required**: the 1.21.1 `MobEffect` has no `shouldRenderHUD()` / `shouldRenderIcon()`, and the five-argument `/effect` makes `showIcon = visible`, so omitting it yields `show_icon:1b` (V-08).
   2. In `/data get entity @s active_effects`, `farmstorm:zangief_piledriver` has `amplifier` **2** and `show_icon` **false** (the phase channel of D-50 holds).
   3. `/playsound farmstorm:zangief_piledriver master @s ~ ~ ~ 1 1` and `/playsound farmstorm:wild_hunter_loop master @s ~ ~ ~ 1 1` both succeed, and both events are visible in the `/playsound` completion list (`12-TECH-0.0.2.md §11 #6`).
   4. The dedicated-server startup log has no `NoClassDefFoundError` (both effect classes and both registration classes sit on the common side and do not depend on `Dist.CLIENT`).
@@ -237,7 +237,7 @@ Phase exit criteria: a crafting table yields a converter → the converter conve
 - **Deliverables**: the `BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).strength(30.0F, 6.0F).requiresCorrectToolForDrops().sound(SoundType.GRASS)` of `COMPRESSED_HAY_BLOCK` in `registry/FarmstormBlocks.java` (a plain `Block`, no new class)
 - **Acceptance**:
   1. After `/setblock ~ ~ ~ farmstorm:compressed_hay_block`, the hardness reading on the F3 targeted-block panel is **30**; `/execute if block ~ ~ ~ farmstorm:compressed_hay_block run say ok` returns `ok`.
-  2. Left-clicking the block bare-handed for 30 s drops no item (`requiresCorrectToolForDrops`); switching to a diamond pickaxe breaks it once and yields the block itself (the drop's loot table lands in F-74).
+  2. Bare-handed or with a wooden pickaxe, after 30 s (600 ticks) the **block is still there, progress is about 0.400 and nothing is dropped** (`requiresCorrectToolForDrops`). **"A diamond pickaxe breaks it once and yields the block itself" is handed over to F-74**: the `minecraft:mineable/pickaxe` and `minecraft:needs_diamond_tool` tags and the loot table are all F-74 deliverables, so this task only does "attribute check + resistance matrix" (V-14).
   3. Blasting it once each with Melon Grenade and Melon Slice Bomb leaves the block **standing** (threshold 6.0, `6.0 < 6.0` is false); blasting it once with Ubi Server **destroys** the block (threshold 3.6e6).
   4. `/summon tnt` right against the block and detonating it **destroys** the block (ruling A-06: vanilla explosions break it, the same conclusion as the revised `12-TECH-0.0.2.md §3.9` and `§11 #9`).
 
@@ -261,7 +261,7 @@ Phase exit criteria: a crafting table yields a converter → the converter conve
   1. Thrown once on flat ground, `/data get entity @p Health` is identical before and after (`damageCap = 0`, no damage).
   2. A 3×3×3 box centred on the impact point, checked block by block with `/execute if block`, matches the pre-throw state item for item: no block is destroyed (`NEVER_BREAK`).
   3. The log shows `莫洛托夫 落点 (x, y, z) 威力 0`, consistent with the default 0 of `molotov.triggerExplosionPower`.
-  4. After setting `molotov.triggerExplosionPower` to `4` and throwing again, block destruction appears; after setting it back to 0 it appears no more (proving that key really drives this explosion's power).
+  4. After setting `molotov.triggerExplosionPower` to `4` and throwing again: entities inside the blast get **vanilla knockback** (`/data get entity @s Motion` goes from 0 to non-zero), **block destruction stays 0** and health is unchanged; setting it back to 0 removes the knockback (proving the key drives the power without violating A-10: raising it only adds entity damage and never breaks blocks, V-18).
 
 #### F-70 · In-Sphere Candidate Enumeration and Per-Block Fire / Magma Blocks
 
@@ -302,8 +302,8 @@ Phase exit criteria: a crafting table yields a converter → the converter conve
 - **Depends on**: F-65, F-71
 - **Deliverables**: three `ConverterRecipe`s in `datagen/ModRecipeProvider.java` (`minecraft:crimson_fungus` ⇄ `farmstorm:molotov`; `minecraft:sugar_cane` ⇄ `farmstorm:zangief_cane`; `minecraft:golden_apple` ⇄ `farmstorm:wild_apple`), bidirectional, experience cost read from the existing key (default 3), no catalyst; the artifacts `data/farmstorm/recipe/molotov.json`, `zangief_cane.json`, `wild_apple.json`
 - **Acceptance**:
-  1. All three JSONs have `type` `farmstorm:converting`, `bidirectional` `true` and `experience` 3.
-  2. In the converter GUI, golden apple → Wild Apple succeeds once in each direction; `/xp query @s points` drops by 3 both times and `/xp query @s levels` stays unchanged.
+  1. All three JSONs have `type` `farmstorm:converting`; `bidirectional` (default `true`), `experience` (default 3) and the catalyst are **omitted because they equal the defaults** — `ConverterRecipeSerializer` uses `optionalFieldOf`, so the generated files never carry these three keys, exactly like the existing 21 (V-25). Runtime values (`xpCost = 3`, the reverse direction) are taken from measurement; do not change the codec just to get them written out. **The catalyst slot still exists, but the three new recipes do not occupy it** (V-29): with 1 nether star in slot 1, three conversions leave the star untouched; only the **forward** conversion of `awakened_torchflower` / `awakened_pitcher_plant` consumes one (D-12).
+  2. In the converter GUI, golden apple → Wild Apple succeeds once in each direction; `/xp query @s points` drops by 3 both times and `/xp query @s levels` **stays unchanged** (the points are deducted, never the level, D-12 / V-24). Boundary case: when the progress points of the current level run out, exactly 3 points are still deducted and the level drops by one.
   3. The converting recipes (`farmstorm:converting`) under `src/generated/resources/data/farmstorm/recipe/` number **24** in total (21 + 3, `BRIEF §4`).
   4. Not one of the 21 existing converting recipes or the default of the conversion-cost key changed (`git diff` contains added lines only).
 
@@ -313,7 +313,7 @@ Phase exit criteria: a crafting table yields a converter → the converter conve
 - **Depends on**: F-67
 - **Deliverables**: `datagen/ModLootTableProvider.java` (+2 tables: `compressed_hay_block` drops itself, `zangief_cane` follows the deployed-block convention); `datagen/ModBlockTagsProvider.java` (`minecraft:mineable/pickaxe` gains `compressed_hay_block`; `minecraft:needs_diamond_tool` created; `farmstorm:deployed_crops` gains `zangief_cane`)
 - **Acceptance**:
-  1. A diamond pickaxe mines Compressed Hay Block and drops itself; a wooden pickaxe for 30 s drops nothing (`requiresCorrectToolForDrops` + `needs_diamond_tool` acting together).
+  1. A diamond pickaxe mines Compressed Hay Block and drops itself; after 600 ticks with a wooden pickaxe **progress is 0.400, the block is still there and nothing is dropped** (`requiresCorrectToolForDrops` + `needs_diamond_tool` acting together). **The two cases must be worded separately**: "not broken through after 600 ticks" ≠ "broken but no drop" (V-28).
   2. The `values` of `data/minecraft/tags/block/needs_diamond_tool.json` are `["farmstorm:compressed_hay_block"]` (a new file).
   3. The `values` of `data/minecraft/tags/block/mineable/pickaxe.json` gain `farmstorm:compressed_hay_block`, and every existing entry is still there (append, not overwrite).
   4. The `values` of `data/farmstorm/tags/block/deployed_crops.json` contain `farmstorm:zangief_cane`; `data/farmstorm/loot_table/blocks/zangief_cane.json` exists and drops itself (when the player mines it personally).
@@ -387,7 +387,7 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 - **Depends on**: F-78
 - **Deliverables**: the server-side entry of `combat/WildHunterCombat` (on receiving `ServerboundSwingPacket`, resolve the target independently with the same algorithm as the client, settle the damage, and on “damage actually dealt” call the vanilla `LivingEntity#knockback` at default strength)
 - **Acceptance**:
-  1. Attack a pig within 30° once: the drop in `/data get entity <target> Health` equals the post-bonus damage value F3 shows.
+  1. Attack a pig within 30° once: the drop in `/data get entity <target> Health` equals the reading of `/attribute @s minecraft:generic.attack_damage get` (**the F3 panel does not show attribute values**, V-61).
   2. After settlement the target is pushed away: the before/after difference of `/data get entity <target> Pos` is >= 0.2 blocks (D-75 vanilla default strength, no custom number).
   3. Attacking a creature beyond 30°: a normal attack, no snap, and the player's coordinates do not change.
   4. When the target is a same-team player, neither a snap nor any health loss occurs.
@@ -408,7 +408,7 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 - **Depends on**: F-60, F-76
 - **Deliverables**: `client/GrayscalePass.java` (the vanilla `PostChain`: `GameRenderer#loadEffect(Farmstorm.id("shaders/post/grayscale.json"))` / `shutdownEffect()`, switched once per client tick according to whether the effect is present, and it does not steal the vanilla creeper / spider chain); `assets/farmstorm/shaders/post/grayscale.json` (the chain, `targets` must be an array), `shaders/program/grayscale.json` (program declaration), `shaders/core/grayscale.fsh` (the luminance formula); `assets/farmstorm/post_effect/grayscale.json` (RT-10's reserved mount point, no loader today); `shaders/core/grayscale.json` and `grayscale.vsh` are leftovers of the earlier plan, kept but not loaded
 - **Acceptance**:
-  1. With the effect on, the world and the GUI go black and white **at the same time**: in an F3 screenshot the inventory's red hearts, the green experience bar and the chat's coloured text are all grayscale (D-61's “whole screen including the GUI”).
+  1. With the effect on the **world goes black and white while the HUD keeps its original colours**: in an F3 screenshot blocks / entities / particles are grey, while the inventory's red hearts, the green experience bar and the coloured chat text are **unchanged** (D-61 with the scope change of V-56 — `PostChain.process()` runs at `GameRenderer:1027`, before GUI rendering at `:1073`, so including the GUI has no reliable implementation path).
   2. The client log has no `Shader ... could not be loaded` and no `GL_INVALID` line (`12-TECH-0.0.2.md §11 #5`).
   3. The F3 `ms` reading differs by **< 3 ms** between having the effect on and off.
   4. Colour is back within 1 tick of `/effect clear @s farmstorm:wild_hunter`; any approach that fakes grayscale by tinting fog or swapping textures never counts as passing (a prohibited item of `BRIEF §7.1`).
@@ -417,7 +417,7 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-76
-- **Deliverables**: `client/WildHunterOutline.java` (`RenderLivingEvent.Post` → `getModel().renderToBuffer(...)` + `RenderType.entityTranslucentEmissive(whiteTexture)` + `RenderSystem.setShaderColor(1, 0.15, 0.15, 0.45)`; distance reads `wild_hunter.highlightRadius` 64.0; filtered by `player.hasLineOfSight`); `assets/farmstorm/textures/misc/wild_hunter_red.png` (1×1)
+- **Deliverables**: `client/WildHunterOutline.java` (`RenderLivingEvent.Post` redraws through `LivingEntityRenderer#render(...)` with `MultiBufferSource` **filtered by vertex format** — only `DefaultVertexFormat.NEW_ENTITY` becomes `RenderType.entityTranslucentEmissive(SILHOUETTE_TEXTURE)` and everything else passes through (V-58: a leash uses `POSITION_COLOR_LIGHTMAP` and forcing it into an entity buffer crashes the client); the colour is baked into the texture instead of `setShaderColor` (that shader ignores ColorModulator, V-60); `AFTER_ENTITIES` captures the camera and the projection, and `RenderGuiEvent.Pre` redraws after grayscale; distance from `wild_hunter.highlightRadius` 64.0; `player.hasLineOfSight` filter); `assets/farmstorm/textures/misc/wild_hunter_red.png` (1×1 RGBA (255,38,38,115))
 - **Acceptance**:
   1. Looking straight at a pig within 5 blocks: a red outline appears; at 65 blocks: it is not drawn.
   2. A creature behind a wall is not drawn (`hasLineOfSight` is false); self and same-team players are not drawn.
@@ -428,11 +428,11 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-76
-- **Deliverables**: `client/WildHunterLoopSound.java` (`isLooping() = true`, the position updated onto the player every tick, `SoundSource.PLAYERS`, audible range read from `wild_hunter.loopSoundRange` 16.0 with distance attenuation set in `attributes()`)
+- **Deliverables**: `client/WildHunterLoopSound.java` (`isLooping() = true`, `SoundSource.PLAYERS`, audible range read from `wild_hunter.loopSoundRange` 16.0; **position convention per V-53**: your own instance uses `relative = true` with the coordinates **zeroed**, `Attenuation.NONE` and `getVolume()` fixed at 1.0, while everyone else's uses `relative = false` with world coordinates and `Attenuation.LINEAR` so the engine attenuates over 16 blocks — never hand-write the volume every tick, or it stacks with the engine attenuation into double attenuation)
 - **Acceptance**:
-  1. Two-player check: A turns the effect on, and B hears it at 8 blocks but not at 20 blocks (the 16-block attenuation holds).
+  1. Two-player check: A turns the effect on, and B hears it at 8 blocks but not at 20 blocks (the 16-block attenuation holds); **A hears no stutter and no left/right image jumping while strafing left and right** (`relative=true` with zeroed coordinates, V-53).
   2. The vanilla background music is not cut off: `/playsound minecraft:music.game` and the loop sound coexist (the category is `PLAYERS`, not `MUSIC`, D-76).
-  3. It stops within 1 tick of `/effect clear @s farmstorm:wild_hunter`; no loop sound is left behind after the player dies and respawns.
+  3. It stops within 1 tick of `/effect clear @s farmstorm:wild_hunter`; no loop sound is left behind after the player dies and respawns; the volume stays 1.0 (changing `loopSoundRange` only moves the audible distance for others, never your own volume).
   4. The server does not resend the play command every tick: `wild_hunter_loop` appears in `logs/latest.log` no more than 2 times over the whole effect period.
 
 #### F-85 · Phase 13 Exit Regression
@@ -442,8 +442,8 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 - **Deliverables**: a regression record (`logs/latest.log` excerpt + a manual-test table); the fix patch touches whitelisted files only
 - **Acceptance**:
   1. All three of #13 (the outline's three conditions), #14 (the dash goes through the server-side recheck) and #15 (kill extension has no cap) in `12-TECH-0.0.2.md §11` pass.
-  2. The seven abilities run through in one go: attribute bonuses / targeting snap / damage knockback / kill extension / world-only grayscale / red outline / loop sound; after `/effect clear` all of them reset.
-  3. `grep -r "CustomPacketPayload" src/main/java` matches 0 times; `grep -rn "Mixin" src/main/java` matches 0 times (D-40 / D-50).
+  2. The seven abilities run through in one go: attribute bonuses / targeting snap / damage knockback / kill extension / world-only grayscale (HUD in its original colours) / red outline / loop sound; everything resets after `/effect clear`.
+  3. `grep -r "CustomPacketPayload" src/main/java` matches 0 times; for Mixin, check the **actual usage** rather than the literal hits: `@Mixin` annotations 0, `mixins.json` / `mixins.*.json` 0, `org.spongepowered` references 0, no mixin dependency in `build.gradle` (D-40 / D-50). `grep -rn "Mixin"` does match 5 lines, **all of them javadoc comments explaining why Mixin is not used**; both readings go into the regression record, and the explanatory comments are not scrubbed to make the literal count zero (V-47).
 
 Phase subtotal: **10 tasks, 16.0 person-days** (S 2 / M 6 / L 2).
 
@@ -500,10 +500,10 @@ Phase exit criteria: stepping within 1.5 blocks inverts the view at once and loc
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-89
-- **Deliverables**: the phase 2 segment (`setDeltaMovement` every tick = remaining height ÷ remaining ticks; the effect is cleared as soon as landing is detected; the target duration reads `zangief_cane.fallTicks` 40 ticks, ruling A-03); one log line `落地耗时 {N} 刻`
+- **Deliverables**: the phase 2 segment (`setNoGravity(true)` first, then `setDeltaMovement` every tick = remaining height ÷ remaining ticks — without disabling gravity the measured fall is 0.23 blocks per tick too fast and a four-block platform drops from 40 ticks to 23; the effect is cleared as soon as landing is detected and **`noGravity` is restored**; `noGravity` must be restored on **every** exit path: landing / `/kill` / disconnect / `/effect clear` / dimension change, or the player floats forever, V-39; the target duration reads `zangief_cane.fallTicks` 40 ticks, ruling A-03); one log line `落地耗时 {N} 刻`
 - **Acceptance**:
-  1. Test once each on flat ground / a two-block platform / a four-block platform: N in all three `落地耗时 {N} 刻` log lines falls within **40 ± 2** (the watershed of `12-TECH-0.0.2.md §11 #10`).
-  2. After landing, `/data get entity @s active_effects` no longer reads `farmstorm:zangief_piledriver` (the effect was cleared).
+  1. Test once each on flat ground / a two-block platform / a four-block platform: N in all three `落地耗时 {N} 刻` log lines falls within **40 ± 2** (the watershed of `12-TECH-0.0.2.md §11 #10`). **"Platform" means a surface of at least 3×3**: a 1×1 pillar catches the player on the way down (23 ticks measured), which is an edge-case geometry result and is not treated as a defect (V-46).
+  2. After landing, `/data get entity @s active_effects` no longer reads `farmstorm:zangief_piledriver` (the effect was cleared) and the player is subject to gravity again (`noGravity` restored).
   3. After setting `zangief_cane.fallTicks` to `80` and retesting, the landing time at all three heights becomes about 80 (proving it is time servoing, not a fixed speed).
   4. `/kill @s` during phase 2 and respawn: no leftover velocity and no leftover effect.
 
@@ -522,14 +522,14 @@ Phase exit criteria: stepping within 1.5 blocks inverts the view at once and loc
 
 - **Complexity**: L | **Person-days**: 3.0
 - **Depends on**: F-88
-- **Deliverables**: `client/InputLockHandler.java` (five events, each handling one segment: `MovementInputUpdateEvent` zeroes `forwardImpulse` / `leftImpulse` / `jumping` / `shiftKeyDown`; `InputEvent.InteractionKeyMappingTriggered` cancels attack and use; `InputEvent.Key` lets `GLFW_KEY_ESCAPE` through and cancels the rest; `InputEvent.MouseScrollingEvent` cancels; `ScreenEvent.Opening` lets only `PauseScreen` through)
+- **Deliverables**: `client/InputLockHandler.java` (**seven mechanisms**, one segment each, as revised by D-79: `MovementInputUpdateEvent` zeroes `forwardImpulse` / `leftImpulse` / `jumping` / `shiftKeyDown`; `InputEvent.MouseButton.Pre` cancels left/right button presses; `InputEvent.InteractionKeyMappingTriggered` cancels attack and use (including holding the button to keep mining); `InputEvent.Key` drains the `consumeClick()` of hotbar 1–9 / Q / E / F / F5 (that event is not cancellable, so consumption has to be stolen); `InputEvent.MouseScrollingEvent` cancels; `CalculatePlayerTurnEvent` sets `mouseSensitivity` to 0; `ScreenEvent.Opening` allows `PauseScreen` **and `DeathScreen`** and `setNewScreen(null)` otherwise). **Why `DeathScreen` must be allowed**: the F-90 acceptance runs `/kill` during phase 2, and allowing only `PauseScreen` blocks the death screen — the player is stuck with no UI and the old screen does not come back after unlocking (V-30).
 - **Acceptance**:
   1. During phases 0 to 2, pressing W/A/S/D, space or Shift does not move the F3 coordinates (movement and jumping are zeroed).
   2. Left / right click produces no attack and no use (the target block's `/data get block` is unchanged and the target mob loses no health).
   3. 1–9 and the scroll wheel cannot switch the hotbar: the selected-slot number shown in F3 is unchanged.
   4. E does not open the inventory, T and `/` do not open chat (blocked by `ScreenEvent.Opening`).
-  5. **ESC still opens the pause menu** (D-60 keeps ESC alone).
-  6. Every key recovers within 1 tick of the effect ending; hand-test key by key against the 21 items of `12-TECH-0.0.2.md §10 RT-13` and fill in the table.
+  5. **ESC still opens the pause menu** (D-60 keeps ESC alone), and `/kill @s` during phase 2 shows the death screen normally (allowing only `PauseScreen` would freeze the player, V-30).
+  6. Every key recovers within 1 tick of the effect ending; hand-test key by key against the 21 items of `12-TECH-0.0.2.md §10 RT-13` and fill in the table. **Record the look item as "turn speed drops to about 1/15.6", not "the view is locked"**: after `setMouseSensitivity(0)` the `MouseHandler#turnPlayer` factor is still `0 × 0.6 + 0.2 = 0.2`, only about 15.6× slower than the default 0.5, and without Mixin it cannot be zeroed (V-31).
 
 #### F-93 · Phase 14 Exit Regression
 
@@ -539,7 +539,8 @@ Phase exit criteria: stepping within 1.5 blocks inverts the view at once and loc
 - **Acceptance**:
   1. All three of #10 (the three-phase timing and the landing duration), #11 (it takes effect on non-ally players only) and #12 (the input lock leaks nothing but ESC) in `12-TECH-0.0.2.md §11` pass.
   2. All four phase log lines are present: `桑吉尔蔗 相位 0` / `相位 1` / `相位 2` / `结束`, and `落地耗时 {N} 刻` appears once.
-  3. `grep -r "CustomPacketPayload" src/main/java` matches 0 times (phase sync rests entirely on the hidden effect + `ClientboundSetEntityMotionPacket`).
+  3. `grep -r CustomPacketPayload src/main/java` matches 0 times (phase sync rests entirely on the hidden effect + `ClientboundSetEntityMotionPacket`).
+  4. Three wordings for the exit record: the look item reads "turn speed drops to about 1/15.6" rather than "locked" (V-31); all five `noGravity` exit paths were checked one by one (landing / `/kill` / disconnect / `/effect clear` / dimension change, V-39); "platform" is stated as **≥3×3**, with 1×1 pillars treated as an edge case (V-46).
 
 Phase subtotal: **8 tasks, 11.5 person-days** (S 2 / M 5 / L 1).
 
@@ -593,7 +594,7 @@ Phase exit criteria: `src/{main,generated}/resources` holds 302 files in total (
 - **Deliverables**: the 41 `ENTRIES` of `datagen/ModLangProvider.java`; the artifacts `assets/farmstorm/lang/zh_cn.json` and `assets/farmstorm/lang/en_us.json`
 - **Acceptance**:
   1. Each of the two `.json` files has **263** keys (222 + 41), and `set(zh) == set(en)` is `True` (`12-TECH-0.0.2.md §7.4`).
-  2. The composition of the 41 matches category by category: `farmstorm.configuration.*` 22 + `item.*` 5 + `block.*` 2 + `effect.*` 2 + `subtitles.*` 2 + `advancements.*` 6 (`12-TECH-0.0.2.md §7.3`); among them the 6 `advancements.*` entries use short phrases — 火了！/ 手摇重 360 / 狂野猎人 (ruling A-09; the three sentences such as “火了！火了！” are item blurbs, belong to the `item.farmstorm.*.tooltip` namespace and never enter the advancement keys).
+  2. The composition of the 41 entries matches category by category: `farmstorm.configuration.*` 22 + `item.*` 5 + `block.*` 2 + `entity.*` 2 (V-64) + `effect.*` 2 + `subtitles.*` 2 + `advancements.*` 6 (`12-TECH-0.0.2.md §7.3`).
   3. `tooltip.farmstorm.*` is still **16** entries (nothing added by mistake; the “two categories with no additions” of `12-TECH-0.0.2.md §7.3`).
 
 #### F-98 · Three New Advancements
@@ -615,9 +616,9 @@ Phase exit criteria: `src/{main,generated}/resources` holds 302 files in total (
   1. **302** resources (JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1), minus the 11 extensionless `.cache` files (run the checking method of `12-TECH-0.0.2.md §7.4` item by item).
   2. Both language files carry **263** keys with equal key sets; `config/farmstorm-server.toml` has **139** keys; the startup log carries both the `自检 注册对象 77 个` line and the `自检 实体渲染器 11/11 → OK` line.
   3. All 22 self-checks of `12-TECH-0.0.2.md §11` pass, with a reading kept for each.
-  4. `grep -r "CustomPacketPayload" src/main/java` matches 0 times; `grep -rn "Mixin" src/main/java` matches 0 times.
+  4. `grep -r CustomPacketPayload src/main/java` matches 0 times; for Mixin, check the **actual usage** (`@Mixin` annotations, `mixins*.json`, `org.spongepowered`, `build.gradle` dependencies all 0, with the 5 literal hits all being explanatory comments, V-47).
   5. Dedicated server started + client connected: the server log has no `NoClassDefFoundError` and the effect-related features work (`12-TECH-0.0.2.md §11 #22`).
-  6. `jar tf dist/farmstorm-0.0.2+mc1.21.1.jar` shows both `.ogg` files, `sounds.json` and the 4 grayscale-related resource files.
+  6. `jar tf dist/farmstorm-0.0.2+mc1.21.1.jar` shows both `.ogg` files, `sounds.json`, the 6 grayscale-related resource files (`shaders/post/grayscale.json`, `shaders/program/grayscale.json`, `shaders/program/grayscale.fsh`, `shaders/core/grayscale.json` / `.vsh` / `.fsh`) and `post_effect/grayscale.json` (kept, but it has no loader, V-49).
 
 Phase subtotal: **6 tasks, 11.5 person-days** (S 2 / M 1 / L 3).
 
@@ -815,7 +816,7 @@ M7 ~ M11 map one-to-one onto Phase 11 ~ Phase 15. Each milestone gives two workl
 
 ### M9 · Wild Hunter and Two Presentation Layers (Phase 13)
 
-- **Completion criteria**: ① all three of #13 / #14 / #15 in `12-TECH-0.0.2.md §11` pass; ② the whole screen turns grayscale including the GUI (the shader of `§11 #5` reports no error, and the frame-time difference is < 3 ms); ③ the 16-block attenuation of the loop sound holds and the vanilla background music is not cut off; ④ the match counts for `CustomPacketPayload` and `Mixin` are both 0.
+- **Completion criteria**: ① all three of #13 / #14 / #15 in `12-TECH-0.0.2.md §11` pass; ② the world goes grayscale with the HUD in its original colours (the chain of `§11 #5` reports no error and the frame-time difference is < 3 ms, V-56); ③ the 16-block attenuation of the loop sound holds and the vanilla background music is not cut off; ④ the match counts for `CustomPacketPayload` and `Mixin` are both 0.
 - **What is playable at the end of this milestone**: eat one Wild Apple and enter 35 s of Wild Hunter — three attribute bonuses, a snapping dash to the creature nearest the crosshair within 5 blocks, damage and knockback, kill extension with no cap; the whole screen goes black and white (inventory included), visible creatures carry a red outline, and the hunting music follows the player.
 
 ### M10 · Zangief Cane and the Input Lock (Phase 14)

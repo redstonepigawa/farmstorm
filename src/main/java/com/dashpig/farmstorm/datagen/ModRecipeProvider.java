@@ -3,25 +3,36 @@ package com.dashpig.farmstorm.datagen;
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.recipe.ConverterRecipe;
 import com.dashpig.farmstorm.registry.FarmstormItems;
+import com.dashpig.farmstorm.util.FarmstormTags;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 /**
- * 21 条农产品转换配方（TECH §6.7 / D-11 / D-12）。
+ * 21 条农产品转换配方（TECH §6.7 / D-11 / D-12）+ 1 条转换器合成配方（D-52 / F-71）。
  *
- * <p>全部配方共用自定义类型 {@code farmstorm:converting}，字段口径见 {@link ConverterRecipe} 的
+ * <p>转换配方全部共用自定义类型 {@code farmstorm:converting}，字段口径见 {@link ConverterRecipe} 的
  * 7 个分量。一条双向配方同时覆盖「原版 → 改良」与「改良 → 原版」（D-11）；
  * 火把花 / 瓶子草两条单向，且正向额外收 1 个下界之星（D-12）。
  *
- * <p>JSON 由 {@link ConverterRecipe} 实例经 serializer codec 落盘（R-03：不手写数据包 JSON）。
+ * <p>合成配方（F-71）属于 {@code minecraft:crafting_shaped}，与上面 21 条互不相干：
+ * 合成不扣经验、不收下界之星，只是给转换器一条获得途径（DESIGN §2.6 #4/#5）。
+ *
+ * <p>JSON 由 serializer codec 落盘（R-03：不手写数据包 JSON）。
  * codec 对「等于默认值」的可选字段会省略（R-23 同类现象）：{@code xp_cost} 的默认值就是 3、
  * {@code catalyst_count} 默认 1、非单向配方的 {@code bidirectional} 默认 true，故这三处不会出现在
  * JSON 里，语义与显式书写完全等价。
@@ -42,6 +53,8 @@ public final class ModRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildRecipes(RecipeOutput recipeOutput) {
+        // 转换器没有配方就拿不到，21 条转换配方也无从用起（D-52：本条是首条合成配方）
+        converter(recipeOutput);
         // 1-8：作物本体双向
         twoWay(recipeOutput, "puffed_wheat", Items.WHEAT, FarmstormItems.PUFFED_WHEAT);
         twoWay(recipeOutput, "blast_carrot", Items.CARROT, FarmstormItems.BLAST_CARROT);
@@ -69,6 +82,52 @@ public final class ModRecipeProvider extends RecipeProvider {
         twoWay(recipeOutput, "awakened_torchflower_seeds", Items.TORCHFLOWER_SEEDS,
                 FarmstormItems.AWAKENED_TORCHFLOWER_SEEDS);
         twoWay(recipeOutput, "awakened_pitcher_plant_pod", Items.PITCHER_POD, FarmstormItems.AWAKENED_PITCHER_PLANT_POD);
+    }
+
+    /**
+     * D-52 / DESIGN §2.4：有序 3×3，中心 {@code minecraft:crafting_table}，外围八格各 1 个
+     * {@code #farmstorm:converter_fuel}，产出 1 个转换器。
+     *
+     * <p>八格写同一个 tag key（{@link FarmstormTags#CONVERTER_FUEL}）而不是八条物品清单：
+     * 「什么算农作物」只维护在标签里（D-52 设计意图）。逐格独立判定、可混搭（DESIGN §2.6 #2）。
+     *
+     * <p>分类取 {@code DECORATIONS}：原版的工作站方块（工作台 / 熔炉 / 锻造台）都在这一类。
+     */
+    private static void converter(RecipeOutput recipeOutput) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, FarmstormItems.CONVERTER.get())
+                .define('T', Items.CRAFTING_TABLE)
+                .define('F', FarmstormTags.CONVERTER_FUEL)
+                .pattern("FFF")
+                .pattern("FTF")
+                .pattern("FFF")
+                .unlockedBy("has_converter_fuel", has(FarmstormTags.CONVERTER_FUEL))
+                .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("converter"));
+    }
+
+    /**
+     * 只放配方、丢掉配方解锁进度。
+     *
+     * <p>{@code ShapedRecipeBuilder#save} 会顺带写一份 {@code advancement/recipes/<分类>/<id>.json}；
+     * 而 F-71 的产物清单只要两个文件（BRIEF §7.2 #25 / #35），既有 21 条转换配方也都传 {@code null}
+     * 进度，故这里统一剥掉，保持「本 Provider 只产配方 JSON」这一口径。
+     */
+    private static RecipeOutput recipeWithoutAdvancement(RecipeOutput recipeOutput) {
+        return new RecipeOutput() {
+            @Override
+            public void accept(ResourceLocation id, Recipe<?> recipe, AdvancementHolder advancement) {
+                recipeOutput.accept(id, recipe, null);
+            }
+
+            @Override
+            public void accept(ResourceLocation id, Recipe<?> recipe, AdvancementHolder advancement, ICondition... conditions) {
+                recipeOutput.accept(id, recipe, null, conditions);
+            }
+
+            @Override
+            public Advancement.Builder advancement() {
+                return recipeOutput.advancement();
+            }
+        };
     }
 
     /** 双向 1:1 配方：一条 JSON 覆盖两个方向，无催化剂（D-11）。 */

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "F": {
+      "tag": "farmstorm:converter_fuel"
+    },
+    "T": {
+      "item": "minecraft:crafting_table"
+    }
+  },
+  "pattern": [
+    "FFF",
+    "FTF",
+    "FFF"
+  ],
+  "result": {
+    "count": 1,
+    "id": "farmstorm:converter"
+  }
+}

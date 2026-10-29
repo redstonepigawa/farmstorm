@@ -67,7 +67,15 @@
 Phase 13 / 14 的任务都是代码改动，不需要新生成物。
 **真需要生成物时停下来问调度者**，由调度者串行跑。
 
-### 3.2 运行目录与端口固定分配
+### 3.2 并行期间**禁止 `clean`**（V-41）
+
+`:clean` 会先删 `build/`。如果另一条 lane 的 java 正占用 `build/moddev/artifacts/*.jar`，删除会**失败并把 `build/` 删掉一半**，后续构建状态不可信。
+
+- 并行期间只用**增量** `gw.cmd build`；
+- 确需 `clean build` 时，先 `Get-Process java` 看清归属，确认没有别的 lane 在跑；
+- clean 之后必须重新完整 build 一次再采信任何产物读数。
+
+### 3.3 运行目录与端口固定分配
 
 | Lane | 运行目录 | server-port | rcon.port |
 |---|---|---|---|

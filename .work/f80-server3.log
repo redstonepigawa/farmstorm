@@ -1,0 +1,131 @@
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+Starting a Gradle Daemon, 42 busy and 58 stopped Daemons could not be reused, use --status for details
+
+> Configure project :
+[farmstorm-init] repo mirror: https://maven.neoforged.net/mojang-meta/ -> http://127.0.0.1:8899/mojang-meta/
+[farmstorm-init] repo mirror: https://maven.neoforged.net/releases/ -> http://127.0.0.1:8899/releases/
+
+> Task :createMinecraftArtifacts UP-TO-DATE
+> Task :compileJava UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :downloadAssets UP-TO-DATE
+> Task :writeServerLegacyClasspath UP-TO-DATE
+> Task :prepareServerRun UP-TO-DATE
+
+> Task :runServer
+NOTE: Picked up JDK_JAVA_OPTIONS: --patch-module java.base=D:\project_farm\.tools\jdk-patch\classes
+Picked up JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2
+WARN StatusConsoleListener Advanced terminal features are not available in this environment
+[18:27:34] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[18:27:34] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[18:27:34] [main/INFO] [cp.mo.mo.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[18:27:34] [main/INFO] [ne.ne.fm.lo.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[18:27:34] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[18:27:35] [main/INFO] [ne.ne.fm.lo.mo.lo.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[18:27:35] [main/INFO] [ne.ne.fm.lo.mo.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.0.2 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[18:27:35] [main/INFO] [cp.mo.mo.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[18:27:36] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[18:27:36] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[18:27:36] [main/WARN] [os.ut.pl.wi.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[18:27:36] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[18:27:42] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[18:27:42] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[18:27:42] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[18:27:42] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[18:27:42] [main/WARN] [minecraft/Commands]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[18:27:42] [modloading-worker-0/INFO] [ne.ne.ne.co.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[18:27:42] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[18:27:42] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[18:27:42] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[18:27:42] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 19 种：投掷型 10 / 部署型 6 / 食用型 3；破障类 4 → OK
+[18:27:42] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 16 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[18:27:42] [modloading-worker-0/INFO] [farmstorm/]: 自检 注册对象 77 个：items 27 / blocks 22 / block_entities 6 / entity_types 11 / mob_effects 2 / sound_events 2 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 2 / data_components 1 / menu_types 1 → OK
+[18:27:42] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[18:27:43] [main/INFO] [mojang/YggdrasilAuthenticationService]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[18:27:43] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[18:27:43] [main/WARN] [minecraft/VanillaPackResourcesBuilder]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[18:27:44] [main/INFO] [minecraft/RecipeManager]: Loaded 1316 recipes
+[18:27:44] [main/INFO] [minecraft/AdvancementTree]: Loaded 1411 advancements
+[18:27:44] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[18:27:45] [Server thread/INFO] [minecraft/DedicatedServer]: Starting minecraft server version 1.21.1
+[18:27:45] [Server thread/INFO] [minecraft/DedicatedServer]: Loading properties
+[18:27:45] [Server thread/INFO] [minecraft/DedicatedServer]: Default game type: SURVIVAL
+[18:27:45] [Server thread/INFO] [minecraft/MinecraftServer]: Generating keypair
+[18:27:45] [Server thread/INFO] [minecraft/DedicatedServer]: Starting Minecraft server on *:25631
+[18:27:45] [Server thread/INFO] [minecraft/ServerConnectionListener]: Using default channel type
+[18:27:45] [Server thread/WARN] [minecraft/DedicatedServer]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[18:27:45] [Server thread/WARN] [minecraft/DedicatedServer]: The server will make no attempt to authenticate usernames. Beware.
+[18:27:45] [Server thread/WARN] [minecraft/DedicatedServer]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[18:27:45] [Server thread/WARN] [minecraft/DedicatedServer]: To change this, set "online-mode" to "true" in the server.properties file.
+[18:27:45] [Server thread/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[18:27:45] [Server thread/INFO] [minecraft/DedicatedServer]: Preparing level "world"
+[18:27:45] [Server thread/INFO] [minecraft/MinecraftServer]: Preparing start region for dimension minecraft:overworld
+[18:27:46] [worldgen/INFO] [minecraft/LoggerChunkProgressListener]: Preparing spawn area: 0%
+[18:27:46] [Server thread/INFO] [minecraft/LoggerChunkProgressListener]: Time elapsed: 226 ms
+[18:27:46] [Server thread/INFO] [minecraft/DedicatedServer]: Done (0.458s)! For help, type "help"
+[18:27:46] [Server thread/INFO] [minecraft/DedicatedServer]: Starting remote control listener
+[18:27:46] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Listener started
+[18:27:46] [Server thread/INFO] [minecraft/RconThread]: RCON running on 0.0.0.0:25641
+[18:27:46] [Server thread/INFO] [ne.ne.ne.ga.GameTestHooks/]: Enabled Gametest Namespaces: []
+[18:27:46] [Server thread/INFO] [ne.ne.ne.se.pe.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[18:27:46] [Server thread/INFO] [farmstorm/]: 自检 部署行为 BLAST_CARROT → BlastCarrotTrap
+[18:27:46] [Server thread/INFO] [farmstorm/]: 自检 部署行为 FANG_TRAP_CACTUS → FangTrapCactusTrap
+[18:27:46] [Server thread/INFO] [farmstorm/]: 自检 部署行为 PUMPKIN_TURRET → PumpkinTurret
+[18:27:46] [Server thread/INFO] [farmstorm/]: 自检 部署行为 AWAKENED_TORCHFLOWER → TorchflowerAura
+[18:27:46] [Server thread/INFO] [farmstorm/]: 自检 部署行为 AWAKENED_PITCHER_PLANT → PitcherPlantAura
+[18:27:46] [Server thread/INFO] [farmstorm/]: 自检 部署行为 ZANGIEF_CANE → ZangiefCaneTrap
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] charged via LivingEntity.attackStrengthTicker
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] setup attackDamageAttr=1.400 pigHealth=10.000
+[18:27:46] [Server thread/INFO] [farmstorm/]: 狂野猎人 目标 minecraft:pig 夹角 0.0 度 距离 4.65
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] C1_attackDamage pigHealth=8.600 dealt=1.400 attr=1.400 scale=0.130 pigDelta=0.000,0.400
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] C2_noai_pig afterOneTick pos=0.500,5.000 moved=0.000 delta=0.000,0.392
+[18:27:46] [Server thread/INFO] [farmstorm/]: 狂野猎人 目标 minecraft:pig 夹角 0.0 度 距离 4.65
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] C2_ai_pig rightAfterAttack health=9.701 delta=0.000,0.400
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] C2_ai_pig afterOneTick pos=0.500,5.400 moved=0.400
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] C3_outsideCone behindHealth 10.000->9.701 playerMoved=0.000
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] C4_sameTeam allied=true allyHealth 20.000->20.000
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] killChain start health=5.00 duration=700
+[18:27:46] [Server thread/INFO] [farmstorm/]: 狂野猎人 续时 860
+[18:27:46] [Server thread/INFO] [minecraft/LivingEntity]: Named entity Pig['K1'/29, l='ServerLevel[world]', x=0.50, y=-57.83, z=4.00] died: K1 was slain by [Minecraft]
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] kill 1 dead=true duration=860 health=15.00
+[18:27:46] [Server thread/INFO] [farmstorm/]: 狂野猎人 续时 1020
+[18:27:46] [Server thread/INFO] [minecraft/LivingEntity]: Named entity Pig['K2'/32, l='ServerLevel[world]', x=0.50, y=-57.83, z=4.00] died: K2 was slain by [Minecraft]
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] kill 2 dead=true duration=1020 health=20.00
+[18:27:46] [Server thread/INFO] [farmstorm/]: 狂野猎人 续时 1180
+[18:27:46] [Server thread/INFO] [minecraft/LivingEntity]: Named entity Pig['K3'/35, l='ServerLevel[world]', x=0.50, y=-57.83, z=4.00] died: K3 was slain by [Minecraft]
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] kill 3 dead=true duration=1180 health=20.00
+[18:27:46] [Server thread/INFO] [farmstorm/]: 狂野猎人 续时 1340
+[18:27:46] [Server thread/INFO] [minecraft/LivingEntity]: Named entity Pig['K4'/39, l='ServerLevel[world]', x=0.50, y=-57.83, z=4.00] died: K4 was slain by [Minecraft]
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] kill 4 dead=true duration=1340 health=20.00
+[18:27:46] [Server thread/INFO] [farmstorm/]: 狂野猎人 续时 1500
+[18:27:46] [Server thread/INFO] [minecraft/LivingEntity]: Named entity Pig['K5'/42, l='ServerLevel[world]', x=0.50, y=-57.83, z=4.00] died: K5 was slain by [Minecraft]
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] kill 5 dead=true duration=1500 health=20.00
+[18:27:46] [Server thread/INFO] [farmstorm/]: 狂野猎人 续时 1660
+[18:27:46] [Server thread/INFO] [minecraft/LivingEntity]: Named entity Pig['K6'/45, l='ServerLevel[world]', x=0.50, y=-57.83, z=4.00] died: K6 was slain by [Minecraft]
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] kill 6 dead=true duration=1660 health=20.00
+[18:27:46] [Server thread/INFO] [farmstorm/]: [F80PROBE] done duration=1660 health=20.00 effectPresent=true
+[18:28:33] [RCON Listener #1/INFO] [minecraft/GenericThread]: Thread RCON Client /127.0.0.1 started
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: [Rcon: Stopping the server]
+[18:28:33] [RCON Client /127.0.0.1 #2/INFO] [minecraft/RconClient]: Thread RCON Client /127.0.0.1 shutting down
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: Stopping server
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: Saving players
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: Saving worlds
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[18:28:33] [Server thread/INFO] [minecraft/MinecraftServer]: ThreadedAnvilChunkStorage: All dimensions are saved
+[18:28:33] [Server thread/INFO] [minecraft/GenericThread]: Thread RCON Listener stopped
+
+BUILD SUCCESSFUL in 1m 11s
+7 actionable tasks: 1 executed, 6 up-to-date

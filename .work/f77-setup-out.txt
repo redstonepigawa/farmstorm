@@ -1,0 +1,9 @@
+=== f76 rcon session  port=25641  2026-10-29T09:58:23.951Z ===
+> /gamemode survival Dev
+    "Set Dev's game mode to Survival Mode"
+> /clear Dev
+    "Removed 1 item(s) from player Dev"
+> /effect give Dev minecraft:hunger 25 4
+    "Applied effect Hunger to Dev"
+> /effect give Dev minecraft:saturation 1 0
+    "Applied effect Saturation to Dev"

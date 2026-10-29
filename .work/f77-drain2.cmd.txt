@@ -1,0 +1,1 @@
+effect give Dev minecraft:hunger 60 9

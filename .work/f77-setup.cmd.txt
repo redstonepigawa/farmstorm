@@ -1,0 +1,4 @@
+gamemode survival Dev
+clear Dev
+effect give Dev minecraft:hunger 25 4
+effect give Dev minecraft:saturation 1 0

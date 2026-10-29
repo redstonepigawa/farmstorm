@@ -1,0 +1,7 @@
+=== f76 rcon session  port=25641  2026-10-29T10:03:15.691Z ===
+> /data merge entity Dev {foodLevel:6, foodSaturationLevel:0.0f}
+    "Unable to modify player data"
+> /data get entity Dev foodLevel
+    "Dev has the following entity data: 19"
+> /data get entity Dev foodSaturationLevel
+    "Dev has the following entity data: 0.0f"

@@ -1,0 +1,3 @@
+data merge entity Dev {foodLevel:6, foodSaturationLevel:0.0f}
+data get entity Dev foodLevel
+data get entity Dev foodSaturationLevel

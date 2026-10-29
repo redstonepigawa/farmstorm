@@ -1,0 +1,9 @@
+=== f76 rcon session  port=25641  2026-10-29T10:02:10.132Z ===
+> /effect clear Dev
+    "Target has no effects to remove"
+> /data get entity Dev foodLevel
+    "Dev has the following entity data: 19"
+> /data get entity Dev foodSaturationLevel
+    "Dev has the following entity data: 0.0f"
+> /data get entity Dev ActiveEffects
+    "Found no elements matching ActiveEffects"

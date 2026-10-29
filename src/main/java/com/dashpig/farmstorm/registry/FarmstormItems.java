@@ -71,9 +71,11 @@ public final class FarmstormItems {
             properties -> new ThrowableCropItem(CropProfile.MOLOTOV, FarmstormEntityTypes.MOLOTOV::get, properties));
     public static final DeferredItem<DeployableCropItem> ZANGIEF_CANE = cropItem(CropProfile.ZANGIEF_CANE,
             properties -> new DeployableCropItem(CropProfile.ZANGIEF_CANE, FarmstormBlocks.ZANGIEF_CANE.get(), properties));
-    /** 营养值与饱和度属 F-77（读 wild_apple.nutrition / wild_apple.saturationModifier），本任务只注册物品本体。 */
+    /** D-54 / F-77：营养与饱和度取 {@code wild_apple.nutrition} 4 / {@code wild_apple.saturationModifier} 1.2（金苹果同值）。 */
     public static final DeferredItem<FoodCropItem> WILD_APPLE = cropItem(CropProfile.WILD_APPLE,
-            properties -> new FoodCropItem(CropProfile.WILD_APPLE, properties));
+            properties -> new FoodCropItem(CropProfile.WILD_APPLE, properties),
+            foodProperties(CropProfile.WILD_APPLE,
+                    FarmstormConfig.wildAppleNutrition, FarmstormConfig.wildAppleSaturationModifier));
     public static final DeferredItem<ThrowableCropItem> COMPRESSED_PUFFED_WHEAT = cropItem(CropProfile.COMPRESSED_PUFFED_WHEAT,
             properties -> new ThrowableCropItem(CropProfile.COMPRESSED_PUFFED_WHEAT,
                     FarmstormEntityTypes.COMPRESSED_PUFFED_WHEAT::get, properties));

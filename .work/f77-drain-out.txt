@@ -1,0 +1,5 @@
+=== f76 rcon session  port=25641  2026-10-29T10:00:55.425Z ===
+> /effect give Dev minecraft:hunger 20 9
+    "Applied effect Hunger to Dev"
+> /effect give Dev minecraft:poison 1 0
+    "Applied effect Poison to Dev"

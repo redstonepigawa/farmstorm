@@ -1,0 +1,5 @@
+effect clear Dev
+data get entity Dev foodLevel
+data get entity Dev foodSaturationLevel
+data get entity Dev Health
+data get entity Dev SelectedItem

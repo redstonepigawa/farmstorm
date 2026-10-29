@@ -1,0 +1,2 @@
+effect give Dev minecraft:hunger 20 9
+effect give Dev minecraft:poison 1 0

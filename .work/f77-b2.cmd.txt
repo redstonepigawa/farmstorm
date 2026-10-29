@@ -1,0 +1,4 @@
+effect clear Dev
+data get entity Dev foodLevel
+data get entity Dev foodSaturationLevel
+data get entity Dev ActiveEffects

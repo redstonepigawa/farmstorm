@@ -1,0 +1,17 @@
+=== f76 rcon session  port=25641  2026-10-29T09:59:36.788Z ===
+> /data get entity Dev foodLevel
+    "Dev has the following entity data: 20"
+> /data get entity Dev foodSaturationLevel
+    "Dev has the following entity data: 4.0f"
+> /data get entity Dev ActiveEffects
+    "Found no elements matching ActiveEffects"
+> /clear Dev
+    "No items were found on player Dev"
+> /give Dev farmstorm:wild_apple 1
+    "Gave 1 [item.farmstorm.wild_apple] to Dev"
+> /data get entity Dev SelectedItem
+    "Dev has the following entity data: {count: 1, id: "farmstorm:wild_apple"}"
+> /data get entity Dev foodLevel
+    "Dev has the following entity data: 20"
+> /data get entity Dev foodSaturationLevel
+    "Dev has the following entity data: 4.0f"

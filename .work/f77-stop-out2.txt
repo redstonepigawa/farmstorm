@@ -1,0 +1,3 @@
+=== f76 rcon session  port=25641  2026-10-29T10:10:16.263Z ===
+> /stop
+    "Stopping the server"

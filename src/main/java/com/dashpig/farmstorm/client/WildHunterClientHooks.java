@@ -15,5 +15,6 @@ public final class WildHunterClientHooks {
         WildHunterDashClient.onClientTick();
         WildHunterLoopSound.onClientTick();
         GrayscalePass.tick();
+        GammaBoost.tick();
     }
 }

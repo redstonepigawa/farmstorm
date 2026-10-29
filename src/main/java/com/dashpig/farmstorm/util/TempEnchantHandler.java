@@ -37,6 +37,10 @@ public final class TempEnchantHandler {
             return;
         }
         long now = player.level().getGameTime();
+        // 关键：先把这条物品上**已过期但还没被 20 刻扫描器清掉**的记录还原掉，
+        // 否则下面的 previous 会读到「临时等级」（例如 1），新记录的 previous 也随之变成 1，
+        // 到期时还原成 1 → 附魔永久留下（作者报的「火焰附加不消失」）。
+        revokeExpired(stack, now);
         long expireAt = now + durationTicks;
         List<TempEnchantRecord> records = read(stack);
         for (int index = 0; index < records.size(); index++) {

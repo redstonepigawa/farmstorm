@@ -344,7 +344,7 @@ public enum DeployedKind {
 | `behavior/DeployedBehaviors.java` | `of(DeployedKind)` 的 `switch` 表达式 | `case ZANGIEF_CANE -> ZANGIEF_CANE_TRAP;` + 一个静态单例字段 | **不在**（见 §3.14 的矛盾登记） |
 | `registry/FarmstormBlockEntities.java` | `deployedOf(DeployedKind)` 的 `switch` 表达式 | `case ZANGIEF_CANE -> FANG_TRAP_CACTUS.get();` | **不在**（同上） |
 
-**读哪些 config 键**：不直接读；行为对象 `ZangiefCaneTrap` 读 `zangief_cane.triggerRadius`。
+**读哪些 config 键**：不直接读；行为对象 `ZangiefCaneTrap` 读 `zangief_cane.triggerRadius`（1.5 格）。
 **写哪些注册对象**：无。
 
 ### 3.3 `FarmstormMobEffects`（新建 `DeferredRegister`）
@@ -448,7 +448,7 @@ public void removeAttributeModifiers(AttributeMap attributes, int amplifier) { �
 | 分类 | `MobEffectCategory.HARMFUL` | 被打桩机是负面体验 |
 | 颜色 | `0x000000`（隐藏效果，颜色不会被看到） | — |
 | 可见性 | `visible = false`、`showIcon = false`（施加时传） | BRIEF §3.2「隐藏，纯同步通道」 |
-| amplifier 语义 | `0`=已倒转等待漂浮 / `1`=漂浮中 / `2`=下坠自转 | BRIEF §7.5 |
+| amplifier 语义 | `0`=已倒转等待抬升 / `1`=伺服上抬中 / `2`=自由下坠 + 自转 | BRIEF §7.5 + 作者实机口径 |
 | 时长语义 | 当前相位的剩余刻数（每次切换重设） | §5.2 |
 
 **关键方法**：
@@ -601,21 +601,23 @@ public final class ZangiefCaneTrap implements TrapBehavior {
 |---|---|---|
 | `scanInterval()` | 沿用 `TrapBehavior` 的默认 10 刻 | `DeployedKind.ZANGIEF_CANE(10)` |
 | `findTrigger(be)` | 遍历 `level.players()`；跳过 `isSpectator()` / `isCreative()` / `be.isAlly(player)`；判据是 **球形欧氏距离** `pos.distSqr(player.position()) <= r*r`，`r = zangief_cane.triggerRadius`（1.5 格） | D-71（只对非己方玩家、创造与旁观豁免）、D-73（球形，不是切比雪夫） |
-| `trigger(be, target)` | ① 给 trigger 施加 `zangief_piledriver` amplifier 0；② `level.playSound(null, pos, FarmstormSounds.ZANGIEF_PILEDRIVER.get(), SoundSource.PLAYERS, 1.0F, 1.0F)`；③ 记录 `(playerId → 触发 tick)`；④ `be.consume()`（静默移除 + 破坏粒子） | D-72（静默消失、无掉落）、D-66（播放触发音） |
+| `trigger(be, target)` | ① 给 trigger 施加 `zangief_piledriver` amplifier 0；② `level.playSound(null, player, FarmstormSounds.ZANGIEF_PILEDRIVER.get(), SoundSource.PLAYERS, 1.0F, 1.0F)`（**以被触发的玩家为声源**，不是方块位置）；③ 记录 `(playerId → 触发 tick)`；④ `be.consume()`（静默移除 + 破坏粒子） | D-72（静默消失、无掉落）、D-66（播放触发音） |
 
 **为什么距离判定用 `player.position()` 而不是 `player.blockPosition()`**：`BLAST_CARROT` 用 `blockPosition()` 是因为它是**切比雪夫**判定（格与格之间比整数）；`FANG_TRAP_CACTUS` 用欧氏距离，但比对的是方块的`Vec3`中心与实体的精确位置（源码 `FangTrapCactusTrap`）。桑吉尔蔗跟后者同族：`pos.getCenter().distanceTo(player.position()) <= 1.5`。**本文补充**：1.5 格是「从方块中心算起」而不是「从方块边界算起」，这样玩家站在陷阱正上方贴着站也算命中（中心距 0.5 左右），而站在相邻方块中心（距 1.0 或 1.41）也算——这正是 1.5 这个数想要的效果。
 
 **触发后陷阱立刻消失顺序**：先施加效果与音效，再 `consume()`。`consume()` 内部是 `level.removeBlock(pos, false)` + `levelEvent(PARTICLES_DESTROY_BLOCK)`，方块一没了 `DeployedCropBlockEntity` 也随即被移除；反过来做的话 `be.getBlockPos()` 与 `be.getLevel()` 会先失效（v0.0.1 的 `BlastCarrotTrap` 注释里有同类教训：必须先摘方块再引爆，否则采样射线被自己挡住）。
 
-**读哪些 config 键**：`zangief_cane.triggerRadius`（1.5 格，0.0–8.0）、`zangief_cane.stageDelayTicks`（14 刻，0–200）、`zangief_cane.levitationLevel`（7 级，1–255）、`zangief_cane.levitationDurationTicks`（20 刻，0–72000）、`zangief_cane.fallTicks`（40 刻 = 2 秒，1–200）、`zangief_cane.spinDegreesPerTick`（72.0 度/刻，0.0–360.0）。
+**读哪些 config 键**：`zangief_cane.triggerRadius`（1.5 格，0.0–8.0）、`zangief_cane.stageDelayTicks`（14 刻，0–200）、`zangief_cane.riseHeightBlocks`（16 格，1–64）、`zangief_cane.riseTicks`（15 刻，1–200）、`zangief_cane.spinDelayTicks`（4 刻，0–40）、`zangief_cane.triggerRadius`（1.5 格 = 2 秒，1–200）、`zangief_cane.spinDegreesPerTick`（72.0 度/刻，0.0–360.0）。
 **写哪些注册对象**：无（行为对象是静态单例，不注册）。
 
 ### 3.11 `ZangiefPiledriverController`（服务端三相位状态机）
 
-**职责**：触发之后的一切**时序**都归它：14 刻后给漂浮、漂浮结束后给向下速度、落地或超时后摘效果。它挂在 `PlayerTickEvent.Post` 上，只在服务端跑。
+**职责**：触发之后的一切**时序**都归它：14 刻后开始**伺服上抬**、抬升结束后进入相位 2（还重力 + 清残余速度、之后**完全不写速度**、只做落地检测）、落地或超时后摘效果。它挂在 `PlayerTickEvent.Post` 上，只在服务端跑。
 
 ```java
 public final class ZangiefPiledriverController {
+    /** 相位 1 的上抬速度上限（格/刻）。试过 1.5 与 3.0：前者会把 riseTicks 夹死，后者 16/5=3.2 仍被夹。不进 config（HC-13 同类）。 */
+    public static final double MAX_RISE_SPEED = 4.0;
     /** 安全阀：相位 2 最长持续刻数，防止玩家卡在半空时效果永不结束。不进 config（HC-13 同类）。 */
     public static final int MAX_FALL_TICKS = 100;
     /** 只存内存：UUID → 相位状态。服务器重启即清空，不写存档（D-18 的先例）。 */
@@ -628,10 +630,10 @@ public final class ZangiefPiledriverController {
 
 | 相位 | amplifier | 进入时刻 | 持续 | 服务端动作 | 客户端读到的语义 |
 |---|---|---|---|---|---|
-| 0 已倒转、等待漂浮 | 0 | `trigger` 当刻（t=0） | `stageDelayTicks` = 14 刻 | 施加效果（`visible=false, showIcon=false`），播触发音 | 灰度关 / 倒转开 / 输入锁开 / 自转关 |
-| 1 漂浮中 | 1 | t = 14 | `levitationDurationTicks` = 20 刻 | 硬切换效果；同时 `addEffect(LEVITATION, 20, 6)`（amplifier 6 = VII 级） | 灰度关 / 倒转开 / 输入锁开 / 自转关 |
-| 2 下坠自转 | 2 | t = 34 | 到落地为止，目标 `zangief_cane.fallTicks` = 40 刻，安全上限 `MAX_FALL_TICKS` = 100 刻 | 硬切换效果；此后**每刻伺服**向下速度 = 剩余高度 ÷ 剩余刻数（§5.2） | 灰度关 / 倒转开 / 输入锁开 / 自转开 |
-| （结束） | — | 落地或超时 | — | `removeEffect` + 从 `ACTIVE` 移除 | 全部复位 |
+| 0 已倒转、等待抬升 | 0 | `trigger` 当刻（t=0） | `stageDelayTicks` = 14 刻 | 施加效果（`visible=false, showIcon=false`），以被触发玩家为声源播触发音 | 倒转开 / 输入锁开 / 自转关 |
+| 1 伺服上抬 | 1 | t = 14 | `riseTicks` = 15 刻 | 硬切换效果；关重力后**每刻伺服向上速度** = 剩余抬升高度 ÷ 剩余刻数，总抬升 `riseHeightBlocks` 格（默认 ≈1.07 格/刻），速度上限 `MAX_RISE_SPEED = 4.0` | 倒转开 / 输入锁开 / 自转关（抬升期间不转） |
+| 2 自由下坠 + 自转 | 2 | t = 29 | 到落地为止（实测 22 刻），安全上限 `MAX_FALL_TICKS` = 100 刻 | 硬切换效果；**还重力 + 清残余速度，此后完全不写速度**，只做落地检测 | 倒转开（`inverted()` 进入相位 2 起恒真）/ 输入锁开 / 自转自 `fallingTicks > spinDelayTicks`（默认 4）起转到结束 |
+| （结束） | — | 落地或超时 | — | `removeEffect` + 从 `ACTIVE` 移除，并确保重力已恢复 | 全部复位 |
 
 **「硬切换」的定义**（不能省）：相位推进时先 `player.removeEffect(FarmstormMobEffects.ZANGIEF_PILEDRIVER)`，下一行再 `addEffect(new MobEffectInstance(…, amplifier = 新相位, …))`。原因是原版 `MobEffectInstance#update` 有自己的合并规则（比较 amplifier 与 duration），直接叠加一个「同 id、不同 amplifier」的实例并不保证一定替换。
 **待验证（挂 RT-15）**：1.21.1 的 `MobEffectInstance#update` 具体比较顺序；本设计**不依赖**它的行为，用「先移除再加」绕开。风险是硬切换会多一个 `ClientboundRemoveMobEffectPacket` + 一个 `ClientboundUpdateMobEffectPacket`，客户端有 1 tick 的「效果不在」窗口——§5.6 的客户端自检必须在「效果不在」时不立刻复位，而要等 2 tick。
@@ -646,28 +648,36 @@ public final class ZangiefPiledriverController {
 | `finish(ServerPlayer)` | `removeEffect` + 移除记录 | 幂等 |
 | `isActive(UUID)` | 给 `WildHunterCombat` 之类判断用（相位期间禁止冲刺吸附） | 只读 |
 
-**读哪些 config 键**：`zangief_cane.stageDelayTicks`、`zangief_cane.levitationLevel`、`zangief_cane.levitationDurationTicks`、`zangief_cane.fallTicks`。
+**读哪些 config 键**：`zangief_cane.stageDelayTicks`（14，0–200）、`zangief_cane.riseHeightBlocks`（16，1–64）、`zangief_cane.riseTicks`（15，1–200）、`zangief_cane.spinDelayTicks`（4，0–40）、`zangief_cane.spinDegreesPerTick`（72.0，**服务端只用于读值；自转在客户端累加**）。
 **写哪些注册对象**：无。
 
-**落地时长怎么保证在 1.7–2 秒**（`plan0.0.2.txt` 第 29 行原文「确保其可以在 1.7-2 秒内落地」）：**不用定速，用逐刻伺服**（裁决 A-03）。相位 2 的每一刻先量出玩家脚下的剩余高度 `h` 与剩余刻数 `n = fallTicks - 已过刻数`，再把向下速度设成 `h / n`：
+**抬升怎么抬**（作者实机口径，替换原「漂浮 VII + 定速」方案）：相位 1 关重力后**每刻伺服向上速度** = 剩余抬升高度 ÷ 剩余刻数，总抬升 = `zangief_cane.riseHeightBlocks`、总刻数 = `zangief_cane.riseTicks`（默认 16 格 / 15 刻 ≈ 1.07 格/刻）：
 
 ```java
-double h = player.getY() - groundYBelow(player);          // 剩余下落高度（格）
-int n = Math.max(1, fallTicks - elapsedInPhase2);         // 剩余刻数
-player.setDeltaMovement(0.0, -Math.min(h / n, MAX_SERVO_SPEED), 0.0);
+double remaining = riseHeightBlocks - lifted;             // 还剩多少格
+int n = Math.max(1, riseTicks - elapsedInPhase1);         // 还剩多少刻
+player.setDeltaMovement(0.0, Math.min(remaining / n, MAX_RISE_SPEED), 0.0);
 ```
 
-为什么定速不行：plan 的约束是**时间**（1.7–2 秒），而定速下落地时长由起始高度决定，玩家被漂浮抬多高每一局都不一样，`v` 一旦写死就必然在某些高度上超时或提前落地。伺服用「剩余高度 ÷ 剩余刻数」把时间钉住，高度自动被吸收。
+**`riseHeightBlocks` 默认是 16 不是 15**：取 15 时实测只抬到 **14.01 格**（相位 1 的最后一次伺服速度在相位 2 入口被清零），改 16 后实测 **14.86 格**，才对上作者要的「升高 15 格」。
 
-**伺服必须先关重力**：进入相位 2 前 `setNoGravity(true)`。只设 `setDeltaMovement` 的话，原版重力每刻还会再叠一份——v0.0.2 实测每刻多降 **0.23 格**，地表与两格高度因为剩余高度小、误差还在 ±2 刻内，四格高台会从 40 刻直接掉到 **23 刻**（V-39）。`noGravity` 必须在**所有**退出路径恢复：落地、`/kill`、掉线、`/effect clear`、维度切换——漏一条玩家就永久悬空。
+**速度上限为什么是 4.0**：先试 `1.5` 会把 `riseTicks` 夹死（每刻不够走完），再试 `3.0` 时 16/5 = 3.2 仍被夹；`4.0` 才让默认参数原样生效。
+
+**相位 2 不再写速度**：进入相位 2 时**还重力 + 清残余速度**，之后**完全不写速度**，只做落地检测，`MAX_FALL_TICKS = 100` 兜底。原「逐刻伺服下坠」方案作废（原 A-03 的定速/伺服之争到此结束：时间由 `riseTicks` 与重力决定，不再有目标落地时长键）。
 
 | 量 | 取值 | 说明 |
 |---|---|---|
-| `fallTicks` | `zangief_cane.fallTicks`，默认 **40 刻 = 2.0 秒**，范围 1–200 | plan 的「1.7–2 秒」取上界 2.0 秒作为默认；要 1.7 秒设 34 |
-| 伺服速度上限 `MAX_SERVO_SPEED` | `3.0` 格/刻（**本文补充**，安全阀） | 防止剩余刻数为 1、剩余高度 20 格时给出荒谬的瞬移速度；触顶后按自由落体收尾，日志记一行 `桑吉尔蔗 伺服触顶 h={} n={}` |
-| 安全上限 `MAX_FALL_TICKS` | `100` 刻 | 伺服本身会让玩家在 `fallTicks` 内落地，这个上限只兜「落地判定失效」的底（卡在方块缝里） |
+| 相位时长（实测，两轮一致） | **14 / 15 / 22 刻** | 相位 0 / 1 / 2；相位 2 时长由高度与重力决定，不再是 config |
+| 抬升（实测） | `riseHeightBlocks = 16` → **14.86 格** | 见上：15 只到 14.01 格 |
+| 坠落伤害（实测） | **12.00**（HP 20→8），石头与草一致；落水 0（符合原版） | 见下方「`fallDistance` 机制更正」 |
+| `noGravity` 五条退出路径（实测） | 落地 **8.70** / `/kill` **8.70** / `/effect clear` **9.21** / 换维度 **9.89** / 掉线（相位 1 内杀客户端，重连后无 `noGravity`、半秒落 8.70） | 五条全绿 |
+| 相机（实测） | 自转 **17 刻 × 72° = 1224°**，相位 2 共 21 刻 ⇒ **延迟 4 刻**；另有截图证明相位 2 天地颠倒 | `spinDelayTicks = 4`，`inverted()` 进入相位 2 起恒真 |
 
-实现阶段怎么验：日志行 `桑吉尔蔗 落地耗时 {} 刻（目标 {fallTicks}）`，实测值与 `fallTicks` 的偏差应 ≤ 2 刻；连测 5 次（不同高度：平地、两格高台、四格高台）都要落在同一个时长附近——这正是定速方案做不到的。
+**`fallDistance` 机制更正（必须按这条写）**：抬升段 `fallDistance` **不累加**（原版向上移动时递减归零），所以伤害 = **从最高点落到地面的高度 − 3**。
+反证：若抬升段累加，从 14 格摔下的 `fallDistance` 会是 28、伤害该是 **25 点**；实测 **11~12 点**。
+「抬多高摔多狠」这个**结论**仍然成立，但**机制**必须说对——否则后来的人会据此做错误设计（例如以为「先把人抬到 30 格再落 5 格」会摔 35 格）。
+
+实现阶段怎么验：日志行 `桑吉尔蔗 相位 {n} 结束（{ticks} 刻）` 与 `桑吉尔蔗 抬升 {h} 格`；实测相位时长为 14 / 15 / 22 刻，`riseHeightBlocks = 16` 时抬升约 14.86 格。
 
 ### 3.12 `WildHunterCombat`（服务端判定：目标复核 / 伤害 / 击退 / 击杀续时）
 
@@ -1208,7 +1218,7 @@ public static void onClientTick(ClientTickEvent.Post event) {
 
 **表内的计数**：5 个子系统 = 相机（roll / pitch / yaw 三行合起来算一个）、输入锁、循环音、灰度、红色剪影；表共 **7 行**。「不适用」的三行（循环音、灰度、剪影）与 `zangief_piledriver` 的三个相位无关——它们的开关是 `wild_hunter` 在不在（§0.6 的绑定表），分别由 §4.6、§4.1、§4.2 负责。
 
-**自转只在相位 2**：`plan0.0.2.txt` 第 29 行的语序是「漂浮效果结束后…并在其落地之前持续…转动水平视角」，即自转区间 = 从漂浮结束到落地。D-70 的「落地前」按这个语序取同一段。相位 0 / 1 只倒转不自转。
+**自转从 `spinDelayTicks` 起转**：相位 2 开始后 `fallingTicks > spinDelayTicks`（默认 4 刻）才起转，转到结束；计时以**进入相位 2 为 0**，不以效果生效为 0。「自转区间 = 抬升结束到落地」的原语序仍然成立，只是起转点被这 4 刻的延迟精确化。原语序见 `plan0.0.2.txt` 第 29 行「漂浮效果结束后…并在其落地之前持续…转动水平视角」。D-70 的「落地前」按这个语序取同一段。相位 0 / 1 只倒转不自转。
 
 **倒转从相位 0 就开始**：同一条原文的第一句是「将其视角上下倒转」，紧接着才是「14 个游戏刻后给予漂浮」，所以倒转（roll + pitch）覆盖全部三个相位。
 
@@ -1521,9 +1531,9 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | 33 | `farmstorm.configuration.wild_hunter.loopSoundRange` | 循环音的可听距离（格） | Looping sound audible range (blocks) | §8.1 #16 |
 | 34 | `farmstorm.configuration.zangief_cane.triggerRadius` | 触发球半径（格） | Trigger sphere radius (blocks) | §8.1 #17 |
 | 35 | `farmstorm.configuration.zangief_cane.stageDelayTicks` | 相位 0 的等待刻数 | Ticks spent in phase 0 | §8.1 #18 |
-| 36 | `farmstorm.configuration.zangief_cane.levitationLevel` | 漂浮等级（1 = I 级） | Levitation level (1 = level I) | §8.1 #19 |
-| 37 | `farmstorm.configuration.zangief_cane.levitationDurationTicks` | 漂浮时长（tick） | Levitation duration (ticks) | §8.1 #20 |
-| 38 | `farmstorm.configuration.zangief_cane.fallTicks` | 相位 2 的目标落地时长（tick） | Target landing duration of phase 2 (ticks) | §8.1 #21 |
+| 36 | `farmstorm.configuration.zangief_cane.riseHeightBlocks` | 相位 1 的抬升高度（格） | Blocks lifted in phase 1 | §8.1 #19 |
+| 37 | `farmstorm.configuration.zangief_cane.riseTicks` | 相位 1 的抬升时长（tick） | Ticks spent lifting in phase 1 | §8.1 #20 |
+| 38 | `farmstorm.configuration.zangief_cane.spinDelayTicks` | 相位 2 内自转的延迟刻数（tick） | Delay before the phase-2 spin starts (ticks) | §8.1 #21 |
 | 39 | `farmstorm.configuration.zangief_cane.spinDegreesPerTick` | 水平自转速度（度/刻） | Horizontal spin speed (degrees/tick) | §8.1 #22 |
 | 40 | `entity.farmstorm.molotov` | 莫洛托夫！ | Molotov | V-64（原表漏了这两条，缺它们时 `/summon` 反馈与死亡信息显示裸键） |
 | 41 | `entity.farmstorm.compressed_puffed_wheat` | 压缩膨胀麦 | Compressed Puffed Wheat | V-64 |
@@ -1579,10 +1589,10 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | 15 | `wild_hunter.highlightRadius` | double | 64.0 格 | 0.0–256.0 | 红色剪影的最大距离 | D-62 |
 | 16 | `wild_hunter.loopSoundRange` | double | 16.0 格 | 0.0–64.0 | 循环音的可听距离 | D-76 |
 | 17 | `zangief_cane.triggerRadius` | double | 1.5 格 | 0.0–8.0 | 触发球半径（球形欧氏距离） | D-73 |
-| 18 | `zangief_cane.stageDelayTicks` | int | 14 刻 | 0–200 | 相位 0（已倒转、等待漂浮）的时长 | D-69 |
-| 19 | `zangief_cane.levitationLevel` | int | 7 级 | 1–255 | 漂浮等级；amplifier = 等级 − 1 = 6 | D-69 |
-| 20 | `zangief_cane.levitationDurationTicks` | int | 20 刻（1 秒） | 0–72000 | 漂浮时长 = 相位 1 时长 | D-69 |
-| 21 | `zangief_cane.fallTicks` | int | 40 刻（2 秒） | 1–200 | 相位 2 目标落地时长；服务端逐刻伺服向下速度以落在该时长内 | plan0.0.2.txt 第 29 行 + 本文补充 |
+| 18 | `zangief_cane.stageDelayTicks` | int | 14 刻 | 0–200 | 相位 0（已倒转、等待抬升）的时长 | D-69 |
+| 19 | `zangief_cane.riseHeightBlocks` | int | **16** 格 | 1–64 | 相位 1 的总抬升高度（伺服上抬）。默认 16 而不是 15：取 15 实测只到 14.01 格，16 才实测 14.86 格 | 作者实机口径 |
+| 20 | `zangief_cane.riseTicks` | int | 15 刻 | 1–200 | 相位 1 的时长（抬完 \`riseHeightBlocks\` 格），默认 ≈1.07 格/刻 | 作者实机口径 |
+| 21 | `zangief_cane.spinDelayTicks` | int | 4 刻 | 0–40 | 相位 2 开始后多久起转（\`fallingTicks > spinDelayTicks\` 起转到结束）；计时以进入相位 2 为 0 | 作者实机口径 |
 | 22 | `zangief_cane.spinDegreesPerTick` | double | **72.0** 度/刻 | 0.0–360.0 | 相位 2 水平自转；72 × 20 = 1440 度/秒 | D-70 |
 
 **行数核对**：`22` 行 = `molotov` 3（#1–#3）+ `wild_apple` 2（#4–#5）+ `wild_hunter` 11（#6–#16）+ `zangief_cane` 6（#17–#22）。`117 + 22 = 139`。
@@ -1593,7 +1603,7 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 |---|---|---|
 | A-01 | 只留 `molotov.fireChance`，不设 `magmaChance` | #2 的用途栏写明「余下的百分比自动放岩浆块」 |
 | A-02 | 时长归 `wild_hunter.durationTicks`，狂野苹果不单设 `hunterDurationTicks` | #6 的用途栏写明「狂野苹果授予的就是这个时长」 |
-| A-03 | 用 `zangief_cane.fallTicks` + 逐刻伺服，删掉「定速」方案 | #21；机制见 §3.11 与 §5.2（那个定速键已删，现版本不含它） |
+| A-03 | 相位 2 的驱动方式（已由作者实机口径取代）：相位 1 改为伺服上抬、相位 2 还重力后不写速度 | #19–#21；机制见 §3.11（`fallTicks`/`dropVelocity` 两个键都已删，现版本不含它们） |
 | A-04 | 正文写 `<group>.<key>`，语言键才加 `farmstorm.configuration.` 前缀 | 本表第一列与 §7.3 的 #18–#39 |
 | A-05 | `spinDegreesPerTick` 默认 **72.0** 度/刻 | #22 |
 
@@ -1628,10 +1638,10 @@ loopSoundRange = 16.0              # D-76：循环音可听距离（格）
 
 [zangief_cane]
 triggerRadius = 1.5                # D-73：球形 1.5 格
-stageDelayTicks = 14               # D-69：14 刻后漂浮
-levitationLevel = 7                # D-69：VII 级 → amplifier 6
-levitationDurationTicks = 20       # D-69：1 秒
-fallTicks = 40                     # 相位 2 目标落地时长（刻）= 2 秒，逐刻伺服
+stageDelayTicks = 14               # 相位 0 的等待刻数
+riseHeightBlocks = 16              # 相位 1 的抬升高度（格）；取 15 实测只到 14.01，16 → 14.86
+riseTicks = 15                     # 相位 1 的抬升时长（刻）≈ 1.07 格/刻
+spinDelayTicks = 4                 # 相位 2 起转延迟（刻），计时以进入相位 2 为 0
 spinDegreesPerTick = 72.0          # D-70：1440 度/秒 ÷ 20
 ```
 
@@ -1651,11 +1661,12 @@ spinDegreesPerTick = 72.0          # D-70：1440 度/秒 ÷ 20
 
 ### 8.4 明确不进 config 的常量（逐条给理由）
 
-「数值只有一个来源」不等于「所有数字都进 config」。下面这些**刻意**留在代码里。**反向核对**：凡是出现在 §8.1 的 22 行里的键（含 `fallTicks`、`highlightRadius`、`loopSoundRange`、`spinDegreesPerTick`）都**不在**本表，本表里也不许再出现同名常量。
+「数值只有一个来源」不等于「所有数字都进 config」。下面这些**刻意**留在代码里。**反向核对**：凡是出现在 §8.1 的 22 行里的键（含 `spinDelayTicks`、`highlightRadius`、`loopSoundRange`、`spinDegreesPerTick`）都**不在**本表，本表里也不许再出现同名常量。
 
 | 常量 | 值 | 留在代码里的理由 | 依据 |
 |---|---|---|---|
-| `MAX_FALL_TICKS` | `100` 刻 | 兜底上限，**不是**目标时长：目标时长是 config 的 `zangief_cane.fallTicks`（默认 40 刻），这个上限只兜「落地判定失效（卡在方块缝里）」的底。安全阀不进 config 是 v0.0.1 的既有口径 | HC-13 同类 |
+| `MAX_RISE_SPEED` | `4.0` 格/刻 | 相位 1 伺服上抬的速度上限：`1.5` 会把 `riseTicks` 夹死，`3.0` 时 16/5 = 3.2 仍被夹，`4.0` 才让默认参数原样生效。不进 config 是 v0.0.1 的既有口径 | HC-13 同类 |
+| `MAX_FALL_TICKS` | `100` 刻 | 兜底上限，**不是**目标时长：相位 2 已经不写速度，时长由高度与重力决定，这个上限只兜「落地判定失效（卡在方块缝里）」的底 | HC-13 同类 |
 | 白色贴图路径 / 18×18 尺寸 / 红色 `(1.0, 0.15, 0.15, 0.45)` / 同帧 32 只上限 | — | 纯渲染参数，不改变任何玩法结果，也不是「范围」类数值。**距离类的两个值已进 config**（`wild_hunter.highlightRadius` #15、`wild_hunter.loopSoundRange` #16），客户端通过 §4.4 的镜像常量读到同一组默认值 | 本文补充 |
 | `DEFAULT_SPIN_DEGREES_PER_TICK` / `DEFAULT_SEARCH_RADIUS` / `DEFAULT_SEARCH_ANGLE` / `DEFAULT_HIGHLIGHT_RADIUS` / `DEFAULT_LOOP_SOUND_RANGE` 等客户端镜像常量 | 与 config 默认值同值：72.0 / 5.0 / 30.0 / 64.0 / 16.0 | 客户端读不到 SERVER config（§4.4 的降级口径）；这 5 个镜像常量对应的键都在 §8.1 里（#22 / #9 / #10 / #15 / #16），注释里点名必须同步 | 本文补充 |
 | `compressed_hay_block` 的 `strength(30.0F, 6.0F)` 与 `requiresCorrectToolForDrops()` | — | D-57 已把三个数字钉死，属方块固有属性；做成可调键等于给平衡性开后门 | D-57 |
@@ -1681,7 +1692,7 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 2 | 现在处于哪个相位（0/1/2） | 同上的 amplifier 字段 | 同 #1 | amplifier 就是相位号，不需要额外字段 |
 | 3 | 相位还剩多少刻 | 同上的 duration 字段 | 同 #1 | 原版效果计时器自己会往下减，客户端读到的是权威剩余时长 |
 | 4 | 相位结束（落地 / 超时） | 服务端 `removeEffect` | `ClientboundRemoveMobEffectPacket` | 「效果没了」就是「该复位了」 |
-| 5 | 相位 2 每刻的向下速度（逐刻伺服，`fallTicks` 目标时长） | 服务端每 tick `ServerPlayer#setDeltaMovement(0, -h / n, 0)` | `ClientboundSetEntityMotionPacket`（相位 2 内约每 tick 一个，40 刻共约 40 个；仍是原版包） | `ServerPlayer` 的速度变更由 `ServerEntity` 的同步广播给所有追踪者（含本人）；40 个速度包分摊在 2 秒内，带宽量级与一次爆炸（`ClientboundExplodePacket` 带方块列表）相当 |
+| 5 | 相位 1 每刻的向上速度（伺服上抬，`riseHeightBlocks` / `riseTicks`） | 服务端每 tick `ServerPlayer#setDeltaMovement(0, +h / n, 0)` 于相位 1；相位 2 **不写速度** | `ClientboundSetEntityMotionPacket`（相位 2 内约每 tick 一个，40 刻共约 40 个；仍是原版包） | `ServerPlayer` 的速度变更由 `ServerEntity` 的同步广播给所有追踪者（含本人）；40 个速度包分摊在 2 秒内，带宽量级与一次爆炸（`ClientboundExplodePacket` 带方块列表）相当 |
 | 6 | 「你进了狂野猎人状态」 | 服务端 `addEffect(wild_hunter, …)` | `ClientboundUpdateMobEffectPacket` | 同 #1；灰度（D-61）与红色剪影（D-62）都以它为开关 |
 | 7 | 狂野猎人的剩余时长（击杀续时会变长） | 服务端重新 `addEffect` 一个更长的实例 | `ClientboundUpdateMobEffectPacket` | 时长变化 = 一次新的效果包 |
 | 8 | 三项属性加成（+30 % 移速 / +30 % 攻速 / +40 % 伤害） | `MobEffect#addAttributeModifiers` | 不需要包 | 原版在客户端也会执行该方法（`LivingEntity#onEffectAdded` 两侧对称），客户端属性表与服务端一致 |
@@ -1723,7 +1734,7 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 莫洛托夫的火 / 岩浆块写入 | `MolotovProjectile#scatter` | 世界写入只能服务端做（HC-03） |
 | 压缩膨胀麦的方块写入 | `CompressedPuffedWheatProjectile#fill` | 同上 |
 | 桑吉尔蔗的触发判定 | `ZangiefCaneTrap#findTrigger` | 己方判定要读队伍（客户端看不到完整队伍信息，源码 `DeployedCropBlockEntity#isAlly` 注释） |
-| 相位推进与漂浮施加 | `ZangiefPiledriverController` | 时间与状态必须单一权威 |
+| 相位推进与抬升伺服 | `ZangiefPiledriverController` | 时间与状态必须单一权威 |
 | 狂野猎人的目标复核 / 伤害 / 击退 | `WildHunterCombat` | 伤害只能服务端结算 |
 | 击杀续时与回血 | `WildHunterCombat#onKill` | 生命值与效果时长只能服务端改 |
 | 三个新进度的授予 | `FarmstormAdvancements#award` | 进度判定在服务端（`ModAdvancementProvider#AWARD_REQUIRED` 的既有约定） |
@@ -1782,7 +1793,7 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 7 | 莫洛托夫的落点语义 | 在平地上投一颗，清点火焰与岩浆块数量并对照 D-58 | 球半径 4 格内只有「上表面接触空气」的方块上方新增了火/岩浆块；原方块一个都没少；无爆炸伤害、无方块破坏；火 : 岩浆块 ≈ 85 : 15（投 20 颗做粗核） |
 | 8 | 压缩膨胀麦完全沿用膨胀麦 | 同一位置分别投一颗膨胀麦、一颗压缩膨胀麦，各记一次 | 两次的立方体边长一致（干 3 / 遇水 5）、落点方块一致、被 3.6e6 方块挡住的格一致；唯一差异是写入的方块（干草块 vs 压缩干草块） |
 | 9 | 压缩干草块的抗性边界（D-57） | 用 `/setblock` 放一块，旁边放一块圆石；分别用瓜！、育碧服务器、原版 TNT 各炸一次 | 瓜！炸不掉压缩干草块、炸得掉圆石；育碧服务器两块都炸得掉；**原版 TNT 也炸得掉压缩干草块**（原版 `Explosion` 逐格减 `(resistance + 0.3) * 0.3`，6.0 抗性挡不住圆石级别的方块——圆石本身就会被 TNT 炸掉） |
-| 10 | 桑吉尔蔗的三相位时序与落地时长 | 站进 1.5 格内，掐表 + 看日志；在平地 / 两格高台 / 四格高台各测一次（**「高台」指 ≥3×3 台面**；1×1 石柱会被自己的柱体中途截住，属边缘几何构型，不作缺陷，V-46） | 立刻倒转；14 刻后开始漂浮（VII 级、20 刻）；34 刻后开始下坠 + 自转（72.0 度/刻 = 1440 度/秒）；**三个高度测出的落地耗时都落在 `fallTicks`（默认 40 刻）± 2 刻内**（这是逐刻伺服与定速方案的分水岭）；落地后 100 ms 内画面与输入全部复位；日志有 `桑吉尔蔗 相位 0→1→2→结束` 四行与 `落地耗时 {N} 刻` |
+| 10 | 桑吉尔蔗的三相位时序与实测读数 | 站进 1.5 格内，掐表 + 看日志；在平地 / 两格高台 / 四格高台各测一次（**「高台」指 ≥3×3 台面**；1×1 石柱会被自己的柱体中途截住，属边缘几何构型，不作缺陷，V-46） | 立刻倒转；相位时长 **14 / 15 / 22 刻**（两轮一致）；`riseHeightBlocks = 16` 时抬升 **14.86 格**；坠落伤害 **12.00**（HP 20→8）、落水 0；自转 **17 刻 × 72° = 1224°**（相位 2 共 21 刻 ⇒ 延迟 4 刻）；`noGravity` 五条退出路径全绿（这是逐刻伺服与定速方案的分水岭）；落地后 100 ms 内画面与输入全部复位；日志有 `桑吉尔蔗 相位 0→1→2→结束` 四行与 `落地耗时 {N} 刻` |
 | 11 | 桑吉尔蔗只对非己方玩家生效 | 同队玩家 A、敌对玩家 B、创造模式玩家 C、旁观者 D 各踩一次 | 只有 B 被打桩机；A（同队）不触发；C、D 不触发；陷阱触发后**方块消失且不掉落任何物品** |
 | 12 | 输入锁只漏 ESC | 按 §10 RT-13 的 21 项逐键手测并填表 | 除 ESC 外全部拦住；ESC 能打开暂停菜单；效果消失后所有键立刻恢复 |
 | 13 | 红色剪影的三个条件 | 站 5 格内 / 65 格外；墙前 / 墙后；同队玩家 / 敌对玩家 | 只有「≤64 格 + 无遮挡 + 非己方」的生物被画红色剪影；自己与同队玩家不画；65 格外不画 |

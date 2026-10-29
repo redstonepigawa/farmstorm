@@ -486,25 +486,25 @@ Phase exit criteria: stepping within 1.5 blocks inverts the view at once and loc
   2. 14 ticks later the `amplifier` under the same id becomes **1** (a re-issue, producing no second effect record).
   3. After setting `zangief_cane.stageDelayTicks` to `30` and retesting, phase 0 lasts 30 ticks (the key takes effect).
 
-#### F-89 · Phase 1: Levitation VII for 20 Ticks
+#### F-89 · Phase 1: Servo Lift of 16 Blocks over 15 Ticks
 
 - **Complexity**: S | **Person-days**: 0.5
 - **Depends on**: F-88
-- **Deliverables**: the phase 1 segment (`MobEffects.LEVITATION`, `amplifier = levitationLevel - 1 = 6`, lasting `levitationDurationTicks` 20 ticks, applied on tick 14); one log line `桑吉尔蔗 相位 1`
+- **Deliverables**: the phase 1 segment (entered on tick 14: with **gravity disabled**, servo the upward velocity every tick = remaining lift height ÷ remaining ticks, total `zangief_cane.riseHeightBlocks` 16 blocks over `zangief_cane.riseTicks` 15 ticks ≈ 1.07 blocks/tick, cap `MAX_RISE_SPEED = 4.0`); one log line `桑吉尔蔗 相位 1`
 - **Acceptance**:
   1. During phase 1 the F3 `Y` coordinate rises tick by tick; in `/data get entity @s active_effects`, `minecraft:levitation` has `amplifier` **6** and **20 ticks** remaining (D-69).
-  2. After setting `zangief_cane.levitationLevel` to `3` and retesting, `amplifier` becomes **2** (the level minus 1).
+  2. After setting `zangief_cane.riseTicks` to `30` and retesting, the lift is slower and phase 1 lasts about 30 ticks (the key takes effect, and `MAX_RISE_SPEED = 4.0` does not clamp the speed).
   3. During phase 0 (the first 14 ticks) the player's Y coordinate does not change (levitation is not applied in phase 0).
 
-#### F-90 · Phase 2: Tick-by-Tick Servoed Fall and Landing Detection
+#### F-90 · Phase 2: Free Fall + Spin and Landing Detection
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-89
-- **Deliverables**: the phase 2 segment (`setNoGravity(true)` first, then `setDeltaMovement` every tick = remaining height ÷ remaining ticks — without disabling gravity the measured fall is 0.23 blocks per tick too fast and a four-block platform drops from 40 ticks to 23; the effect is cleared as soon as landing is detected and **`noGravity` is restored**; `noGravity` must be restored on **every** exit path: landing / `/kill` / disconnect / `/effect clear` / dimension change, or the player floats forever, V-39; the target duration reads `zangief_cane.fallTicks` 40 ticks, ruling A-03); one log line `落地耗时 {N} 刻`
+- **Deliverables**: the phase 2 segment (on entry **restore gravity + clear residual velocity**, then **write no velocity at all** and only detect landing, `MAX_FALL_TICKS = 100` as the backstop; clear the effect as soon as landing is detected and confirm gravity was restored; `noGravity` must be restored on **every** exit path: landing / `/kill` / disconnect / `/effect clear` / dimension change, V-39); one log line `桑吉尔蔗 相位 2 结束（{ticks} 刻）`
 - **Acceptance**:
   1. Test once each on flat ground / a two-block platform / a four-block platform: N in all three `落地耗时 {N} 刻` log lines falls within **40 ± 2** (the watershed of `12-TECH-0.0.2.md §11 #10`). **"Platform" means a surface of at least 3×3**: a 1×1 pillar catches the player on the way down (23 ticks measured), which is an edge-case geometry result and is not treated as a defect (V-46).
   2. After landing, `/data get entity @s active_effects` no longer reads `farmstorm:zangief_piledriver` (the effect was cleared) and the player is subject to gravity again (`noGravity` restored).
-  3. After setting `zangief_cane.fallTicks` to `80` and retesting, the landing time at all three heights becomes about 80 (proving it is time servoing, not a fixed speed).
+  3. After setting `zangief_cane.riseHeightBlocks` to `8` and retesting, the lift and the phase-2 duration both shrink (height decides the fall, and **phase 2 writes no velocity**); test the five `noGravity` exit paths one by one: landing 8.70 / `/kill` 8.70 / `/effect clear` 9.21 / dimension change 9.89 / disconnect (client killed during phase 1: after reconnecting there is no `noGravity` and it falls 8.70 in half a second).
   4. `/kill @s` during phase 2 and respawn: no leftover velocity and no leftover effect.
 
 #### F-91 · Camera: roll 180 + Inverted pitch + Self-Rotating yaw
@@ -705,9 +705,9 @@ All 22 keys land in F-61; the “Consuming task” column names the implementati
 | 16 | `wild_hunter.loopSoundRange` | 16.0 blocks | F-61 | F-84 |
 | 17 | `zangief_cane.triggerRadius` | 1.5 blocks | F-61 | F-87 |
 | 18 | `zangief_cane.stageDelayTicks` | 14 ticks | F-61 | F-88 |
-| 19 | `zangief_cane.levitationLevel` | 7 levels | F-61 | F-89 |
-| 20 | `zangief_cane.levitationDurationTicks` | 20 ticks (1 s) | F-61 | F-89 |
-| 21 | `zangief_cane.fallTicks` | 40 ticks (2 s) | F-61 | F-90 |
+| 19 | `zangief_cane.riseHeightBlocks` | **16** blocks | F-61 | F-89 |
+| 20 | `zangief_cane.riseTicks` | 15 ticks | F-61 | F-89 |
+| 21 | `zangief_cane.spinDelayTicks` | 4 ticks | F-61 | F-90 |
 | 22 | `zangief_cane.spinDegreesPerTick` | 72.0 degrees/tick | F-61 | F-91 |
 | **Total** | **22 entries** | | **22 / 22** | **22 / 22 with an implementation read point** |
 

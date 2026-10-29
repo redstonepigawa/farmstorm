@@ -493,9 +493,9 @@ The only route is the converter: `minecraft:sugar_cane` ⇄ `farmstorm:zangief_c
 | Trigger radius | 1.5 | blocks (spherical Euclidean) | 【P-3】 + D-73 |
 | Scan interval | 10 | ticks | BRIEF §3.2 |
 | Phase 0 duration (inverted, waiting) | 14 | ticks | D-69 |
-| Levitation level | VII (`amplifier = 6`) | level | D-69 |
-| Levitation duration | 20 | ticks (1 second) | D-69 |
-| Phase 2 target duration (fall) | 40 | ticks (2.0 seconds) | 【P-3】 gives 1.7–2.0 seconds; 【本文补充】 takes the upper bound of the range, 40 ticks |
+| Lift height | **16** | blocks | author's in-game wording: with 15 the measurement is only 14.01 blocks, with 16 it is **14.86** |
+| Lift duration | 15 | ticks | author's in-game wording (≈1.07 blocks/tick, cap `MAX_RISE_SPEED = 4.0`) |
+| Phase-2 spin delay | 4 | ticks | author's in-game wording (`spinDelayTicks`; the clock starts at the phase-2 entry) |
 | Spin speed | 72 | degrees/tick | D-70; config key `zangief_cane.spinDegreesPerTick` defaults to 72.0 (ruling A-05) |
 | Spin direction | counter-clockwise | — | D-70 |
 | Input-lock window | trigger tick → end of phase 2 | — | D-60, 【P-3】 |
@@ -521,9 +521,9 @@ The **amplifier of the hidden effect `farmstorm:zangief_piledriver` is the stage
 
 | amplifier | Stage | Effect duration | What the server does in this stage | What the client does according to this stage | When this stage is left |
 |---|---|---|---|---|---|
-| 0 | Inverted, waiting for levitation | 14 ticks | Remembers the triggerer and the trigger tick; does not touch position; re-issues the same id at `amplifier 1` on tick 14 | Camera `roll = 180` plus inverted pitch (D-59); keyboard and mouse locked (D-60); plays the trigger sound once | Remaining duration reaches zero |
-| 1 | Levitating | 20 ticks | Gives no extra velocity (the rise is left to vanilla `MobEffects.LEVITATION` itself; D-69 fixes only level and duration); on tick 20 re-issues `amplifier 2` and gives the first downward velocity | Keeps inversion and lock; does not spin; the view rises naturally with the body | Remaining duration reaches zero |
-| 2 | Falling and spinning | 40 ticks | Every tick resets the downward velocity from 'remaining height ÷ remaining ticks' (§6.10); clears the effect as soon as landing is detected | Keeps inversion; every tick `yaw += 72°` (D-70); resets the camera angle to 0 on landing or when the effect disappears | Landing / effect expiry / player death / effect cleared from outside |
+| 0 | Inverted, waiting for the lift | 14 ticks | Remembers the triggerer and the trigger tick; does not touch position; re-issues the same id at `amplifier 1` on tick 14 | Camera `roll = 180` plus inverted pitch (D-59); keyboard and mouse locked (D-60); plays the trigger sound once | Remaining duration reaches zero |
+| 1 | Servo lift | 15 ticks | With gravity disabled, servo the upward velocity every tick = remaining lift height ÷ remaining ticks (total `riseHeightBlocks` 16 blocks, cap `MAX_RISE_SPEED = 4.0`); on tick 20 re-issues `amplifier 2` and gives the first downward velocity | Keeps inversion and lock; does not spin; the view rises naturally with the body | Remaining duration reaches zero |
+| 2 | Free fall + spin | until landing (22 ticks measured), backstop `MAX_FALL_TICKS = 100` | On entry **restore gravity + clear residual velocity**, then **write no velocity at all** and only detect landing (§6.10); `inverted()` is true from phase 2 on, and `spinning()` starts at `fallingTicks > spinDelayTicks` (default 4)
 
 Three state-machine constraints (【本文补充】): ① the stage may only move forward 0 → 1 → 2, never back; ② when the effect is cleared from outside in any stage (`/effect clear`, the cleanup logic of another mod), the client resets straight to 'no effect' and no further stage is issued; ③ a phase switch is implemented by **re-issuing the effect with the same id and a different amplifier**, one re-issue refreshing amplifier and remaining duration together.
 
@@ -536,12 +536,12 @@ Let the trigger tick be T+0. The whole chain is capped at 74 ticks (3.7 seconds)
 | 1 | T+0 | 1 tick | Flips the screen at once (roll 180 + inverted pitch); keyboard and mouse dead, only ESC works; the `zangief_piledriver` sound is heard | Validate the target → set `triggered` true → silently remove the block → apply `amplifier 0` (14 ticks) | Vanilla `ClientboundUpdateMobEffectPacket` + vanilla sound packet |
 | 2 | T+0 … T+13 | 14 ticks | Inverted + locked, position does not move | Only counts down; does not touch position | The remaining duration of the hidden effect is the complete state |
 | 3 | T+14 | 1 tick | The camera starts rising with the body | Re-issues `amplifier 1` (20 ticks) | Same as above (a different amplifier means a different stage) |
-| 4 | T+14 … T+33 | 20 ticks | Stays inverted and locked; the player can see themselves being lifted by vanilla levitation | Does not intervene; records the lift height for §6.10 | Hidden effect + vanilla entity position sync |
-| 5 | T+34 | 1 tick | Starts to fall; turns 72° in the first tick | Re-issues `amplifier 2` (40 ticks); sends the first downward velocity | Hidden effect + `ClientboundSetEntityMotionPacket` |
-| 6 | T+34 … T+73 | ≤ 40 ticks | Every tick `yaw += 72°` (2880° over 40 ticks, i.e. 8 whole turns); inversion is kept | Tick by tick resets the downward velocity from 'remaining height ÷ remaining ticks'; detects landing | Same as above; the spin is a pure client-side accumulation and is not sent every tick |
+| 4 | T+14 … T+28 | 15 ticks | Stays inverted and locked; the player is lifted by the per-tick servo (14.86 blocks measured) | Sets the upward velocity every tick; records how far it has lifted | hidden effect + vanilla entity position sync |
+| 5 | T+29 | 1 tick | Starts to fall (the spin has not begun yet) | Re-issues `amplifier 2`; **restore gravity + clear residual velocity, writes no velocity** | hidden effect + vanilla gravity |
+| 6 | T+29 … landing | 22 ticks measured | From tick `spinDelayTicks` (4) on, `yaw += 72°` every tick (17 ticks × 72° = 1224° measured); inversion is kept | Only detects landing | same as above; the spin is a pure client-side accumulation and is not sent every tick |
 | 7 | Landing tick (≤ T+74) | 1 tick | Camera angle reset; keyboard and mouse unlocked; screen upright again | Clears `farmstorm:zangief_piledriver` | Effect-removal packet |
 
-This table has 7 rows. In it, '2880°' is the product 72 degrees/tick × 40 ticks and '8 whole turns' is the quotient 2880° ÷ 360° (【本文补充】: results of arithmetic, not independent values). **The '≤ 40 ticks' of stages 5 and 6 is not vagueness**: 40 ticks is the design target, and landing earlier ends the stage early (§6.10 recomputes the servo velocity every tick); landing later does not happen — unless there is no ground to land on beneath the player (§11.5).
+This table has 7 rows. The spin measures **17 ticks × 72° = 1224°** against 21 ticks of phase 2 ⇒ a 4-tick delay; the old '40 ticks = 8 whole turns' target no longer exists. **The durations of stages 5 and 6 are not vague**: phase 2 writes no velocity, so its length follows height and gravity and ends on landing — unless there is no ground beneath the player (§11.5).
 
 ### 6.8 Camera
 
@@ -576,7 +576,7 @@ The implementation lands on five client events (the table of BRIEF §7.3). This 
 
    so however high the player was lifted, they reach the ground on tick 40; if a block stops them earlier, the stage ends earlier.
 3. **How the remaining height is taken**: search downward from the player's feet for the first standable surface or the world minimum y, whichever is nearer.
-4. **End conditions**: the player's `onGround()` is true / a block stops them from below / 40 ticks are used up / the player dies / the effect is cleared. Any one of the five clears the effect, unlocks and resets the camera.
+4. **End conditions**: the player's `onGround()` is true / a block stops them from below / `MAX_FALL_TICKS` (100 ticks) are used up / the player dies / the effect is cleared. Any of the five clears the effect, releases the lock, resets the camera and makes sure gravity has been restored.
 5. **No snapping, no ghosting through**: the fall is a velocity, not a teleport; hitting a block stops the player on that block (the same wording as the dash of D-65).
 
 ### 6.11 Boundaries and exceptions
@@ -588,7 +588,7 @@ The implementation lands on five client events (the table of BRIEF §7.3). This 
 | Only creative-mode players nearby | No trigger (D-71); the block stays on standby |
 | The owner is offline | The trap works as usual; the friend-or-foe check uses the owner's last known team (`01-DESIGN.md` §7.2) |
 | The triggerer is pushed away by another effect during phase 1 | The server does not correct the position; the remaining height of phase 2 is computed afresh from the new position |
-| No ground beneath during phase 2 (void) | When the 40 ticks run out the lock is released and vanilla gravity is handed back, so the player can save themselves (§11.5) |
+| No ground beneath during phase 2 (void) | When `MAX_FALL_TICKS` (100 ticks) run out the lock is released, so the player can save themselves (§11.5) |
 | The supporting block is broken | The deployed block is removed on the next tick; whether the item itself drops is decided by the existing key `deploy.dropOnSupportLost` (drops by default, `01-DESIGN.md` §3.3.3) |
 | One player steps on two Zangief Canes in a row | If the second triggers during the first one's phase, the effect is re-issued as `amplifier 0`, equivalent to starting the round again (【本文补充】: a phase can only start from 0; phases do not stack) |
 
@@ -968,10 +968,10 @@ Key names are written uniformly as `<group>.<key>` (ruling A-04); language keys 
 | 15 | `wild_hunter.highlightRadius` | double | 64.0 blocks | 0.0–256.0 | maximum distance of the red silhouette | D-62 |
 | 16 | `wild_hunter.loopSoundRange` | double | 16.0 blocks | 0.0–64.0 | audible distance of the looping sound | D-76 |
 | 17 | `zangief_cane.triggerRadius` | double | 1.5 blocks | 0.0–8.0 | radius of the trigger sphere (spherical Euclidean distance) | D-73 |
-| 18 | `zangief_cane.stageDelayTicks` | int | 14 ticks | 0–200 | duration of phase 0 (inverted, waiting for levitation) | D-69 |
-| 19 | `zangief_cane.levitationLevel` | int | level 7 | 1–255 | levitation level; amplifier = level − 1 = 6 | D-69 |
-| 20 | `zangief_cane.levitationDurationTicks` | int | 20 ticks (1 second) | 0–72000 | levitation duration = phase 1 duration | D-69 |
-| 21 | `zangief_cane.fallTicks` | int | 40 ticks (2 seconds) | 1–200 | target landing duration of phase 2; the server servos the downward velocity every tick so that the landing falls within this duration | line 29 of `plan0.0.2.txt` + 【本文补充】 |
+| 18 | `zangief_cane.stageDelayTicks` | int | 14 ticks | 0–200 | duration of phase 0 (inverted, waiting for the lift) | D-69 |
+| 19 | `zangief_cane.riseHeightBlocks` | int | **16** blocks | 1–64 | total lift of phase 1 (servo); with 15 the measurement is only 14.01 blocks | author's in-game wording |
+| 20 | `zangief_cane.riseTicks` | int | 15 ticks | 1–200 | duration of the phase-1 lift (≈1.07 blocks/tick) | author's in-game wording |
+| 21 | `zangief_cane.spinDelayTicks` | int | 4 ticks | 0–40 | delay before the phase-2 spin starts (clock starts at the phase-2 entry) | author's in-game wording |
 | 22 | `zangief_cane.spinDegreesPerTick` | double | **72.0** degrees/tick | 0.0–360.0 | horizontal spin of phase 2; 72 × 20 = 1440 degrees/second | D-70 |
 
 **22 entries in total.** With the 117 entries of v0.0.1 as the base: `117 + 22 = 139`.
@@ -1026,9 +1026,9 @@ The numbering follows the style of §7 in `01-DESIGN.md`; this section is renumb
 
 ### 11.5 A Zangief Cane throwing the player onto the bedrock layer or into the void
 
-- **Rising part**: levitation is done by vanilla `MobEffects.LEVITATION` itself and this mod gives no velocity (phase 1 of §6.6). With a block overhead the displacement is eaten by collision and the actual rise may be 0.
+- **Rising part**: the server **servos the lift** (phase 1 of §6.6), total height `riseHeightBlocks` 16 blocks. With a block overhead the displacement is eaten by collision and the actual rise may be 0.
 - **Landing back on bedrock**: the bedrock top face is a standable surface, the servo velocity presses the player onto it before tick 40, phase 2 ends early and everything is normal.
-- **Falling into the void (the player dug through the bedrock themselves)**: the servo velocity advances by 'remaining height ÷ remaining ticks', with the remaining height taken to the world minimum y. After the 40 ticks the phase ends, the lock is released and vanilla gravity is handed back, so the player can save themselves (ender pearl, water bucket, flight). **No patch that 'force-ends at a y coordinate' is added** — that would introduce a second termination condition unrelated to health.
+- **Falling into the void (the player dug through the bedrock themselves)**: phase 2 writes no velocity, so the player falls under vanilla gravity toward the world minimum y; when `MAX_FALL_TICKS` (100 ticks) runs out the phase ends, the lock is released and the player can save themselves (ender pearl, water bucket, flight).
 - **Dying during phase 2** (from fall damage or any other source): it takes the death path of §11.4.
 - **The lock cannot last indefinitely**: the end point of the input lock is 'end of phase 2', not 'actually landed'. A lock to the actual landing would leave a player who fell into the void unable to move forever, which must be avoided.
 

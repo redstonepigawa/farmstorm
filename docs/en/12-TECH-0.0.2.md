@@ -600,19 +600,19 @@ public final class ZangiefCaneTrap implements TrapBehavior {
 |---|---|---|
 | `scanInterval()` | uses the `TrapBehavior` default of 10 ticks | `DeployedKind.ZANGIEF_CANE(10)` |
 | `findTrigger(be)` | iterate `level.players()`; skip `isSpectator()` / `isCreative()` / `be.isAlly(player)`; the test is **spherical Euclidean distance** `pos.distSqr(player.position()) <= r*r` with `r = zangief_cane.triggerRadius` (1.5 blocks) | D-71 (non-ally players only, creative and spectators exempt), D-73 (spherical, not Chebyshev) |
-| `trigger(be, target)` | ① apply `zangief_piledriver` amplifier 0 to the target; ② `level.playSound(null, pos, FarmstormSounds.ZANGIEF_PILEDRIVER.get(), SoundSource.PLAYERS, 1.0F, 1.0F)`; ③ record `(playerId → trigger tick)`; ④ `be.consume()` (silent removal + destroy particles) | D-72 (vanishes silently, drops nothing), D-66 (play the trigger sound) |
+| `trigger(be, target)` | ① apply `zangief_piledriver` amplifier 0 to the target; ② `level.playSound(null, player, FarmstormSounds.ZANGIEF_PILEDRIVER.get(), SoundSource.PLAYERS, 1.0F, 1.0F)` (**the triggered player is the sound source**, not the block position); ③ record `(playerId → trigger tick)`; ④ `be.consume()` (silent removal + destroy particles) | D-72 (vanishes silently, drops nothing), D-66 (play the trigger sound) |
 
 **Why the distance test uses `player.position()` and not `player.blockPosition()`**: `BLAST_CARROT` uses `blockPosition()` because it is a **Chebyshev** test (comparing integers between cells); `FANG_TRAP_CACTUS` uses Euclidean distance but compares the block's `Vec3` center with the entity's exact position (source `FangTrapCactusTrap`). Zangief Cane belongs to the latter family: `pos.getCenter().distanceTo(player.position()) <= 1.5`. **Added by this document**: 1.5 blocks is measured "from the block center", not "from the block boundary", so a player standing right on top of the trap (center distance about 0.5) still counts as hit, and a player standing at the center of an adjacent block (distance 1.0 or 1.41) also counts — which is exactly the effect this number 1.5 is meant to produce.
 
 **The order in which the trap disappears after triggering**: apply the effect and the sound first, then `consume()`. `consume()` internally does `level.removeBlock(pos, false)` + `levelEvent(PARTICLES_DESTROY_BLOCK)`, and once the block is gone the `DeployedCropBlockEntity` is removed right after; doing it the other way round invalidates `be.getBlockPos()` and `be.getLevel()` first (the `BlastCarrotTrap` comment in v0.0.1 records the same lesson: the block must be detached before detonating, otherwise the sampling ray is blocked by itself).
 
-**Which config keys it reads**: `zangief_cane.triggerRadius` (1.5 blocks, 0.0–8.0), `zangief_cane.stageDelayTicks` (14 ticks, 0–200), `zangief_cane.levitationLevel` (level 7, 1–255), `zangief_cane.levitationDurationTicks` (20 ticks, 0–72000), `zangief_cane.fallTicks` (40 ticks = 2 seconds, 1–200), `zangief_cane.spinDegreesPerTick` (72.0 degrees/tick, 0.0–360.0).
+**Which config keys it reads**: `zangief_cane.triggerRadius` (1.5 blocks, 0.0–8.0), `zangief_cane.stageDelayTicks` (14 ticks, 0–200), `zangief_cane.riseHeightBlocks` (16 blocks, 1–64), `zangief_cane.riseTicks` (15 ticks, 1–200), `zangief_cane.spinDelayTicks` (4 ticks, 0–40), `zangief_cane.spinDegreesPerTick` (72.0 degrees/tick, 0.0–360.0).
 **Which registry objects it writes**: none (behavior objects are static singletons and are not registered).
 
 
 ### 3.11 `ZangiefPiledriverController` (server-side three-phase state machine)
 
-**Responsibility**: every piece of **timing** after the trigger belongs here: grant levitation after 14 ticks, apply downward velocity when levitation ends, strip the effect on landing or on timeout. It hangs on `PlayerTickEvent.Post` and runs on the server only.
+**Responsibility**: every piece of **timing** after the trigger belongs here: start the **servo lift** after 14 ticks, enter phase 2 when the lift ends (restore gravity + clear residual velocity, then **write no velocity at all** and only detect landing), strip the effect on landing or on timeout. It hangs on `PlayerTickEvent.Post` and runs on the server only.
 
 ```java
 public final class ZangiefPiledriverController {
@@ -628,10 +628,10 @@ public final class ZangiefPiledriverController {
 
 | Phase | amplifier | Entry moment | Duration | Server action | Semantics read by the client |
 |---|---|---|---|---|---|
-| 0 flipped, waiting to levitate | 0 | the instant of `trigger` (t=0) | `stageDelayTicks` = 14 ticks | apply the effect (`visible=false, showIcon=false`), play the trigger sound | grayscale off / flip on / input lock on / spin off |
-| 1 levitating | 1 | t = 14 | `levitationDurationTicks` = 20 ticks | hard-switch the effect; at the same time `addEffect(LEVITATION, 20, 6)` (amplifier 6 = level VII) | grayscale off / flip on / input lock on / spin off |
-| 2 falling and spinning | 2 | t = 34 | until landing, target `zangief_cane.fallTicks` = 40 ticks, safety cap `MAX_FALL_TICKS` = 100 ticks | hard-switch the effect; from then on **servo the downward velocity every tick** = remaining height ÷ remaining ticks (§5.2) | grayscale off / flip on / input lock on / spin on |
-| (end) | — | landing or timeout | — | `removeEffect` + remove from `ACTIVE` | everything reset |
+| 0 flipped, waiting to lift | 0 | the instant of `trigger` (t=0) | `stageDelayTicks` = 14 ticks | apply the effect (`visible=false, showIcon=false`), play the trigger sound **with the triggered player as the source** | flip on / input lock on / spin off |
+| 1 servo lift | 1 | t = 14 | `riseTicks` = 15 ticks | hard-switch the effect; disable gravity, then **servo the upward velocity every tick** = remaining lift height ÷ remaining ticks, total `riseHeightBlocks` blocks (≈1.07 blocks/tick), cap `MAX_RISE_SPEED = 4.0` | flip on / input lock on / spin off (no spin while lifting) |
+| 2 free fall + spin | 2 | t = 29 | until landing (22 ticks measured), safety cap `MAX_FALL_TICKS` = 100 ticks | hard-switch the effect; **restore gravity + clear residual velocity, then write no velocity at all** and only detect landing | flip on (`inverted()` is true from phase 2 onwards) / input lock on / spin starts at `fallingTicks > spinDelayTicks` (default 4) and runs to the end |
+| (end) | — | landing or timeout | — | `removeEffect` + remove from `ACTIVE`, and make sure gravity has been restored | everything reset |
 
 **The definition of "hard switch"** (not optional): when advancing a phase, first `player.removeEffect(FarmstormMobEffects.ZANGIEF_PILEDRIVER)`, then on the next line `addEffect(new MobEffectInstance(…, amplifier = new phase, …))`. The reason is that vanilla `MobEffectInstance#update` has its own merge rules (comparing amplifier and duration), and simply stacking an instance with "the same id, a different amplifier" does not guarantee a replacement.
 **Pending verification (attached to RT-15)**: the exact comparison order of 1.21.1's `MobEffectInstance#update`; this design **does not rely** on its behavior and sidesteps it with "remove first, then add". The risk is that a hard switch costs one extra `ClientboundRemoveMobEffectPacket` plus one `ClientboundUpdateMobEffectPacket`, so the client has a 1-tick window in which "the effect is absent" — the client self-check of §5.6 must therefore not reset immediately when the effect is absent, but wait 2 ticks.
@@ -646,26 +646,36 @@ public final class ZangiefPiledriverController {
 | `finish(ServerPlayer)` | `removeEffect` + drop the record | idempotent |
 | `isActive(UUID)` | for `WildHunterCombat` and the like to test on (no dash attraction during a phase) | read only |
 
-**Which config keys it reads**: `zangief_cane.stageDelayTicks`, `zangief_cane.levitationLevel`, `zangief_cane.levitationDurationTicks`, `zangief_cane.fallTicks`.
+**Which config keys it reads**: `zangief_cane.stageDelayTicks` (14, 0–200), `zangief_cane.riseHeightBlocks` (16, 1–64), `zangief_cane.riseTicks` (15, 1–200), `zangief_cane.spinDelayTicks` (4, 0–40) and `zangief_cane.spinDegreesPerTick` (72.0; the server only reads it, the spin accumulates on the client).
 **Which registry objects it writes**: none.
 
-**How the landing stays inside 1.7–2 seconds** (`plan0.0.2.txt` line 29, verbatim: "确保其可以在 1.7-2 秒内落地"): **no constant speed, use a per-tick servo** (ruling A-03). Every tick of phase 2 measures the remaining height `h` below the player and the remaining ticks `n = fallTicks - elapsed`, then sets the downward velocity to `h / n`:
+**How the lift works** (author's in-game wording; it replaces the old "levitation VII + fixed velocity" plan): in phase 1, with gravity disabled, **servo the upward velocity every tick** = remaining lift height ÷ remaining ticks, total lift = `zangief_cane.riseHeightBlocks` blocks over `zangief_cane.riseTicks` ticks (default 16 blocks / 15 ticks ≈ 1.07 blocks/tick):
 
 ```java
-double h = player.getY() - groundYBelow(player);          // remaining fall height (blocks)
-int n = Math.max(1, fallTicks - elapsedInPhase2);         // remaining ticks
-player.setDeltaMovement(0.0, -Math.min(h / n, MAX_SERVO_SPEED), 0.0);
+double remaining = riseHeightBlocks - lifted;             // blocks still to lift
+int n = Math.max(1, riseTicks - elapsedInPhase1);         // ticks still left
+player.setDeltaMovement(0.0, Math.min(remaining / n, MAX_RISE_SPEED), 0.0);
 ```
 
-Why a constant speed does not work: the plan's constraint is **time** (1.7–2 seconds), whereas under a constant speed the landing time is decided by the starting height, and the height to which the player is lifted by levitation differs from round to round; once `v` is hard-coded it must either overshoot or land early at some heights. The servo pins the time with "remaining height ÷ remaining ticks", and height is absorbed automatically.
+**`riseHeightBlocks` defaults to 16, not 15**: with 15 the measured lift is only **14.01 blocks** (the last servo velocity of phase 1 is zeroed at the phase-2 entry); with 16 it measures **14.86 blocks**, which matches what the author asked for ("lift 15 blocks").
+
+**Why the speed cap is 4.0**: `1.5` clamps `riseTicks` (not enough distance per tick); `3.0` still clamps the 16/5 = 3.2 case; only `4.0` lets the defaults apply as written.
+
+**Phase 2 writes no velocity**: on entry **restore gravity + clear residual velocity**, then **write no velocity at all** and only detect landing, with `MAX_FALL_TICKS = 100` as the backstop. The old "servo the fall every tick" plan is withdrawn (the A-03 fixed-speed-vs-servo debate ends here: the duration follows the configured lift plus vanilla gravity, and there is no target-landing-time key any more).
 
 | Quantity | Value | Note |
 |---|---|---|
-| `fallTicks` | `zangief_cane.fallTicks`, default **40 ticks = 2.0 seconds**, range 1–200 | the plan's "1.7–2 seconds" takes the upper bound 2.0 seconds as the default; set 34 for 1.7 seconds |
-| Servo speed ceiling `MAX_SERVO_SPEED` | `3.0` blocks/tick (**added by this document**, safety valve) | prevents an absurd teleport speed when the remaining ticks are 1 and the remaining height is 20 blocks; after hitting the ceiling it finishes as free fall and logs one line `桑吉尔蔗 伺服触顶 h={} n={}` |
-| Safety cap `MAX_FALL_TICKS` | `100` ticks | the servo alone lands the player within `fallTicks`; this cap only backstops "the landing test failed" (stuck in a block seam) |
+| Phase durations (measured, identical in two rounds) | **14 / 15 / 22 ticks** | phases 0 / 1 / 2; phase 2's length follows height and gravity and is no longer configurable |
+| Lift (measured) | `riseHeightBlocks = 16` → **14.86 blocks** | see above: 15 only reaches 14.01 |
+| Fall damage (measured) | **12.00** (HP 20→8), identical on stone and grass; 0 when landing in water (vanilla) | see the `fallDistance` correction below |
+| `noGravity` five exit paths (measured) | landing **8.70** / `/kill` **8.70** / `/effect clear` **9.21** / dimension change **9.89** / disconnect (client killed during phase 1; after reconnecting there is no `noGravity` and it falls 8.70 in half a second) | all five green |
+| Camera (measured) | spin **17 ticks × 72° = 1224°** against 21 ticks of phase 2 ⇒ a **4-tick delay**; a screenshot also confirms the world is upside down during phase 2 | `spinDelayTicks = 4`, `inverted()` true from phase 2 on |
 
-How to verify during implementation: the log line `桑吉尔蔗 落地耗时 {} 刻（目标 {fallTicks}）`, where the deviation of the measured value from `fallTicks` must be ≤ 2 ticks; run it 5 times in a row (different heights: flat ground, a two-block platform, a four-block platform) and all runs must land near the same duration — which is exactly what a constant-speed approach cannot do.
+**`fallDistance` mechanism correction (state it this way)**: `fallDistance` does **not** accumulate while lifting (vanilla decrements it to zero when moving up), so the damage = **height from the highest point to the ground − 3**.
+Counter-check: if it did accumulate, a 14-block fall would carry `fallDistance` 28 and deal **25** damage; the measurement is **11–12**.
+The **conclusion** "the higher the lift, the harder the fall" still holds, but the **mechanism** must be stated correctly — otherwise someone will design against it (for example assuming that "lift to 30 blocks, then drop 5" would fall 35 blocks).
+
+How to verify during implementation: the log lines `桑吉尔蔗 相位 {n} 结束（{ticks} 刻）` and `桑吉尔蔗 抬升 {h} 格`; the measured phase durations are 14 / 15 / 22 ticks and `riseHeightBlocks = 16` lifts about 14.86 blocks.
 
 ### 3.12 `WildHunterCombat` (server-side decisions: target re-check / damage / knockback / kill extension)
 
@@ -1511,9 +1521,9 @@ The key set is written out column by column from the same `ENTRIES` table of `Mo
 | 33 | `farmstorm.configuration.wild_hunter.loopSoundRange` | 循环音的可听距离（格） | Looping sound audible range (blocks) | §8.1 #16 |
 | 34 | `farmstorm.configuration.zangief_cane.triggerRadius` | 触发球半径（格） | Trigger sphere radius (blocks) | §8.1 #17 |
 | 35 | `farmstorm.configuration.zangief_cane.stageDelayTicks` | 相位 0 的等待刻数 | Ticks spent in phase 0 | §8.1 #18 |
-| 36 | `farmstorm.configuration.zangief_cane.levitationLevel` | 漂浮等级（1 = I 级） | Levitation level (1 = level I) | §8.1 #19 |
-| 37 | `farmstorm.configuration.zangief_cane.levitationDurationTicks` | 漂浮时长（tick） | Levitation duration (ticks) | §8.1 #20 |
-| 38 | `farmstorm.configuration.zangief_cane.fallTicks` | 相位 2 的目标落地时长（tick） | Target landing duration of phase 2 (ticks) | §8.1 #21 |
+| 36 | `farmstorm.configuration.zangief_cane.riseHeightBlocks` | 相位 1 的抬升高度（格） | Blocks lifted in phase 1 | §8.1 #19 |
+| 37 | `farmstorm.configuration.zangief_cane.riseTicks` | 相位 1 的抬升时长（tick） | Ticks spent lifting in phase 1 | §8.1 #20 |
+| 38 | `farmstorm.configuration.zangief_cane.spinDelayTicks` | 相位 2 内自转的延迟刻数（tick） | Delay before the phase-2 spin starts (ticks) | §8.1 #21 |
 | 39 | `farmstorm.configuration.zangief_cane.spinDegreesPerTick` | 水平自转速度（度/刻） | Horizontal spin speed (degrees/tick) | §8.1 #22 |
 | 40 | `entity.farmstorm.molotov` | 莫洛托夫！ | Molotov | V-64 (the original table missed these two; without them `/summon` feedback and death messages show bare keys) |
 | 41 | `entity.farmstorm.compressed_puffed_wheat` | 压缩膨胀麦 | Compressed Puffed Wheat | V-64 |
@@ -1566,10 +1576,11 @@ This table **copies `.work/v002-BRIEF.md` §8 "sole inventory of new config keys
 | 15 | `wild_hunter.highlightRadius` | double | 64.0 blocks | 0.0–256.0 | maximum distance of the red silhouette | D-62 |
 | 16 | `wild_hunter.loopSoundRange` | double | 16.0 blocks | 0.0–64.0 | audible range of the looping sound | D-76 |
 | 17 | `zangief_cane.triggerRadius` | double | 1.5 blocks | 0.0–8.0 | trigger sphere radius (spherical Euclidean distance) | D-73 |
-| 18 | `zangief_cane.stageDelayTicks` | int | 14 ticks | 0–200 | duration of phase 0 (flipped, waiting to levitate) | D-69 |
-| 19 | `zangief_cane.levitationLevel` | int | level 7 | 1–255 | levitation level; amplifier = level − 1 = 6 | D-69 |
-| 20 | `zangief_cane.levitationDurationTicks` | int | 20 ticks (1 second) | 0–72000 | levitation duration = duration of phase 1 | D-69 |
-| 21 | `zangief_cane.fallTicks` | int | 40 ticks (2 seconds) | 1–200 | target landing duration of phase 2; the server servos the downward velocity every tick so that landing falls inside this duration | plan0.0.2.txt line 29 + added by this document |
+| 18 | `zangief_cane.stageDelayTicks` | int | 14 ticks | 0–200 | duration of phase 0 (flipped, waiting for the lift) | D-69 |
+
+| 19 | `zangief_cane.riseHeightBlocks` | int | **16** blocks | 1–64 | total lift of phase 1 (servo). Default 16 rather than 15: with 15 the measurement is only 14.01 blocks, with 16 it is 14.86 | author's in-game wording |
+| 20 | `zangief_cane.riseTicks` | int | 15 ticks | 1–200 | duration of phase 1 (lifting \`riseHeightBlocks\` blocks), ≈1.07 blocks/tick | author's in-game wording |
+| 21 | `zangief_cane.spinDelayTicks` | int | 4 ticks | 0–40 | how long after the start of phase 2 the spin begins (`fallingTicks > spinDelayTicks`; the clock starts at the phase-2 entry) | author's in-game wording |
 | 22 | `zangief_cane.spinDegreesPerTick` | double | **72.0** degrees/tick | 0.0–360.0 | horizontal spin in phase 2; 72 × 20 = 1440 degrees/second | D-70 |
 
 **Row count check**: `22` rows = `molotov` 3 (#1–#3) + `wild_apple` 2 (#4–#5) + `wild_hunter` 11 (#6–#16) + `zangief_cane` 6 (#17–#22). `117 + 22 = 139`.
@@ -1580,7 +1591,7 @@ This table **copies `.work/v002-BRIEF.md` §8 "sole inventory of new config keys
 |---|---|---|
 | A-01 | keep only `molotov.fireChance`, no `magmaChance` | the purpose cell of #2 states "the remaining percentage automatically places a magma block" |
 | A-02 | the duration belongs to `wild_hunter.durationTicks`, the Wild Apple does not get its own `hunterDurationTicks` | the purpose cell of #6 states "this is exactly the duration the Wild Apple grants" |
-| A-03 | use `zangief_cane.fallTicks` + per-tick servo, delete the "constant speed" option | #21; the mechanism is in §3.11 and §5.2 (that constant-speed key has been deleted and is not in the current version) |
+| A-03 | how phase 2 is driven (**superseded by the author's in-game wording**): phase 1 became a servo lift and phase 2 restores gravity and writes no velocity | #19–#21; mechanism in §3.11 (both the `fallTicks` and `dropVelocity` keys are gone) |m is in §3.11 and §5.2 (that constant-speed key has been deleted and is not in the current version) |
 | A-04 | the body writes `<group>.<key>`; only the language key carries the `farmstorm.configuration.` prefix | the first column of this table and #18–#39 of §7.3 |
 | A-05 | `spinDegreesPerTick` defaults to **72.0** degrees/tick | #22 |
 
@@ -1616,8 +1627,9 @@ loopSoundRange = 16.0              # D-76: looping sound audible range (blocks)
 [zangief_cane]
 triggerRadius = 1.5                # D-73: spherical 1.5 blocks
 stageDelayTicks = 14               # D-69: levitation after 14 ticks
-levitationLevel = 7                # D-69: level VII → amplifier 6
-levitationDurationTicks = 20       # D-69: 1 second
+riseHeightBlocks = 16              # phase 1 lift (blocks); 15 measures only 14.01, 16 gives 14.86
+riseTicks = 15                     # phase 1 duration (ticks) ≈ 1.07 blocks/tick
+spinDelayTicks = 4                 # phase-2 spin delay (ticks), clock starts at the phase-2 entry
 fallTicks = 40                     # phase 2 target landing duration (ticks) = 2 seconds, per-tick servo
 spinDegreesPerTick = 72.0          # D-70: 1440 degrees/second ÷ 20
 ```
@@ -1642,7 +1654,9 @@ The mechanical comparison during implementation: the number of leaf nodes in `ru
 
 | Constant | Value | Reason for keeping it in code | Basis |
 |---|---|---|---|
-| `MAX_FALL_TICKS` | `100` ticks | backstop cap, **not** the target duration: the target duration is `zangief_cane.fallTicks` from the config (default 40 ticks), and this cap only backstops "the landing test failed (stuck in a block seam)". Safety valves staying out of config is the existing v0.0.1 convention | HC-13 family |
+| `MAX_RISE_SPEED` | `4.0` blocks/tick | upward speed cap of the phase-1 servo: `1.5` clamps `riseTicks`, `3.0` still clamps the 16/5 = 3.2 case, and only `4.0` lets the defaults apply as written. Not in config, same rule as v0.0.1 | same class as HC-13 |
+| `MAX_FALL_TICKS` | `100` ticks | backstop cap, **not** a target duration: phase 2 writes no velocity and its length follows height and gravity, so this only backstops "the landing test failed" (stuck in a block seam) | same class as HC-13 |
+
 | white texture path / 18×18 size / red `(1.0, 0.15, 0.15, 0.45)` / the 32-per-frame cap | — | pure render parameters that change no gameplay outcome and are not "range"-type values. **The two distance-type values are already in config** (`wild_hunter.highlightRadius` #15, `wild_hunter.loopSoundRange` #16), and the client reads the same default values through the mirror constants of §4.4 | added by this document |
 | client mirror constants such as `DEFAULT_SPIN_DEGREES_PER_TICK` / `DEFAULT_SEARCH_RADIUS` / `DEFAULT_SEARCH_ANGLE` / `DEFAULT_HIGHLIGHT_RADIUS` / `DEFAULT_LOOP_SOUND_RANGE` | the same values as the config defaults: 72.0 / 5.0 / 30.0 / 64.0 / 16.0 | the client cannot read the SERVER config (the degradation rule of §4.4); the keys behind these 5 mirror constants are all in §8.1 (#22 / #9 / #10 / #15 / #16), and the comments name them as requiring synchronization | added by this document |
 | `strength(30.0F, 6.0F)` and `requiresCorrectToolForDrops()` of `compressed_hay_block` | — | D-57 has nailed down the three numbers and they are inherent block properties; making them tunable keys is a back door for balancing | D-57 |
@@ -1768,7 +1782,8 @@ Every item can be decided by one **concrete action**; "looks fine" is not accept
 | 7 | the landing semantics of Molotov | throw one on flat ground, count the fire and magma blocks and compare with D-58 | inside the 4-block sphere, fire/magma blocks have been added only above blocks whose top surface touches air; not one original block is lost; no explosion damage, no block destruction; fire : magma ≈ 85 : 15 (a rough check with 20 throws) |
 | 8 | Compressed Puffed Wheat fully carries over Puffed Wheat | throw one Puffed Wheat and one Compressed Puffed Wheat at the same position, recording each | the cube edge length matches (dry 3 / wet 5), the landing block matches, and the cells blocked by 3.6e6 blocks match; the only difference is the block written (hay block vs compressed hay block) |
 | 9 | the resistance boundary of the compressed hay block (D-57) | place one with `/setblock` and a cobblestone block next to it; explode each with Melon Grenade, Ubi Server and vanilla TNT | Melon Grenade cannot break the compressed hay block but breaks the cobblestone; Ubi Server breaks both; **vanilla TNT also breaks the compressed hay block** (vanilla `Explosion` subtracts `(resistance + 0.3) * 0.3` per cell, and 6.0 resistance cannot stop a cobblestone-tier block — cobblestone itself is destroyed by TNT) |
-| 10 | the three-phase timing and landing duration of Zangief Cane | stand inside 1.5 blocks, time it with a stopwatch and read the log; test once on flat ground, once on a two-block platform and once on a four-block platform | flipped immediately; levitation starts after 14 ticks (level VII, 20 ticks); falling + spinning starts after 34 ticks (72.0 degrees/tick = 1440 degrees/second); **the landing time measured at all three heights falls within `fallTicks` (default 40 ticks) ± 2 ticks** (this is the dividing line between the per-tick servo and the constant-speed option); within 100 ms of landing the screen and input are fully reset; the log shows the four lines `桑吉尔蔗 相位 0→1→2→结束` and `落地耗时 {N} 刻` |
+| 10 | the three-phase timing and measured readings of Zangief Cane | stand inside 1.5 blocks, time it with a stopwatch and read the log; test once on flat ground / a two-block platform / a four-block platform (**"platform" means a surface of at least 3×3**; a 1×1 pillar catches the player on the way down and is an edge case, not a defect, V-46) | flips at once; phase durations **14 / 15 / 22 ticks** (identical in two rounds); `riseHeightBlocks = 16` lifts **14.86 blocks**; fall damage **12.00** (HP 20→8) and 0 in water; spin **17 ticks × 72° = 1224°** (21 ticks of phase 2 ⇒ 4-tick delay); all five `noGravity` exit paths green |
+
 | 11 | Zangief Cane only affects non-ally players | teammate A, hostile player B, creative-mode player C and spectator D each step on one | only B is piledriven; A (same team) does not trigger; C and D do not trigger; after triggering, **the block disappears and drops no item at all** |
 | 12 | the input lock leaks nothing but ESC | test key by key with the 21 items of RT-13 in §10 and fill the table | everything except ESC is blocked; ESC opens the pause menu; all keys are restored at once when the effect disappears |
 | 13 | the three conditions of the red silhouette | stand within 5 blocks / beyond 65 blocks; in front of / behind a wall; a teammate / a hostile player | only creatures that are "≤64 blocks + unobstructed + non-ally" get a red silhouette; self and teammates are not drawn; nothing is drawn beyond 65 blocks |

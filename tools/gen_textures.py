@@ -193,6 +193,12 @@ ICONS: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
     ("awakened_torchflower_seeds", "激活的火把花种子", (("item", "torchflower_seeds"),)),
     ("awakened_pitcher_plant_pod", "激活的瓶子草种荚", (("item", "pitcher_pod"),)),
     ("converter", "转换器", (("item", "converter"), ("block", "crafting_table_front"))),
+    # V-23：F-65 注册的 4 个新作物物品没有图标，客户端 datagen 从 F-65 起跑不通。
+    # 源贴图是临时起手，最终外观由 F-95 审定（届时只改这一张表即可）。
+    ("molotov", "莫洛托夫！", (("item", "splash_potion"),)),
+    ("zangief_cane", "桑吉尔蔗", (("item", "sugar_cane"),)),
+    ("wild_apple", "狂野苹果", (("item", "apple"),)),
+    ("compressed_puffed_wheat", "压缩膨胀麦", (("block", "hay_block_side"),)),
 )
 
 # 转换器不是改良作物，图标不加「+」（plan0.0.1.txt 第 8 条只要求改良作物）。
@@ -243,6 +249,10 @@ BLOCK_TEXTURES: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
     ("awakened_pitcher_plant", "部署·激活的瓶子草",
      (("item", "pitcher_plant"), ("block", "pitcher_crop_top"))),
     ("fang_trap_cactus", "部署·赢过输过没死过", (("block", "cactus_side"),)),
+    # V-23：F-65 注册了这两个方块却没建外观，导致 runData --all 从 F-65 起就抛「贴图不存在」。
+    # 陷阱类部署方块在世界里不渲染几何，这张 PNG 只作破坏粒子；压缩干草块则是 cubeAll 的正式贴图。
+    ("zangief_cane", "部署·桑吉尔蔗（仅作破坏粒子）", (("block", "sugar_cane"),)),
+    ("compressed_hay_block", "压缩干草块", (("block", "hay_block_side"),)),
     # 顶面兼底面：原版 crafting_table 模型的 up / down 都用 crafting_table_top，这里照抄同一个口径。
     ("converter_top", "转换器·顶面（兼底面）", (("block", "crafting_table_top"),)),
     ("converter_side", "转换器·净工作台侧面（模型已不引用）", (("block", "crafting_table_side"),)),
@@ -635,7 +645,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--list",
         dest="list_items",
         action="store_true",
-        help="打印内置目标表（91 条：22 item + 56 stage + 12 block + 1 gui）后退出",
+        help="打印内置目标表（97 条：26 item + 56 stage + 14 block + 1 gui）后退出",
     )
     return parser
 

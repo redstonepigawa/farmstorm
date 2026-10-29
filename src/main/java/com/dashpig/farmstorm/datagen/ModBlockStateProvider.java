@@ -37,7 +37,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
     /** 十字 / 平面几何（作物、火把花、瓶子草）都是带透明边的 PNG，必须自带 cutout：原版 render type 在 Java 里注册，不随 parent 继承。 */
     private static final String CUTOUT = "minecraft:cutout";
     /** 陷阱类部署方块：空模型（只有 particle，与原版 barrier.json 同构），世界里不渲染任何几何。 */
-    private static final Set<String> DEPLOYED_INVISIBLE = Set.of("blast_carrot", "fang_trap_cactus");
+    private static final Set<String> DEPLOYED_INVISIBLE = Set.of("blast_carrot", "fang_trap_cactus", "zangief_cane");
     /**
      * 炮台 / 光环类部署方块：直接借用原版方块模型。
      * 瓶子草在原版是双格高植物，pitcher_plant_bottom/top 的几何都是 y -5~11（下沉 5 像素，单独占一格会插进下方方块），
@@ -63,6 +63,10 @@ public final class ModBlockStateProvider extends BlockStateProvider {
                 deployedStates(block);
             } else if (block instanceof ConverterBlock) {
                 converterStates(block);
+            } else {
+                // 普通方块（compressed_hay_block）：cubeAll + 同名贴图。
+                // 没有这个分支时普通方块会被静默跳过，不生成 blockstate，客户端表现为缺模型。
+                simpleBlock(block);
             }
         }
     }
@@ -190,7 +194,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         return id.getPath();
     }
 
-    /** 本模组注册的 20 个方块：14 作物 + 5 部署 + 1 转换器。 */
+    /** 本模组注册的 22 个方块：14 作物 + 6 部署 + 1 转换器 + 1 普通方块（compressed_hay_block）。 */
     private static List<Block> farmstormBlocks() {
         List<Block> blocks = new ArrayList<>();
         for (Block block : BuiltInRegistries.BLOCK) {

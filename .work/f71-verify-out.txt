@@ -1,0 +1,177 @@
+### RCON 已连接 127.0.0.1:25610
+
+## 0. 清场与基线
+> forceload add 96 96 112 112
+    "No chunks were marked for force loading\n"
+> fill 96 96 96 112 112 112 minecraft:air
+    "No blocks were filled\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> execute if block 104 100 100 minecraft:air
+    "Test passed\n"
+  [PASS] 清场基线：104,100,100 为空
+
+## A. 验收 2：标签命中（/execute if items block ... #farmstorm:converter_fuel）
+> setblock 100 100 100 minecraft:chest
+    "Changed the block at 100, 100, 100\n"
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test passed, count: 1\n"
+  [PASS] 命中标签 minecraft:wheat
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test passed, count: 1\n"
+  [PASS] 命中标签 minecraft:golden_apple
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test passed, count: 1\n"
+  [PASS] 命中标签 minecraft:crimson_fungus
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test passed, count: 1\n"
+  [PASS] 命中标签 farmstorm:puffed_wheat
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test passed, count: 1\n"
+  [PASS] 命中标签 farmstorm:molotov
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test passed, count: 1\n"
+  [PASS] 命中标签 farmstorm:wild_apple
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test failed\n"
+  [PASS] 未入标签 minecraft:diamond
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test failed\n"
+  [PASS] 未入标签 minecraft:enchanted_golden_apple
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test failed\n"
+  [PASS] 未入标签 farmstorm:puffed_wheat_seeds
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test failed\n"
+  [PASS] 未入标签 farmstorm:compressed_puffed_wheat
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test failed\n"
+  [PASS] 未入标签 minecraft:apple
+> execute if items block 100 100 100 container.0 #farmstorm:converter_fuel
+    "Test failed\n"
+  [PASS] 未入标签 farmstorm:converter
+
+## B. 验收 3 正例：3x3（中心工作台 + 八格各 1 个燃料，八格混搭）→ 1 个转换器
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 104 100 100 minecraft:air
+    "Could not set the block\n"
+> setblock 104 100 100 minecraft:crafter[crafting=true]
+    "Changed the block at 104, 100, 100\n"
+> item replace block 104 100 100 container.0 with minecraft:wheat
+    "Replaced a slot at 104, 100, 100 with [Wheat]\n"
+> item replace block 104 100 100 container.1 with minecraft:golden_apple
+    "Replaced a slot at 104, 100, 100 with [Golden Apple]\n"
+> item replace block 104 100 100 container.2 with minecraft:crimson_fungus
+    "Replaced a slot at 104, 100, 100 with [Crimson Fungus]\n"
+> item replace block 104 100 100 container.3 with farmstorm:molotov
+    "Replaced a slot at 104, 100, 100 with [item.farmstorm.molotov]\n"
+> item replace block 104 100 100 container.4 with minecraft:crafting_table
+    "Replaced a slot at 104, 100, 100 with [Crafting Table]\n"
+> item replace block 104 100 100 container.5 with farmstorm:puffed_wheat
+    "Replaced a slot at 104, 100, 100 with [Puffed Wheat]\n"
+> item replace block 104 100 100 container.6 with farmstorm:wild_apple
+    "Replaced a slot at 104, 100, 100 with [item.farmstorm.wild_apple]\n"
+> item replace block 104 100 100 container.7 with minecraft:carrot
+    "Replaced a slot at 104, 100, 100 with [Carrot]\n"
+> item replace block 104 100 100 container.8 with farmstorm:lucky_berry
+    "Replaced a slot at 104, 100, 100 with [Lucky Berry]\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+  [PASS] B. 验收 3 正例：3x3（中心工作台 + 八格各 1 个燃料，八格混搭）→ 1 个转换器：中心格就位
+> setblock 105 100 100 minecraft:redstone_block
+    "Changed the block at 105, 100, 100\n"
+> setblock 105 100 100 minecraft:air
+    "Changed the block at 105, 100, 100\n"
+> data get entity @e[type=minecraft:item,limit=1]
+    "Converter has the following entity data: {Motion: [0.0017540727552744235d, -0.4228539053919395d, -0.17379005455925203d], Health: 5s, Invulnerable: 0b, Air: 300s, OnGround: 0b, PortalCooldown: 0, Rotation: [12.441845f, 0.0f], FallDistance: 2.9157348f, Item: {count: 1, id: \"farmstorm:converter\"}, Pos: [104.5384640718095d, 98.05096604520708d, 95.98905594523097d], PickupDelay: 0s, Fire: -1s, UUID: [I; 549899447, -1196406588, -1972348100, 405201312], Lifespan: 6000, Age: 18s}\n"
+> execute if data entity @e[type=minecraft:item,limit=1] Item{id:"farmstorm:converter"}
+    "Test passed, count: 1\n"
+  [PASS] B. 验收 3 正例：3x3（中心工作台 + 八格各 1 个燃料，八格混搭）→ 1 个转换器：产出 item 实体 id = farmstorm:converter
+> execute if data entity @e[type=minecraft:item,limit=1] Item{count:1}
+    "Test passed, count: 1\n"
+  [PASS] B. 验收 3 正例：3x3（中心工作台 + 八格各 1 个燃料，八格混搭）→ 1 个转换器：产出数量 = 1
+
+## C. 验收 3 反例：把一格换成 minecraft:diamond → 无产物
+> kill @e[type=minecraft:item]
+    "Killed Converter\n"
+> setblock 108 100 100 minecraft:air
+    "Could not set the block\n"
+> setblock 108 100 100 minecraft:crafter[crafting=true]
+    "Changed the block at 108, 100, 100\n"
+> item replace block 108 100 100 container.0 with minecraft:diamond
+    "Replaced a slot at 108, 100, 100 with [Diamond]\n"
+> item replace block 108 100 100 container.1 with minecraft:wheat
+    "Replaced a slot at 108, 100, 100 with [Wheat]\n"
+> item replace block 108 100 100 container.2 with minecraft:golden_apple
+    "Replaced a slot at 108, 100, 100 with [Golden Apple]\n"
+> item replace block 108 100 100 container.3 with minecraft:crimson_fungus
+    "Replaced a slot at 108, 100, 100 with [Crimson Fungus]\n"
+> item replace block 108 100 100 container.4 with minecraft:crafting_table
+    "Replaced a slot at 108, 100, 100 with [Crafting Table]\n"
+> item replace block 108 100 100 container.5 with farmstorm:molotov
+    "Replaced a slot at 108, 100, 100 with [item.farmstorm.molotov]\n"
+> item replace block 108 100 100 container.6 with farmstorm:puffed_wheat
+    "Replaced a slot at 108, 100, 100 with [Puffed Wheat]\n"
+> item replace block 108 100 100 container.7 with farmstorm:wild_apple
+    "Replaced a slot at 108, 100, 100 with [item.farmstorm.wild_apple]\n"
+> item replace block 108 100 100 container.8 with minecraft:carrot
+    "Replaced a slot at 108, 100, 100 with [Carrot]\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+  [PASS] C. 验收 3 反例：把一格换成 minecraft:diamond → 无产物：中心格就位
+> setblock 109 100 100 minecraft:redstone_block
+    "Changed the block at 109, 100, 100\n"
+> setblock 109 100 100 minecraft:air
+    "Changed the block at 109, 100, 100\n"
+> data get entity @e[type=minecraft:item,limit=1]
+    "No entity was found\n"
+> execute if entity @e[type=minecraft:item]
+    "Test failed\n"
+  [PASS] C. 验收 3 反例：把一格换成 minecraft:diamond → 无产物：无任何 item 实体
+
+## D. 反例 2：中心放钻石块（不是工作台）→ 无产物
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> setblock 104 100 100 minecraft:air
+    "Changed the block at 104, 100, 100\n"
+> setblock 104 100 100 minecraft:crafter[crafting=true]
+    "Changed the block at 104, 100, 100\n"
+> item replace block 104 100 100 container.0 with minecraft:wheat
+    "Replaced a slot at 104, 100, 100 with [Wheat]\n"
+> item replace block 104 100 100 container.1 with minecraft:golden_apple
+    "Replaced a slot at 104, 100, 100 with [Golden Apple]\n"
+> item replace block 104 100 100 container.2 with minecraft:crimson_fungus
+    "Replaced a slot at 104, 100, 100 with [Crimson Fungus]\n"
+> item replace block 104 100 100 container.3 with farmstorm:molotov
+    "Replaced a slot at 104, 100, 100 with [item.farmstorm.molotov]\n"
+> item replace block 104 100 100 container.4 with minecraft:diamond_block
+    "Replaced a slot at 104, 100, 100 with [Block of Diamond]\n"
+> item replace block 104 100 100 container.5 with farmstorm:puffed_wheat
+    "Replaced a slot at 104, 100, 100 with [Puffed Wheat]\n"
+> item replace block 104 100 100 container.6 with farmstorm:wild_apple
+    "Replaced a slot at 104, 100, 100 with [item.farmstorm.wild_apple]\n"
+> item replace block 104 100 100 container.7 with minecraft:carrot
+    "Replaced a slot at 104, 100, 100 with [Carrot]\n"
+> item replace block 104 100 100 container.8 with farmstorm:lucky_berry
+    "Replaced a slot at 104, 100, 100 with [Lucky Berry]\n"
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+  [PASS] D. 反例 2：中心放钻石块（不是工作台）→ 无产物：中心格就位
+> setblock 105 100 100 minecraft:redstone_block
+    "Changed the block at 105, 100, 100\n"
+> setblock 105 100 100 minecraft:air
+    "Changed the block at 105, 100, 100\n"
+> data get entity @e[type=minecraft:item,limit=1]
+    "No entity was found\n"
+> execute if entity @e[type=minecraft:item]
+    "Test failed\n"
+  [PASS] D. 反例 2：中心放钻石块（不是工作台）→ 无产物：无任何 item 实体
+
+## E. 收尾：清场
+> kill @e[type=minecraft:item]
+    "No entity was found\n"
+> fill 96 96 96 112 112 112 minecraft:air
+    "Successfully filled 3 block(s)\n"
+
+### 全部断言通过 (0 FAIL)

@@ -40,6 +40,9 @@ public final class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(path, mcLoc(vanillaParent));
             } else if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ConverterBlock) {
                 withExistingParent(path, modLoc("block/" + blockPath(blockItem.getBlock())));
+            } else if ("compressed_hay_block".equals(path)) {
+                // TECH §3.14：普通方块物品直接复用方块模型，不额外要一张 item 贴图。
+                withExistingParent(path, modLoc("block/compressed_hay_block"));
             } else {
                 basicItem(item);
             }

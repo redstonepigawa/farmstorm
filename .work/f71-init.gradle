@@ -1,0 +1,18 @@
+// F-71 临时 init script：让 runData 只跑 server 侧 provider。
+// 原因：HEAD 6e352b7 上 ModBlockStateProvider 的两张部署方块表都没有 zangief_cane（F-65 新增的部署方块），
+// 客户端 provider 在「部署方块缺少外观定义: zangief_cane」处抛错，带 --all 的 runData 直接失败。
+// F-71 的产物只有 recipe + item tag 两个 server 侧文件，故把参数文件里的 --all 换成 --server：
+// 不写任何客户端资源、不改 build.gradle、不改 ModBlockStateProvider（越界）。
+gradle.projectsEvaluated {
+    def t = gradle.rootProject.tasks.findByName('runData')
+    if (t == null) {
+        throw new GradleException('[f71-init] runData task not found')
+    }
+    t.doFirst {
+        def f = new File(t.project.projectDir, 'build/moddev/dataRunProgramArgs.txt')
+        def text = f.getText('UTF-8')
+        def next = text.replaceAll(/(?m)^--all\s*$/, '--server')
+        f.setText(next, 'UTF-8')
+        println '[f71-init] dataRunProgramArgs.txt: --all -> --server'
+    }
+}

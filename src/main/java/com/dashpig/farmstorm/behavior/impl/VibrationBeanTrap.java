@@ -1,31 +1,90 @@
 package com.dashpig.farmstorm.behavior.impl;
 
+import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.behavior.DeployedKind;
 import com.dashpig.farmstorm.behavior.TrapBehavior;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
+import com.dashpig.farmstorm.config.FarmstormConfig;
+import com.dashpig.farmstorm.registry.FarmstormMobEffects;
+import java.util.Locale;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * 震动豆的陷阱行为（TECH §3.6）：非己方玩家进入 4.0 格即触发，范围内所有玩家获得 {@code vibration_bean.confusionTicks} 刻混乱，
  * 播一次爆炸音后静默消失、无掉落（D-92 / D-101）。
  *
- * <p>F-103 只立编译期骨架：触发条件恒空，因此不会触发也不会消失；结算由 F-124 填入。
+ * <p>两端（触发端与效果端）读同一个 config 键、写同一个 {@code <}，因此不存在「没触发却被混乱」的边界态。
  */
-public class VibrationBeanTrap implements TrapBehavior {
+public final class VibrationBeanTrap implements TrapBehavior {
+
+    /** 爆炸音的音源与音高：文档只给了「音源 BLOCKS、音高 0.9」，音量取原版默认的 1.0（TECH §3.6 ②）。 */
+    private static final float EXPLODE_VOLUME = 1.0F;
+    private static final float EXPLODE_PITCH = 0.9F;
 
     @Override
     public DeployedKind kind() {
         return DeployedKind.VIBRATION_BEAN;
     }
 
+    /**
+     * 触发端只认**非己方玩家**，并沿用既有陷阱的创造 / 旁观豁免（HC-09 / D-92）；
+     * 距离判据与效果端共用 {@code vibration_bean.triggerRadius} 与同一个严格小于（D-101）。
+     */
     @Override
     public Optional<Player> findTrigger(DeployedCropBlockEntity be) {
+        if (!(be.getLevel() instanceof ServerLevel level)) {
+            return Optional.empty();
+        }
+        Vec3 center = be.getBlockPos().getCenter();
+        double radius = FarmstormConfig.vibrationBeanTriggerRadius.get();
+        for (ServerPlayer player : level.players()) {
+            if (player.isSpectator() || player.isCreative() || be.isAlly(player)) {
+                continue;
+            }
+            if (center.distanceTo(player.position()) < radius) {
+                return Optional.of(player);
+            }
+        }
         return Optional.empty();
     }
 
+    /**
+     * 同一刻的四步（TECH §3.6 / DESIGN §6.5）：半径内**所有**玩家写混乱（不筛敌我，D-27 的一次性 AoE 口径）
+     * → 播一次爆炸音（只用原版既有事件，不构造 {@code Explosion}，D-58 边界 / D-100）
+     * → {@code consume()} 静默移除，不触战利品表（D-72）。
+     */
     @Override
     public void trigger(DeployedCropBlockEntity be, Player target) {
-        // 骨架：F-124 填触发结算
+        if (!(be.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        Vec3 center = be.getBlockPos().getCenter();
+        double radius = FarmstormConfig.vibrationBeanTriggerRadius.get();
+        int ticks = FarmstormConfig.vibrationBeanConfusionTicks.get();
+        int inRange = 0;
+        int applied = 0;
+        for (ServerPlayer player : level.players()) {
+            if (center.distanceTo(player.position()) >= radius) {
+                continue;
+            }
+            inRange++;
+            if (player.addEffect(new MobEffectInstance(FarmstormMobEffects.CONFUSION, ticks, 0, false, false, false))) {
+                applied++;
+            }
+        }
+        BlockPos pos = be.getBlockPos();
+        level.playSound(null, pos, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, EXPLODE_VOLUME, EXPLODE_PITCH);
+        Farmstorm.LOGGER.info(String.format(Locale.ROOT,
+                "震动豆 触发 @ %s 由 %s：球内玩家 %d 施加成功 %d（半径 %.2f 格，%d 刻，amplifier 0），爆炸音一次",
+                pos.toShortString(), target.getGameProfile().getName(), inRange, applied, radius, ticks));
+        be.consume();
     }
 }

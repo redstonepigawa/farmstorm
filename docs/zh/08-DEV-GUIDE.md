@@ -134,6 +134,8 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 | 灰度后处理让水下完全看不见 | 水下画面偏暗、低对比，取亮度后糊成一片均匀的灰；初步以为是「太暗」，试着抬伽马、去雾、去蓝色蒙版都不够 | **给水下单独一条灰度链**（提亮暗部 + 拉对比），而不是停掉灰度。判据：作者开 F3+F4 面板（后处理未生效）时画面正常 ⇒ 元凶就是后处理。V-81 |
 | 索敌锥比预期宽得多（面前一片全中） | `searchAngleDegrees` 直接当半角用了：设 90 实际是 180° 半球，不是 90° 锥 | 配置值按**全顶角**解释、比较时取半角（`maxAngle * 0.5`）；默认 60 = 半角 30°（V-82） |
 | 伤害日志显示「名义 8.4」但实际只掉 5，误判成封顶没生效 | 封顶与盔甲减免都在 `hurt()` 内部结算，日志只打了名义值 | 日志固定打**双读数** `名义伤害 X 实际掉血 Y`（V-82） |
+| 依附方块被挖，上面的陷阱方块**掉两个** | `updateShape` 返回 AIR 后，**原版形变更新自己会走 `updateOrDestroy → destroyBlock(pos, true)` 按战利品表掉一次**；我们又在 `updateShape` 里 `dropResources` 一次 ⇒ 两条路径各掉一个。老的「放这里免得 `onRemove` 复制」注释防错了对象 | **`updateShape` 里不要自己掉落**，交给原版移除路径（一定掉、只掉一次）；要「不掉」时先 `removeBlock(pos, false)` 再返回 AIR。判据：破坏依附方块掉 1、玩家直接挖也掉 1（V-86） |
+| 改了 config 默认值/键名，但跑起来还是旧行为 | **`run-*/config/farmstorm-server.toml` 不会自动跟随代码**：键缺失取默认值（可能正是你要改的那个）、旧键名残留则完全不生效。本轮踩过两次（`run-p13` 缺 `deployDropOnSupportLost`；`run-p14` 还是 `levitationLevel` 时代的旧键） | 改 config 后固定动作：**删掉 `run-*/config/farmstorm-server.toml` 让它重新生成**，或起服前 `Select-String` 核一遍键集（旧键 0 处、新键各 1 处）。否则整轮读数都在读默认值（V-87） |
 
 ## 8. 调试手法
 

@@ -195,9 +195,27 @@ public class DeployedCropBlock extends BaseEntityBlock {
             }
             return state.setValue(FLOATING, true);
         }
-        // 掉落放在这里而不是 onRemove：onRemove 无法区分「玩家破坏」与「依附丢失」，两处都掉会复制物品。
-        if (FarmstormConfig.deployDropOnSupportLost.get() && level instanceof ServerLevel server) {
-            Block.dropResources(state, server, pos, level.getBlockEntity(pos));
+        // 「先自己摘、再自己掉一次」是唯一确定性的做法：
+        // 若只返回 AIR 让别人处理，掉落会看调用方的脸色——实测同一次破坏里
+        // NeighborUpdater#executeShapeUpdate → Block#updateOrDestroy → Level#destroyBlock(pos, true) 会掉一次，
+        // 但在批量/同 tick 多次形变时可能根本不走 destroyBlock（方块凭空消失、0 掉落，实测到过）。
+        // 所以：先 removeBlock(pos, false) 把方块无掉落摘掉（随后的 AIR 施加变成空操作），
+        // 再由这里按配置决定是否 dropResources 一次 —— 恰好一次，与调用方无关。
+        if (level instanceof ServerLevel server) {
+            boolean drop = FarmstormConfig.deployDropOnSupportLost.get();
+            if (drop) {
+                // 战利品表优先；万一它返回空（实测在「同 tick 批量形变」这条路径上出现过 0 掉落），
+                // 兜底直接掉方块本体，保证「依附丢失 = 恰好 1 个本体」这条语义不落空。
+                java.util.List<net.minecraft.world.item.ItemStack> drops =
+                        Block.getDrops(state, server, pos, level.getBlockEntity(pos));
+                if (drops.isEmpty()) {
+                    drops = java.util.List.of(new net.minecraft.world.item.ItemStack(state.getBlock()));
+                }
+                for (net.minecraft.world.item.ItemStack stack : drops) {
+                    Block.popResource(server, pos, stack);
+                }
+            }
+            server.removeBlock(pos, false);
         }
         return Blocks.AIR.defaultBlockState();
     }

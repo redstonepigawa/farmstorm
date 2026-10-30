@@ -7,8 +7,11 @@ import com.dashpig.farmstorm.registry.FarmstormMobEffects;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import com.dashpig.farmstorm.registry.FarmstormSounds;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
@@ -48,6 +51,27 @@ public final class WildHunterAura {
     /** 被剥夺 AI 的生物 → 应恢复的 gameTime。 */
     private static final Map<UUID, Long> AI_RESTORE_AT = new ConcurrentHashMap<>();
 
+    /**
+     * #2 循环音的**服务端广播**重发间隔（刻）。曲长 47.14 s ≈ 942.8 刻，取 900 刻：
+     * 下一次在上一次还没播完时就发出（尾巴重叠约 42 刻 ≈ 2.1 s）。宁可轻微重叠，也不要出现空档——
+     * 空档会让听者以为「效果结束了」。
+     */
+    private static final int LOOP_BROADCAST_INTERVAL_TICKS = 900;
+    /**
+     * 广播半径（格）：与 {@code sounds.json} 里本曲的 {@code attenuation_distance: 32} 对齐——
+     * 32 格外的玩家本来就听不见，发包纯属浪费带宽。
+     */
+    private static final double LOOP_BROADCAST_RADIUS = 32.0;
+    /**
+     * 「这一对（持有者, 收件人）上次发包的 gameTime」。
+     * <p>为什么按**收件人**计时而不是按持有者：按持有者统一发的话，刚走进 32 格的人、以及刚重连的人，
+     * 最坏要等满 900 刻（45 秒）才会听到第一声——那会被当成「还是听不见」。按收件人计时，新人/重连者立刻收到。
+     */
+    private static final Map<LoopPair, Long> LOOP_LAST_SENT = new ConcurrentHashMap<>();
+
+    /** 广播计时的键。 */
+    private record LoopPair(UUID holder, UUID listener) {}
+
     private WildHunterAura() {}
 
     /** 每刻：阶梯高度、武器攻速、红烟粒子、AI 恢复扫描。 */
@@ -59,6 +83,7 @@ public final class WildHunterAura {
         applyStepHeight(player);
         applyWeaponAttackSpeed(player);
         spawnSmoke(player);
+        broadcastLoop(player);
     }
 
     /** #5：让非玩家生物「失去 AI」若干刻，到期自动恢复。 */
@@ -74,6 +99,16 @@ public final class WildHunterAura {
 
     /** 服务端每刻扫描到期项（不挂在某个玩家身上，掉线/换维度也不会漏恢复）。 */
     public static void sweep(ServerLevel level) {
+        // #2：掉线的持有者 / 收件人都不该留在计时表里——收件人掉线后重连要能**立刻**再收到（而不是等满 900 刻）
+        if (!LOOP_LAST_SENT.isEmpty()) {
+            var playerList = level.getServer().getPlayerList();
+            LOOP_LAST_SENT.keySet().removeIf(pair -> {
+                ServerPlayer holder = playerList.getPlayer(pair.holder());
+                ServerPlayer listener = playerList.getPlayer(pair.listener());
+                return holder == null || listener == null
+                        || !holder.hasEffect(FarmstormMobEffects.WILD_HUNTER);
+            });
+        }
         if (AI_RESTORE_AT.isEmpty()) {
             return;
         }
@@ -140,8 +175,50 @@ public final class WildHunterAura {
                 4, 0.5, 0.6, 0.5, 0.01);
     }
 
+    /**
+     * #2：把循环音**广播给附近的其它玩家**（作者报的 bug：原实现只有本地客户端那份 SoundInstance，
+     * 别人根本没收到任何东西）。
+     *
+     * <p>做法是原版 {@link ClientboundSoundPacket}（不是自定义 payload，不违反 D-50）：
+     * <ul>
+     *   <li><b>排除持有者本人</b>——他自己的那份由客户端 {@code WildHunterLoopSound}（{@code relative=true}）播放，
+     *       这里再发一份他就会听到两层，表现为回声/叠加；</li>
+     *   <li>原版包只播**一次**（本曲 47.14 s），所以按 {@link #LOOP_BROADCAST_INTERVAL_TICKS} 周期重发；</li>
+     *   <li>只发给 {@link #LOOP_BROADCAST_RADIUS} 内的玩家，与 {@code attenuation_distance: 32} 对齐。</li>
+     * </ul>
+     * 效果结束时不需要发「停止」：{@link #clear(ServerPlayer)} 摘掉重发记录，最后一次播放会在曲末自然结束。
+     */
+    private static void broadcastLoop(ServerPlayer holder) {
+        if (!(holder.level() instanceof ServerLevel level)) {
+            return;
+        }
+        long now = level.getGameTime();
+        double radiusSqr = LOOP_BROADCAST_RADIUS * LOOP_BROADCAST_RADIUS;
+        int sent = 0;
+        for (ServerPlayer listener : level.players()) {
+            if (listener == holder || listener.distanceToSqr(holder) > radiusSqr) {
+                continue;                              // 排除持有者本人：否则他会同时听到客户端那份 + 这份
+            }
+            LoopPair pair = new LoopPair(holder.getUUID(), listener.getUUID());
+            Long last = LOOP_LAST_SENT.get(pair);
+            if (last != null && now - last < LOOP_BROADCAST_INTERVAL_TICKS) {
+                continue;                              // 这位收件人还在本轮的播放窗口里
+            }
+            listener.connection.send(new ClientboundSoundPacket(
+                    FarmstormSounds.WILD_HUNTER_LOOP, SoundSource.PLAYERS,
+                    holder.getX(), holder.getY(), holder.getZ(), 1.0F, 1.0F, level.getRandom().nextLong()));
+            LOOP_LAST_SENT.put(pair, now);
+            sent++;
+        }
+        if (sent > 0) {
+            Farmstorm.LOGGER.info("狂野猎人 循环音 广播 t={} 持有者 {} → {} 人（半径 {} 格，排除持有者）",
+                    now, holder.getGameProfile().getName(), sent, (int) LOOP_BROADCAST_RADIUS);
+        }
+    }
+
     /** 失效即摘除两个临时修饰器（效果到期 / clear / 死亡 / 退出世界都由这里兜住）。 */
     public static void clear(ServerPlayer player) {
+        LOOP_LAST_SENT.keySet().removeIf(pair -> pair.holder().equals(player.getUUID()));  // 效果结束就不再重发
         AttributeInstance step = player.getAttribute(Attributes.STEP_HEIGHT);
         if (step != null) {
             step.removeModifier(STEP_ID);

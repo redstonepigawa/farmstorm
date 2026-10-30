@@ -2,8 +2,10 @@
 r"""Farmstorm v0.0.3 静态验收器。
 
 期望值全部从上游文档现算，不手抄：
-  - 139 个配置键  <- docs/zh/01-DESIGN.md §3.8（117）+ docs/zh/12-TECH-0.0.2.md §8.1（22），
-                     并与 run/config/farmstorm-server.toml 逐键比对（v0.0.3 的 19 行由 F-104 落地后再回到 158）
+  - config 键集  <- docs/zh/01-DESIGN.md §3.8（117）+ docs/zh/12-TECH-0.0.2.md §8.1（22）
+                   + docs/zh/18-TECH-0.0.3.md §8.1（v0.0.3 的 19 行，F-104），并与
+                   run/config/farmstorm-server.toml 逐键比对。19 行里 3 行是「改既有默认值」
+                   （fang_trap_cactus 的三个键），键名与 117 里的重名，按集合去重后是 155 个键
   - 90 个注册 ID  <- docs/zh/18-TECH-0.0.3.md §2.1 的 v0.0.3 列逐类小计（12 类，相加 90）
 
 用法：python -X utf8 tools/verify_project.py [--root <仓库根>]
@@ -67,6 +69,14 @@ def expected_config_keys(design: str) -> list[str]:
 
 
 def expected_config_keys_v002(tech: str) -> list[str]:
+    start = tech.index("### 8.1")
+    end = tech.index("### 8.2")
+    section = tech[start:end]
+    return [m.group(1) for m in re.finditer(
+        r"^\|\s*\d+\s*\|\s*`([A-Za-z0-9_.]+)`\s*\|", section, re.MULTILINE)]
+
+
+def expected_config_keys_v003(tech: str) -> list[str]:
     start = tech.index("### 8.1")
     end = tech.index("### 8.2")
     section = tech[start:end]
@@ -161,13 +171,22 @@ def main() -> int:
     java = root / "src/main/java/com/dashpig/farmstorm"
     all_java = "\n".join(read(f) for f in java.rglob("*.java")) if java.exists() else ""
 
-    print("== 1. config：文档 139 键 vs 生成的 toml ==")
+    print("== 1. config：文档键集 vs 生成的 toml ==")
     design = read(root / "docs/zh/01-DESIGN.md")
     tech = read(root / "docs/zh/12-TECH-0.0.2.md")
+    tech3 = read(root / "docs/zh/18-TECH-0.0.3.md")
     base = expected_config_keys(design)
     added = expected_config_keys_v002(tech)
-    exp = set(base) | set(added)
-    print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}）")
+    added3 = expected_config_keys_v003(tech3)
+    if len(added3) != 19:
+        fail(f"18-TECH §8.1 解析出 {len(added3)} 行，文档口径是 19 行（表格格式变了？）")
+    # 19 行里有若干行是「改既有默认值」——键名与上面的 117 / 22 重名，不是新键。
+    # 因此期望集是三个清单的并集（集合去重），重复行数现算、不写死：v0.0.3 是 3 行（139 + 16 = 155）。
+    overlap = set(added3) & (set(base) | set(added))
+    exp = set(base) | set(added) | set(added3)
+    print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}"
+          f" + 18-TECH §8.1 {len(added3)} 行；其中 {len(overlap)} 行是改既有默认值、键名已在上两份清单里，"
+          f"按并集去重后 {len(exp)} = {len(base) + len(added)} + {len(added3) - len(overlap)}）")
     toml = root / "run/config/farmstorm-server.toml"
     if toml.exists():
         got = toml_keys(read(toml))
@@ -199,7 +218,7 @@ def main() -> int:
             if real_extra:
                 fail(f"toml 多 {len(real_extra)} 个键且源码里存在（文档漏记 MISMATCH）: {real_extra[:8]}")
         else:
-            ok(f"139 个配置键与文档逐字一致（{len(got)} 键）")
+            ok(f"{len(exp)} 个配置键与文档逐字一致（toml {len(got)} 键）")
     else:
         warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
 

@@ -7,7 +7,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 /**
  * 服务端配置（DEC D-21 / D-22，TECH §4.11）。
  * 键是封闭集合（HC-07）：v0.0.1 的 117 个逐字对齐 01-DESIGN.md §3.8，v0.0.2 新增的 22 个逐字对齐
- * 12-TECH-0.0.2.md §8.1（即 BRIEF §8 的唯一清单），合计 139——不接受「差不多」。
+ * 12-TECH-0.0.2.md §8.1，v0.0.3 新增的 19 个逐字对齐 18-TECH-0.0.3.md §8.1（16 纯新增 + 3 改既有默认值），
+ * 合计 139 + 19 = 158——不接受「差不多」。
  * 字段不能是 final——值在静态块里赋值。
  */
 public final class FarmstormConfig {
@@ -188,6 +189,29 @@ public final class FarmstormConfig {
     public static ModConfigSpec.IntValue zangiefCaneRiseTicks;
     public static ModConfigSpec.IntValue zangiefCaneSpinDelayTicks;
     public static ModConfigSpec.DoubleValue zangiefCaneSpinDegreesPerTick;
+
+    // ---- 18-TECH §8.1：v0.0.3 新增 4 组 12 键 + 两组追加 4 键（合计 19 行）----
+    public static ModConfigSpec.ConfigValue<String> qbouncePoseMode;
+    public static ModConfigSpec.DoubleValue qbounceRotateDegreesPerTick;
+    public static ModConfigSpec.DoubleValue qbounceSquashAmplitude;
+    public static ModConfigSpec.IntValue qbounceSquashPeriodTicks;
+
+    public static ModConfigSpec.DoubleValue friendChivesHitRadius;
+    public static ModConfigSpec.IntValue friendChivesEffectTicks;
+    public static ModConfigSpec.DoubleValue friendChivesSoundRange;
+
+    public static ModConfigSpec.DoubleValue pointDefenseFungusInterceptRadius;
+    public static ModConfigSpec.IntValue pointDefenseFungusMaxIntercepts;
+    public static ModConfigSpec.IntValue pointDefenseFungusInterceptParticles;
+
+    public static ModConfigSpec.DoubleValue vibrationBeanTriggerRadius;
+    public static ModConfigSpec.IntValue vibrationBeanConfusionTicks;
+
+    public static ModConfigSpec.IntValue fangTrapSlownessDurationTicks;
+    public static ModConfigSpec.IntValue fangTrapSlownessLevel;
+
+    public static ModConfigSpec.DoubleValue zangiefCaneSlamDamage;
+    public static ModConfigSpec.BooleanValue zangiefCaneCancelFallDamage;
 
     // ---- 烘焙快照 ----
     /** 概率表条目数（§4.11.4 / §4.12）。 */
@@ -493,25 +517,31 @@ public final class FarmstormConfig {
         b.push("fang_trap_cactus");
         fangTrapTriggerRadius = b.comment("C-5 / D-20：触发用欧氏距离")
                 .translation(tr("fang_trap_cactus.triggerRadius"))
-                .defineInRange("triggerRadius", 3.0, 0.0, 32.0);
+                .defineInRange("triggerRadius", 2.5, 0.0, 32.0);
         fangTrapOuterFangCount = b.comment("外圈尖牙个数")
                 .translation(tr("fang_trap_cactus.outerFangCount"))
                 .defineInRange("outerFangCount", 8, 1, 64);
-        fangTrapOuterDelayTicks = b.comment("外圈尖牙延迟（0.5 秒）")
+        fangTrapOuterDelayTicks = b.comment("D-94：外圈尖牙延迟（0.2 秒）")
                 .translation(tr("fang_trap_cactus.outerDelayTicks"))
-                .defineInRange("outerDelayTicks", 10, 0, 200);
+                .defineInRange("outerDelayTicks", 4, 0, 200);
         fangTrapOuterRadius = b.comment("G-3：外圈尖牙分布半径")
                 .translation(tr("fang_trap_cactus.outerRadius"))
                 .defineInRange("outerRadius", 2.0, 0.0, 16.0);
         fangTrapInnerFangCount = b.comment("内圈尖牙个数")
                 .translation(tr("fang_trap_cactus.innerFangCount"))
                 .defineInRange("innerFangCount", 5, 1, 64);
-        fangTrapInnerDelayTicks = b.comment("内圈尖牙延迟（0.2 秒）")
+        fangTrapInnerDelayTicks = b.comment("D-94：内圈尖牙延迟（0.1 秒）")
                 .translation(tr("fang_trap_cactus.innerDelayTicks"))
-                .defineInRange("innerDelayTicks", 4, 0, 200);
+                .defineInRange("innerDelayTicks", 2, 0, 200);
         fangTrapInnerRadius = b.comment("G-3：内圈尖牙分布半径")
                 .translation(tr("fang_trap_cactus.innerRadius"))
                 .defineInRange("innerRadius", 1.0, 0.0, 16.0);
+        fangTrapSlownessDurationTicks = b.comment("D-94：尖牙实际造成伤害后施加的缓慢时长（60 刻 = 3 秒）")
+                .translation(tr("fang_trap_cactus.slownessDurationTicks"))
+                .defineInRange("slownessDurationTicks", 60, 0, 600);
+        fangTrapSlownessLevel = b.comment("D-94：缓慢等级（写入 amplifier = level − 1 = 4）")
+                .translation(tr("fang_trap_cactus.slownessLevel"))
+                .defineInRange("slownessLevel", 5, 1, 10);
         b.pop();
 
         b.push("bamboo_firecracker");
@@ -772,6 +802,61 @@ public final class FarmstormConfig {
         zangiefCaneSpinDegreesPerTick = b.comment("D-70：相位 2 水平自转（72 × 20 = 1440 度/秒，方向固定逆时针）")
                 .translation(tr("zangief_cane.spinDegreesPerTick"))
                 .defineInRange("spinDegreesPerTick", 72.0, 0.0, 360.0);
+        zangiefCaneSlamDamage = b.comment("D-96：落地固定伤害（点 = 半颗心，7.5 点 = 3.75 颗心）")
+                .translation(tr("zangief_cane.slamDamage"))
+                .defineInRange("slamDamage", 7.5, 0.0, 40.0);
+        zangiefCaneCancelFallDamage = b.comment("D-96：相位 2 期间取消自然坠落伤害；false = 自然坠落与固定伤害叠加，留作对照实验")
+                .translation(tr("zangief_cane.cancelFallDamage"))
+                .define("cancelFallDamage", true);
+        b.pop();
+
+        // ---- 18-TECH §8.1：v0.0.3 新增 4 组，按 §8.2 的片段顺序追加在文件末尾 ----
+        b.push("qbounce");
+        qbouncePoseMode = b.comment("D-82：坐姿分支——render = 只改渲染层（默认），mount = 服务端挂隐形坐骑")
+                .translation(tr("qbounce.poseMode"))
+                .defineInList("poseMode", "render", java.util.Arrays.asList("render", "mount"));
+        qbounceRotateDegreesPerTick = b.comment("D-81：持续旋转的角速度（度/刻，24 × 20 = 480 度/秒）；客户端按同一默认值镜像（§3.12）")
+                .translation(tr("qbounce.rotateDegreesPerTick"))
+                .defineInRange("rotateDegreesPerTick", 24.0, 0.0, 360.0);
+        qbounceSquashAmplitude = b.comment("D-81：压缩拉伸幅度（模型原尺寸的比例，0.15 = 15 %）")
+                .translation(tr("qbounce.squashAmplitude"))
+                .defineInRange("squashAmplitude", 0.15, 0.0, 0.90);
+        qbounceSquashPeriodTicks = b.comment("D-81：压缩拉伸一个完整周期的刻数（6 刻 ≈ 3.3 个周期/秒）")
+                .translation(tr("qbounce.squashPeriodTicks"))
+                .defineInRange("squashPeriodTicks", 6, 2, 100);
+        b.pop();
+
+        b.push("friend_chives");
+        friendChivesHitRadius = b.comment("D-85：落点作用球半径（格，欧氏距离）")
+                .translation(tr("friend_chives.hitRadius"))
+                .defineInRange("hitRadius", 6.0, 0.0, 16.0);
+        friendChivesEffectTicks = b.comment("D-85：Q弹 时长（200 刻 = 10 秒）")
+                .translation(tr("friend_chives.effectTicks"))
+                .defineInRange("effectTicks", 200, 20, 1200);
+        friendChivesSoundRange = b.comment("D-85：命中音的可闻半径（格）")
+                .translation(tr("friend_chives.soundRange"))
+                .defineInRange("soundRange", 32.0, 0.0, 64.0);
+        b.pop();
+
+        b.push("point_defense_fungus");
+        pointDefenseFungusInterceptRadius = b.comment("D-87：拦截作用球半径（格，欧氏距离；AABB 只做粗筛）")
+                .translation(tr("point_defense_fungus.interceptRadius"))
+                .defineInRange("interceptRadius", 8.0, 0.0, 16.0);
+        pointDefenseFungusMaxIntercepts = b.comment("D-88：拦截次数上限，第 N 次拦截后静默移除")
+                .translation(tr("point_defense_fungus.maxIntercepts"))
+                .defineInRange("maxIntercepts", 6, 1, 64);
+        pointDefenseFungusInterceptParticles = b.comment("D-89：拦截图效的粒子数（类型固定 ParticleTypes.CRIT，不参数化）")
+                .translation(tr("point_defense_fungus.interceptParticles"))
+                .defineInRange("interceptParticles", 8, 0, 64);
+        b.pop();
+
+        b.push("vibration_bean");
+        vibrationBeanTriggerRadius = b.comment("D-92 / D-101：触发距离（格，严格小于；触发端与效果端共用这一个键与这一个小于号）")
+                .translation(tr("vibration_bean.triggerRadius"))
+                .defineInRange("triggerRadius", 4.0, 0.0, 16.0);
+        vibrationBeanConfusionTicks = b.comment("D-92：混乱时长（80 刻 = 4 秒）；confusion 组本身不设键，时长由施加方写入")
+                .translation(tr("vibration_bean.confusionTicks"))
+                .defineInRange("confusionTicks", 80, 20, 600);
         b.pop();
 
         SPEC = b.build();

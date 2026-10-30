@@ -313,6 +313,30 @@ public final class ModLangProvider extends LanguageProvider {
         config(entries, "zangief_cane.riseTicks", "相位 1 抬完所用的刻数", "Ticks used to lift the player in phase 1");
         config(entries, "zangief_cane.spinDelayTicks", "视角自转开始前的倒转时长（刻）", "Ticks of upside-down before the spin starts");
         config(entries, "zangief_cane.spinDegreesPerTick", "水平自转速度（度/刻）", "Horizontal spin speed (degrees/tick)");
+        // ---- v0.0.3 的 4 个新分组 12 条 + 两组追加 4 条 = 16 条（F-104 / 18-TECH §8.1）----
+        // §8.1 的 19 行里有 3 行是「改既有默认值」（fang_trap_cactus 的 triggerRadius / outerDelayTicks /
+        // innerDelayTicks），它们的语言键已在上面写过、§8.1 表下注要求逐字保留，因此不重复登记。
+        config(entries, "qbounce.poseMode", "坐姿分支（render = 只改渲染层，mount = 服务端挂隐形坐骑）",
+                "Pose branch (render = rendering only, mount = server-side invisible mount)");
+        config(entries, "qbounce.rotateDegreesPerTick", "持续旋转的角速度（度/刻）", "Continuous rotation speed (degrees/tick)");
+        config(entries, "qbounce.squashAmplitude", "压缩拉伸幅度（模型原尺寸的比例，0.15 = 15 %）",
+                "Squash-stretch amplitude (ratio of the original model size; 0.15 = 15 %)");
+        config(entries, "qbounce.squashPeriodTicks", "压缩拉伸一个完整周期的刻数", "Ticks of one full squash-stretch cycle");
+        config(entries, "friend_chives.hitRadius", "落点作用球半径（格）", "Impact sphere radius (blocks)");
+        config(entries, "friend_chives.effectTicks", "Q弹 时长（刻）", "Q-Bounce duration in ticks");
+        config(entries, "friend_chives.soundRange", "命中音的可闻半径（格）", "Hit sound audible range (blocks)");
+        config(entries, "point_defense_fungus.interceptRadius", "拦截作用球半径（格）", "Intercept sphere radius (blocks)");
+        config(entries, "point_defense_fungus.maxIntercepts", "拦截次数上限（第 N 次后静默移除）",
+                "Intercept limit (silently removed after the Nth intercept)");
+        config(entries, "point_defense_fungus.interceptParticles", "拦截图效的粒子数", "Intercept particle count");
+        config(entries, "vibration_bean.triggerRadius", "触发距离（格，严格小于）",
+                "Trigger distance (blocks, strictly less than)");
+        config(entries, "vibration_bean.confusionTicks", "混乱时长（刻）", "Confusion duration in ticks");
+        config(entries, "fang_trap_cactus.slownessDurationTicks", "缓慢时长（刻）", "Slowness duration in ticks");
+        config(entries, "fang_trap_cactus.slownessLevel", "缓慢等级（1 = I 级）", "Slowness level (1 = level I)");
+        config(entries, "zangief_cane.slamDamage", "落地固定伤害（点）", "Fixed landing damage (points)");
+        config(entries, "zangief_cane.cancelFallDamage", "相位 2 期间取消自然坠落伤害",
+                "Cancel natural fall damage during phase 2");
         return List.copyOf(entries);
     }
 

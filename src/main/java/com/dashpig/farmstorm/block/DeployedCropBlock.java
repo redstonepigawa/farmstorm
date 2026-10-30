@@ -55,9 +55,11 @@ public class DeployedCropBlock extends BaseEntityBlock {
             Codec.BOOL.optionalFieldOf("supports_floating", false).forGetter(DeployedCropBlock::supportsFloating),
             Codec.BOOL.optionalFieldOf("turret_hard_mine", false).forGetter(DeployedCropBlock::turretHardMine),
             Codec.BOOL.optionalFieldOf("explosion_immune", false).forGetter(DeployedCropBlock::explosionImmune),
+            Codec.BOOL.optionalFieldOf("unattached", false).forGetter(DeployedCropBlock::unattached),
             propertiesCodec()
-    ).apply(instance, (kindName, floating, hardMine, immune, properties) ->
-            new DeployedCropBlock(CropProfile.byKind(DeployedKind.valueOf(kindName)), floating, hardMine, immune, properties)));
+    ).apply(instance, (kindName, floating, hardMine, immune, unattached, properties) ->
+            new DeployedCropBlock(CropProfile.byKind(DeployedKind.valueOf(kindName)), floating, hardMine, immune, unattached,
+                    properties)));
 
     private final CropProfile profile;
     private final DeployedKind kind;
@@ -65,10 +67,12 @@ public class DeployedCropBlock extends BaseEntityBlock {
     private final boolean supportsFloating;
     private final boolean turretHardMine;
     private final boolean explosionImmune;
+    /** D-91：与 {@link #supportsFloating} 正交的「从一开始就不依附」；只有 {@code vibration_bean} 传 true。 */
+    private final boolean unattached;
     private final boolean allyOnlyBreak;
 
     public DeployedCropBlock(CropProfile profile, boolean supportsFloating, boolean turretHardMine, boolean explosionImmune,
-                             BlockBehaviour.Properties properties) {
+                             boolean unattached, BlockBehaviour.Properties properties) {
         super(properties);
         this.profile = profile;
         this.kind = profile.kind() == null ? DeployedKind.BLAST_CARROT : profile.kind();
@@ -76,6 +80,7 @@ public class DeployedCropBlock extends BaseEntityBlock {
         this.supportsFloating = supportsFloating;
         this.turretHardMine = turretHardMine;
         this.explosionImmune = explosionImmune;
+        this.unattached = unattached;
         // D-14：只有火把花 / 瓶子草既爆炸免疫又「非己方不可挖」，两个标志恒同真同假。
         this.allyOnlyBreak = explosionImmune;
         this.registerDefaultState(this.stateDefinition.any()
@@ -102,6 +107,11 @@ public class DeployedCropBlock extends BaseEntityBlock {
 
     public boolean explosionImmune() {
         return this.explosionImmune;
+    }
+
+    /** 「从一开始就不依附」（D-91 §7.1）：永不读写成名 FLOATING，也不参与依附面判定。 */
+    public boolean unattached() {
+        return this.unattached;
     }
 
     public boolean allyOnlyBreak() {
@@ -175,14 +185,26 @@ public class DeployedCropBlock extends BaseEntityBlock {
 
     @Override
     protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        // D-91：不依附模式没有依附面可查，恒真（BlockItem#canPlace / updateOrDestroy / FallingBlock 都拿到 true）。
+        if (this.unattached) {
+            return true;
+        }
         BlockPos supportPos = supportPos(state, pos);
         return isSupportValid(level.getBlockState(supportPos), level, supportPos, supportDirection(state));
     }
 
-    /** 依附方块消失：可悬空的转 FLOATING，其余的直接变空气并按 G-9 掉落本体。 */
+    /**
+     * 依附方块消失：可悬空的转 FLOATING，其余的直接变空气并按 G-9 掉落本体。
+     * 不依附模式（D-91）不看方向、也不看支撑，任何更新都返回自身实例。
+     */
     @Override
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
                                     BlockPos pos, BlockPos neighborPos) {
+        // D-91：返回同一实例 ⇒ Block#updateOrDestroy 的 newState != state 为 false ⇒ 既不 destroyBlock 也不 setBlock。
+        // 必须早于下面 direction != supportDirection(state) 的判断：不依附方块的 6 个方向都要走这条。
+        if (this.unattached) {
+            return state;
+        }
         if (direction != supportDirection(state)) {
             return state;
         }

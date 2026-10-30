@@ -41,28 +41,28 @@ public final class FarmstormBlocks {
     /** D-84：朋友的韭的种植形态，注册 ID 由档案的作物方块键给出（{@code friend_chives_crop}）；4 个 age 由 F-114 落。 */
     public static final DeferredBlock<FarmstormCropBlock> FRIEND_CHIVES_CROP = crop(CropProfile.FRIEND_CHIVES);
 
-    // ---- 6 个部署方块（kind / 悬空 / 固定硬挖 / 爆炸免疫）----
-    public static final DeferredBlock<DeployedCropBlock> BLAST_CARROT = deployed(CropProfile.BLAST_CARROT, false, false, false);
-    public static final DeferredBlock<DeployedCropBlock> PUMPKIN_TURRET = deployed(CropProfile.PUMPKIN_TURRET, true, true, false);
+    // ---- 8 个部署方块（kind / 悬空 / 固定硬挖 / 爆炸免疫 / 不依附）----
+    public static final DeferredBlock<DeployedCropBlock> BLAST_CARROT = deployed(CropProfile.BLAST_CARROT, false, false, false, false);
+    public static final DeferredBlock<DeployedCropBlock> PUMPKIN_TURRET = deployed(CropProfile.PUMPKIN_TURRET, true, true, false, false);
     public static final DeferredBlock<DeployedCropBlock> AWAKENED_TORCHFLOWER =
-            deployed(CropProfile.AWAKENED_TORCHFLOWER, true, false, true);
+            deployed(CropProfile.AWAKENED_TORCHFLOWER, true, false, true, false);
     public static final DeferredBlock<DeployedCropBlock> AWAKENED_PITCHER_PLANT =
-            deployed(CropProfile.AWAKENED_PITCHER_PLANT, true, false, true);
+            deployed(CropProfile.AWAKENED_PITCHER_PLANT, true, false, true, false);
     public static final DeferredBlock<DeployedCropBlock> FANG_TRAP_CACTUS =
-            deployed(CropProfile.FANG_TRAP_CACTUS, false, false, false);
+            deployed(CropProfile.FANG_TRAP_CACTUS, false, false, false, false);
     /** D-68：陷阱口径与尖牙仙人掌逐项一致；与它共用同一个 BlockEntityType（RT-04）。 */
     public static final DeferredBlock<DeployedCropBlock> ZANGIEF_CANE =
-            deployed(CropProfile.ZANGIEF_CANE, false, false, false);
+            deployed(CropProfile.ZANGIEF_CANE, false, false, false, false);
     /**
      * D-86：近防菌，炮台类外观（不隐形）；索敌在 F-118，结算与图效在 F-119 / F-120。
      * 三个旗标文档没有逐项点名，按同类（炮台类只有 {@link #PUMPKIN_TURRET} 一个既有实例）比出来：
      * 悬空 = true（DESIGN §5.7 的「依附丢失后保留并标记」描述的就是这条）、固定硬挖 = true（炮台类口径）、爆炸免疫 = false（只有火把花 / 瓶子草免疫）。
      */
     public static final DeferredBlock<DeployedCropBlock> POINT_DEFENSE_FUNGUS =
-            deployed(CropProfile.POINT_DEFENSE_FUNGUS, true, true, false);
-    /** D-91：震动豆，隐形空模型；不依附方块的第 5 个旗标 {@code unattached} 由 F-123 加，此处仍是 4 参形态。 */
+            deployed(CropProfile.POINT_DEFENSE_FUNGUS, true, true, false, false);
+    /** D-91：震动豆，隐形空模型；第 5 个旗标 {@code unattached = true} 是它唯一的专属模式（F-123，§7.1）。 */
     public static final DeferredBlock<DeployedCropBlock> VIBRATION_BEAN =
-            deployed(CropProfile.VIBRATION_BEAN, false, false, false);
+            deployed(CropProfile.VIBRATION_BEAN, false, false, false, true);
 
     // ---- 1 个功能方块 ----
     public static final DeferredBlock<ConverterBlock> CONVERTER = REGISTER.registerBlock("converter", ConverterBlock::new,
@@ -91,7 +91,8 @@ public final class FarmstormBlocks {
     }
 
     private static DeferredBlock<DeployedCropBlock> deployed(CropProfile profile, boolean supportsFloating,
-                                                             boolean turretHardMine, boolean explosionImmune) {
+                                                             boolean turretHardMine, boolean explosionImmune,
+                                                             boolean unattached) {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
                 .mapColor(MapColor.PLANT)
                 .strength(0.5F)
@@ -105,7 +106,7 @@ public final class FarmstormBlocks {
             properties = properties.explosionResistance(3600000.0F);
         }
         return REGISTER.registerBlock(profile.path(),
-                props -> new DeployedCropBlock(profile, supportsFloating, turretHardMine, explosionImmune, props),
+                props -> new DeployedCropBlock(profile, supportsFloating, turretHardMine, explosionImmune, unattached, props),
                 properties);
     }
 

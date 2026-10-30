@@ -100,14 +100,14 @@ public final class Farmstorm {
                 demolition++;
             }
         }
-        boolean taxonomyOk = CropProfile.ALL.size() == 19
-                && throwable == 10 && deployable == 6 && edible == 3 && demolition == 4;
+        boolean taxonomyOk = CropProfile.ALL.size() == 22
+                && throwable == 12 && deployable == 7 && edible == 3 && demolition == 4;
         LOGGER.info("自检 作物 {} 种：投掷型 {} / 部署型 {} / 食用型 {}；破障类 {} → {}",
                 CropProfile.ALL.size(), throwable, deployable, edible, demolition, taxonomyOk ? "OK" : "FAIL");
 
-        // D-55 + D-56：池从「ALL 减幸运浆果」的自动推导改成显式排除三件，19 - 3 = 16（TECH §11 #3）。
+        // D-55 + D-56 + D-97：池从「ALL 减幸运浆果」的自动推导改成显式排除三件，22 - 3 = 19（TECH §11 #2）。
         int poolSize = CropProfile.LUCKY_BERRY_POOL.size();
-        boolean poolOk = poolSize == 16 && CropProfile.LUCKY_BERRY_POOL.stream().noneMatch(profile ->
+        boolean poolOk = poolSize == 19 && CropProfile.LUCKY_BERRY_POOL.stream().noneMatch(profile ->
                 profile == CropProfile.LUCKY_BERRY || profile == CropProfile.WILD_APPLE
                         || profile == CropProfile.COMPRESSED_PUFFED_WHEAT);
         LOGGER.info("自检 幸运浆果池 {} 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ {}",

@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 
 /**
- * 单个改良作物的静态档案（DEC §4 的 15 条，一条一个常量）。
+ * 单个改良作物的静态档案（DEC §4 的 22 条，一条一个常量）。
  * 物品 / 方块 / 实体都用这里的数据，避免同一个注册 ID 在多处各写一份字符串。
  *
  * <p>DEC §4 的两列是两个正交维度（DESIGN §2.4），这里是两个独立字段：
@@ -127,14 +127,15 @@ public record CropProfile(
             categorySet(CropCategory.TRAP),
             null, null, DeployedKind.VIBRATION_BEAN, Set.of(AttachFace.FLOOR), THROWABLE_STACK_TIER);
 
-    /** DEC §4 的 19 条，顺序即 00-DECISIONS §4 的行号。 */
+    /** DEC §4 的 22 条，顺序即 00-DECISIONS §4 的行号（第 20~22 行是 v0.0.3 的三条新档案）。 */
     public static final List<CropProfile> ALL = List.of(
             PUFFED_WHEAT, BLAST_CARROT, UBI_SERVER, TOXIC_UBI_SERVER, POWER_BEET,
             MELON_SLICE_BOMB, MELON_GRENADE, PUMPKIN_TURRET, AWAKENED_TORCHFLOWER, AWAKENED_PITCHER_PLANT,
             FANG_TRAP_CACTUS, BAMBOO_FIRECRACKER, RED_MUSHROOM_PUFF, BROWN_MUSHROOM_PUFF, LUCKY_BERRY,
-            MOLOTOV, ZANGIEF_CANE, WILD_APPLE, COMPRESSED_PUFFED_WHEAT);
+            MOLOTOV, ZANGIEF_CANE, WILD_APPLE, COMPRESSED_PUFFED_WHEAT,
+            FRIEND_CHIVES, POINT_DEFENSE_FUNGUS, VIBRATION_BEAN);
 
-    /** D-55 + D-56：19 条里排除 lucky_berry、wild_apple、compressed_puffed_wheat → 16 条。 */
+    /** D-55 + D-56 + D-97：22 条里排除 lucky_berry、wild_apple、compressed_puffed_wheat → 19 条。 */
     public static final List<CropProfile> LUCKY_BERRY_POOL = ALL.stream()
             .filter(profile -> profile != LUCKY_BERRY)
             .filter(profile -> profile != WILD_APPLE)
@@ -159,7 +160,7 @@ public record CropProfile(
         return profile;
     }
 
-    /** 部署方块按 kind 反查档案：6 个方块的行为参数（附着面）只有这一处来源。 */
+    /** 部署方块按 kind 反查档案：8 个 kind 的行为参数（附着面）只有这一处来源。 */
     public static CropProfile byKind(DeployedKind kind) {
         return ALL.stream()
                 .filter(profile -> profile.kind() == kind)
@@ -167,7 +168,7 @@ public record CropProfile(
                 .orElseThrow(() -> new IllegalArgumentException("No crop profile for kind " + kind));
     }
 
-    /** 是否为部署型（5 个）。判据是类型列（§2.2.2），不是类别。 */
+    /** 是否为部署型（7 个）。判据是类型列（§2.2.2），不是类别。 */
     public boolean isDeployed() {
         return this.type == CropType.DEPLOYABLE;
     }

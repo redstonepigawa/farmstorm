@@ -12,5 +12,12 @@
     "sounds": [
       { "name": "farmstorm:zangief_piledriver", "attenuation_distance": 16 }
     ]
+  },
+  "friend_chives": {
+    "category": "player",
+    "subtitle": "subtitles.farmstorm.friend_chives",
+    "sounds": [
+      { "name": "farmstorm:friend_chives", "stream": false }
+    ]
   }
 }

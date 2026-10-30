@@ -311,7 +311,7 @@ menu types             1
 | 项 | 内容 |
 |---|---|
 | 职责 | 朋友的韭的投掷物。落点对**欧氏 6 格**球内的生物施加 200 刻 Q弹；**至少命中 1 个生物**时在落点播一次命中音（32 格可闻），空投不响（D-85） |
-| 关键方法 | `protected CropProfile profile()` 返回 `CropProfile.FRIEND_CHIVES`（必须是静态常量：基类在 `defineSynchedData` 期间就会调到它）；重写 `onImpact(ServerLevel, Vec3, @Nullable Entity)`——① `level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, pos).inflate(radius), e -> e != shooter && e.isAlive() && pos.distanceTo(e.position()) <= radius)`；② 对每个命中者 `addEffect(new MobEffectInstance(FarmstormMobEffects.Q_BOUNCE, ticks, 0, false, true, true))`；③ 命中数 > 0 时在落点播放命中音 |
+| 关键方法 | `protected CropProfile profile()` 返回 `CropProfile.FRIEND_CHIVES`（必须是静态常量：基类在 `defineSynchedData` 期间就会调到它）；重写 `onImpact(ServerLevel, Vec3, @Nullable Entity)`——① `level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, pos).inflate(radius), e -> e.isAlive() && pos.distanceTo(e.position()) <= radius)`；② 对每个命中者 `addEffect(new MobEffectInstance(FarmstormMobEffects.Q_BOUNCE, ticks, 0, false, true, true))`；③ 命中数 > 0 时在落点播放命中音 |
 | 二次筛 | AABB 只是粗筛（`inflate(6.0)` 给的是 12×12×12 的立方），命中判定必须再用 `distanceTo` 做欧氏复核——否则就成了切比雪夫（D-20 的欧氏口径、D-85 的球体） |
 | 读哪些 config 键 | `friend_chives.hitRadius`（6.0 格）、`friend_chives.effectTicks`（200 刻）、`friend_chives.soundRange`（32.0 格） |
 | 改哪些既有文件 | `registry/FarmstormEntityTypes.java`（+1 次 `projectile("friend_chives", FriendChivesProjectile::new)`，参数与既有 10 个逐字一致：`MISC` / `0.25×0.25` / tracking 4 / interval 10）；`registry/FarmstormItems.java`（`FRIEND_CHIVES` 的 `cropItem` 指向它）；`registry/FarmstormSounds.java`（+1 个可变距离事件） |

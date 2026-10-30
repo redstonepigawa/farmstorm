@@ -276,7 +276,7 @@
 - Phase 16 全部出口判据通过，特别是 `F-103`（`blocks` +3、`entity_types` +2、`sound_events` +1）与 `F-105`（`FRIEND_CHIVES` 与 `POINT_DEFENSE_FUNGUS` 两条档案）。
 - `18` §3.3（朋友的韭投掷物）、§3.4（近防菌行为类）、§6（拦截的四筛与判据）、§9.2 附（音效事件总表）、§11 #8 / #9 / #12 / #13 / #14 已读；`17` §4（朋友的韭）、§5（近防菌）、§12.4 / §12.14 已读。
 - 家族口径已知：`ThrownCropEntity` 共 **12** 个成员（0.0.2 的 10 + 本版 2），判定用基类 `instanceof`，不写 ID 白名单（D-98；`18` §6.1）。
-- 三条增量边界：`sound_events` 增量 **+1**（只有 `friend_chives`）、`block_entities` 仍是 **6**（两个新方块都复用 `DeployedCropBlockEntity`）、`sounds.json` 事件数在本阶段仍是 **2**（不新增任何音效事件，A-13）。
+- 三条增量边界：`sound_events` 增量 **+1**（只有 `friend_chives`）、`block_entities` 仍是 **6**（两个新方块都复用 `DeployedCropBlockEntity`）、`sound_events` 增量 **+1**（只有 `friend_chives`）、`sounds.json` 事件数 **2 → 3**；拦截音与爆炸音**复用原版**不新增（A-13 的适用范围仅限那两个音，**不要**扩写成「本阶段不新增任何音效事件」——那是旧稿的错写）。
 - 己方判据只用既有的 `be.isAlly(player)` 一条链路，不新写队伍比较；归属者不是玩家时按非己方处理（`18` §6.1 的己方排除行）。
 
 ### 4.2 本阶段目标
@@ -337,7 +337,7 @@
 - 己方穿透的两条证据：放置者本人与同队队友各投一次，`interceptCount` 不变、无粒子。
 - 落点球的两个距离读数（6.0 格施加 / 对角 8.4 格不施加）与投掷者本人也拿效果的证据。
 - `n` 的两组读数：命中一次（`n ≥ 1`，播一次）与空投（`n = 0`，不播）。
-- 注册自检行（90；`entity_types` 13 / `sound_events` 3 / `block_entities` 6）与 `sounds.json` 的事件数（2）。
+- 注册自检行（90；`entity_types` 13 / `sound_events` 3 / `block_entities` 6）与 `sounds.json` 的事件数（**2 → 3**，即 F-116 加上 `friend_chives` 之后为 3）。
 - 未关闭的问题（尤其是 `getEntitiesOfClass` 的 predicate 重载是否可用、区块卸载后 `interceptCount` 的表现、`isAlly` 在无队伍时的返回值）。
 
 ---

@@ -276,7 +276,7 @@ Phase subtotal: **8 tasks, 14.0 person-days** (S 1 / M 5 / L 2).
 - All of Phase 16's exit criteria pass, especially `F-103` (`blocks` +3, `entity_types` +2, `sound_events` +1) and `F-105` (the `FRIEND_CHIVES` and `POINT_DEFENSE_FUNGUS` profiles).
 - `18` §3.3 (Friend Chives' projectile), §3.4 (the Point Defense Fungus behaviour class), §6 (the four interception filters and the criterion), the appendix to §9.2 (the full sound-event table) and §11 #8 / #9 / #12 / #13 / #14 have been read; `17` §4 (Friend Chives), §5 (Point Defense Fungus) and §12.4 / §12.14 have been read.
 - The family reading is known: `ThrownCropEntity` has **12** members in total (0.0.2's 10 + this release's 2), and the decision uses the base class's `instanceof`, not an ID whitelist (D-98; `18` §6.1).
-- Three increment boundaries: the `sound_events` increment is **+1** (only `friend_chives`), `block_entities` is still **6** (both new blocks reuse `DeployedCropBlockEntity`), and `sounds.json`'s event count is still **2** during this phase (no sound event is added at all, A-13).
+- Three increment boundaries: the `sound_events` increment is **+1** (only `friend_chives`), `block_entities` is still **6** (both new blocks reuse `DeployedCropBlockEntity`), and `sounds.json`'s event count goes **2 → 3** (only `friend_chives`; the interception and explosion sounds reuse vanilla, so A-13 applies to those two only — **do not** read it as "no sound event is added in this phase", which was the old draft's over-generalisation).
 - The ally criterion uses only the existing `be.isAlly(player)` chain and writes no new team comparison; when the owner is not a player it is treated as non-ally (`18` §6.1's ally-exclusion row).
 
 ### 4.2 Goal
@@ -337,7 +337,7 @@ Phase subtotal: **8 tasks, 12.5 person-days** (S 1 / M 6 / L 1).
 - The two pieces of evidence for ally pass-through: the deployer themselves and a teammate throw once each, with `interceptCount` unchanged and no particles.
 - The two distance readings of the impact sphere (applied at 6.0 blocks / not applied at a diagonal 8.4 blocks) and the evidence that the thrower themselves also gets the effect.
 - The two readings of `n`: one hit (`n ≥ 1`, played once) and one empty throw (`n = 0`, not played).
-- The registry self-check line (90; `entity_types` 13 / `sound_events` 3 / `block_entities` 6) and `sounds.json`'s event count (2).
+- The registry self-check line (90; `entity_types` 13 / `sound_events` 3 / `block_entities` 6) and `sounds.json`'s event count (**2 → 3**, i.e. 3 after F-116 adds `friend_chives`).
 - Open issues (especially whether `getEntitiesOfClass`'s predicate overload is usable, how `interceptCount` behaves after a chunk unload, and what `isAlly` returns when there is no team).
 
 ---

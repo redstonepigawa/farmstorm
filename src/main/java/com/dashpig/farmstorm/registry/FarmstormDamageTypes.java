@@ -37,6 +37,19 @@ public final class FarmstormDamageTypes {
         return level.damageSources().source(CROP_BLAST, owner);
     }
 
+    /**
+     * 桑吉尔蔗落地固定伤害：击杀归属陷阱部署者（D-96）。
+     * <p>{@code null} = 数据包里的 {@code damage_type/zangief_slam.json} 还没注册（F-132 的交付物），
+     * 此时 {@code DamageSources#source} 会抛 {@code IllegalStateException}；调用点据此跳过结算并留 warn。
+     */
+    @Nullable
+    public static DamageSource zangiefSlam(Level level, @Nullable Entity owner) {
+        if (level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(ZANGIEF_SLAM).isEmpty()) {
+            return null;
+        }
+        return level.damageSources().source(ZANGIEF_SLAM, owner);
+    }
+
     private static ResourceKey<DamageType> key(String path) {
         return ResourceKey.create(Registries.DAMAGE_TYPE, Farmstorm.id(path));
     }

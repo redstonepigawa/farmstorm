@@ -64,10 +64,11 @@ public final class ZangiefCaneTrap implements TrapBehavior {
         }
         BlockPos pos = be.getBlockPos();                                       // consume() 之前先取出坐标
         double distance = Math.sqrt(Vec3.atCenterOf(pos).distanceToSqr(player.position()));
-        ZangiefPiledriverController.begin(player);                             // 相位 0 的施加与记账归状态机（§3.11）
         // D-63 / DESIGN §9.1–9.2：zangief_hit 授予**陷阱的部署者**（父进度是 first_deploy，属于部署者那棵树），
         // 不是被命中的玩家——「你布的东西打中了人」才是成就。归属者离线 / 无归属（/setblock）时跳过。
+        // D-96：同一个归属者随相位状态机带到落地结算（固定 7.5 点也记给部署者），所以要在 begin 之前取出来。
         ServerPlayer deployer = be.owner(level);
+        ZangiefPiledriverController.begin(player, deployer);                   // 相位 0 的施加与记账归状态机（§3.11）
         if (deployer != null) {
             FarmstormAdvancements.award(deployer, "zangief_hit");
         }

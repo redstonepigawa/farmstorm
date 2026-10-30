@@ -3,6 +3,7 @@ package com.dashpig.farmstorm.behavior;
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.effect.ZangiefPiledriverEffect;
+import com.dashpig.farmstorm.registry.FarmstormDamageTypes;
 import com.dashpig.farmstorm.registry.FarmstormMobEffects;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,8 +11,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -19,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -55,6 +59,19 @@ public final class ZangiefPiledriverController {
     private static final int LANDING_CHECK_AFTER = 2;
 
     /**
+     * 落地后等「落地那条 {@code LivingFallEvent}」的最长刻数。
+     * <p><b>这是正确性闸门，不是缓冲、不是手感参数，别顺手调小或删掉。</b>
+     * 它守的是 §3.11 的顺序约束：自然坠落要在相位 2 里被取消，固定 7.5 才有资格叫「固定」。
+     * <p>为什么不能不等：{@code onGround()} 与坠落伤害的到达顺序不固定——实测（mineflayer 客户端）坠落事件会晚
+     * 1 刻才到，此时若在落地 tick 里直接 slam + {@code finish}，效果已被摘掉、取消判据失效，原版坠落照常结算，
+     * 两条伤害被原版的「更大伤害覆盖」规则合并成 max(7.5, 自然坠落)：16 格实测 **HP 20.00 → 7.00**（而不是 12.50）。
+     * 这就是 RT-22 风险② 的「7.5 + 自然坠落」，只是表现为 max 语义、更隐蔽。
+     * <p>4 刻只是兜底上限：落地没有坠落距离（贴地落地）、或坠落伤害已被别的模组提前取消时，事件永远不会来，
+     * 靠它放行，避免相位 2 卡到 {@link #MAX_FALL_TICKS} 超时。
+     */
+    private static final int SETTLE_WAIT_TICKS = 4;
+
+    /**
      * 相位 0 / 1 的效果时长比相位本身多 1 刻（实测订正）：效果施加当刻就会被 {@code LivingEntity#tickEffects}
      * 扣 1，所以 duration = 相位时长 时，效果只会覆盖「相位时长 − 1」刻，末尾那一 tick 出现「效果已没、
      * 相位还没推进」的空窗——客户端会把它渲染成一次相机/输入全复位再上锁的闪烁（RT-15 说的正是这个）。
@@ -80,6 +97,12 @@ public final class ZangiefPiledriverController {
         /** 相位 1 进入时的 Y：抬升目标 = 它 + {@code riseHeightBlocks}。 */
         private double riseStartY;
         private boolean riseClampWarned;
+        /** 触发这场打桩机的陷阱部署者（落地伤害归属，D-96）；{@code /setblock} 或部署者离线时为 null。 */
+        private UUID ownerId;
+        /** 检测到落地（{@code onGround()}）的 gameTime；0 = 还没落地。 */
+        private long landedAt;
+        /** 本相位里最近一条坠落事件的 gameTime；-1 = 一条都没有。 */
+        private long fallHandledAt = -1L;
 
         private PhaseState(int phase, long enteredAt) {
             this.phase = phase;
@@ -87,13 +110,16 @@ public final class ZangiefPiledriverController {
         }
     }
 
-    /** 相位 0 落地：由 {@link com.dashpig.farmstorm.behavior.impl.ZangiefCaneTrap#trigger} 调用。 */
-    public static void begin(ServerPlayer player) {
+    /**
+     * 相位 0 落地：由 {@link com.dashpig.farmstorm.behavior.impl.ZangiefCaneTrap#trigger} 调用。
+     * <p>{@code owner} 是陷阱部署者，随相位状态一路带到落地结算——落地固定伤害记给部署者（D-96 的「伤害归属」行）。
+     */
+    public static void begin(ServerPlayer player, @Nullable Entity owner) {
         if (ACTIVE.containsKey(player.getUUID())) {
             return;                                       // 重复触发不叠加、不重置（§5.3）
         }
         setPhase(player, ZangiefPiledriverEffect.PHASE_REVERSED,
-                FarmstormConfig.zangiefCaneStageDelayTicks.get() + PHASE_EFFECT_CUSHION);
+                FarmstormConfig.zangiefCaneStageDelayTicks.get() + PHASE_EFFECT_CUSHION, owner);
     }
 
     @SubscribeEvent
@@ -231,9 +257,22 @@ public final class ZangiefPiledriverController {
 
     /** 相位 2：只做落地检测与超时兜底，**不写速度**（作者要「自然坠落 + 痛感」）。 */
     private static void tickFalling(ServerPlayer player, long elapsed) {
-        if (elapsed >= LANDING_CHECK_AFTER && player.onGround()) {
+        PhaseState state = ACTIVE.get(player.getUUID());
+        if (state == null) {
+            return;
+        }
+        long now = player.level().getGameTime();
+        if (state.landedAt == 0L && elapsed >= LANDING_CHECK_AFTER && player.onGround()) {
+            state.landedAt = now;
             Farmstorm.LOGGER.info(String.format(Locale.ROOT, "桑吉尔蔗 落地耗时 %d 刻（自然坠落）", elapsed));
-            finish(player);
+        }
+        // 落地这一 tick 的自然坠落由 onLivingFall 取消，但那条事件不一定先于这里到达：先 slam 再 finish 会让效果
+        // 提前被摘掉、取消失效，两条伤害被原版合并成 max(7.5, 自然坠落)（16 格实测 HP 20 → 7）。
+        // 所以要等「落地之后的那条坠落事件」处理完（fallHandledAt >= landedAt）才结算；等不到按 SETTLE_WAIT_TICKS 放行。
+        if (state.landedAt != 0L
+                && (state.fallHandledAt >= state.landedAt || now - state.landedAt >= SETTLE_WAIT_TICKS)) {
+            slam(player);                                 // 先结算（D-96）
+            finish(player);                               // 再静默移除：finish 会摘效果，摘掉后相位判据就失效了
             return;
         }
         if (elapsed >= MAX_FALL_TICKS) {
@@ -245,6 +284,78 @@ public final class ZangiefPiledriverController {
         requireEffect(player);
     }
 
+    /**
+     * D-96 / §3.11：落地结算**固定** {@code zangief_cane.slamDamage} 点伤害（默认 7.5 = 3.75 颗心）。
+     * <p>必须由 {@link #tickFalling} 在 {@link #finish} **之前**调用：{@code finish} 会摘掉相位效果，
+     * 摘掉之后「相位 2」这个判据就不成立了；反过来写会造出「有伤害但相位已结束」的半截状态（§3.11 第 449 行）。
+     * <p>伤害走伤害事件通道（{@code farmstorm:zangief_slam}），不走坠落伤害通道，所以它与
+     * {@link #onLivingFall} 的取消互不重叠：取消只影响原版坠落，这里只结算一次（§12.9）。
+     */
+    private static void slam(ServerPlayer player) {
+        double amount = FarmstormConfig.zangiefCaneSlamDamage.get();
+        String name = player.getGameProfile().getName();
+        if (amount <= 0.0) {
+            Farmstorm.LOGGER.info(String.format(Locale.ROOT, "桑吉尔蔗 落地结算跳过（slamDamage=0）玩家 %s", name));
+            return;
+        }
+        PhaseState state = ACTIVE.get(player.getUUID());
+        Entity owner = resolveOwner(player, state == null ? null : state.ownerId);
+        DamageSource source = FarmstormDamageTypes.zangiefSlam(player.level(), owner);
+        if (source == null) {
+            // 数据侧的 zangief_slam.json 由 F-132 落地；之前注册表里查不到，这里跳过而不是让落地 tick 抛异常
+            Farmstorm.LOGGER.warn(String.format(Locale.ROOT, "桑吉尔蔗 落地结算跳过（damage_type farmstorm:zangief_slam 未注册）玩家 %s",
+                    name));
+            return;
+        }
+        float before = player.getHealth();
+        boolean applied = player.hurt(source, (float) amount);
+        Farmstorm.LOGGER.info(String.format(Locale.ROOT,
+                "桑吉尔蔗 落地结算 玩家 %s 固定伤害 %.2f 点 HP %.2f → %.2f 归属 %s（%s）",
+                name, amount, before, player.getHealth(),
+                owner == null ? "无" : owner.getName().getString(), applied ? "已生效" : "未生效（无敌帧 / 免疫）"));
+    }
+
+    /** 归属者按 UUID 实时解析：部署者掉线 / 不在同一维度时记不到人，等同于无主（0.0.2 的 `be.owner` 同口径）。 */
+    @Nullable
+    private static Entity resolveOwner(ServerPlayer player, @Nullable UUID ownerId) {
+        if (ownerId == null || player.getServer() == null) {
+            return null;
+        }
+        return player.getServer().getPlayerList().getPlayer(ownerId);
+    }
+
+    /**
+     * D-96 / §3.11 第 447 行：**相位 2 下坠期间取消目标受到的自然坠落伤害**。
+     * <p>判据是「本陷阱的效果存在 + {@code amplifier == 2}」，不是全局坠落规则——因此不影响别的伤害来源、
+     * 不碰缓降 / 免疫 / 飞行（RT-22 风险③），也不影响同高度下不带效果的生物。
+     * <p>取消在 {@code CommonHooks.onLivingFall} 处直接短路 {@code causeFallDamage}（既不结算伤害也不播落地音），
+     * 所以「自然坠落」这一段在相位 2 里归零，落地伤害只剩 {@link #slam} 的固定值（§12.9）。
+     * <p>这里还兼一个职责：把 {@code PhaseState#fallHandledAt} 记成「这一轮落地的那条坠落事件已经处理过」，
+     * {@link #tickFalling} 据此才放行结算——两个方法的先后次序不固定（见 {@link #SETTLE_WAIT_TICKS}），
+     * 这个时间戳就是它们之间的握手；删掉它，固定 7.5 会在部分时序下退化成 max(7.5, 自然坠落)。
+     * <p>{@code zangief_cane.cancelFallDamage=false} 时不取消，自然坠落与固定伤害叠加——留给作者做对照实验（§3.11 第 451 行）。
+     */
+    @SubscribeEvent
+    public static void onLivingFall(LivingFallEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;                                       // 只在服务端跑（HC-03）
+        }
+        MobEffectInstance effect = player.getEffect(FarmstormMobEffects.ZANGIEF_PILEDRIVER);
+        if (effect == null || effect.getAmplifier() != ZangiefPiledriverEffect.PHASE_FALLING) {
+            return;                                       // 不在本陷阱的相位 2：原版逻辑原样
+        }
+        PhaseState state = ACTIVE.get(player.getUUID());
+        if (state != null) {
+            state.fallHandledAt = player.level().getGameTime();   // 这一条就是本轮落地的那条：结算可以走了
+        }
+        if (!FarmstormConfig.zangiefCaneCancelFallDamage.get()) {
+            return;                                       // 对照实验：保留自然坠落，与固定伤害叠加（§3.11 第 451 行）
+        }
+        event.setCanceled(true);
+        Farmstorm.LOGGER.info(String.format(Locale.ROOT, "桑吉尔蔗 取消自然坠落伤害 玩家 %s 下落 %.2f 格",
+                player.getGameProfile().getName(), event.getDistance()));
+    }
+
     /** 把 {@code setDeltaMovement} 同步给客户端：{@code hurtMarked} 走 ServerEntity，显式包兜「单人没有旁观者」的情况。 */
     private static void syncMotion(ServerPlayer player) {
         player.hurtMarked = true;
@@ -253,10 +364,18 @@ public final class ZangiefPiledriverController {
 
     /** 相位推进的唯一写法：先摘再加的硬切换（§3.11），因为 {@code MobEffectInstance#update} 不保证替换 amplifier。 */
     private static void setPhase(ServerPlayer player, int phase, int durationTicks) {
+        setPhase(player, phase, durationTicks, null);      // 相位 1 / 2：归属沿用上一相位
+    }
+
+    /** {@code owner} 非 null 时以它为准（只有相位 0 由陷阱给出），否则继承上一相位的归属。 */
+    private static void setPhase(ServerPlayer player, int phase, int durationTicks, @Nullable Entity owner) {
+        PhaseState previous = ACTIVE.get(player.getUUID());
         player.removeEffect(FarmstormMobEffects.ZANGIEF_PILEDRIVER);
         player.addEffect(new MobEffectInstance(FarmstormMobEffects.ZANGIEF_PILEDRIVER,
                 durationTicks, phase, false, false, false));
-        ACTIVE.put(player.getUUID(), new PhaseState(phase, player.level().getGameTime()));
+        PhaseState next = new PhaseState(phase, player.level().getGameTime());
+        next.ownerId = owner != null ? owner.getUUID() : (previous == null ? null : previous.ownerId);
+        ACTIVE.put(player.getUUID(), next);
         Farmstorm.LOGGER.info(String.format(Locale.ROOT, "桑吉尔蔗 相位 %d t=%d 玩家 %s duration=%d", phase,
                 player.level().getGameTime(), player.getGameProfile().getName(), durationTicks));
     }

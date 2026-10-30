@@ -59,7 +59,7 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "pumpkin_turret", "man瓜", "Pumpkin Turret");
         item(entries, "awakened_torchflower", "激活的火把花", "Awakened Torchflower");
         item(entries, "awakened_pitcher_plant", "激活的瓶子草", "Awakened Pitcher Plant");
-        item(entries, "fang_trap_cactus", "赢过输过没死过", "Fang Trap Cactus");
+        item(entries, "fang_trap_cactus", "刺球", "Fang Trap Cactus");
         item(entries, "bamboo_firecracker", "爆竹", "Bamboo Firecracker");
         item(entries, "red_mushroom_puff", "？！菇菇！？", "Red Mushroom Puff");
         item(entries, "brown_mushroom_puff", "？！棕色菇菇色棕！？", "Brown Mushroom Puff");
@@ -87,7 +87,7 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "pumpkin_turret_stem", "man瓜", "Pumpkin Turret");
         block(entries, "awakened_torchflower_crop", "激活的火把花", "Awakened Torchflower");
         block(entries, "awakened_pitcher_plant_crop", "激活的瓶子草", "Awakened Pitcher Plant");
-        block(entries, "fang_trap_cactus_block", "赢过输过没死过", "Fang Trap Cactus");
+        block(entries, "fang_trap_cactus_block", "刺球", "Fang Trap Cactus");
         block(entries, "bamboo_firecracker_stalk", "爆竹", "Bamboo Firecracker");
         block(entries, "red_mushroom_puff_block", "？！菇菇！？", "Red Mushroom Puff");
         block(entries, "brown_mushroom_puff_block", "？！棕色菇菇色棕！？", "Brown Mushroom Puff");
@@ -96,7 +96,7 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "pumpkin_turret", "man瓜", "Pumpkin Turret");
         block(entries, "awakened_torchflower", "激活的火把花", "Awakened Torchflower");
         block(entries, "awakened_pitcher_plant", "激活的瓶子草", "Awakened Pitcher Plant");
-        block(entries, "fang_trap_cactus", "赢过输过没死过", "Fang Trap Cactus");
+        block(entries, "fang_trap_cactus", "刺球", "Fang Trap Cactus");
         block(entries, "converter", "农产品转换器", "Converter");
         // ---- v0.0.2 的 2 个新方块（TECH §7.3 #6–#7）----
         block(entries, "zangief_cane", "桑吉尔蔗", "Zangief Cane");

@@ -17,8 +17,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 
 /**
- * 赢过输过没死过（DESIGN §4.11）：一次性陷阱，非己方玩家进入欧氏半径 3 后吐出两圈尖牙。
- * 两圈的时间差**被刻意反过来**：内圈 0.2 秒先出、外圈 0.5 秒后出（照录原文，不做「修正」）。
+ * 刺球（DESIGN §4.11 / §7.3 的 D-94）：一次性陷阱，非己方玩家进入欧氏 **≤ 2.5** 后吐出两圈尖牙。
+ * 两圈的时间差**被刻意反过来**：内圈 2 刻先出、外圈 4 刻后出（照录原文，不做「修正」）。
  * 触发只负责压入两波队列；真正的出牙由 BlockEntity 的每 tick 队列驱动（§4.5 pendingWaves）。
  */
 public final class FangTrapCactusTrap implements TrapBehavior {
@@ -54,6 +54,9 @@ public final class FangTrapCactusTrap implements TrapBehavior {
         if (!(be.getLevel() instanceof ServerLevel level)) {
             return;
         }
+        if (!be.pendingWaves().isEmpty()) {
+            return;                          // 一次性：波已排出去就不再重排（重排会把外圈那波顶到更远，方块永不自毁）
+        }
         long now = level.getGameTime();
         be.setPendingWaves(List.of(
                 new FangWave(now + FarmstormConfig.fangTrapInnerDelayTicks.get(),
@@ -88,6 +91,7 @@ public final class FangTrapCactusTrap implements TrapBehavior {
                 fangs.setOwner(owner);                                  // 击杀归属部署者
             }
             fangs.moveTo(x, pos.getY(), z, (float) Math.toDegrees(-angle), 0.0F);
+            FangTrapFangs.mark(fangs, pos, level.getGameTime());          // D-95：登记归属，伤害事件侧才认这颗尖牙
             level.addFreshEntity(fangs);
         }
     }

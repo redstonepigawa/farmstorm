@@ -477,7 +477,7 @@ F-100 修 verify_project.py 0.5
 - **验收**：
   1. 游戏内该方块与物品的显示名都是「刺球」，英文仍是 `Fang Trap Cactus`（D-93；C-10 的第一处显式例外）。
   2. 注册身份一处未动：registry id `fang_trap_cactus`、方块 id `fang_trap_cactus_block`、`DeployedKind.FANG_TRAP_CACTUS`、战利品表、尖牙实体与归属全部不变（`16-DECISIONS-0.0.3.md` §5.2 的 8 行对照表；A-10）。
-  3. `git diff --numstat assets/farmstorm/lang/` 增删各 1 行、只落在 `zh_cn.json`；`en_us.json` 无改动。
+  3. `git diff --numstat assets/farmstorm/lang/` 增删各 **3** 行（不是 1 行）、只落在 `zh_cn.json`；`en_us.json` 无改动。**为什么是 3 而不是 1**：刺球的显示名由 3 个语言键承载（`item.farmstorm.fang_trap_cactus` / `block.farmstorm.fang_trap_cactus` / `block.farmstorm.fang_trap_cactus_block`），只改 1 个会让方块或物品仍显示旧名，直接违反验收 1；键集与键数（263）不变。
   4. 语言键总数不变：本条不增删键（`16-DECISIONS-0.0.3.md` §5.2 的「只改取值，不增删键」）。
 
 #### F-126 · 刺球四项数值：触发 ≤ 2.5、外圈 4 刻、内圈 2 刻

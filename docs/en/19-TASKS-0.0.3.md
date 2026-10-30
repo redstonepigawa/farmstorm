@@ -477,7 +477,7 @@ Phase exit criteria: all four of #10 / #11 / #15 / #16 in `18-TECH-0.0.3.md §11
 - **Acceptance**:
   1. In game, both the block and the item display the name “刺球”, while the English is still `Fang Trap Cactus` (D-93; the first explicit exception to C-10).
   2. Not one thing of its registry identity moves: the registry id `fang_trap_cactus`, the block id `fang_trap_cactus_block`, `DeployedKind.FANG_TRAP_CACTUS`, the loot table, the fang entity and its ownership are all unchanged (the 8-row comparison table of `16-DECISIONS-0.0.3.md` §5.2; A-10).
-  3. `git diff --numstat assets/farmstorm/lang/` shows 1 line added and one line removed, landing only in `zh_cn.json`; `en_us.json` has no change.
+  3. `git diff --numstat assets/farmstorm/lang/` shows **3** lines added and 3 removed (not 1), landing only in `zh_cn.json`; `en_us.json` has no change. **Why 3 rather than 1**: the Fang Trap Cactus display name is carried by 3 language keys (`item.farmstorm.fang_trap_cactus` / `block.farmstorm.fang_trap_cactus` / `block.farmstorm.fang_trap_cactus_block`); changing only one would leave either the block or the item showing the old name, violating acceptance 1 outright. The key set and count (263) are unchanged.
   4. The language key total is unchanged: this item adds and removes no key (“change only the value, add or remove no key” of `16-DECISIONS-0.0.3.md` §5.2).
 
 #### F-126 · Fang Trap Cactus Four Values: Trigger ≤ 2.5, Outer Ring 4 Ticks, Inner Ring 2 Ticks

@@ -405,9 +405,11 @@ D-94 的 8 行数值表里 4 行变、4 行不变。**其中 3 行的实现改�
 
 **代码层实际改 2 处 + 新增 1 类**：
 
-1. `spawnWave`（L72–L93）在 `level.addFreshEntity(fangs)` **之前**加一行 `FangTrapFangs.mark(fangs, be.getBlockPos())`。归属行 L87–L89（`fangs.setOwner(owner)`）不动——D-95 明确「尖牙的归属者仍是部署者」。
-2. `FangTrapFangs`（新类，`behavior/impl/`）：一张 `Map<Integer, Long>`（尖牙实体 id → 失效 gameTime），`mark` 写入 `gameTime + 40`（原版尖牙寿命 20 刻的两倍余量），`consume(Entity)` 读到即删并返回是否命中过。**不写 NBT、不注册任何对象**——它是一张有界内存表，条目上限 ≈ 单次触发的 13 个尖牙（8 外圈 + 5 内圈）。
-3. `FangTrapFangs` 同时订阅 `LivingDamageEvent.Post`（**待验证** [RT-22]）：`event.getSource().getDirectEntity() instanceof EvokerFangs fangs` 且 `FangTrapFangs.consume(fangs)` 为真 → 对 `event.getEntity()` 施加 `new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slownessDurationTicks, slownessLevel - 1)`。
+1. `spawnWave`（L72–L93）在 `level.addFreshEntity(fangs)` **之前**加一行 `FangTrapFangs.mark(fangs, pos, gameTime)`（`pos` = 已有的局部 `be.getBlockPos()`）。**签名演革**：旧稿写 `mark(fangs, pos)`（无 `gameTime`）→ V-124 曾按「pos 无消费者」削成 `mark(fangs, gameTime)` → **V-127 又把 pos 加回来**：去重窗口改成 `(部署点, 玩家)` 后，`pos` 正是窗口键的一半，有真实消费者。**V-124 的理由已被 V-127 推翻，此处以三参签名为准**。归属行 L87–L89（`fangs.setOwner(owner)`）不动
+2. `FangTrapFangs`（新类，`behavior/impl/`）：**两张表**——`Map<Integer, FangMark(BlockPos trap, long until)>`（尖牙实体 id → 它属于哪个陷阱 + 失效 gameTime，`mark` 写入 `gameTime + 40`，原版尖牙寿命 20 刻的两倍余量）与 `Map<Slowed(BlockPos trap, UUID player), long>`（该陷阱给该玩家的 40 刻窗口）。**没有 `consume` 方法**：读不到条目即视为「不是本陷阱的尖牙」，读到但已过期同样跳过。**不写 NBT、不注册任何对象**——有界内存表，条目上限 ≈ 单次触发的 13 个尖牙（8 外圈 + 5 内圈）。**V-127 订正**：旧稿写「一张 `Map<Integer, Long>` + `consume(Entity)`」，去重窗口改成 `(部署点, 玩家)` 后必须记 `trap`，`consume` 也随之取消
+3. `FangTrapFangs` 同时订阅 `LivingDamageEvent.Post`（**待验证** [RT-22]）：`event.getSource().getDirectEntity() instanceof EvokerFangs fangs` 且 `FangTrapFangs` 的尖牙归属表命中该 id 且未过期（**V-127**：不再有 `consume` 方法） → 对 `event.getEntity()` 施加 `new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, slownessDurationTicks, slownessLevel - 1)`。
+
+**一次性守卫（V-127，写在 `FangTrapCactusTrap.trigger` 入口）**：`if (!be.pendingWaves().isEmpty()) return;`。用「波队列非空」作为「已经排过波」的证据——不新增字段、不动 BE 的 NBT 与存档格式；BE 从存档恢复时队列还在也不会重排；`trigger` 是 `TrapBehavior.tick` 的唯一出口，顺带挡住重复的 `fang_dance` 进度领取；`findTrigger` 保持纯查询语义。**为什么需要它**：主扫描每 10 刻一次，若 `outerDelayTicks > 10`，玩家持续站在范围内会不断重压 `pendingWaves`，外圈那波永远赶不上触发刻、内圈反复重出、方块**永不自毁**（出厂 2/4 走不到；0.0.2 的 4/10 只是恰好等于扫描间隔才没暴露）。
 
 **为什么不用包围盒判定**（D-95）：尖牙的伤害自带无敌帧、护甲与抗性结算；另造一套「在不在圈里」会造出「动画里被咬了、实际没掉血」却被减速的假命中。以实际伤害事件为准，等于把「击中」的定义交给唯一能改血的那一方。
 

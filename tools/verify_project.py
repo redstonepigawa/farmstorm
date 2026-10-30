@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-r"""Farmstorm v0.0.1 静态验收器。
+r"""Farmstorm v0.0.2 静态验收器。
 
 期望值全部从上游文档现算，不手抄：
-  - 117 个配置键  <- docs/zh/01-DESIGN.md §3.8（并与 run/config/farmstorm-server.toml 逐键比对）
-  - 64 个注册 ID  <- docs/zh/02-TECH-SPEC.md §3
+  - 139 个配置键  <- docs/zh/01-DESIGN.md §3.8（117）+ docs/zh/12-TECH-0.0.2.md §8.1（22），
+                     并与 run/config/farmstorm-server.toml 逐键比对
+  - 77 个注册 ID  <- docs/zh/12-TECH-0.0.2.md §2.1 逐类小计（12 类，相加 77）
 
 用法：python -X utf8 tools/verify_project.py [--root <仓库根>]
 """
@@ -13,6 +14,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
 FAIL: list[str] = []
@@ -31,6 +33,15 @@ def fail(m: str) -> None:
 def warn(m: str) -> None:
     WARN.append(m)
     print(f"  [WARN] {m}")
+
+
+def stale(m: str) -> None:
+    FAIL.append(m)
+    print(f"  [STALE] {m}")
+
+
+def mtime(p: Path) -> str:
+    return datetime.fromtimestamp(p.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def read(p: Path) -> str:
@@ -53,6 +64,14 @@ def expected_config_keys(design: str) -> list[str]:
                 seen.add(k)
                 keys.append(k)
     return keys
+
+
+def expected_config_keys_v002(tech: str) -> list[str]:
+    start = tech.index("### 8.1")
+    end = tech.index("### 8.2")
+    section = tech[start:end]
+    return [m.group(1) for m in re.finditer(
+        r"^\|\s*\d+\s*\|\s*`([A-Za-z0-9_.]+)`\s*\|", section, re.MULTILINE)]
 
 
 def toml_keys(text: str) -> set[str]:
@@ -80,9 +99,10 @@ CROP_IDS = [
 
 EXPECTED = {
     "items": CROP_IDS + [
+        "molotov", "zangief_cane", "wild_apple", "compressed_puffed_wheat",
         "puffed_wheat_seeds", "power_beet_seeds", "melon_grenade_seeds",
         "pumpkin_turret_seeds", "awakened_torchflower_seeds",
-        "awakened_pitcher_plant_pod", "converter",
+        "awakened_pitcher_plant_pod", "converter", "compressed_hay_block",
     ],
     "blocks": [
         "puffed_wheat_crop", "blast_carrot_crop", "ubi_server_crop", "toxic_ubi_server_crop",
@@ -91,7 +111,7 @@ EXPECTED = {
         "bamboo_firecracker_stalk", "red_mushroom_puff_block", "brown_mushroom_puff_block",
         "lucky_berry_bush",
         "blast_carrot", "pumpkin_turret", "awakened_torchflower", "awakened_pitcher_plant",
-        "fang_trap_cactus", "converter",
+        "fang_trap_cactus", "converter", "zangief_cane", "compressed_hay_block",
     ],
     "block_entity_type": [
         "blast_carrot", "pumpkin_turret", "awakened_torchflower",
@@ -100,7 +120,16 @@ EXPECTED = {
     "entity_type": [
         "puffed_wheat", "ubi_server", "toxic_ubi_server", "melon_slice_bomb", "melon_grenade",
         "bamboo_firecracker", "red_mushroom_puff", "brown_mushroom_puff", "turret_bullet",
+        "molotov", "compressed_puffed_wheat",
     ],
+    "mob_effect": ["wild_hunter", "zangief_piledriver"],
+    "sound_event": ["wild_hunter_loop", "zangief_piledriver"],
+    "recipe_type": ["converting"],
+    "recipe_serializer": ["converting"],
+    "creative_mode_tab": ["main"],
+    "damage_type": ["void_bolt", "crop_blast"],
+    "data_component_type": ["temporary_enchantments"],
+    "menu_type": ["converter"],
 }
 
 
@@ -112,25 +141,49 @@ def main() -> int:
     java = root / "src/main/java/com/dashpig/farmstorm"
     all_java = "\n".join(read(f) for f in java.rglob("*.java")) if java.exists() else ""
 
-    print("== 1. config：文档 117 键 vs 生成的 toml ==")
+    print("== 1. config：文档 139 键 vs 生成的 toml ==")
     design = read(root / "docs/zh/01-DESIGN.md")
-    exp = set(expected_config_keys(design))
-    print(f"  文档口径键数: {len(exp)}")
+    tech = read(root / "docs/zh/12-TECH-0.0.2.md")
+    base = expected_config_keys(design)
+    added = expected_config_keys_v002(tech)
+    exp = set(base) | set(added)
+    print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}）")
     toml = root / "run/config/farmstorm-server.toml"
     if toml.exists():
         got = toml_keys(read(toml))
         print(f"  生成 toml 键数: {len(got)}")
         missing, extra = sorted(exp - got), sorted(got - exp)
-        if missing:
-            fail(f"toml 缺 {len(missing)} 个键: {missing[:8]}")
-        if extra:
-            fail(f"toml 多 {len(extra)} 个键: {extra[:8]}")
-        if not missing and not extra:
-            ok(f"117 个配置键与文档逐字一致（{len(got)} 键）")
+        if missing or extra:
+            config_java = root / "src/main/java/com/dashpig/farmstorm/config/FarmstormConfig.java"
+            # 判据是源码里有没有键字面量；mtime 只进提示文字，不参与判定
+            literal = (set(re.findall(r'"([A-Za-z0-9_.]+)"', read(config_java)))
+                       if config_java.exists() else set())
+
+            def in_source(k: str) -> bool:
+                return k in literal or k.rsplit(".", 1)[-1] in literal
+
+            # 源码有而 toml 没有 ⇒ 产物没重生成；源码没有而 toml 有 ⇒ 旧键名残留
+            stale_keys = [k for k in missing if in_source(k)] + [k for k in extra if not in_source(k)]
+            real_missing = [k for k in missing if not in_source(k)]
+            real_extra = [k for k in extra if in_source(k)]
+            if stale_keys:
+                stamp = f"mtime {mtime(toml)}"
+                if config_java.exists() and toml.stat().st_mtime < config_java.stat().st_mtime:
+                    stamp += f"，早于 config/FarmstormConfig.java 的 {mtime(config_java)}"
+                stale(f"run/config/farmstorm-server.toml 过期（{stamp}）："
+                      f"缺 {len(missing)} 个键、多 {len(extra)} 个键，重新生成即可消除"
+                      f"（缺 {missing[:3]}，多 {extra[:3]}）；"
+                      f"跑一次 .tools\\gw.cmd runServer 让它重新生成后再验")
+            if real_missing:
+                fail(f"toml 缺 {len(real_missing)} 个键且源码里也没有（文档/代码不一致 MISMATCH）: {real_missing[:8]}")
+            if real_extra:
+                fail(f"toml 多 {len(real_extra)} 个键且源码里存在（文档漏记 MISMATCH）: {real_extra[:8]}")
+        else:
+            ok(f"139 个配置键与文档逐字一致（{len(got)} 键）")
     else:
         warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
 
-    print("== 2. 64 个注册 ID 逐字核对（全源码树） ==")
+    print("== 2. 77 个注册 ID 逐字核对（全源码树） ==")
     total = 0
     for group, ids in EXPECTED.items():
         missed = [i for i in ids if f'"{i}"' not in all_java]
@@ -139,12 +192,7 @@ def main() -> int:
         else:
             ok(f"{group}: {len(ids)} 个 ID 齐全")
         total += len(ids)
-    for gid in ("converting", "main", "void_bolt", "crop_blast", "temporary_enchantments"):
-        if f'"{gid}"' not in all_java:
-            fail(f"缺注册 ID 字面量: {gid}")
-        else:
-            total += 1
-    print(f"  已核 registry 对象: {total} / 64")
+    print(f"  已核 registry 对象: {total} / 77")
 
     print("== 3. 语言文件键集一致 ==")
     gen = root / "src/generated/resources"

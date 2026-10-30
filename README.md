@@ -1,6 +1,6 @@
 # 农场风云 / Farmstorm
 
-Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已实现并发版）· **v0.0.2（已实现并发版）**
+Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已实现并发版）· v0.0.2（已实现并发版）· **v0.0.3（文档已就绪，未实现）**
 
 > 把原版农作物改造成 PvP 道具：同一种作物可以种在地里、扔出去、架在墙上、或者吃掉。
 > Vanilla crops re-armed as PvP gadgets: plant them, throw them, mount them, or eat them.
@@ -134,6 +134,19 @@ jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.w
 | [`docs/zh/14-PROMPT-MAIN-0.0.2.md`](docs/zh/14-PROMPT-MAIN-0.0.2.md) | [`docs/en/14-PROMPT-MAIN-0.0.2.md`](docs/en/14-PROMPT-MAIN-0.0.2.md) | v0.0.2 主提示词：14 条硬约束 HC-15~HC-28、14 条禁止行为 N-15~N-28、15 条已知陷阱 |
 | [`docs/zh/15-PROMPT-TASKS-0.0.2.md`](docs/zh/15-PROMPT-TASKS-0.0.2.md) | [`docs/en/15-PROMPT-TASKS-0.0.2.md`](docs/en/15-PROMPT-TASKS-0.0.2.md) | v0.0.2 分阶段任务清单：Phase 11~15 各一节（每节固定 6 项），可单独复制投喂 |
 
+### v0.0.3 增量文档 / v0.0.3 delta documents
+
+| 中文 | English | 行数（中/英） | 内容 |
+|---|---|---|---|
+| [`docs/zh/16-DECISIONS-0.0.3.md`](docs/zh/16-DECISIONS-0.0.3.md) | [`docs/en/16-DECISIONS-0.0.3.md`](docs/en/16-DECISIONS-0.0.3.md) | 619 / 622 | **v0.0.3 唯一真相源**：23 条决策 D-80~D-102（含 §3.6 的 5 条补充裁定）、22 条档案总表、对 v0.0.2 既有内容的改动登记 |
+| [`docs/zh/17-DESIGN-0.0.3.md`](docs/zh/17-DESIGN-0.0.3.md) | [`docs/en/17-DESIGN-0.0.3.md`](docs/en/17-DESIGN-0.0.3.md) | 1032 / 1037 | 设计增量：7 个条目全规格（Q弹 两条坐姿分支、混乱、朋友的韭、近防菌、震动豆、刺球、桑吉尔蔗）、§12 十四条边界、附录 A 差异登记 |
+| [`docs/zh/18-TECH-0.0.3.md`](docs/zh/18-TECH-0.0.3.md) | [`docs/en/18-TECH-0.0.3.md`](docs/en/18-TECH-0.0.3.md) | 966 / 974 | 技术增量：基线 **77 → 90**、config **139 → 158**、语言键 **263 → 300**、31 个新资源、RT-17~RT-23、17 条验收自检 |
+| [`docs/zh/19-TASKS-0.0.3.md`](docs/zh/19-TASKS-0.0.3.md) | [`docs/en/19-TASKS-0.0.3.md`](docs/en/19-TASKS-0.0.3.md) | 910 / 921 | 任务拆分与大纲：**36 个任务 F-100~F-135**、5 个 Phase（16~20）、M12~M16、9 条裁决 A-10~A-18、五张覆盖对照表 |
+| [`docs/zh/20-PROMPT-MAIN-0.0.3.md`](docs/zh/20-PROMPT-MAIN-0.0.3.md) | [`docs/en/20-PROMPT-MAIN-0.0.3.md`](docs/en/20-PROMPT-MAIN-0.0.3.md) | 380 / 387 | v0.0.3 主提示词：**HC-29~HC-50 共 22 条**、**N-29~N-50 共 22 条**、22 条已知陷阱 |
+| [`docs/zh/21-PROMPT-TASKS-0.0.3.md`](docs/zh/21-PROMPT-TASKS-0.0.3.md) | [`docs/en/21-PROMPT-TASKS-0.0.3.md`](docs/en/21-PROMPT-TASKS-0.0.3.md) | 627 / 639 | v0.0.3 分阶段任务清单：Phase 16~20 各一节（每节固定 6 项），§9 自检 36/36，§0.5 数字速查 15 行 |
+
+> v0.0.3 那六份的**中文合计 4534 行 / 英文合计 4580 行**。
+
 ### 实施文档 / Implementation documents
 
 | 文件 | 内容 |
@@ -180,6 +193,19 @@ jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.w
 
 做玩法时加 `11-DESIGN-0.0.2.md`，写代码时加 `12-TECH-0.0.2.md`，找任务时加 `13-TASKS-0.0.2.md` 或当前 Phase 那一节。**`10-DECISIONS-0.0.2.md` 要一直在场**——v0.0.2 与 v0.0.1 冲突时以它为准。
 
+### v0.0.3 的投喂顺序
+
+```
+第一轮  20-PROMPT-MAIN-0.0.3.md                          （v0.0.3 全局约束，只投一次）
+第二轮  21-PROMPT-TASKS-0.0.3.md 的 §2  Phase 16 那一节     （一次只投一个 Phase）
+第三轮  21-PROMPT-TASKS-0.0.3.md 的 §3  Phase 17 那一节
+...     直到 Phase 20
+```
+
+做玩法时加 `17-DESIGN-0.0.3.md`，写代码时加 `18-TECH-0.0.3.md`，找任务时加 `19-TASKS-0.0.3.md` 或当前 Phase 那一节。**`16-DECISIONS-0.0.3.md` 要一直在场**——v0.0.3 与 v0.0.2 冲突时以它为准。
+
+> ⚠️ **Phase 16 第一件事是修 `tools/verify_project.py`**（F-100）。它现在还是 0.0.1 时代的硬编码，跑出来 `FAIL 1 项`。不先修它，后面所有计数验收都没有可信基线。
+
 ### 代理该读哪几份
 
 - **永远**：`00-DECISIONS.md`（裁决优先）、`05-PROMPT-MAIN.md`（纪律）
@@ -191,20 +217,20 @@ jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.w
 
 ## 关键数字 / Key numbers
 
-| 指标 | v0.0.1（已实现） | v0.0.2（**实测**） |
-|---|---|---|
-| 改良作物档案 | 15 种 | **19 种**（投掷 10 / 部署 6 / 食用 3；破障 4） |
-| registry 对象 | 64 个 | **77 个**（+5 items / +2 blocks / +2 entity / +2 mob_effect / +2 sound_event） |
-| config 键 | 117 个 | **139 个**（+22） |
-| 资源文件 | 262 个（实测；169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | **305 个**（JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / `pack.mcmeta` 1） |
-| 语言键 | 222 × 2（中英相等） | **263 × 2**（+41） |
-| 进度 | 12 条 | **15 条**（+3） |
-| 转换配方 / 合成配方 | 21 / 0 | **24 / 2** |
-| 幸运浆果池 | 14 种 | **16 种**（排除幸运浆果、狂野苹果、压缩膨胀麦） |
-| 任务 | 59 个，10 个 Phase | **40 个（F-60~F-99），5 个 Phase** |
-| 工作量 | 96.0 人日裸 / 120.1 含缓冲 | **60.5 人日裸 / 75.6 含缓冲** |
-| 关键路径 | 18.5 人日 / 11 个任务 | **14.5 人日 / 9 个任务** |
-| 技术风险 | RT-01 ~ RT-09 | **RT-01 ~ RT-16**（+RT-10 ~ RT-16） |
+| 指标 | v0.0.1（已实现） | v0.0.2（**实测**） | v0.0.3（**文档口径，未实现**） |
+|---|---|---|---|
+| 改良作物档案 | 15 种 | **19 种**（投掷 10 / 部署 6 / 食用 3；破障 4） | **22 种**（投掷 12 / 部署 7 / 食用 3；破障 4） |
+| registry 对象 | 64 个 | **77 个**（+5 items / +2 blocks / +2 entity / +2 mob_effect / +2 sound_event） | **90 个**（+4 items / +3 blocks / +2 entity / +2 mob_effect / +1 sound_event / +1 damage_type） |
+| config 键 | 117 个 | **139 个**（+22） | **158 个**（+19：16 新 + 3 改默认值） |
+| 资源文件 | 262 个（实测；169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | **305 个**（JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / `pack.mcmeta` 1） | **336 个**（+31：JSON +22 / PNG +8 / OGG +1） |
+| 语言键 | 222 × 2（中英相等） | **263 × 2**（+41） | **300 × 2**（+37） |
+| 进度 | 12 条 | **15 条**（+3） | **18 条**（+3） |
+| 转换配方 / 合成配方 | 21 / 0 | **24 / 2** | **26 / 2**（+2 转换） |
+| 幸运浆果池 | 14 种 | **16 种**（排除幸运浆果、狂野苹果、压缩膨胀麦） | **19 种**（D-97：三条新档案全部纳入，推导式不动） |
+| 任务 | 59 个，10 个 Phase | **40 个（F-60~F-99），5 个 Phase** | **36 个（F-100~F-135），5 个 Phase** |
+| 工作量 | 96.0 人日裸 / 120.1 含缓冲 | **60.5 人日裸 / 75.6 含缓冲** | **60.0 人日裸 / 75.0 含缓冲** |
+| 关键路径 | 18.5 人日 / 11 个任务 | **14.5 人日 / 9 个任务** | **18.0 人日 / 11 个任务** |
+| 技术风险 | RT-01 ~ RT-09 | **RT-01 ~ RT-16**（+RT-10 ~ RT-16） | **RT-01 ~ RT-23**（+RT-17 ~ RT-23） |
 
 ---
 
@@ -343,6 +369,24 @@ Seven additions on top of a frozen v0.0.1: the converter finally gets a crafting
 | Advancements | **15** |
 | Tasks | **40** (F-60…F-99) across 5 phases (11: 7, 12: 9, 13: 10, 14: 8, 15: 6) |
 
+### v0.0.3 at a glance (documented, not implemented)
+
+| Item | v0.0.3 (documentation) |
+|---|---|
+| Registry objects | **90** (77 + 13) |
+| config keys | **158** (139 + 19: 16 new, 3 changed defaults) |
+| Language keys | **300 × 2** (263 + 37) |
+| Resource files | **336** (305 + 31: JSON +22 / PNG +8 / OGG +1) |
+| Advancements | **18** (15 + 3) |
+| Crop profiles | **22** (19 + 3: Friend Chives, Point Defense Fungus, Vibration Bean) |
+| Tasks | **36** (F-100…F-135) across 5 phases (16: 6, 17: 8, 18: 8, 19: 8, 20: 6) |
+| Workload | **60.0 person-days raw / 75.0 buffered**; critical path **18.0 person-days / 11 tasks** |
+| Risk register | RT-01 … **RT-23** (+RT-17 … RT-23) |
+
+**Feed order:** `20-PROMPT-MAIN-0.0.3.md` once, then exactly one phase section from `21-PROMPT-TASKS-0.0.3.md` at a time (Phase 16 … 20). Keep `16-DECISIONS-0.0.3.md` in context — it wins over v0.0.2 on any conflict.
+
+> ⚠️ **Phase 16 starts by fixing `tools/verify_project.py`** (F-100). It is still hardcoded for 0.0.1 and currently reports `FAIL 1`. Until it is fixed there is no trustworthy baseline for any count-based acceptance.
+
 **Known limitations (always state these in the release notes):**
 
 - **Greyscale covers the world only; the HUD stays coloured.** The vanilla `PostChain` runs at `GameRenderer:1027`, before GUI rendering at `:1073`; there is no reliable Mixin-free way to include the HUD (V-56 / V-61).
@@ -366,12 +410,16 @@ The former "`Unknown recipe category: farmstorm:convert`" warning is **fixed** i
 | `sounds/zangief_piledriver.ogg` | SF6 视频片段 `BV1qu411W7ha`（846–850 段） | 同上，作桑吉尔蔗触发音 |
 | `textures/mob_effect/wild_hunter.png` | 作者提供的桌面 JPG | 居中裁切缩放为 18×18 PNG |
 | `textures/item/*.png`、`textures/block/*.png`（含 `compressed_hay_block.png` 的灰度版与 `misc/wild_hunter_red.png` 的 1×1 红图） | **原版 Minecraft 1.21.1 客户端 jar** 的 `assets/minecraft/textures/{item,block}/*.png`（本机 `26.3-NeoForge_26.3.0.99.jar`） | 由 `tools/gen_textures.py` 用标准库 `zipfile` **直读 jar、不解包**，按需做灰度化 / 缩放到 16×16 / 右下角叠绿色「+」，产物是本模组的占位素材；**不修改原图、不在仓库内分发原版素材本体** |
+| `sounds/friend_chives.ogg`（v0.0.3） | `pengyoudejiu.mp3`（非原创音乐，7.45 MB） | 转 mono / 64 kbps Ogg Vorbis，作朋友的韭命中音；**32 格**可闻 |
+| `textures/mob_effect/q_bounce.png`（v0.0.3） | Steam 创意工坊 `431960/3796093604/preview.jpg`（1024×1024） | 居中裁切缩放为 18×18 PNG，作「Q弹」状态图标 |
+| `textures/item/friend_chives.png`、`textures/item/chive_seeds.png`（v0.0.3） | 作者提供的两张 QQ 图片（1254×1254 RGBA） | 缩放为 16×16 PNG |
+| `textures/block/friend_chives_stage0..3.png`（v0.0.3） | **本项目自绘占位**（洋红 `#D81E8A`） | 作者明确「方块材质暂不绘制，先实现功能」，这 4 张不是第三方素材，出终稿时直接替换 |
 
 ### 使用条件（务必照此分发）
 
 1. **非商业**：不得将上述素材或其转换产物用于任何商业用途。
 2. **署名**：转载、二次分发本模组时，必须连同本表一并保留。
-3. **范围**：这条限制针对上表前三行（两个音频 + 效果图标）；第四行的原版贴图派生图**另按 Minecraft 使用条款处理**（见下），模组自身的代码与自绘素材按 `## 许可 / License` 一节处理。
+3. **范围**：这条限制针对上表里**所有非原版派生的第三方素材**——两个 v0.0.2 音频、v0.0.2 效果图标，以及 v0.0.3 的 `friend_chives.ogg`、`q_bounce.png` 与两张物品贴图；原版贴图派生图**另按 Minecraft 使用条款处理**（见下），`friend_chives_stage0..3.png` 是自绘占位、模组自身的代码也按 `## 许可 / License` 一节处理。
 4. **可移除**：若权利人提出异议，维护者会移除对应素材并发布替代版本；发现问题的请联系仓库维护者。
 
 ### 关于原版贴图派生图

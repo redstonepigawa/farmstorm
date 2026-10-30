@@ -300,4 +300,23 @@ DESIGN §7.6 L1053 原文：陷阱与炮台只锁定**非己方且非创造模�
 | V-96 | **`ServerStoppedEvent` 阶段世界已关闭，隐形坐骑会留在存档里**：F-109 原按 §4.3 只挂 `ServerStoppedEvent`，实测该阶段 `getLevel(dim).getEntity(..)` 返回 null ⇒ `discard=false`，**重启后世界里残留 2 个 armor_stand** | 改挂 **`ServerStoppingEvent`**（世界还活着时 discard），保留 `ServerStoppedEvent` 作清表兜底。重测：停服前 `清表 reason=服务器即将停止 共 1 个（discard 1）`，重启后 `execute if entity @e[type=armor_stand]` → `Test failed`（存档零残留）。这是 F-109 唯一一处对文档的偏离，理由与读数已写进代码注释。 |
 | V-97 | **`render` 分支变不出「坐姿」**：§4.2 要求 `RenderLivingEvent.Pre` 里设 `model.riding = true`，实测 21.1.213 字节码里该事件在 `render` 入口（偏移 3）触发，而 `model.riding` 在**偏移 89** 由 `isPassenger() && getVehicle().shouldRiderSit()` 重写 ⇒ Pre 里的赋值被覆盖 | **结论：坐姿只能由 mount 分支产生**；render 分支实际只提供「压低 + 旋转 + 压缩」三项变换。该行按 §4.2 保留并在注释写明，**但 F-112 的两条分支对照必须据此重述**——render 分支不是「另一种坐姿实现」，而是「无坐姿的变换版」。此发现已在本轮回报里明确，留给作者在 F-112 拍板时参考。 |
 | V-98 | **客户端启动时报「自检 实体类型有 13 个，渲染器只注册了 11 个」**，并伴随 `friend_chives` / `vibration_bean` / `chive_seeds` 的 model 缺失告警 | **属 Phase 16 之后的预期状态，不是缺陷**：F-103 把 `entity_types` 提到 13，而两个新投掷物的渲染器与三处资源要等 Phase 18（F-114/F-122）与 Phase 20（F-130）才落地。**判据时点**：这两个数应当在 Phase 20 出口前收敛到 13 / 13；在那之前看到这条 ERROR 不必排查。 |
+| V-99 | **F-112 两条坐姿分支对照数据**（只采数据，保留哪条由作者定）。对照表：
+
+| 对照项 | render 分支 | mount 分支 |
+|---|---|---|
+| 是否有坐姿 | 无（model.riding 在偏移 89 被 isPassenger && shouldRiderSit 重写，render 下非乘客 ⇒ 写入 false） | 有（真乘客 ⇒ 写入 true；ArmorStand 未覆写 shouldRiderSit ⇒ 默认 true） |
+| 自主位移（194 刻） | [+1.95, 0, +2.66] | **[0, 0, 0]** |
+| 注入 Motion=[0.6,0,0] 净位移 | [+1.21, 0, -0.09]（被摩擦吃掉） | **[0, 0, 0]**（下一刻 Motion 被改写成 [-0.003,-0.078,-0.003]，位置不动） |
+| /tp 指令 | 生效（0.5 → 5.5） | **指令回成功但实体没动**（rideTick 偏移 1 setDeltaMovement(ZERO) + 偏移 25-40 positionRider 钉住） |
+| 能被推动/挤开 | 能（sub [-0.44,0,+0.29]、牛 [+0.53,0,-0.35]） | **不能**（ArmorStand.isPushable 恒 false、doPush 空、hasPhysics false） |
+| 碰撞箱 | 不适用（无坐骑） | Marker=1b ⇒ MARKER_DIMENSIONS = fixed(0,0)，**0×0** |
+| 乘客 Y 偏移 | 不适用 | **随体型变**：僵尸（高 1.95）-0.70、牛（高 1.4）0.00；僵尸 OnGround=0b |
+| 第三方模型认不认 riding | **无法测**（本机 run*/mods 全部 0 个 jar） | 同左 |
+| 观感 | 留待作者 | 留待作者 |
+
+**三条要点（不含推荐）**：① render 给不出坐姿，两条分支不是「两种坐姿实现」而是「无坐姿 vs 有坐姿」；② mount 下乘客被完全钉住——连 /tp 都静默失效（指令回成功、实体不动），对服主与指令用户是意外；③ render 下 AI、推挤、/tp 全部正常，但只有「压低+旋转+压缩」。
+**方法学坑**：专用服务器无玩家在线时出生区块不 tick 实体 ⇒ 首轮 6 个采样点全停同一坐标、位移全 0 是**假读数**；必须 /forceload add 强制区块后再采。首轮读数已作废未进表。原始读数在 .work/f112-*.txt / .log（未跟踪）。 |
+| V-100 | **§12.3 的拴绳规则没实现**：文档要求「`isLeashed()` 为真则不挂隐形坐骑」，但全源码树 `isLeashed|getLeashHolder` 命中 **0**，`QbounceMountController:176/194` 只判 `isPassenger()` ⇒ mount 分支下**拴绳生物会被挂上隐形坐骑**（拴绳者牵着它、它却被钉住，关系会错乱） | **裁定：补判据，不改文档**。理由是这条规则本身正确（拴着的生物不该被隐形坐骑接管），删规则等于把一个真缺陷写成「设计如此」。改动应为在跳过条件里加 `|| entity.isLeashed()`，一行级。 |
+| V-101 | **`adoptExisting()` 承诺但未生效**：`QbounceMountController:60-65` 注释承诺「重启后同样会被认领」，F-113 两次起服实测**均未生效**（存档里带 `q_bounce` 的僵尸、区块已 forceload，重启后无「挂上」日志、世界里 0 个模组坐骑）。机制推测：它只在「状态翻转那一 tick」扫一次，若那时实体尚未进 `level.getAllEntities()` 就永不重试 | **裁定：修（有界周期重扫）**。严重度低（效果的 10 秒内状态不一致），但**代码注释在承诺一件它做不到的事**——这比缺陷本身更坏，下一个人会照着注释相信它。修法：每 N 刻（如 20）对有「有效果但无记录且非乘客」的实体补挂，带上限，避免每刻全量扫。 |
+| V-102 | F-113 发现的两条**口径澄清**（非缺陷）：① `Mixin` 字面 grep 在 `src/main/java` 有 5 处命中，全是注释里写「无 Mixin」，工具的禁令扫描按语义判为 OK——**不要按字面计数判失败**；② 朋友的韭 AoE 未实现属 Phase 18，故 §12.12 的运行时读数最早在 F-115 才有。 | 两条均记入，供后续验收时对照，避免把「还没做到」误判成「做错了」。 |
 

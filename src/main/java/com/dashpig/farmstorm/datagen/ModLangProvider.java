@@ -7,16 +7,17 @@ import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
 /**
- * 语言文件（TECH §7）：zh_cn 与 en_us 各 **297** 键（v0.0.3 口径）。
+ * 语言文件（TECH §7）：zh_cn 与 en_us 各 **299** 键（v0.0.3 口径）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
  * 不存在「两份键各自维护」的可能。**条目构成（v0.0.3 实测，改表时必须同步本段）**：
  * 31 item + 25 block + 4 effect + 3 subtitles + 155 config + 36 advancement + 6 death
- * + 16 tooltip + 11 entity + 8 gui + 1 container + 1 itemGroup = **297**。
+ * + 16 tooltip + 13 entity + 8 gui + 1 container + 1 itemGroup = **299**。
  *
  * <p>沿革：v0.0.1 是 222 键（22/20/9/1/1/8/16/4/24/117），v0.0.2 收到 263，
- * v0.0.3 收到 297（其中 16 条 `farmstorm.configuration.*` 由 F-132 的 runData 落地、
- * 另 18 条由 F-134 补齐：item 4 / block 3 / effect 2 / subtitles 1 / advancements 6 / death 2）。
+ * v0.0.3 收到 299（其中 16 条 `farmstorm.configuration.*` 由 F-132 的 runData 落地、
+ * 另 18 条由 F-134 补齐：item 4 / block 3 / effect 2 / subtitles 1 / advancements 6 / death 2；
+ * 末 2 条 entity 由 F-135 补漏：friend_chives / vibration_bean）。
  *
  * <p>tooltip 计 16（FIX-7）：§2.3 的六个类别各一个键（{@code tooltip.farmstorm.category.*}）
  * 取代原先 {@code DeployedKind} 的三个 {@code tooltip.farmstorm.type.*} 单值键——类别是多值集合，
@@ -114,7 +115,7 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "friend_chives_crop", "朋友的韭", "Friend Chives");
         block(entries, "point_defense_fungus", "近防菌", "Point Defense Fungus");
         block(entries, "vibration_bean", "震动豆", "Vibration Bean");
-        // ---- 11 个实体类型（TECH §3.4）----
+        // ---- 13 个实体类型（TECH §3.4）----
         entity(entries, "puffed_wheat", "膨胀麦", "Puffed Wheat");
         entity(entries, "ubi_server", "育碧服务器", "Ubi Server");
         entity(entries, "toxic_ubi_server", "毒育碧服务器", "Toxic Ubi Server");
@@ -127,6 +128,10 @@ public final class ModLangProvider extends LanguageProvider {
         // ---- v0.0.2 的 2 个新投掷物实体（F-66；实体名会出现在召唤反馈与死亡信息里）----
         entity(entries, "molotov", "莫洛托夫！", "Molotov");
         entity(entries, "compressed_puffed_wheat", "压缩膨胀麦", "Compressed Puffed Wheat");
+        // ---- v0.0.3 的 2 个新投掷物实体（F-135）：实体显示名与同名物品一致。
+        // 漏掉 entity(...) 时 /summon 反馈与死亡信息会退化成裸键 entity.farmstorm.*。----
+        entity(entries, "friend_chives", "朋友的韭", "Friend Chives");
+        entity(entries, "vibration_bean", "震动豆", "Vibration Bean");
         // ---- 2 个 mob_effect（TECH §7.3 #8–#9；隐藏效果的键只用于 /effect 补全）----
         plain(entries, "effect.farmstorm.wild_hunter", "狂 野 猎 人", "Wild Hunter");
         plain(entries, "effect.farmstorm.zangief_piledriver", "桑吉尔蔗打桩", "Zangief Piledriver");

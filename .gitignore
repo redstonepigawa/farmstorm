@@ -27,3 +27,5 @@ dsh-session-*.zip
 
 # 截图采集件：只挑决定性的几张进 .work/，其余不入库（V-34 的采集产物）
 .work/screenshots/
+__pycache__/
+*.pyc

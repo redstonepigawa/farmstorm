@@ -25,17 +25,29 @@ import net.minecraft.world.phys.Vec3;
 public final class WildHunterCombat {
     /** D-75：击退用原版默认强度，不自订数值。 */
     private static final double KNOCKBACK_STRENGTH = 0.4;
+    /** #3：效果剩余时长上限（50 秒 = 1000 刻），超出部分丢弃。 */
+    private static final int MAX_DURATION_TICKS = 1000;
 
     private WildHunterCombat() {}
 
     /**
      * 选中 {@code wild_hunter.searchRadius}（默认 5.0 格）球内、与视线夹角不超过
-     * {@code wild_hunter.searchAngleDegrees}（默认 30.0°）的生物：夹角最小者优先，夹角相同取距离近者（D-64）。
+     * {@code wild_hunter.searchAngleDegrees}（默认 60°，即半角 30°）的生物：夹角最小者优先，夹角相同取距离近者（D-64）。
      * 排除自己、同队伍玩家（{@link Player#isAlliedTo}）、旁观者与已死实体。
      * <p>只在服务端打日志（{@code 狂野猎人 目标 {id} 夹角 {A} 度 距离 {D}}），客户端那一份静默。
      *
      * @return 没有候选时返回 {@code null}
      */
+    public static List<LivingEntity> resolveTargets(Player player) {
+        double radius = FarmstormConfig.wildHunterSearchRadius.get();
+        double maxAngle = FarmstormConfig.wildHunterSearchAngleDegrees.get();
+        Vec3 eye = player.getEyePosition();
+        Vec3 look = player.getLookAngle();
+        AABB box = player.getBoundingBox().inflate(radius);
+        return player.level().getEntitiesOfClass(LivingEntity.class, box,
+                candidate -> isCandidate(player, candidate, radius, maxAngle, eye, look));
+    }
+
     public static LivingEntity resolveTarget(Player player) {
         double radius = FarmstormConfig.wildHunterSearchRadius.get();
         double maxAngle = FarmstormConfig.wildHunterSearchAngleDegrees.get();
@@ -72,19 +84,24 @@ public final class WildHunterCombat {
                 || player.hasEffect(FarmstormMobEffects.ZANGIEF_PILEDRIVER)) {
             return;
         }
-        LivingEntity resolved = resolveTarget(player);
-        if (resolved == null || resolved == directlyHit) {
-            return;
-        }
+        // #1：扇形范围内**所有**目标各吃一次（不再只挑最近的一个）。
         float damage = (float) player.getAttributeValue(Attributes.ATTACK_DAMAGE);
-        if (!resolved.hurt(player.damageSources().playerAttack(player), damage)) {
-            return;
+        for (LivingEntity resolved : resolveTargets(player)) {
+            if (resolved == directlyHit) {
+                continue;   // 原版已经结算过这一下
+            }
+            // 记真实掉血而不是名义伤害：伤害封顶（#5 剑上限 5）与盔甲减免都在 hurt() 内部结算，
+            // 只打名义值会让人误以为封顶没生效（名义 14、实际掉 5）。
+            float healthBefore = resolved.getHealth();
+            if (!resolved.hurt(player.damageSources().playerAttack(player), damage)) {
+                continue;
+            }
+            Vec3 push = resolved.position().subtract(player.position());
+            resolved.knockback(KNOCKBACK_STRENGTH, -push.x, -push.z);
+            Farmstorm.LOGGER.info("狂野猎人 扇形结算 目标 {} 名义伤害 {} 实际掉血 {}",
+                    BuiltInRegistries.ENTITY_TYPE.getKey(resolved.getType()), format(damage, 1),
+                    format(healthBefore - resolved.getHealth(), 1));
         }
-        Vec3 push = resolved.position().subtract(player.position());
-        resolved.knockback(KNOCKBACK_STRENGTH, -push.x, -push.z);
-        Farmstorm.LOGGER.info("狂野猎人 结算 目标 {} 伤害 {} 击退 {}", 
-                BuiltInRegistries.ENTITY_TYPE.getKey(resolved.getType()), format(damage, 1),
-                format(KNOCKBACK_STRENGTH, 1));
     }
 
     /**
@@ -96,7 +113,9 @@ public final class WildHunterCombat {
         if (current == null) {
             return;
         }
-        int extended = current.getDuration() + FarmstormConfig.wildHunterKillExtensionTicks.get();
+        // #3：总时长封顶 1000 刻（50 秒），超出部分直接丢弃。
+        int extended = Math.min(MAX_DURATION_TICKS,
+                current.getDuration() + FarmstormConfig.wildHunterKillExtensionTicks.get());
         player.addEffect(new MobEffectInstance(FarmstormMobEffects.WILD_HUNTER, extended, current.getAmplifier(),
                 current.isAmbient(), current.isVisible(), current.showIcon()));
         player.heal(FarmstormConfig.wildHunterKillHealPoints.get().floatValue());
@@ -114,7 +133,9 @@ public final class WildHunterCombat {
         if (player.distanceToSqr(candidate) > radius * radius) {
             return false;
         }
-        return angleTo(eye, look, candidate) <= maxAngle;
+        // maxAngle 是**全顶角**（作者口径「锥形 60 度」），比较时取半角。
+        // 早期实现直接把它当半角用：设 90 就成了 180° 半球（手感是「面前一片全中」而非锥形）。
+        return angleTo(eye, look, candidate) <= maxAngle * 0.5;
     }
 
     /** 视线与「眼睛 → 目标包围盒中心」的夹角（度，0–180）。 */

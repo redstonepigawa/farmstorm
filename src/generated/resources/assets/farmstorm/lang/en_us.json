@@ -199,7 +199,7 @@
   "farmstorm.configuration.wild_hunter.killExtensionTicks": "Duration added per kill (ticks)",
   "farmstorm.configuration.wild_hunter.killHealPoints": "Health restored per kill",
   "farmstorm.configuration.wild_hunter.loopSoundRange": "Looping sound audible range (blocks)",
-  "farmstorm.configuration.wild_hunter.searchAngleDegrees": "Target search view angle limit (degrees)",
+  "farmstorm.configuration.wild_hunter.searchAngleDegrees": "Search cone full apex angle (degrees; 60 = 30 half-angle)",
   "farmstorm.configuration.wild_hunter.searchRadius": "Target search radius (blocks)",
   "farmstorm.configuration.wild_hunter.speedBonusPercent": "Movement speed bonus (%)",
   "farmstorm.configuration.zangief_cane.riseHeightBlocks": "Height (blocks) the player is lifted in phase 1",

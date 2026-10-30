@@ -39,8 +39,15 @@ public final class WildHunterCombatEvents {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            WildHunterAura.tick(player);
             WildHunterSwingSettler.tick(player);
         }
+    }
+
+    /** #5：每刻扫一遍「被剥夺 AI」的到期项（与玩家脱钩，掉线也不会漏恢复）。 */
+    @SubscribeEvent
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        WildHunterAura.sweep(event.getServer().overworld());
     }
 
     /** F-81 / D-74：killer 必须是持有效果的玩家本人；不设计数器。 */

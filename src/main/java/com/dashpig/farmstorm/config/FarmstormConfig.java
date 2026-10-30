@@ -730,9 +730,9 @@ public final class FarmstormConfig {
         wildHunterSearchRadius = b.comment("D-64：索敌球半径")
                 .translation(tr("wild_hunter.searchRadius"))
                 .defineInRange("searchRadius", 5.0, 0.0, 32.0);
-        wildHunterSearchAngleDegrees = b.comment("D-64：候选与视线方向的夹角上限")
+        wildHunterSearchAngleDegrees = b.comment("D-64：索敌锥的全顶角（度），60 = 半角 30°；三维锥，含俯仰")
                 .translation(tr("wild_hunter.searchAngleDegrees"))
-                .defineInRange("searchAngleDegrees", 30.0, 0.0, 180.0);
+                .defineInRange("searchAngleDegrees", 60.0, 0.0, 180.0);
         wildHunterDashTicks = b.comment("D-65：吸附冲刺跨越到位所用的刻数")
                 .translation(tr("wild_hunter.dashTicks"))
                 .defineInRange("dashTicks", 3, 1, 20);

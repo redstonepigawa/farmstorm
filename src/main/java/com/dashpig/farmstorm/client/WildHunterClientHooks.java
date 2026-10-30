@@ -9,7 +9,7 @@ package com.dashpig.farmstorm.client;
 public final class WildHunterClientHooks {
     private WildHunterClientHooks() {}
 
-    /** 每客户端刻：状态快照 → 冲刺预测 → 循环音 → 灰度 PostChain 装载/卸载。 */
+    /** 每客户端刻：状态快照 → 冲刺/充能 → 循环音 → 灰度 PostChain 装载/卸载 → 伽马。 */
     public static void onClientTick() {
         WildHunterClientState.refresh();
         WildHunterDashClient.onClientTick();

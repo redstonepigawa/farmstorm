@@ -199,7 +199,7 @@
   "farmstorm.configuration.wild_hunter.killExtensionTicks": "每次击杀延长的时长（tick）",
   "farmstorm.configuration.wild_hunter.killHealPoints": "每次击杀回复的生命点数",
   "farmstorm.configuration.wild_hunter.loopSoundRange": "循环音的可听距离（格）",
-  "farmstorm.configuration.wild_hunter.searchAngleDegrees": "索敌视线夹角上限（度）",
+  "farmstorm.configuration.wild_hunter.searchAngleDegrees": "索敌锥全顶角（度，60 = 半角 30°）",
   "farmstorm.configuration.wild_hunter.searchRadius": "索敌球半径（格）",
   "farmstorm.configuration.wild_hunter.speedBonusPercent": "移动速度加成（%）",
   "farmstorm.configuration.zangief_cane.riseHeightBlocks": "相位 1 向上抬升的高度（格）",

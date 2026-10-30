@@ -298,7 +298,7 @@ public final class ModLangProvider extends LanguageProvider {
         config(entries, "wild_hunter.killExtensionTicks", "每次击杀延长的时长（tick）", "Duration added per kill (ticks)");
         config(entries, "wild_hunter.killHealPoints", "每次击杀回复的生命点数", "Health restored per kill");
         config(entries, "wild_hunter.searchRadius", "索敌球半径（格）", "Target search radius (blocks)");
-        config(entries, "wild_hunter.searchAngleDegrees", "索敌视线夹角上限（度）", "Target search view angle limit (degrees)");
+        config(entries, "wild_hunter.searchAngleDegrees", "索敌锥全顶角（度，60 = 半角 30°）", "Search cone full apex angle (degrees; 60 = 30 half-angle)");
         config(entries, "wild_hunter.dashTicks", "吸附冲刺跨越的刻数", "Ticks the dash takes");
         config(entries, "wild_hunter.speedBonusPercent", "移动速度加成（%）", "Movement speed bonus (%)");
         config(entries, "wild_hunter.attackSpeedBonusPercent", "攻击速度加成（%）", "Attack speed bonus (%)");

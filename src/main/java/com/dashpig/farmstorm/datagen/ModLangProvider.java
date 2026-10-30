@@ -7,20 +7,24 @@ import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
 /**
- * 语言文件（TECH §7）：zh_cn 与 en_us 各 222 键。
+ * 语言文件（TECH §7）：zh_cn 与 en_us 各 **297** 键（v0.0.3 口径）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
- * 不存在「两份键各自维护」的可能。条目构成：
- * 22 item + 20 block + 9 entity + 1 itemGroup + 1 container + 8 gui + 16 tooltip
- * + 4 death + 24 advancement + 117 config。
+ * 不存在「两份键各自维护」的可能。**条目构成（v0.0.3 实测，改表时必须同步本段）**：
+ * 31 item + 25 block + 4 effect + 3 subtitles + 155 config + 36 advancement + 6 death
+ * + 16 tooltip + 11 entity + 8 gui + 1 container + 1 itemGroup = **297**。
+ *
+ * <p>沿革：v0.0.1 是 222 键（22/20/9/1/1/8/16/4/24/117），v0.0.2 收到 263，
+ * v0.0.3 收到 297（其中 16 条 `farmstorm.configuration.*` 由 F-132 的 runData 落地、
+ * 另 18 条由 F-134 补齐：item 4 / block 3 / effect 2 / subtitles 1 / advancements 6 / death 2）。
  *
  * <p>tooltip 计 16（FIX-7）：§2.3 的六个类别各一个键（{@code tooltip.farmstorm.category.*}）
  * 取代原先 {@code DeployedKind} 的三个 {@code tooltip.farmstorm.type.*} 单值键——类别是多值集合，
  * 一个作物要能同时显示「炮台类、buff类」；再加一个 {@code tooltip.farmstorm.category_separator}
- * 让中英各自用自己的分隔符（「、」/ 「, 」）。218 - 3 + 6 + 1 = 222。
+ * 让中英各自用自己的分隔符（「、」/ 「, 」）。这条沿革保留在 v0.0.1 的口径里（218 - 3 + 6 + 1 = 222）。
  *
  * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
- * 117 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
+ * 155 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
  * 该 TOML 由 {@code FarmstormConfig} 的真实 spec 写出，可做机械比对。
  */
 public final class ModLangProvider extends LanguageProvider {
@@ -77,6 +81,11 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "wild_apple", "狂野苹果", "Wild Apple");
         item(entries, "compressed_puffed_wheat", "压缩膨胀麦", "Compressed Puffed Wheat");
         item(entries, "compressed_hay_block", "压缩干草块", "Compressed Hay Block");
+        // ---- v0.0.3 的 4 个新物品（F-134 / 18-TECH §9.4）----
+        item(entries, "friend_chives", "朋友的韭", "Friend Chives");
+        item(entries, "chive_seeds", "朋友的韭种子", "Chive Seeds");
+        item(entries, "point_defense_fungus", "近防菌", "Point Defense Fungus");
+        item(entries, "vibration_bean", "震动豆", "Vibration Bean");
         // ---- 22 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
         block(entries, "puffed_wheat_crop", "膨胀麦", "Puffed Wheat");
         block(entries, "blast_carrot_crop", "胡罗贝", "Blast Carrot");
@@ -101,6 +110,10 @@ public final class ModLangProvider extends LanguageProvider {
         // ---- v0.0.2 的 2 个新方块（TECH §7.3 #6–#7）----
         block(entries, "zangief_cane", "桑吉尔蔗", "Zangief Cane");
         block(entries, "compressed_hay_block", "压缩干草块", "Compressed Hay Block");
+        // ---- v0.0.3 的 3 个新方块（F-134 / 18-TECH §9.4）----
+        block(entries, "friend_chives_crop", "朋友的韭", "Friend Chives");
+        block(entries, "point_defense_fungus", "近防菌", "Point Defense Fungus");
+        block(entries, "vibration_bean", "震动豆", "Vibration Bean");
         // ---- 11 个实体类型（TECH §3.4）----
         entity(entries, "puffed_wheat", "膨胀麦", "Puffed Wheat");
         entity(entries, "ubi_server", "育碧服务器", "Ubi Server");
@@ -117,9 +130,14 @@ public final class ModLangProvider extends LanguageProvider {
         // ---- 2 个 mob_effect（TECH §7.3 #8–#9；隐藏效果的键只用于 /effect 补全）----
         plain(entries, "effect.farmstorm.wild_hunter", "狂 野 猎 人", "Wild Hunter");
         plain(entries, "effect.farmstorm.zangief_piledriver", "桑吉尔蔗打桩", "Zangief Piledriver");
+        // ---- v0.0.3 的 2 个新 mob_effect（F-134 / 18-TECH §9.4；时长由施加方写入，见 §8.1）----
+        plain(entries, "effect.farmstorm.q_bounce", "Q弹", "Q-Bounce");
+        plain(entries, "effect.farmstorm.confusion", "混乱", "Confusion");
         // ---- 2 条字幕（TECH §7.3 #10–#11；键名必须与 sounds.json 的 subtitle 逐字一致）----
         plain(entries, "subtitles.farmstorm.wild_hunter_loop", "狩猎主题响起", "Hunting theme plays");
         plain(entries, "subtitles.farmstorm.zangief_piledriver", "打桩机启动", "Piledriver hits");
+        // ---- v0.0.3 的 1 条新字幕（F-134 / 18-TECH §9.4；键名与 sounds.json 的 subtitle 逐字一致）----
+        plain(entries, "subtitles.farmstorm.friend_chives", "朋友的韭命中", "Chives hit");
         // ---- 固定键：创造标签页 / GUI / 提示 / 死亡信息（TECH §7.2 逐条）----
         plain(entries, "itemGroup.farmstorm.main", "农场风云", "Farmstorm");
         plain(entries, "container.farmstorm.converter", "农产品转换器", "Converter");
@@ -152,6 +170,10 @@ public final class ModLangProvider extends LanguageProvider {
         plain(entries, "death.attack.farmstorm.void_bolt.player", "%1$s 被 %2$s 的 man瓜 击落", "%1$s was shot down by %2$s's Pumpkin Turret");
         plain(entries, "death.attack.farmstorm.crop_blast", "%1$s 被作物炸飞了", "%1$s was blown up by a crop");
         plain(entries, "death.attack.farmstorm.crop_blast.player", "%1$s 被 %2$s 的作物炸飞了", "%1$s was blown up by %2$s's crop");
+        // ---- v0.0.3 的 1 个新伤害类型 → 2 键（F-134 / 18-TECH §9.4；message_id = farmstorm.zangief_slam）----
+        plain(entries, "death.attack.farmstorm.zangief_slam", "%1$s 被桑吉尔蔗砸进了地里", "%1$s was slammed into the ground by a Zangief Cane");
+        plain(entries, "death.attack.farmstorm.zangief_slam.player", "%1$s 被 %2$s 的桑吉尔蔗砸进了地里",
+                "%1$s was slammed into the ground by %2$s's Zangief Cane");
         // ---- 12 条进度 × (title + description)（DEC C-7）----
         advancement(entries, "root", "农场风云", "Farmstorm", "获得任意一件改良作物", "Obtain any modified crop");
         advancement(entries, "converter", "装个转换器", "Get a Converter", "放置一台农产品转换器", "Place a Crop Converter");
@@ -170,6 +192,12 @@ public final class ModLangProvider extends LanguageProvider {
         advancement(entries, "first_molotov", "火了！", "It's Lit!", "初次投出莫洛托夫！", "Throw a Molotov for the first time");
         advancement(entries, "zangief_hit", "手摇重 360", "Hand-Cranked 360", "桑吉尔蔗首次命中一名玩家", "Land a Zangief Cane on a player for the first time");
         advancement(entries, "first_wild_hunter", "狂野猎人", "Wild Hunter", "首次获得「狂 野 猎 人」效果", "Obtain the Wild Hunter effect for the first time");
+        // ---- v0.0.3 的 3 条新进度（F-134；显示名取 17-DESIGN §10.1 表第 16–18 行的定稿值）----
+        advancement(entries, "first_q_bounce", "弹起来了", "Q-Bounce", "首次获得「Q弹」效果", "Obtain the Q-Bounce effect for the first time");
+        advancement(entries, "point_defense_intercept", "一颗都不放", "Not One Through", "近防菌首次拦下一枚非己方投掷物",
+                "Have a Point Defense Fungus intercept a foreign projectile for the first time");
+        advancement(entries, "vibration_bean_trigger", "留个纪念", "A Souvenir", "首次踩中震动豆并完成结算",
+                "Trigger a Vibration Bean for the first time");
         // ---- 139 个配置项（键路径 = run/config/farmstorm-server.toml 的段/键）----
         config(entries, "converter.xpCost", "每次转换扣除的经验点数", "Experience points spent per conversion");
         config(entries, "converter.netherStarForwardCost", "正向转换额外消耗的下界之星个数", "Nether stars consumed per forward conversion");

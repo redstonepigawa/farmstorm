@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import com.dashpig.farmstorm.registry.FarmstormSounds;
 import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerLevel;
@@ -179,7 +179,10 @@ public final class WildHunterAura {
      * #2：把循环音**广播给附近的其它玩家**（作者报的 bug：原实现只有本地客户端那份 SoundInstance，
      * 别人根本没收到任何东西）。
      *
-     * <p>做法是原版 {@link ClientboundSoundPacket}（不是自定义 payload，不违反 D-50）：
+     * <p>做法是原版 {@link ClientboundSoundEntityPacket}（不是自定义 payload，不违反 D-50）。
+     * <b>必须用「绑定实体」的那个包</b>：它的客户端实例 {@code EntityBoundSoundInstance} 每刻从实体读坐标，
+     * 声音跟着持有者走；换成按坐标的 {@code ClientboundSoundPacket}，位置会被烘进包里，玩家一走开声音留在原地。
+     * <p>其余口径：
      * <ul>
      *   <li><b>排除持有者本人</b>——他自己的那份由客户端 {@code WildHunterLoopSound}（{@code relative=true}）播放，
      *       这里再发一份他就会听到两层，表现为回声/叠加；</li>
@@ -192,6 +195,9 @@ public final class WildHunterAura {
         if (!(holder.level() instanceof ServerLevel level)) {
             return;
         }
+        // 用**绑定实体**的声音包：ClientboundSoundPacket 会把坐标烘进包里，声音就钉在发包那一刻的位置上，
+        // 玩家一走开声音留在原地（作者实测报的正是这个）。EntityBoundSoundInstance 每刻从实体读坐标，声音跟着人走。
+        // 持有者本人就是那个实体（ServerPlayer 是 Entity）。
         long now = level.getGameTime();
         double radiusSqr = LOOP_BROADCAST_RADIUS * LOOP_BROADCAST_RADIUS;
         int sent = 0;
@@ -204,9 +210,9 @@ public final class WildHunterAura {
             if (last != null && now - last < LOOP_BROADCAST_INTERVAL_TICKS) {
                 continue;                              // 这位收件人还在本轮的播放窗口里
             }
-            listener.connection.send(new ClientboundSoundPacket(
+            listener.connection.send(new ClientboundSoundEntityPacket(
                     FarmstormSounds.WILD_HUNTER_LOOP, SoundSource.PLAYERS,
-                    holder.getX(), holder.getY(), holder.getZ(), 1.0F, 1.0F, level.getRandom().nextLong()));
+                    holder, 1.0F, 1.0F, level.getRandom().nextLong()));
             LOOP_LAST_SENT.put(pair, now);
             sent++;
         }

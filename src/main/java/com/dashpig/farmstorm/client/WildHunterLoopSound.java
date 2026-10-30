@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
  * <b>只服务本地玩家本人</b>。
  *
  * <p><b>别人的循环音不走这里</b>：由服务端在 {@code combat/WildHunterAura#broadcastLoop} 里用原版
- * {@code ClientboundSoundPacket} 广播给附近的其它玩家（V-85）。
+ * {@code ClientboundSoundEntityPacket}（**绑定实体**，声音跟着持有者走）广播给附近的其它玩家（V-85）。
  * <p>曾经这里还有一条「给其他带效果的玩家也建实例」的分支，但它依赖「客户端能看到别人身上的效果」——
  * 前提不成立：{@code ClientboundUpdateMobEffectPacket} 只发给持有者本人，B 侧 {@code A.hasEffect()} 恒为 false，
  * 那条分支一次都不会执行（留着只会误导下一个人，并可能在将来效果同步补上后与服务端广播叠成两层）。

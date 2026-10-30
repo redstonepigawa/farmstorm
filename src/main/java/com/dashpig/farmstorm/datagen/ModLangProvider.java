@@ -87,7 +87,7 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "chive_seeds", "朋友的韭种子", "Chive Seeds");
         item(entries, "point_defense_fungus", "近防菌", "Point Defense Fungus");
         item(entries, "vibration_bean", "震动豆", "Vibration Bean");
-        // ---- 22 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
+        // ---- 20 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
         block(entries, "puffed_wheat_crop", "膨胀麦", "Puffed Wheat");
         block(entries, "blast_carrot_crop", "胡罗贝", "Blast Carrot");
         block(entries, "ubi_server_crop", "育碧服务器", "Ubi Server");

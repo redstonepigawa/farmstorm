@@ -55,7 +55,7 @@ This document's three inventories (§2 registry objects, §8 config keys, §9 re
 | Measured | 263 language keys | the actual output of §3 of `tools/verify_project.py` (263 each in Chinese and English, identical key sets) |
 | Measured | 19 crop profiles / 16 lucky berry pool entries | `util/CropProfile.java`'s `ALL` (19 entries) and `LUCKY_BERRY_POOL` (19 − 3 entries) |
 | Increment | +13 (registry) / +16 (config keys) / +34 (language keys) / +8 PNG / +1 OGG | §2 / §8 / §9 of this document |
-| Target | 90 registry objects, 155 config keys, 297 language keys | measured value + increment, itemized in §2.4 / §8.3 / §9.4 |
+| Target | 90 registry objects, 155 config keys, 299 language keys | measured value + increment, itemized in §2.4 / §8.3 / §9.4 |
 | Forbidden | any registry total not backed by this section's two pieces of evidence | D-80's numeric discipline; §1 of this document has already lifted that ban (both the tool gap and the measured values are given) |
 
 ### 0.5 Registration Rule for "To Be Verified"
@@ -170,7 +170,7 @@ Run result (`python -X utf8 tools/verify_project.py`, exit code 1, 1 FAIL item):
 
 **Which side may have been wrong**: the tool's expected values and its denominator. The implementation side was not wrong — the tool's own §3 section counts 263 and that matches the implementation.
 
-**Closed (author's adjudication, fix)**: execute the four sections' changes in the table below; the target is the 0.0.2 baseline **77 / 77** and `结论：FAIL 0 项`; after v0.0.3 lands, tighten it to **90 / 90**, config **155**, lang **297**. The criterion of §11 #1 is exactly this output, and it **may not be downgraded to a manual signature**.
+**Closed (author's adjudication, fix)**: execute the four sections' changes in the table below; the target is the 0.0.2 baseline **77 / 77** and `结论：FAIL 0 项`; after v0.0.3 lands, tighten it to **90 / 90**, config **155**, lang **299**. The criterion of §11 #1 is exactly this output, and it **may not be downgraded to a manual signature**.
 
 **The target of fixing it to the 0.0.2 baseline** (as an acceptance item of §11 #1):
 
@@ -180,7 +180,7 @@ Run result (`python -X utf8 tools/verify_project.py`, exit code 1, 1 FAIL item):
 | §2 `EXPECTED` | items 22 / blocks 20 / entity 9 | items 27 / blocks 22 / entity 11 (add `compressed_hay_block`, `zangief_cane`, `molotov`, `compressed_puffed_wheat`) |
 | §2 denominator | 64 | 77, and the per-category subtotals equal §1.2 (12 categories, see §2.1) |
 | §2 bare ID literals | 5 (`converting` / `main` / `void_bolt` / `crop_blast` / `temporary_enchantments`) | Complete the remaining 5 (including the recipe serializer and the menu) so that all 12 categories go through "per-category subtotal" instead of bare literals |
-| §3 language | 263 | Unchanged (after v0.0.3 lands, change to 297, see §9.4) |
+| §3 language | 263 | Unchanged (after v0.0.3 lands, change to 299, see §9.4) |
 
 #### (d) The PNG Increment: 8 and the Gap in "the Sum of the Items"
 
@@ -841,7 +841,7 @@ Category subtotal: blockstate **3** (#1 / #6 / #8) + block models **6** (#2–#5
 
 The other half of A5's story: 0.0.2's `MINEABLE_WITH_PICKAXE` does not carry `zangief_cane` (an existing state), and this release does not add it back; all that is guaranteed is that the two new blocks match the existing deployed blocks.
 
-### 9.4 Language Key Increment (**34 keys**)
+### 9.4 Language Key Increment (**36 keys**; 34 were planned, plus 2 `entity.*` keys added during release prep — see the note at the end of this section)
 
 | Prefix | 0.0.2 | Increment | 0.0.3 | Source |
 |---|---|---|---|---|
@@ -852,12 +852,15 @@ The other half of A5's story: 0.0.2's `MINEABLE_WITH_PICKAXE` does not carry `za
 | `farmstorm.configuration.*` | 139 | +16 | 155 | the 16 new keys of §8.1 |
 | `advancements.farmstorm.*` | 30 | +6 | 36 | 3 advancements × 2 (title + description) |
 | `death.attack.farmstorm.*` | 4 | +2 | 6 | `zangief_slam` + `zangief_slam.player` (following the shape of the existing 2 damage types, 2 keys each) |
-| the rest (`tooltip` 16 / `entity` 11 / `gui` 8 / `container` 1 / `itemGroup` 1) | 37 | +0 | 37 | unchanged (16 + 11 + 8 + 1 + 1 = 37) |
-| **Total** | **263** | **+34** | **297** | |
+| `entity.farmstorm.*` (added during release prep) | 11 | **+2** | 13 | `friend_chives` / `vibration_bean` (V-154: the plan said "reuse the item name, no entity key"; in practice `/summon` feedback showed the raw key, so they were added) |
+| the rest (`tooltip` 16 / `gui` 8 / `container` 1 / `itemGroup` 1) | 26 | +0 | 26 | unchanged (16 + 8 + 1 + 1 = 26) |
+| **Total** | **263** | **+36** | **299** | |
 
-**Check equation for the three columns** (added row by row; both columns land on the Total row): `0.0.2 column: 27+22+2+2+139+30+4+37 = 263; 0.0.3 column: 31+25+4+3+155+36+6+37 = 297.` Increment column: 4+3+2+1+16+6+2+0 = +34. All three hold at once.
+**Check equation for the three columns** (added row by row; both columns land on the Total row): `0.0.2 column: 27+22+2+2+139+30+4+11+26 = 263; 0.0.3 column: 31+25+4+3+155+36+6+13+26 = 299.` Increment column: 4+3+2+1+16+6+2+2+0 = +36. All three hold at once.
 
-Why the three `+0` categories do not move: the 16 keys of `tooltip.farmstorm.*` are organised by category (Trap / Turret / Buff / Demolition / Damage / Construction) plus fixed entries such as "no vanilla counterpart", and the two new deployables reuse existing category rows; the relation of `entity.farmstorm.*`'s 11 keys to a new `entity_type` is "one entry only if it has a display name of its own", and the two new projectiles use their item names as display names (`ThrownCropEntity#getDefaultItem` takes the item from the crop profile, so the name comes from `item.farmstorm.*` naturally).
+Why the other categories do not move: the 16 keys of `tooltip.farmstorm.*` are organised by category (Trap / Turret / Buff / Demolition / Damage / Construction) plus fixed entries such as "no vanilla counterpart", and the two new deployables reuse existing category rows; `gui` / `container` / `itemGroup` add no new UI in this version, so they stay.
+
+**Why `entity.farmstorm.*` went from "+0" to "+2" (V-154)**: the plan was for the two new projectiles to reuse their item names as display names (`ThrownCropEntity#getDefaultItem` takes the item from the crop profile, so the name comes from `item.farmstorm.*`) and therefore to add no `entity` keys. **Measurement before release disproved that**: `/summon farmstorm:friend_chives` answered `Summoned new entity.farmstorm.friend_chives` (a raw key), and death messages behaved the same way. After adding the two `entity(...)` keys the feedback reads `Summoned new Friend Chives` / `Summoned new Vibration Bean`. So the 34-key increment becomes **36 keys** and the total 297 becomes **299**.
 
 ---
 
@@ -933,7 +936,7 @@ The numbering is fixed at 7 entries; none is added, removed or merged. Each has 
 | Trigger condition | anyone running the tool right now; anyone following §4 row 22 and treating `DeployedKind` as +1; anyone copy-pasting "77" without looking at §1.2 |
 | Primary mitigation | §1.2 of this document has already counted the 77 by category and aligned it with the 12 runtime assertions of `Farmstorm#logRegistrySelfCheck`, so 90 is the result of **two independent pieces of evidence plus one addition**, not a guess; the fix to the tool is written section by section in the table of §1.4(c) |
 | Fallback | if the author's intent is "the tool is never changed and just stays red", then §11 #1 becomes "the tool stays red, but its output is compared section by section against this table and signed off in the acceptance record" — which loses the automation value, so it is used only if the author explicitly rejects fixing the tool |
-| How to verify during implementation | ① run it once after the fix: `已核 registry 对象: 77 / 77` appears along with `结论：FAIL 0 项` and exit code 0; ② run it once more after v0.0.3 lands: `90 / 90`, config `139` (`155` after v0.0.3), lang `263` (`297` after v0.0.3); ③ re-run after every change to a registry class, and any subtotal that disagrees goes red immediately |
+| How to verify during implementation | ① run it once after the fix: `已核 registry 对象: 77 / 77` appears along with `结论：FAIL 0 项` and exit code 0; ② run it once more after v0.0.3 lands: `90 / 90`, config `139` (`155` after v0.0.3), lang `263` (`299` after v0.0.3); ③ re-run after every change to a registry class, and any subtotal that disagrees goes red immediately |
 
 ---
 
@@ -959,7 +962,7 @@ One concrete action plus one decidable pass criterion per entry. **17 entries** 
 | 14 | a player at full health stands within 8 blocks and has 6 projectiles intercepted | health, hunger and coordinates are unchanged point by point; the block and its block state do not change; there is no `Explosion` construction line in the log | D-89 |
 | 15 | Fang Trap Cactus: verify item by item against D-94's 8 rows | 3.0 blocks does not trigger and 2.5 blocks triggers; the 5 inner-ring fangs come first (on tick 2) and the 8 outer-ring fangs after (on tick 4), 2 ticks between the two rings; a player who is **actually damaged** by the fangs gets Slowness V (amplifier 4) for 60 ticks, applied exactly once; a player swept by the animation but losing no health gets **no** Slowness | D-93 ~ D-95, RT-22 |
 | 16 | Zangief Cane: fall naturally after the default 16-block lift; then land once with `cancelFallDamage` turned off | default: health drops by exactly 7.5 points at the moment of landing, with no vanilla fall damage in the log; with it off: the damage is > 7.5 and varies with height; **the death message and the attribution are judged in two parts (V-149 correction)**: ① **the text key is right** — it shows the base key's wording, not a raw key string and not a format error; ② **the attribution evidence is the log line** — `桑吉尔蔗 落地结算 玩家 X 固定伤害 7.50 点 HP a → b 归属 Owner1（已生效）`. **Do not expect the owner's name in the text**: when the damage source carries an `owner`, vanilla takes the "base key + 2 args" branch and our base key has only `%1$s` | D-96, RT-22 |
-| 17 | the resource and language-key counts are self-consistent | exactly 8 new PNGs under `textures/`, each named as in §9.1 (4 of them `friend_chives_stage0..3`, **magenta #D81E8A placeholders, not final art**); 1 new OGG under `sounds/`; 3 events in `sounds.json`; `zh_cn.json` and `en_us.json` with 297 keys each and identical key sets character for character; 22 new JSON files, each named as in §9.3 | §9.1 – §9.4 |
+| 17 | the resource and language-key counts are self-consistent | exactly 8 new PNGs under `textures/`, each named as in §9.1 (4 of them `friend_chives_stage0..3`, **magenta #D81E8A placeholders, not final art**); 1 new OGG under `sounds/`; 3 events in `sounds.json`; `zh_cn.json` and `en_us.json` with 299 keys each and identical key sets character for character; 22 new JSON files, each named as in §9.3 | §9.1 – §9.4 |
 
 **Coverage statement**: of the 17 entries, 2 cover the registry and config numbers (#1 / #2), 3 cover the two Q-Bounce branches (#3 / #4 / #5), 2 cover Confusion (#6 / #7), 4 cover Point Defense Fungus (#8 / #9 / #13 / #14), 2 cover Vibration Bean (#10 / #11), 1 covers Friend Chives (#12), 1 covers Fang Trap Cactus (#15), 1 covers Zangief Cane (#16) and 1 covers the resources and language keys (#17). All seven RTs are covered by at least one entry: RT-17 → #3; RT-18 → #4; RT-19 → #7; RT-20 → #8 / #9; RT-21 → #10; RT-22 → #15 / #16; RT-23 → #1 / #2.
 

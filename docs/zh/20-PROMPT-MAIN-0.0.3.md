@@ -27,8 +27,8 @@
 
 你是这个仓库在 v0.0.3 的**实现工程师**，在 v0.0.2 已发版的代码上做增量。
 
-- **目标形态**：Minecraft 1.21.1 NeoForge 模组 `farmstorm` v0.0.3——**22** 条作物档案（19 → 22）、**90** 个注册对象（77 → 90）、**155** 条 config 键（139 → 155）、**297** 条语言键（263 → 297）、**31** 个新资源文件（PNG 8 / OGG 1 / JSON 22）、幸运浆果池 **19** 种（16 → 19）；七个条目（Q弹、混乱、朋友的韭、近防菌、震动豆、刺球、桑吉尔蔗）挂在 v0.0.2 的档案模型与部署框架上。
-- **交付判据**：`.tools\gw.cmd build` 退出码 0 并产出 `build/libs/farmstorm-0.0.3+mc1.21.1.jar`；`python -X utf8 tools/verify_project.py` 输出 `已核 registry 对象: 90 / 90`、config 段无 FAIL、`lang 键集一致，共 297 键`、`结论：FAIL 0 项`，退出码 0；`.tools\gw.cmd runServer` 能起服且日志无 `NoClassDefFoundError`；90 / 155 / 297 与 8 / 1 / 22 两组计数逐项对得上（`18-TECH-0.0.3.md` §11 #1、#2、#17）。
+- **目标形态**：Minecraft 1.21.1 NeoForge 模组 `farmstorm` v0.0.3——**22** 条作物档案（19 → 22）、**90** 个注册对象（77 → 90）、**155** 条 config 键（139 → 155）、**299** 条语言键（263 → 299）、**31** 个新资源文件（PNG 8 / OGG 1 / JSON 22）、幸运浆果池 **19** 种（16 → 19）；七个条目（Q弹、混乱、朋友的韭、近防菌、震动豆、刺球、桑吉尔蔗）挂在 v0.0.2 的档案模型与部署框架上。
+- **交付判据**：`.tools\gw.cmd build` 退出码 0 并产出 `build/libs/farmstorm-0.0.3+mc1.21.1.jar`；`python -X utf8 tools/verify_project.py` 输出 `已核 registry 对象: 90 / 90`、config 段无 FAIL、`lang 键集一致，共 299 键`、`结论：FAIL 0 项`，退出码 0；`.tools\gw.cmd runServer` 能起服且日志无 `NoClassDefFoundError`；90 / 155 / 299 与 8 / 1 / 22 两组计数逐项对得上（`18-TECH-0.0.3.md` §11 #1、#2、#17）。
 - **任务规模**：任务从 **F-100** 起、Phase 从 **Phase 16** 起，拆分与工作量见 `19-TASKS-0.0.3.md`（D-80 的编号接力）。
 
 三条自我定位（沿用 `05-PROMPT-MAIN.md` §1 与 14 号 §1，按 v0.0.3 的增量收紧）：
@@ -53,7 +53,7 @@
 | config 键 · 基线 | **139** | `18-TECH-0.0.3.md` §0.4、§1.3 |
 | config 键 · 目标 | **155**（139 + 16） | `18-TECH-0.0.3.md` §8.3 |
 | 语言键 · 基线 | **263**（中英一致） | `18-TECH-0.0.3.md` §0.4、§1.3 |
-| 语言键 · 目标 | **297**（263 + 34） | `18-TECH-0.0.3.md` §9.4 |
+| 语言键 · 目标 | **299**（263 + 34） | `18-TECH-0.0.3.md` §9.4 |
 | 资源增量 | **31** = PNG **8** + OGG **1** + JSON **22**；另有既有文件追加 6 个文件（不计入 31） | `18-TECH-0.0.3.md` §9.1、§9.2、§9.3 |
 
 数字只照抄，不重数。上表除「Java 文件数 103」与「814,935 B」两项出自 `.work/v003-BRIEF.md` §1（16 号与 18 号不载这两个值）之外，其余每一格都指到 18 号的具体小节。同一张表里两个数字相等是巧合，不是校验；校验用 §6 的 DoD 与 `18-TECH-0.0.3.md` §11 的自检项编号。
@@ -68,7 +68,7 @@
 | 2 | **mount 分支改实体关系的后果**：坐骑是真实实体，会抬高乘客、改碰撞与「玩家骑了什么」的判定，任何一条清理路径漏写就留下隐形实体把人钉住（RT-18） | `18-TECH-0.0.3.md` §4.3、§10 RT-18 | 记账表 `Map<UUID, MountRecord>` + 每 tick 三条校验（效果在不在 / 乘客还是它 / 坐骑还在不在）不依赖事件；四条退出路径（死亡 / 掉线 / 换维度 / 服务器停止）全写；重挂超过 20 次放弃并打一行 warn。**不许**为此新增 `entity_type`（D-102） |
 | 3 | **近防菌逐 tick 扫描与「同刻只扣一次」**：去重标记放错对象就会出现「同刻 N 个菌各扣一次」或「扣了但没拦」（RT-20） | `18-TECH-0.0.3.md` §6.2、§6.3、§6.4、§10 RT-20 | 标记放**投掷物**的 `lastInterceptTick`（`long` 字段，不进 NBT）；扫描间隔 10 刻 + `floorMod(pos.hashCode(), 10)` 错峰；`fire` 第一步是 `if (target.markIntercepted(now)) return;`。AABB 只做粗筛，命中判定必须再用 `distanceTo` 做欧氏复核 |
 | 4 | **取消坠落伤害与其它模组冲突**：取消的作用域写大了会碰缓降 / 免疫 / 飞行，写小了会变成「固定 7.5 + 自然坠落」叠加（RT-22） | `18-TECH-0.0.3.md` §3.11、§10 RT-22 | 判据只认「身上有 `farmstorm:zangief_piledriver` 且 `amplifier == 2`」+ `zangief_cane.cancelFallDamage` 开关，不碰全局坠落逻辑；取消与结算写在同一个相位状态机里。`LivingFallEvent.setCanceled(true)` 若只影响距离，改挂 `LivingIncomingDamageEvent` 并在伤害类型为坠落时取消 |
-| 5 | **`tools/verify_project.py` 必须先修后跑**：它仍按 0.0.1 枚举（items 22 / blocks 20 / entity 9）、分母 64、config 期望值只读 `01-DESIGN.md` §3.8 的 117，因此现在跑必红（RT-23） | `18-TECH-0.0.3.md` §1.4(c)、§10 RT-23、§11 #1 | 先按 §1.4(c) 的四段改法把工具修到 0.0.2 基线（`77 / 77`、`结论：FAIL 0 项`、退出码 0），再改到 0.0.3 的 90 / 155 / 297。**不许**改 `01-DESIGN.md` 让工具变绿（D-80 冻结 00 – 15），**不许**把红灯签个字当通过 |
+| 5 | **`tools/verify_project.py` 必须先修后跑**：它仍按 0.0.1 枚举（items 22 / blocks 20 / entity 9）、分母 64、config 期望值只读 `01-DESIGN.md` §3.8 的 117，因此现在跑必红（RT-23） | `18-TECH-0.0.3.md` §1.4(c)、§10 RT-23、§11 #1 | 先按 §1.4(c) 的四段改法把工具修到 0.0.2 基线（`77 / 77`、`结论：FAIL 0 项`、退出码 0），再改到 0.0.3 的 90 / 155 / 299。**不许**改 `01-DESIGN.md` 让工具变绿（D-80 冻结 00 – 15），**不许**把红灯签个字当通过 |
 
 ## 3. 不可违反的硬约束（HC-29 ~ HC-50）
 
@@ -79,9 +79,9 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3、HC-15 ~ HC-28 见 `14-PROMPT-MAIN-0.
   - 违反后果：§11 #1 红（工具段不是 90 / 90）；§11 #2 的自检行与回报里的数字不一致，自检行本身变成假通过；取数用了 0.0.1 的枚举值，逐类小计 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1 对不上。
   - 来源：D-80（数字纪律）；`18-TECH-0.0.3.md` §0.4、§1.2、§2.1、§2.4；RT-23。
 
-- **HC-30 · config 155 与语言键 297 恒含同一批键**
-  - 约束：config 键 139 + 16 = **155**，语言键 263 + 34 = **297**；19 个 config 键都是「16 纯新增 + 3 改既有默认值」，另有 1 行非键说明（`confusion` 组无键，不计入 19）；`farmstorm.configuration.*` 与 config 键恒相等。
-  - 违反后果：`config/farmstorm-server.toml` 叶节点不是 155；两份语言文件不是各 297 键或键集不等；§11 #17 红；19 个键里漏一条实现读取点，改 config 后行为不变。
+- **HC-30 · config 155 与语言键 299 恒含同一批键**
+  - 约束：config 键 139 + 16 = **155**，语言键 263 + 34 = **299**；19 个 config 键都是「16 纯新增 + 3 改既有默认值」，另有 1 行非键说明（`confusion` 组无键，不计入 19）；`farmstorm.configuration.*` 与 config 键恒相等。
+  - 违反后果：`config/farmstorm-server.toml` 叶节点不是 155；两份语言文件不是各 299 键或键集不等；§11 #17 红；19 个键里漏一条实现读取点，改 config 后行为不变。
   - 来源：`18-TECH-0.0.3.md` §8.1、§8.3、§9.4；`.work/v003-BRIEF.md` §3.3。
 
 - **HC-31 · 资源只许 31 个新文件，既有文件只许在 6 个文件上追加**
@@ -90,7 +90,7 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3、HC-15 ~ HC-28 见 `14-PROMPT-MAIN-0.
   - 来源：`18-TECH-0.0.3.md` §9.1、§9.2、§9.3；`.work/v003-BRIEF.md` §3.4。
 
 - **HC-32 · 验证工具先修后跑，红灯不许签字绕过**
-  - 约束：任何注册 / config / 语言键数字，必须在 `tools/verify_project.py` 修好之后才有资格写进文档与回报。修的顺序固定：先修到 0.0.2 基线（`已核 registry 对象: 77 / 77`、`结论：FAIL 0 项`、退出码 0），再改到 0.0.3 的 90 / 155 / 297。
+  - 约束：任何注册 / config / 语言键数字，必须在 `tools/verify_project.py` 修好之后才有资格写进文档与回报。修的顺序固定：先修到 0.0.2 基线（`已核 registry 对象: 77 / 77`、`结论：FAIL 0 项`、退出码 0），再改到 0.0.3 的 90 / 155 / 299。
   - 违反后果：§11 #1 红；工具修好前任何总数断言都不成立（RT-23 第 ① 条）；凭「+13」直接宣布 90 而不去数，等于 RT-23 第 ④ 条；为了让工具变绿去改 `01-DESIGN.md`，同时破 D-80 与 HC-36。
   - 来源：RT-23；`18-TECH-0.0.3.md` §1.4(c)、§10 RT-23、§11 #1。
 
@@ -262,8 +262,8 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3、HC-15 ~ HC-28 见 `14-PROMPT-MAIN-0.
 
 1. 任务书列出的验收项逐条可指认到代码、资源或命令读数。
 2. `.tools\gw.cmd compileJava` 通过；涉及 DataGen 时 `.tools\gw.cmd runData` 通过且产物落进 `src/generated/resources`；收尾 `.tools\gw.cmd build` 退出码 0 并产出 `build/libs/farmstorm-0.0.3+mc1.21.1.jar`。
-3. `python -X utf8 tools/verify_project.py` 输出 `已核 registry 对象: 90 / 90`、config 段 155 键无 FAIL、`lang 键集一致，共 297 键`、`结论：FAIL 0 项`，退出码 0（工具尚未修好时先做 HC-32 的修复任务，不拿红灯交差）。
-4. 三组计数成立：注册 90 且逐类为 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1；config 155；两份语言文件各 297 键且 `set(zh) == set(en)`；资源增量 8 / 1 / 22（合计 31）与既有文件的 6 个追加点逐条对得上。
+3. `python -X utf8 tools/verify_project.py` 输出 `已核 registry 对象: 90 / 90`、config 段 155 键无 FAIL、`lang 键集一致，共 299 键`、`结论：FAIL 0 项`，退出码 0（工具尚未修好时先做 HC-32 的修复任务，不拿红灯交差）。
+4. 三组计数成立：注册 90 且逐类为 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1；config 155；两份语言文件各 299 键且 `set(zh) == set(en)`；资源增量 8 / 1 / 22（合计 31）与既有文件的 6 个追加点逐条对得上。
 5. 启动日志的三行自检都在且以 `OK` 结尾：注册对象 90、作物 22 种（投掷型 12 / 部署型 7 / 食用型 3、破障类 4）、幸运浆果池 19 种。
 6. 红线可判：`grep -r "CustomPacketPayload" src/main/java` 为 0；`grep -rn "Mixin" src/main/java` 为 0。
 7. 无越界改动：`git status` 只出现新增文件与 `18-TECH-0.0.3.md` 点名的既有文件；`.work/v003-BRIEF.md`、`docs/zh/00` ~ `15`、`docs/en/00` ~ `15` 未被触碰；16 – 21 是本次交付物，改动只落在 16 – 21 这六份上。
@@ -284,10 +284,10 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3、HC-15 ~ HC-28 见 `14-PROMPT-MAIN-0.
   - .tools\gw.cmd compileJava → BUILD SUCCESSFUL（<耗时>）
   - .tools\gw.cmd runData → 生成 N 个文件到 src/generated/resources
   - .tools\gw.cmd build → 退出码 0，产物 build/libs/farmstorm-0.0.3+mc1.21.1.jar
-  - python -X utf8 tools/verify_project.py → 已核 registry 对象: 90 / 90；config 155；lang 297；结论：FAIL 0 项（退出码 0）
+  - python -X utf8 tools/verify_project.py → 已核 registry 对象: 90 / 90；config 155；lang 299；结论：FAIL 0 项（退出码 0）
   - （失败的命令照写，附第一条错误原文与总结行）
 - 验收项对照：<任务书每个验收项 → 证据位置（文件:行 / 命令输出关键行 / 日志断言行 / 18 号 §11 的自检项编号）>
-- 计数与红线：<本条涉及的 90 / 155 / 297 / 8 / 1 / 22 现值；CustomPacketPayload 与 Mixin 的匹配数；sounds.json 事件数>
+- 计数与红线：<本条涉及的 90 / 155 / 299 / 8 / 1 / 22 现值；CustomPacketPayload 与 Mixin 的匹配数；sounds.json 事件数>
 - 未决问题：<文档矛盾、缺失的 API、必须由作者裁决的事项；挂 RT 编号的在这里点名；无则写「无」>
 - 下一步提示：<刻意没做但下一步会碰到的事，一句话>
 ```
@@ -344,7 +344,7 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3、HC-15 ~ HC-28 见 `14-PROMPT-MAIN-0.
 | 桑吉尔蔗落地 0 伤害，或伤害随高度漂移 | 只取消没结算、只结算没取消，或顺序反成「先 `finish` 后 `hurt`」 | 取消与结算写在同一个相位状态机里，顺序固定为「先结算、后 `finish`」；关掉 `cancelFallDamage` 做对照实验时必须看到伤害大于 7.5 且随高度变化 | D-96；`18-TECH` §3.11；RT-22 |
 | Ogg 文件与上次对不上，怀疑转换出错 | Ogg 每次重编码的**流序列号是随机的**，字节不可复现，md5 天然不同 | 判据是「时长 / 声道 / 码率」三项（`ffprobe` 读数），**不比 md5**；重编单文件一次，保留新旧两份读数 | `12-TECH-0.0.2.md` §6.4 |
 | 音频产不出来 / 构建成功但没声音 | ffmpeg 在 `D:\dsh\default\sf6_audio\tools\ffmpeg.exe` 但**不在 PATH 上**；Trae CN 的 6.1.1 无 libvorbis 不可用 | 传 `-Ffmpeg` 绝对路径；脚本缺 ffmpeg 时退出码 1 并打印安装指引；音频任务排在资源阶段最前 | `12-TECH-0.0.2.md` §6.4；RT-14；`tools/convert_media.ps1` 的 `-Ffmpeg` 参数 |
-| `verify_project.py` 一直红，越修越红 | 工具仍按 0.0.1 枚举、分母 64、config 期望值只读 `01-DESIGN.md` §3.8 的 117，而该文件属冻结区不能回改 | 按 `18-TECH` §1.4(c) 的四段改法修：期望键集改 139、`EXPECTED` 改 27 / 22 / 11、分母改 77、补齐剩余 5 个裸 ID；修完再收到 90 / 155 / 297 | `18-TECH` §1.4(c)、§10 RT-23、§11 #1 |
+| `verify_project.py` 一直红，越修越红 | 工具仍按 0.0.1 枚举、分母 64、config 期望值只读 `01-DESIGN.md` §3.8 的 117，而该文件属冻结区不能回改 | 按 `18-TECH` §1.4(c) 的四段改法修：期望键集改 139、`EXPECTED` 改 27 / 22 / 11、分母改 77、补齐剩余 5 个裸 ID；修完再收到 90 / 155 / 299 | `18-TECH` §1.4(c)、§10 RT-23、§11 #1 |
 | 改了 config 默认值但游戏里行为没变 | 已生成的 `config/farmstorm-server.toml` 不会因默认值变化而重写 | 删掉该文件重新生成，或手动改值；核对叶节点 155 | `08-DEV-GUIDE.md` §4.3；14 号 §9 |
 | 两个 `runServer` 撞 `session.lock`、日志互相覆盖 | 并行服务端共用一个运行目录 | 起第二个之前加 `-PfsRunDir=run-xxx`，各自独立目录 | `08-DEV-GUIDE.md` §4.2 |
 | 扔新投掷物客户端崩 `entityrenderer is null` | 新增的 `entity_type` 没注册客户端渲染器 | 13 个 `entity_type` 每个都 `registerEntityRenderer`，自检行必须是 13/13；两个新投掷物沿用 `ThrownItemRenderer` | `18-TECH` §2.1 第 4 行；14 号 §9 |
@@ -355,7 +355,7 @@ HC-01 ~ HC-14 见 `05-PROMPT-MAIN.md` §3、HC-15 ~ HC-28 见 `14-PROMPT-MAIN-0.
 | 编号 | 约束摘要 | 来源 |
 |---|---|---|
 | HC-29 | 注册总数只有一个来源：基线 77、增量 +13、目标 90 | D-80；`18-TECH` §0.4、§1.2、§2.1、§2.4；RT-23 |
-| HC-30 | config 155 与语言键 297 恒含同一批键（19 行 = 16 新 + 3 改） | `18-TECH` §8.1、§8.3、§9.4；`.work/v003-BRIEF.md` §3.3 |
+| HC-30 | config 155 与语言键 299 恒含同一批键（19 行 = 16 新 + 3 改） | `18-TECH` §8.1、§8.3、§9.4；`.work/v003-BRIEF.md` §3.3 |
 | HC-31 | 资源只许 31 个新文件（PNG 8 / OGG 1 / JSON 22），既有文件只在 6 个文件上追加 | `18-TECH` §9.1、§9.2、§9.3；`.work/v003-BRIEF.md` §3.4 |
 | HC-32 | verify_project.py 先修后跑，红灯不许签字绕过 | RT-23；`18-TECH` §1.4(c)、§10、§11 #1 |
 | HC-33 | 零自定义网络包，效果状态靠原版 MobEffect 同步 | C-6、D-50；`16-DECISIONS` §7.2；14 号 §3 HC-15 |

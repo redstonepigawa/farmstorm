@@ -131,6 +131,7 @@ cmd /c ""...\gw.cmd" runServer -PfsRunDir=run-myfeature
 | 材质生成后竹子图标变了 | 用了 1.21.1 客户端 jar | 材质脚本必须指向 `26.3` 客户端 jar（`gen_textures.py --vanilla-assets`） |
 | 1.21.1 编译不过的常用签名 | 文档按旧版写的 | `MobEffects.DAMAGE_BOOST/DAMAGE_RESISTANCE/JUMP/MOVEMENT_SPEED/DIG_SPEED`；`PushReaction`；`ColorParticleOption.create(...)`；`Creeper` 无 `setPowered` |
 | 临时附魔到期后附魔还在（如火焰附加永不消失） | `TempEnchantHandler.grant` 遇到「已过期但 20 刻扫描器还没清掉」的旧记录会 `continue` 跳过，随后 `previous = stack.getEnchantmentLevel(...)` 读到的是**当前（临时）等级 1**，新记录写成 `previous=1`，到期只会「还原」成 1 | `grant()` **开头先 `revokeExpired(stack, now)`**，再读 `previous`；`previous` 必须是玩家真实等级（干净物品 = 0）。V-77 |
+| 灰度后处理让水下完全看不见 | 水下画面偏暗、低对比，取亮度后糊成一片均匀的灰；初步以为是「太暗」，试着抬伽马、去雾、去蓝色蒙版都不够 | **给水下单独一条灰度链**（提亮暗部 + 拉对比），而不是停掉灰度。判据：作者开 F3+F4 面板（后处理未生效）时画面正常 ⇒ 元凶就是后处理。V-81 |
 
 ## 8. 调试手法
 

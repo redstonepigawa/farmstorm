@@ -41,14 +41,14 @@ BRIEF §4.2 requires this document to produce three mutually consistent numbers.
 
 | Inventory | Subsection | Inventory rows | BRIEF §4.1 existing stock | New total |
 |---|---|---|---|---|
-| New resource files | §7.2 | **36** | 262 | **302** |
+| New resource files | §7.2 | **36** | 262 | **305** |
 | New language file keys | §7.3 | **39** | 222 | **263** |
 | New config keys | §8.1 | **22** | 117 | **139** |
 
 Two hard checks (pinned from both sides by `runData` and by the startup log during implementation):
 
 - The number of new `farmstorm.configuration.*` language keys, **22**, equals the number of table rows in §8.1, **22**; the key sets of `zh_cn` and `en_us` must be character-for-character equal (`222 + 39 = 263`, both files 263).
-- Total resource files = **265** before the migration + 37 = **302**; split by category = JSON 169+26=195, PNG 92+8=100, OGG 2, GLSL 0+3=3, TOML 1, `pack.mcmeta` 1 → 195+100+2+3+1+1 = 302. The §7.2 list has 40 rows and **all 40 have landed** (the 3 advancements were delivered by F-98); 3 rows (2 `.ogg` files + `textures/mob_effect/wild_hunter.png`) were already in the repository at the 0.0.2 baseline, so `git diff` shows +37.
+- Total resource files = **265** before the migration + 40 = **305**; split by category = JSON 169+28=197, PNG 92+8=100, OGG 2, GLSL 0+4=4, TOML 1, `pack.mcmeta` 1 → 197+100+2+4+1+1 = 305. The §7.2 list has 43 rows and **all 43 have landed** (the 3 advancements were delivered by F-98); 3 rows (2 `.ogg` files + `textures/mob_effect/wild_hunter.png`) were already in the repository at the 0.0.2 baseline, so `git diff` shows +40.
 
 ### 0.4 Numeric conventions (copied from BRIEF §4)
 
@@ -1106,17 +1106,37 @@ public final class WildHunterLoopSound extends SoundInstance {
 
 ---
 
-### 4.7 Wild Hunter gamma boost (added by the author, no decision ID)
+### 4.7 Underwater visibility (V-78 gamma + V-81 underwater grayscale chain)
 
-**Responsibility**: while the effect is present, raise the client's `options.gamma()` to 1.0 to cover "underwater / in caves you cannot see anything"; **the in-memory value only — never call `options.save()`**.
+**The problem**: during Wild Hunter the player "cannot see anything at all" underwater. The author contributed the decisive observation — turning on the F3+F4 panels brings the colours back and underwater vision is normal ⇒ the culprit is the **grayscale post-process**, not brightness or fog.
+
+**Why plain grayscale fails underwater**: the underwater image is already dark and low-contrast, so taking luminance directly smears the details into a uniform grey.
+
+#### 4.7.1 Gamma boost (V-78)
+
+**Responsibility**: while the effect is present, raise the client's `options.gamma()` to 1.0 to cover "in caves you cannot see anything"; **the in-memory value only — never call `options.save()`**.
 
 **Implementation**: `client/GammaBoost.java`, driven every tick from `WildHunterClientHooks#onClientTick`; `originalGamma` is a `Double` (null means "not raised") so the boost is idempotent.
 
-**Restore paths (all of them are required; miss one and the player's local brightness is changed forever)**: effect expiry / `/effect clear` / death (vanilla clears the effect) / leaving the world (`level == null`) / disconnect (`ClientPlayerNetworkEvent.LoggingOut`, **registered from a static block so it does not rely on the tick fallback**).
+**Restore paths (all required; miss one and the player's local brightness is changed forever)**: effect expiry / `/effect clear` / death (vanilla clears the effect) / leaving the world (`level == null`) / disconnect (`ClientPlayerNetworkEvent.LoggingOut`, **registered from a static block so it does not rely on the tick fallback**).
 
 **Why not night vision**: night vision changes the gameplay rules (entity outlines become visible), whereas gamma only changes brightness.
 
-**Known exposure**: ① while the boost is active the brightness slider in the settings screen reads as full, and it recovers once the screen is closed (the vanilla options system has no temporary override); ② when the effect is present and the game exits, the boost must not reach the file — the `LoggingOut` hook covers that path.
+**Known exposure**: while the boost is active the brightness slider in the settings screen reads as full, and it recovers once the screen is closed (the vanilla options system has no temporary override).
+
+#### 4.7.2 The underwater-only grayscale chain (V-81)
+
+**Three measures, stacked**:
+
+1. **Cancel fog**: cancel `ViewportEvent.RenderFog` (covers underwater fog, lava fog and distance fog);
+2. **Cancel the underwater blue overlay**: cancel `RenderBlockScreenEffectEvent` (`OverlayType.WATER`);
+3. **Swap in a dedicated grayscale chain underwater (the key one)**: `shaders/post/grayscale_underwater.json` — still black-and-white, but ① `pow(luma, 0.62)` lifts the shadows; ② a 1.45× stretch around mid grey 0.5 adds contrast; ③ ×1.08 lifts everything slightly.
+
+**Switching**: `GrayscalePass` picks between the two chains by `isEyeInFluid(FluidTags.WATER)`, and only calls shutdown/load **when the state changes**; it shuts down only the chain it loaded itself and never touches the vanilla creeper / spider chain.
+
+**Measured**: `14:19:38 卸载 grayscale → 加载 grayscale_underwater` (entering water) and `14:19:43` in reverse (leaving it), with zero `Failed to load/parse shader`; the author confirmed in game that it is "exactly right".
+
+**Relation to 4.7.1**: gamma fixes "too dark", the underwater chain fixes "smeared". They stack, and the chain is **swapped, not disabled** — the earlier "disable grayscale underwater" idea is superseded.
 
 ## 5. Phase Synchronization Plan for Zangief Cane
 
@@ -1417,11 +1437,11 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | `.glsl` (`.vsh` + `.fsh`) | 0 | +3 | **3** |
 | `.toml` (`neoforge.mods.toml`) | 1 | +0 | **1** |
 | `pack.mcmeta` | 1 | +0 | **1** |
-| **Total** | **265** | **+37** | **302** |
+| **Total** | **265** | **+40** | **305** |
 
 Counting reminder (BRIEF §4.1): the 11 extension-less files under `src/generated/resources/.cache` are DataGen caches — **they do not enter the jar and are not counted**. The 2 language-file `.json`s are already included in the 169 (their content changes, their file count does not).
 
-### 7.2 Itemized inventory of new resource files (**40 rows**)
+### 7.2 Itemized inventory of new resource files (**43 rows**)
 
 "Pipeline" column: `hand-written` = written directly under `src/main/resources`; `DataGen` = generated by a provider into `src/generated/resources`; `script` = produced by the conversion scripts of §6.
 
@@ -1445,40 +1465,43 @@ Counting reminder (BRIEF §4.1): the 11 extension-less files under `src/generate
 | 16 | `assets/farmstorm/shaders/post/grayscale.json` | JSON | hand-written | grayscale `PostChain` declaration (loaded at runtime by `GameRenderer#loadEffect`; `targets` must be an array) | V-56 / V-49 |
 | 17 | `assets/farmstorm/shaders/program/grayscale.json` | JSON | hand-written | grayscale shader program declaration (vertex `minecraft:blit` + fragment `farmstorm:grayscale`) | V-56 |
 | 18 | `assets/farmstorm/shaders/program/grayscale.fsh` | GLSL | hand-written | same content as `core/grayscale.fsh` (a different sampler name), kept as a spare | V-56 |
-| 19 | `assets/farmstorm/post_effect/grayscale.json` | JSON | hand-written | grayscale post-effect declaration (the `PostChain` mount of the RT-10 degradation branch) | BRIEF §3.2 |
-| 20 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | single-variant `cube_all` | D-57 |
-| 21 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | all variants of `face`×`facing`×`floating` → empty model | D-68 |
-| 22 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | six-face single-texture model | D-57 |
-| 23 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | empty model (only `textures.particle`) | D-68 |
-| 24 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | `item/generated` + layer0 | §2.2 |
-| 25 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | `item/generated` (does not reference the block model) | D-68 |
-| 26 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | `item/generated` | §2.2 |
-| 27 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | `item/generated` | D-56 |
-| 28 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | `parent = farmstorm:block/compressed_hay_block` | D-57 |
-| 29 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | converter crafting: center `minecraft:crafting_table` + eight `#farmstorm:converter_fuel` | D-52 |
-| 30 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | shapeless: 4 `puffed_wheat` → 1 `compressed_puffed_wheat` | D-67 |
-| 31 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:crimson_fungus` ⇄ `molotov`, bidirectional, experience 3, no catalyst | same shape as D-54 |
-| 32 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:sugar_cane` ⇄ `zangief_cane`, bidirectional, experience 3 | same shape as D-54 |
-| 33 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:golden_apple` ⇄ `wild_apple`, bidirectional, experience 3 | D-54 |
-| 34 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | advancement: throw a Molotov for the first time | D-63 |
-| 35 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | advancement: Zangief Cane hits for the first time | D-63 |
-| 36 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | advancement: obtain the Wild Hunter effect for the first time | D-63 |
-| 37 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | drops itself (`requiresCorrectToolForDrops` makes it drop nothing bare-handed) | D-57 |
-| 38 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | deployed-block conventions: `survives_explosion` + drops itself | same shape as the 5 existing ones |
-| 39 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | new item tag: vanilla crops + the items of the 19 profiles that can act as crops | D-52 |
-| 40 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | new: `compressed_hay_block` needs a diamond pickaxe | D-57 |
+| 19 | `assets/farmstorm/shaders/post/grayscale_underwater.json` | JSON | hand-written | underwater-only grayscale `PostChain` (still black-and-white: `pow(luma, 0.62)` lifts the shadows, a 1.45× stretch around mid grey 0.5 adds contrast, ×1.08 lifts everything slightly, V-81) | V-81 |
+| 20 | `assets/farmstorm/shaders/program/grayscale_underwater.json` | JSON | hand-written | program declaration of the underwater chain (vertex `minecraft:blit` + fragment `farmstorm:grayscale_underwater`) | V-81 |
+| 21 | `assets/farmstorm/shaders/program/grayscale_underwater.fsh` | GLSL | hand-written | underwater grayscale fragment shader (lift shadows + add contrast) | V-81 |
+| 22 | `assets/farmstorm/post_effect/grayscale.json` | JSON | hand-written | grayscale post-effect declaration (the `PostChain` mount of the RT-10 degradation branch) | BRIEF §3.2 |
+| 23 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | single-variant `cube_all` | D-57 |
+| 24 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | all variants of `face`×`facing`×`floating` → empty model | D-68 |
+| 25 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | six-face single-texture model | D-57 |
+| 26 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | empty model (only `textures.particle`) | D-68 |
+| 27 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | `item/generated` + layer0 | §2.2 |
+| 28 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | `item/generated` (does not reference the block model) | D-68 |
+| 29 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | `item/generated` | §2.2 |
+| 30 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | `item/generated` | D-56 |
+| 31 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | `parent = farmstorm:block/compressed_hay_block` | D-57 |
+| 32 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | converter crafting: center `minecraft:crafting_table` + eight `#farmstorm:converter_fuel` | D-52 |
+| 33 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | shapeless: 4 `puffed_wheat` → 1 `compressed_puffed_wheat` | D-67 |
+| 34 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:crimson_fungus` ⇄ `molotov`, bidirectional, experience 3, no catalyst | same shape as D-54 |
+| 35 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:sugar_cane` ⇄ `zangief_cane`, bidirectional, experience 3 | same shape as D-54 |
+| 36 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | `ConverterRecipe`: `minecraft:golden_apple` ⇄ `wild_apple`, bidirectional, experience 3 | D-54 |
+| 37 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | advancement: throw a Molotov for the first time | D-63 |
+| 38 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | advancement: Zangief Cane hits for the first time | D-63 |
+| 39 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | advancement: obtain the Wild Hunter effect for the first time | D-63 |
+| 40 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | drops itself (`requiresCorrectToolForDrops` makes it drop nothing bare-handed) | D-57 |
+| 41 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | deployed-block conventions: `survives_explosion` + drops itself | same shape as the 5 existing ones |
+| 42 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | new item tag: vanilla crops + the items of the 19 profiles that can act as crops | D-52 |
+| 43 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | new: `compressed_hay_block` needs a diamond pickaxe | D-57 |
 
 Column mapping (this section is a file list, not a key table): **file path** ↔ key name; **category** ↔ default value (including file size, e.g. `PNG 16×16`); **pipeline** ↔ scope (who produces the file, whether it can be re-run); **purpose** ↔ purpose; **basis** ↔ the D number.
 
-**Row count**: this table has `40` rows (the measured repository after V-49 / V-56 / V-60) and **all 40 have landed** (the 3 advancements were delivered by F-98). 3 of them (2 `.ogg` files and `textures/mob_effect/wild_hunter.png`) were already in the repository at the 0.0.2 baseline commit, so "new since the baseline" is 37 files (the `git diff` view) while the total is 265 + 37 = **302**.
+**Row count**: this table has `43` rows (the measured repository after V-49 / V-56 / V-60 / V-81) and **all 43 have landed**. 3 of them (2 `.ogg` files and `textures/mob_effect/wild_hunter.png`) were already in the repository at the 0.0.2 baseline commit, so "new since the baseline" is 40 files (the `git diff` view) while the total is 265 + 40 = **305**.
 
 | Category | Rows | Count |
 |---|---|---|
 | PNG | #1–#9 | 9 |
 | OGG | #10–#11 | 2 |
-| JSON | #12, #13, #16, #17, #19–#40 | 26 |
-| GLSL | #14, #15, #18 | 3 |
-| **Total** | — | **40** |
+| JSON | #12, #13, #16, #17, #19, #20, #22, #23, #25–#43 | 28 |
+| GLSL | #14, #15, #18, #21 | 4 |
+| **Total** | — | **43** |
 
 ### 7.3 Itemized inventory of new language file keys (**41 rows**)
 
@@ -1543,8 +1566,8 @@ Column mapping: **Key** ↔ key name; **the `zh_cn` / `en_us` columns** ↔ valu
 
 | Number | How to check | Expectation |
 |---|---|---|
-| resources 302 | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources \| Where-Object Name -ne '.cache' \| Measure-Object`, then subtract the 11 files under `.cache` | 302 |
-| JSON 195 | same, but count `.json` only | 193 |
+| resources 305 | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources \| Where-Object Name -ne '.cache' \| Measure-Object`, then subtract the 11 files under `.cache` | 305 |
+| JSON 197 | same, but count `.json` only | 193 |
 | PNG 100 | count `.png` only | 99 |
 | language keys 263 | `python -c "import json;print(len(json.load(open('…/zh_cn.json'))))"`, and the same for `en_us` | both 263 |
 | the two key sets are equal | same, but compare `set(a) == set(b)` | `True` |
@@ -1790,7 +1813,7 @@ Every item can be decided by one **concrete action**; "looks fine" is not accept
 | 14 | the Wild Hunter dash goes through the server re-check | with the effect on, attack a creature within 5 blocks and 30° once; then attack one outside 30° once | the former is attracted and takes damage and knockback; the latter is a normal attack with no attraction; `latest.log` shows no `moved too quickly!` (if it appears, tune `dashTicks` per RT-12) |
 | 15 | kill extension has no cap | with the effect on, kill 6 creatures in a row, reading the remaining effect duration each time | every "expiry moment" moves +8 seconds and health +10 points; it is still active after 6 kills (no cap on the number of kills) |
 | 16 | 139 config keys, equal on both sides | count the leaf nodes of `run/config/farmstorm-server.toml`; count the keys with the `farmstorm.configuration.` prefix in `zh_cn.json` | both numbers are **139** (117 + 22); the 22 new key names match §8.1 character for character, and match the sole inventory of BRIEF §8 column by column |
-| 17 | 302 resource files, categories consistent | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources` minus the 11 under `.cache` | total **302**; JSON **193**, PNG **99**, OGG **2**, GLSL **2**, TOML 1, `pack.mcmeta` 1 |
+| 17 | 305 resource files, categories consistent | `Get-ChildItem -Recurse -File src\main\resources, src\generated\resources` minus the 11 under `.cache` | total **305**; JSON **193**, PNG **99**, OGG **2**, GLSL **2**, TOML 1, `pack.mcmeta` 1 |
 | 18 | 263 language keys, Chinese and English equal | after `ModLangProvider` runs, compare the key sets of the two `.json` files | both **263** keys (222 + 39); `set(zh) == set(en)` is `True`; among them `tooltip.farmstorm.*` is still **16** entries (nothing wrongly added) |
 | 19 | the three new advancements unlock | respectively: throw a Molotov / land a Zangief Cane on a player / obtain the Wild Hunter effect | each advancement pops a toast once; `/advancement` shows `farmstorm:first_molotov`, `farmstorm:zangief_hit`, `farmstorm:first_wild_hunter` |
 | 20 | the shape and count of the 5 new recipes | craft the converter at the crafting table (center crafting table + eight crops); place 4 Puffed Wheat shapeless; convert molotov / zangief_cane / wild_apple once each in the converter | the converter yields 1; 4 Puffed Wheat yield 1 Compressed Puffed Wheat; each of the three conversions costs 3 experience points and works in both directions (golden apple ⇄ Wild Apple, once each way) |

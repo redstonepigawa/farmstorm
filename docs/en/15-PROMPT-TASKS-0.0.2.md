@@ -67,9 +67,9 @@ Order of handling when a phase fails: first have it self-check per `14`'s self-c
 | 1 | Number of `CropProfile`s | **19** (15 → 19) | BRIEF §3.1 / §4; `10-DECISIONS-0.0.2.md` §4; `12-TECH-0.0.2.md` §3.1 |
 | 2 | Total registered objects | **77** (64 → 77; the startup self-check line carries the 12-category subtotals) | BRIEF §4; `12-TECH-0.0.2.md` §2.1 / §11 #2 |
 | 3 | config keys | **139** (117 + 22 new) | BRIEF §8; `12-TECH-0.0.2.md` §8.1 / §11 #16 |
-| 4 | Total resource files | **302** (265 + 37 new; JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1, excluding the 11 under `.cache`) | BRIEF §4.1; `12-TECH-0.0.2.md` §7.1 / §11 #17 |
+| 4 | Total resource files | **305** (265 + 37 new; JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / `pack.mcmeta` 1, excluding the 11 under `.cache`) | BRIEF §4.1; `12-TECH-0.0.2.md` §7.1 / §11 #17 |
 | 5 | Language-file keys | **263** (222 + 41 new; the Chinese and English key sets must be equal) | BRIEF §8; `12-TECH-0.0.2.md` §7.3 / §11 #18 |
-| 6 | Resource deliverables | **40 rows** (PNG 9 / OGG 2 / JSON 26 / GLSL 3), all landed | `12-TECH-0.0.2.md` §7.2; `13-TASKS-0.0.2.md` §9.3 |
+| 6 | Resource deliverables | **43 rows** (PNG 9 / OGG 2 / JSON 28 / GLSL 4), all landed | `12-TECH-0.0.2.md` §7.2; `13-TASKS-0.0.2.md` §9.3 |
 | 7 | New language keys | **39** (config 22 + item 5 + block 2 + effect 2 + subtitles 2 + advancements 6) | `12-TECH-0.0.2.md` §7.3; `13-TASKS-0.0.2.md` F-97 |
 | 8 | New config keys | **22** (molotov 3 / wild_apple 2 / wild_hunter 11 / zangief_cane 6) | BRIEF §8's single list; `12-TECH-0.0.2.md` §8.1 |
 | 9 | Advancements | **15** (12 + 3) | BRIEF §4; `10-DECISIONS-0.0.2.md` D-63; `12-TECH-0.0.2.md` §11 #19 |
@@ -82,7 +82,7 @@ Order of handling when a phase fails: first have it self-check per `14`'s self-c
 Two reminders on the wording:
 
 - The three v0.0.1 bases are **117** (config) / **262** (resources) / **222** (language keys), not the earlier 216 / 257 in `06-PROMPT-TASKS.md` — those two figures have been superseded by measurement; BRIEF §4.1 wins.
-- The `.cache` directory under `src/generated/resources` holds **11 extensionless files**; that is DataGen cache, it **does not go into the jar and does not count toward 302**; deduct it before counting resources.
+- The `.cache` directory under `src/generated/resources` holds **11 extensionless files**; that is DataGen cache, it **does not go into the jar and does not count toward 305**; deduct it before counting resources.
 
 ---
 
@@ -94,7 +94,7 @@ Two reminders on the wording:
 | Phase 12 | Compressed Items and Molotov! | 9 | F-67 ~ F-75 | 10.5 | Phase 11 | the 5 new recipes work; throwing a Molotov only appends fire / magma block and not one original block goes missing; Compressed Hay Block does not break to the Melon Grenade or the Melon Slice Bomb and does break to the Ubi Server and to TNT |
 | Phase 13 | Wild Hunter | 10 | F-76 ~ F-85 | 16.0 | Phase 11 | after eating one Wild Apple, seven abilities are observable (attributes / attraction / damage knockback / time extension / world-only grayscale / red silhouette / loop sound), and `/effect clear` resets all of them |
 | Phase 14 | Zangief Cane | 8 | F-86 ~ F-93 | 11.5 | Phase 11 | the three phases run in order (14 / 15 / 22 ticks); lift 14.86 blocks, fall damage 12.00; only ESC survives the 21-key test; `Rotation` is not written back |
-| Phase 15 | Resources, Audio, Advancements and Acceptance | 6 | F-94 ~ F-99 | 11.5 | Phase 11 + 12 + 13 + 14 | 302 / 263 / 139 / 77 all line up; all 23 self-checks of `12-TECH` §11 pass; `dist/farmstorm-0.0.2+mc1.21.1.jar` is produced |
+| Phase 15 | Resources, Audio, Advancements and Acceptance | 6 | F-94 ~ F-99 | 11.5 | Phase 11 + 12 + 13 + 14 | 305 / 263 / 139 / 77 all line up; all 23 self-checks of `12-TECH` §11 pass; `dist/farmstorm-0.0.2+mc1.21.1.jar` is produced |
 | **Total** | **5 Phases** | **40** | **F-60 ~ F-99** | **60.5** | | |
 
 Reading notes:
@@ -396,7 +396,7 @@ Land the Deployable trap Zangief Cane and its three-phase presentation (inversio
 
 ### 6.2 Goal
 
-Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG files, 1 effect icon, 9 model-side JSONs, 3 advancements) plus the 41 language keys, then align the **302 / 263 / 139 / 77** counts, run all 23 self-checks of `12-TECH` §11, and produce a releasable jar.
+Fill in the rest of the 43 resource deliverables (6 item / block textures, 2 OGG files, 1 effect icon, 9 model-side JSONs, 3 advancements) plus the 41 language keys, then align the **305 / 263 / 139 / 77** counts, run all 23 self-checks of `12-TECH` §11, and produce a releasable jar.
 
 ### 6.3 Task list
 
@@ -407,7 +407,7 @@ Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG
 | F-96 | Blockstates and models: 9 JSONs | M / 1.5 | F-65, F-67, F-95 | 2 blockstates + 2 block models + 5 item models (the Zangief Cane model has only `textures.particle` and no `elements`) |
 | F-97 | The 41 language entries and Chinese-English equality | S / 0.5 | F-61, F-64, F-65, F-98 | `ModLangProvider` lands 41 entries → 263 keys in each of the two files with equal key sets; `tooltip.farmstorm.*` still has 16 |
 | F-98 | Three new advancements | S / 0.5 | F-69, F-76, F-87 | `first_molotov` / `zangief_hit` / `first_wild_hunter` with parents `first_throw` / `first_deploy` / `root`, bringing the advancement total to 15 |
-| F-99 | Confirming the four counts, the three-mode regression, and packaging | L / 3.0 | F-75, F-85, F-93, F-94, F-96, F-97 | 302 / 263 / 139 / 77 aligned + a reading recorded for each of the 23 self-checks + the `dist` jar + the index section and the asset-attribution section of `README.md` |
+| F-99 | Confirming the four counts, the three-mode regression, and packaging | L / 3.0 | F-75, F-85, F-93, F-94, F-96, F-97 | 305 / 263 / 139 / 77 aligned + a reading recorded for each of the 23 self-checks + the `dist` jar + the index section and the asset-attribution section of `README.md` |
 
 ### 6.4 Phase exit criteria
 
@@ -422,7 +422,7 @@ Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG
 - [ ] **F-97 key count and equality**: after `runData`, compare the two `.json` files. Passing looks like: **263** keys in each (222 + 41) and `set(zh) == set(en)` is True; the six-group breakdown of the 39 lines matches group by group (config 22 + item 5 + block 2 + effect 2 + subtitles 2 + advancements 6); `tooltip.farmstorm.*` is still 16.
 - [ ] **F-98 the three advancements**: really trigger each one once, then query with `/advancement`. Passing looks like: throwing a Molotov pops `first_molotov`, a Zangief Cane hit pops `zangief_hit`, and gaining the effect pops `first_wild_hunter`, one toast each; `/advancement` finds all three IDs; the advancement total is **15**; `git diff` of the existing 12 is empty.
 - [ ] **F-98 JSON shape**: read the three files. Passing looks like: `parent` is `farmstorm:first_throw` / `farmstorm:first_deploy` / `farmstorm:root` respectively, `frame` is `task`, `show_toast` is true.
-- [ ] **F-99 302 resources**: `git ls-files 'src/main/resources' 'src/generated/resources'`, then deduct the 11 extensionless files under `.cache` and the 3 `.gitkeep` files. Passing looks like: **302** in total; JSON **195**, PNG **100**, OGG **2**, GLSL **3**, TOML 1, `pack.mcmeta` 1.
+- [ ] **F-99 305 resources**: `git ls-files 'src/main/resources' 'src/generated/resources'`, then deduct the 11 extensionless files under `.cache` and the 3 `.gitkeep` files. Passing looks like: **305** in total; JSON **195**, PNG **100**, OGG **2**, GLSL **3**, TOML 1, `pack.mcmeta` 1.
 - [ ] **F-99 the other three numbers**: language keys, toml, self-check lines. Passing looks like: **263** keys in each language file with equal key sets; **139** keys in `config/farmstorm-server.toml`; both the `自检 注册对象 77 个 …` and `自检 实体渲染器 11/11 → OK` lines are in the log (self-check: 77 registered objects / entity renderers 11/11).
 - [ ] **F-99 the 23 self-checks**: run them item by item per `12-TECH` §11. Passing looks like: all 23 pass, each with a recorded reading (one line each: ID / verdict / evidence location).
 - [ ] **F-99 known cosmetic defect**: `WARN ClientRecipeBook: Unknown recipe category: farmstorm:convert` ×3 is **fixed** in this version (`RegisterRecipeBookCategoriesEvent#registerRecipeCategoryFinder`, V-67) — confirm the warning no longer appears and that the README does not list it as a known limitation.
@@ -440,7 +440,7 @@ Fill in the rest of the 40 resource deliverables (6 item / block textures, 2 OGG
 
 ### 6.6 What to report
 
-- The commands and results for the four counts (302 / 263 / 139 / 77) and the six-way breakdown of the resources (JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1).
+- The commands and results for the four counts (305 / 263 / 139 / 77) and the six-way breakdown of the resources (JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / `pack.mcmeta` 1).
 - The key counts of the two language files, the empty verdict of the key-set diff, and the 16 of `tooltip.farmstorm.*`.
 - The three verbatim `ffprobe` lines of the two `.ogg` files (codec / channels / bitrate), plus the script's exit code and message text when ffmpeg is missing.
 - A reading for each of the 23 self-checks (one line each: ID / verdict / evidence location).
@@ -469,7 +469,7 @@ Five ready-to-paste instances:
 | Phase 12 → 13 | The previous phase (Phase 12 · Compressed Items and Molotov!) is complete: the 5 new recipes work, throwing a Molotov only appends fire and magma blocks with not one original block missing, Compressed Hay Block does not break to the Melon Grenade or the Melon Slice Bomb but does break to the Ubi Server and to TNT, and the conversion recipe total is 24. This phase begins: Phase 13 · Wild Hunter — follow the "Phase 13" section of 15-PROMPT-TASKS-0.0.2.md, do only F-76 ~ F-85, and hand the report back in the report format of 14. |
 | Phase 13 → 14 | The previous phase (Phase 13 · Wild Hunter) is complete: all seven are observable — the three attribute bonuses, the 5-block 30° attraction dash, damage and knockback, kill extension without a cap, world-only grayscale (the HUD keeps its original colours), red silhouettes on visible mobs, and the 16-block looping sound; everything resets after `/effect clear`; `CustomPacketPayload` and `Mixin` match counts are both 0. This phase starts Phase 14 · Zangief Cane; follow section 5 of 15-PROMPT-TASKS-0.0.2.md … |
 | Phase 14 → 15 | The previous phase (Phase 14 · Zangief Cane) is complete: the three phases (inversion → servo lift of 16 blocks over 15 ticks → gravity-driven free fall + spin) ran in order (**14 / 15 / 22 ticks**), the lift measured 14.86 blocks and the fall damage 12.00, only ESC survived the 21-key test, and `/data get entity @s Rotation` never changed. This phase starts Phase 15 · Resources, Audio, Advancements and Acceptance; follow section 6 of 15-PROMPT-TASKS-0.0.2.md … |
-| Phase 15 → closing | The previous phase (Phase 15 · Resources, Audio, Advancements and Acceptance) is complete: 302 resources / 263 language keys (Chinese and English equal) / 139 config / 77 registered objects all line up, all 23 self-checks of `12-TECH` §11 have a recorded reading, and `dist/farmstorm-0.0.2+mc1.21.1.jar` exists |
+| Phase 15 → closing | The previous phase (Phase 15 · Resources, Audio, Advancements and Acceptance) is complete: 305 resources / 263 language keys (Chinese and English equal) / 139 config / 77 registered objects all line up, all 23 self-checks of `12-TECH` §11 have a recorded reading, and `dist/farmstorm-0.0.2+mc1.21.1.jar` exists |
 
 ---
 
@@ -484,8 +484,8 @@ Project close-out. Perform one complete delivery check on farmstorm v0.0.2: veri
 
 2. Resource inventory (you must count class by class; reporting only a total is invalid)
    Re-run .tools\gw.cmd runData and count class by class per the wording of 12-TECH-0.0.2.md §7.1 / §7.4;
-   the total must be 302: JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / pack.mcmeta 1,
-   excluding the 11 extensionless files of .cache under src/generated/resources (they do not go into the jar and do not count toward 302).
+   the total must be 305: JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / pack.mcmeta 1,
+   excluding the 11 extensionless files of .cache under src/generated/resources (they do not go into the jar and do not count toward 305).
    Run runData once more: git diff --stat must be empty (no trace of hand-edited generated output).
    Each of the two language files has 263 keys and set(zh) == set(en) is True; among them tooltip.farmstorm.* is still 16.
    config/farmstorm-server.toml has 139 leaf nodes, and the language keys carrying the farmstorm.configuration. prefix are also 139.
@@ -525,7 +525,7 @@ Project close-out. Perform one complete delivery check on farmstorm v0.0.2: veri
 
 Three criteria for the close-out (reviewed by human eyes, not by the agent's self-report):
 
-1. The six classes in the resource inventory table sum to **302**, and every row can be pointed to a directory; the 11 under `.cache` really are left out.
+1. The six classes in the resource inventory table sum to **305**, and every row can be pointed to a directory; the 11 under `.cache` really are left out.
 2. All **22** items of `12-TECH-0.0.2.md` §11 are green and each has an evidence location — #9 (TNT can blow up Compressed Hay Block) and #21 (0 network packets) must be named individually.
 3. The task check table has **40 rows** and "not met" is 0; if there is one, make it up and re-run this section — without making it up, no release.
 

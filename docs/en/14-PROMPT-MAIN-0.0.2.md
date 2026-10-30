@@ -15,7 +15,7 @@
 
 This file states only the **increments** of v0.0.2 and the execution discipline that rides on them; it does not cover the part of v0.0.1 that is already finished. Six boundaries:
 
-1. **Coverage**: the four increments of v0.0.2 — 4 new crop profiles (15 → 19), 13 new registered objects (64 → 77), 22 new config keys (117 → 139), 40 resource deliverables (265 → 302) and 11 data entries (5 recipes + 3 advancements + 1 item tag + 2 vanilla tag sites); plus the three invasive effects (world-only grayscale D-61, red silhouette D-62, input lock D-60) and their camera, audio, and target-acquisition support (D-59, D-66, D-76, D-64).
+1. **Coverage**: the four increments of v0.0.2 — 4 new crop profiles (15 → 19), 13 new registered objects (64 → 77), 22 new config keys (117 → 139), 43 resource deliverables (265 → 305) and 11 data entries (5 recipes + 3 advancements + 1 item tag + 2 vanilla tag sites); plus the three invasive effects (world-only grayscale D-61, red silhouette D-62, input lock D-60) and their camera, audio, and target-acquisition support (D-59, D-66, D-76, D-64).
 2. **`05-PROMPT-MAIN.md` is still in force and takes precedence for any change to existing v0.0.1 code**: enforce its HC-01 ~ HC-14, N-01 ~ N-14, §4 package structure and naming, §5 execution discipline, and §9 nine traps exactly as written. This file only appends HC-15 ~ HC-28 and N-15 ~ N-28 on the new surface of v0.0.2; it does not restate, rewrite, or relax them.
 3. **Conflict adjudication**: when the two prompts conflict, `10-DECISIONS-0.0.2.md` wins; where that is silent too, take `12-TECH-0.0.2.md` > `11-DESIGN-0.0.2.md` > `13-TASKS-0.0.2.md` in that order; for existing v0.0.1 content the adjudication order still runs through `00-DECISIONS.md` (`05-PROMPT-MAIN.md` §0). Where the flattened construction-period draft `.work/v002-BRIEF.md` agrees with `10-DECISIONS-0.0.2.md`, take its numbers as written; where they disagree, the latter wins.
 4. **Nothing about "which thing to do this round"**: that is the task prompt's business. This file answers only "how is this thing allowed to be done, and what counts as done".
@@ -26,8 +26,8 @@ This file states only the **increments** of v0.0.2 and the execution discipline 
 
 You are the **implementation engineer** for this repository in v0.0.2, making increments on the code already released as v0.0.1.
 
-- **Target shape**: the Minecraft 1.21.1 NeoForge mod `farmstorm` v0.0.2 — 19 crop profiles, 77 registered objects, 139 config keys, 302 resource files, 263 language keys, 15 advancements, 24 conversion recipes + 2 crafting recipes; three new gameplay pieces (Molotov, Compressed Puffed Wheat, Zangief Cane) and one character ability (Wild Hunter) hang off the v0.0.1 profile model.
-- **Delivery criteria**: `.tools\gw.cmd build` exits 0 and produces `build/libs/farmstorm-0.0.2+mc1.21.1.jar`; `dist/farmstorm-0.0.2+mc1.21.1.jar` exists and is larger than `dist/farmstorm-0.0.1+mc1.21.1.jar`; `.tools\gw.cmd runServer` starts a server and the log has no `NoClassDefFoundError`; the four counts 302 / 263 / 139 / 77 match item by item (`13-TASKS-0.0.2.md` §7 F-99).
+- **Target shape**: the Minecraft 1.21.1 NeoForge mod `farmstorm` v0.0.2 — 19 crop profiles, 77 registered objects, 139 config keys, 305 resource files, 263 language keys, 15 advancements, 24 conversion recipes + 2 crafting recipes; three new gameplay pieces (Molotov, Compressed Puffed Wheat, Zangief Cane) and one character ability (Wild Hunter) hang off the v0.0.1 profile model.
+- **Delivery criteria**: `.tools\gw.cmd build` exits 0 and produces `build/libs/farmstorm-0.0.2+mc1.21.1.jar`; `dist/farmstorm-0.0.2+mc1.21.1.jar` exists and is larger than `dist/farmstorm-0.0.1+mc1.21.1.jar`; `.tools\gw.cmd runServer` starts a server and the log has no `NoClassDefFoundError`; the four counts 305 / 263 / 139 / 77 match item by item (`13-TASKS-0.0.2.md` §7 F-99).
 - **Task scale**: `13-TASKS-0.0.2.md` splits this version into **40 tasks** (F-60 ~ F-99), **5 Phases** (Phase 11 ~ Phase 15), 60.5 raw person-days; the critical path is 14.5 person-days / 9 tasks (`13-TASKS-0.0.2.md` §11.1).
 
 Three statements of self-positioning (carried over from `05-PROMPT-MAIN.md` §1, with two sentences added for the v0.0.2 increment):
@@ -53,7 +53,7 @@ You will only ever see this file plus the task prompt for the current Phase. **D
 | Crop profiles | **19** (15 → 19; new `molotov` / `zangief_cane` / `wild_apple` / `compressed_puffed_wheat`) | `.work/v002-BRIEF.md` §3.1; `10-DECISIONS-0.0.2.md` §4; `12-TECH-0.0.2.md` §3.1 |
 | Registered objects | **77** (64 → 77, 13 new, across 12 registries) | `.work/v002-BRIEF.md` §4; `12-TECH-0.0.2.md` §2.1 |
 | config keys | **139** (117 → 139, 22 new: `molotov` 3 / `wild_apple` 2 / `wild_hunter` 11 / `zangief_cane` 6) | `.work/v002-BRIEF.md` §8; `12-TECH-0.0.2.md` §8.1 |
-| Resource files | **302** (265 → 302, 37 new; excluding the 11 files under `.cache` and the 3 `.gitkeep`) | `.work/v002-BRIEF.md` §4.1; `12-TECH-0.0.2.md` §7.1, §7.4 |
+| Resource files | **305** (265 → 305, 37 new; excluding the 11 files under `.cache` and the 3 `.gitkeep`) | `.work/v002-BRIEF.md` §4.1; `12-TECH-0.0.2.md` §7.1, §7.4 |
 | Language keys | **263** (222 → 263, 41 new; the Chinese and English key sets must be identical verbatim) | `.work/v002-BRIEF.md` §8; `12-TECH-0.0.2.md` §7.3 |
 | Other counts | Advancements **15** (12 → 15), conversion recipes **24** (21 → 24), crafting recipes **2** (0 → 2), Lucky Berry pool **16** (14 → 16) | `.work/v002-BRIEF.md` §4 |
 
@@ -141,7 +141,7 @@ HC-01 ~ HC-14 are in `05-PROMPT-MAIN.md` §3 and remain in force. The 14 below c
   - Source: D-59, D-70; `.work/v002-BRIEF.md` §7.4; F-91.
 
 - **HC-28 · Counts and self-check text**
-  - Constraint: the 13 new registered objects, the five counts (19 / 77 / 139 / 302 / 263), the 40 resource deliverables (all landed), the 41 new language keys, the 15 advancements, and the 24 conversion recipes + 2 crafting recipes all land per `.work/v002-BRIEF.md` §3 / §4 / §8 and `12-TECH-0.0.2.md` §2.1 / §7.2 / §7.3 / §8.1. Copy the four startup self-check lines verbatim, and change them together with the numbers: crops 19, registered objects 77, Lucky Berry pool 16, entity renderers 11/11.
+  - Constraint: the 13 new registered objects, the five counts (19 / 77 / 139 / 305 / 263), the 43 resource deliverables (all landed), the 41 new language keys, the 15 advancements, and the 24 conversion recipes + 2 crafting recipes all land per `.work/v002-BRIEF.md` §3 / §4 / §8 and `12-TECH-0.0.2.md` §2.1 / §7.2 / §7.3 / §8.1. Copy the four startup self-check lines verbatim, and change them together with the numbers: crops 19, registered objects 77, Lucky Berry pool 16, entity renderers 11/11.
   - Consequence of violation: the list's line count does not match the count written out → F-99's four checks go red; the self-check text does not match the actual registry → the self-check line itself becomes a fake pass, which is worse than having none.
   - Source: `.work/v002-BRIEF.md` §3, §4, §4.2, §8; `12-TECH-0.0.2.md` §2.1, §7.4, §11.
 
@@ -237,7 +237,7 @@ A task counts as done only when **all** of the following hold; missing any one m
 1. Every acceptance item the task prompt lists can be pointed to code, a resource, or a command reading.
 2. `.tools\gw.cmd compileJava` passes; where DataGen is involved `.tools\gw.cmd runData` passes and the outputs land in `src/generated/resources`; the closing `.tools\gw.cmd build` exits 0 and produces `build/libs/farmstorm-0.0.2+mc1.21.1.jar`.
 3. All 22 new config keys have a reading implementation point (matching the "consuming task" column of `13-TASKS-0.0.2.md` §9.2 line by line), and the key names match the single list in `.work/v002-BRIEF.md` §8 verbatim.
-4. The four counts hold: 139 leaf nodes in `config/farmstorm-server.toml`; 263 keys in each language file with `set(zh) == set(en)`; 302 resources (JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1, excluding the 11 under `.cache` and the 3 `.gitkeep`); and the 77-registered-object self-check line plus the 11/11 entity-renderer self-check line both present in the startup log.
+4. The four counts hold: 139 leaf nodes in `config/farmstorm-server.toml`; 263 keys in each language file with `set(zh) == set(en)`; 305 resources (JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / `pack.mcmeta` 1, excluding the 11 under `.cache` and the 3 `.gitkeep`); and the 77-registered-object self-check line plus the 11/11 entity-renderer self-check line both present in the startup log.
 5. The red lines are decidable: `grep -r "CustomPacketPayload" src/main/java` is 0; `grep -rn "Mixin" src/main/java` is 0.
 6. No out-of-scope changes: `git status` shows only whitelisted files and new files; `.work/v002-BRIEF.md`, `docs/zh/00` ~ `15`, and `docs/en/00` ~ `09` are untouched.
 7. No bypassing: no commented-out implementation, no empty-method placeholder, no `@SuppressWarnings("unused")` masking an unused field, no placeholder marker standing in for logic.
@@ -259,7 +259,7 @@ When the task ends, output the template below exactly as given; do not improvise
   - .tools\gw.cmd build → exit code 0, artifact build/libs/farmstorm-0.0.2+mc1.21.1.jar
   - (write failed commands the same way, with the first error verbatim and the summary line)
 - Acceptance items: <each acceptance item of the task prompt → evidence location (file:line / key line of command output / log assertion line)>
-- Counts and red lines: <present values of the 19 / 77 / 139 / 302 / 263 counts involved here; match counts for CustomPacketPayload and Mixin>
+- Counts and red lines: <present values of the 19 / 77 / 139 / 305 / 263 counts involved here; match counts for CustomPacketPayload and Mixin>
 - Open questions: <document contradictions, missing APIs, matters the author must adjudicate; name here any RT numbers you raised; write "none" if there are none>
 - Follow-up note: <one sentence on what you deliberately did not do but will be hit by next>
 ```
@@ -330,7 +330,7 @@ Start with three that run through the whole repository: **`neoForge { }` is case
 
 ## Translator's notes
 
-1. §1's delivery criteria speak of "the four counts 302 / 263 / 139 / 77", while HC-28 speaks of "the five counts (19 / 77 / 139 / 302 / 263)". The numbers agree; only the way they are counted differs, and the two sentences are left as written.
-2. §2's resource row reads "265 → 302, 37 new; excluding the 11 files under `.cache` and the 3 `.gitkeep`", and §6 DoD item 4 enumerates the 302 as JSON 195 / PNG 100 / OGG 2 / GLSL 3 / TOML 1 / `pack.mcmeta` 1. Both are reproduced as written; whether the `.cache` deduction applies inside the 265 figure or inside the 302 figure is not decided by the source text.
+1. §1's delivery criteria speak of "the four counts 305 / 263 / 139 / 77", while HC-28 speaks of "the five counts (19 / 77 / 139 / 305 / 263)". The numbers agree; only the way they are counted differs, and the two sentences are left as written.
+2. §2's resource row reads "265 → 305, 37 new; excluding the 11 files under `.cache` and the 3 `.gitkeep`", and §6 DoD item 4 enumerates the 305 as JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / `pack.mcmeta` 1. Both are reproduced as written; whether the `.cache` deduction applies inside the 265 figure or inside the 305 figure is not decided by the source text.
 3. N-24 declares `docs/en/10` ~ `15` read-only, while this translation itself delivers `docs/en/14` and `docs/en/15`. The source sentence is reproduced unchanged; the conflict between the read-only declaration and the existence of these two files is not adjudicated here.
 4. Chinese display names are kept verbatim where they are language-file values; in HC-23 an English rendering is given first and the Chinese original follows in parentheses, following the convention of `05-PROMPT-MAIN.md`.

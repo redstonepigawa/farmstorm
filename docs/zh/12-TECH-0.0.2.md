@@ -41,15 +41,15 @@ BRIEF §4.2 要求由本文件产出三个自洽的数。本文的处理是**先
 
 | 清单 | 所在小节 | 清单行数 | BRIEF §4.1 存量 | 新总数 |
 |---|---|---|---|---|
-| 新增资源文件 | §7.2 | **40** | 265 | **302** |
+| 新增资源文件 | §7.2 | **40** | 265 | **305** |
 | 新增语言文件键 | §7.3 | **41** | 222 | **263** |
 | 新增 config 键 | §8.1 | **22** | 117 | **139** |
 
 两条硬校验（实现阶段由 `runData` 与启动日志双向卡住）：
 
 - 新增 `farmstorm.configuration.*` 语言键数 **22** == §8.1 的表行数 **22**；`zh_cn` 与 `en_us` 的键集必须逐字相等（`222 + 41 = 263`，两份都是 263）。
-- 资源文件总数 = 迁移前 **265** + 37 = **302**；按类别拆 = JSON 169+26=195、PNG 92+8=100、OGG 2、GLSL 0+3=3、TOML 1、`pack.mcmeta` 1 → 195+100+2+3+1+1 = 302。
-- **口径（V-64/V-65 与实测校正）**：§7.2 的清单是 40 行（v0.0.2 的资源交付全集），其中 3 行（`advancement/*.json`）由 F-98 生成、3 行（2 个 `.ogg` + `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时已在仓库里，所以 `git diff` 只显示 +37（265 + 37 = 302）。以仓库实测为准：302 个文件（不计 `src/generated/resources/.cache` 的 11 个缓存与 3 个 `.gitkeep`）。
+- 资源文件总数 = 迁移前 **265** + 40 = **305**；按类别拆 = JSON 169+28=197、PNG 92+8=100、OGG 2、GLSL 0+4=4、TOML 1、`pack.mcmeta` 1 → 197+100+2+4+1+1 = 305。
+- **口径（V-64/V-65 与实测校正）**：§7.2 的清单是 43 行（v0.0.2 的资源交付全集），其中 3 行（2 个 `.ogg` + `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时已在仓库里，所以 `git diff` 只显示 +40（265 + 40 = 305）。以仓库实测为准：305 个文件（不计 `src/generated/resources/.cache` 的 11 个缓存与 3 个 `.gitkeep`）。
 
 ### 0.4 数字口径（照抄 BRIEF §4）
 
@@ -818,7 +818,7 @@ public static void tick() {
 |---|---|---|---|
 | `shaders/post/grayscale.json` | `PostChain` 链声明（`targets` 数组 + 两个 pass） | **运行时唯一被加载的那份** | `GameRenderer#loadEffect` 读的就是它；`targets` 必须是**数组**（`PostChain.load:63` 只认数组），写成对象会被整段跳过并报 `Output target … does not exist` |
 | `shaders/program/grayscale.json` | shader 程序声明（vertex `minecraft:blit`、fragment `farmstorm:grayscale`） | 运行时由 `PostChain` 加载 | 新版 1.21 目录布局：程序声明在 `shaders/program/`，GLSL 仍在 `shaders/core/` |
-| `shaders/core/grayscale.fsh`（+ `shaders/program/grayscale.fsh` 同内容副本） | GLSL 片元着色器：`0.302 / 0.587 / 0.114` 求亮度后回写 `vec4(vec3(luminance), color.a)` | 运行时（`fragment` 引用的就是这一支） | 编号与 BRIEF §3.2 登记的「2 个 GLSL」对应；两份的唯一差别是采样器名（`Sampler0` / `DiffuseSampler`），改亮度公式两处要同步 |
+| `shaders/core/grayscale.fsh`（+ `shaders/program/grayscale.fsh` 同内容副本） | GLSL 片元着色器：`0.305 / 0.587 / 0.114` 求亮度后回写 `vec4(vec3(luminance), color.a)` | 运行时（`fragment` 引用的就是这一支） | 编号与 BRIEF §3.2 登记的「2 个 GLSL」对应；两份的唯一差别是采样器名（`Sampler0` / `DiffuseSampler`），改亮度公式两处要同步 |
 | `shaders/core/grayscale.json` / `grayscale.vsh` | 上一版「`RegisterShadersEvent` + 自定义 `ShaderInstance`」方案的声明与顶点着色器 | **当前不被加载**（`PostChain` 走 `shaders/program/` + 原版 `minecraft:blit`） | 保留不算错，但改灰度逻辑时不要只改这一对就以为生效了 |
 | `post_effect/grayscale.json` | 新版 `post_effect` 声明 | **RT-10 退化分支的预留挂载点，当前无加载器** | NeoForge 21.1.213 全 jar 只有原版 `PostChain` / `PostPass`，`post_effect/` 目录没有注册入口；文件保留（不破坏资源计数），但**不在 JSON 内加注释**——严格 JSON，`//` 会让将来的加载器直接失败（V-49） |
 
@@ -1113,9 +1113,15 @@ public final class WildHunterLoopSound extends SoundInstance {
 
 ---
 
-### 4.7 狂野猎人的伽马提升（作者补充，无决策编号）
+### 4.7 水下可视性（V-78 伽马 + V-81 水下灰度链）
 
-**职责**：效果在身期间把客户端 `options.gamma()` 抬到 1.0，覆盖「水下 / 洞穴完全看不见」；**只改内存值，绝不 `options.save()`**。
+**问题**：狂野猎人期间在水下「完全看不见」。作者给出一条决定性观察——开 F3+F4 面板、画面变彩色时水下视野正常 ⇒ 元凶是**灰度后处理**，不是亮度或雾。
+
+**为什么普通灰度在水下不行**：水下画面本身偏暗、低对比，直接取亮度会把细节糊成一片均匀的灰。
+
+#### 4.7.1 伽马提升（V-78）
+
+**职责**：效果在身期间把客户端 `options.gamma()` 抬到 1.0，覆盖「洞穴完全看不见」；**只改内存值，绝不 `options.save()`**。
 
 **实现**：`client/GammaBoost.java`，由 `WildHunterClientHooks#onClientTick` 每刻驱动；`originalGamma` 用 `Double` 判空保证幂等。
 
@@ -1123,7 +1129,22 @@ public final class WildHunterLoopSound extends SoundInstance {
 
 **为什么不用夜视**：夜视会改变玩法口径（看见实体轮廓），伽马只是亮度。
 
-**已知暴露面**：① 抬升期间打开设置界面会看到亮度滑条为满，关闭后恢复（原版无临时覆盖机制）；② 与 `PostChain` 灰度同帧存在时，伽马只影响亮度、不影响灰度链。
+**已知暴露面**：抬升期间打开设置界面会看到亮度滑条为满，关闭后恢复（原版无临时覆盖机制）。
+
+#### 4.7.2 水下专用灰度链（V-81）
+
+**三项措施（叠加）**：
+
+1. **取消迷雾**：`ViewportEvent.RenderFog` 取消（覆盖水下雾、岩浆雾、距离雾）；
+2. **取消水下蓝色蒙版**：`RenderBlockScreenEffectEvent`（`OverlayType.WATER`）取消；
+3. **水下换一条灰度链（关键）**：`shaders/post/grayscale_underwater.json`，仍是黑白，但
+   ① `pow(luma, 0.62)` 提亮暗部；② 围绕中灰 0.5 拉伸 1.45 倍拉对比；③ ×1.08 轻微整体提亮。
+
+**切换**：`GrayscalePass` 按 `isEyeInFluid(FluidTags.WATER)` 在两条链间切换，**状态变化才 shutdown/load**；只关自己加载过的链，不碰原版 creeper / spider。
+
+**实测**：`14:19:38 卸载 grayscale → 加载 grayscale_underwater`（下水）、`14:19:43 反向`（出水），零 `Failed to load/parse shader`；作者实机确认「非常完美」。
+
+**与 4.7.1 的关系**：伽马解决「暗」，水下链解决「糊」。两者叠加；水下**不停灰度**，只是换一条链（旧方案已作废）。
 
 ## 5. 桑吉尔蔗的相位同步方案
 
@@ -1409,7 +1430,7 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 **证据要留下**（RT-14 的验收材料）：步骤 1 的完整 stdout（含每个目标的回读校验行）、步骤 2 的「原版命中 / 退回占位」清单、`dist/farmstorm-0.0.2+mc1.21.1.jar` 内 `assets/farmstorm/sounds/` 的 2 个 `.ogg` 条目（`jar tf` 或解压看）。
 
-**两个脚本不进 jar、也不计入 §7.2 的 40 行**：它们落在仓库的 `tools/` 下，是构建期工具，不是模组资源。
+**两个脚本不进 jar、也不计入 §7.2 的 43 行**：它们落在仓库的 `tools/` 下，是构建期工具，不是模组资源。
 
 ---
 
@@ -1425,11 +1446,11 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | `.glsl`（`.vsh` + `.fsh`） | 0 | +3 | **3** |
 | `.toml`（`neoforge.mods.toml`） | 1 | +0 | **1** |
 | `pack.mcmeta` | 1 | +0 | **1** |
-| **合计** | **265** | **+37** | **302** |
+| **合计** | **265** | **+40** | **305** |
 
 口径提醒（BRIEF §4.1）：`src/generated/resources/.cache` 下的 11 个无扩展名文件是 DataGen 缓存，**不进 jar、不计入**。语言文件的 2 个 `.json` 已经算在 169 里（内容变、文件不增）。
 
-### 7.2 新增资源文件逐项清单（**40 行**）
+### 7.2 新增资源文件逐项清单（**43 行**）
 
 「产线」列：`手写` = 用编辑器写死在 `src/main/resources`；`DataGen` = 由 Provider 生成到 `src/generated/resources`；`脚本` = 由 §6 的转换脚本产出。
 
@@ -1453,42 +1474,45 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | 16 | `assets/farmstorm/shaders/post/grayscale.json` | JSON | 手写 | 灰度 `PostChain` 链声明（运行时由 `GameRenderer#loadEffect` 加载；`targets` 必须是数组） | V-56 / V-49 |
 | 17 | `assets/farmstorm/shaders/program/grayscale.json` | JSON | 手写 | 灰度 shader 程序声明（vertex `minecraft:blit` + fragment `farmstorm:grayscale`） | V-56 |
 | 18 | `assets/farmstorm/shaders/program/grayscale.fsh` | GLSL | 手写 | 与 `core/grayscale.fsh` 同内容（采样器名不同），备用副本 | V-56 |
-| 19 | `assets/farmstorm/post_effect/grayscale.json` | JSON | 手写 | 灰度后处理声明 —— **当前无加载器**，是 RT-10 退化分支的预留挂载点（V-49） | BRIEF §3.2 + V-49 |
-| 20 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | 单变体 `cube_all` | D-57 |
-| 21 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | `face`×`facing`×`floating` 全变体 → 空模型 | D-68 |
-| 22 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | 六面同贴图模型 | D-57 |
-| 23 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | 空模型（只有 `textures.particle`） | D-68 |
-| 24 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | `item/generated` + layer0 | §2.2 |
-| 25 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | `item/generated`（不引用方块模型） | D-68 |
-| 26 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | `item/generated` | §2.2 |
-| 27 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | `item/generated` | D-56 |
-| 28 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | `parent = farmstorm:block/compressed_hay_block` | D-57 |
-| 29 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | 转换器合成：中心 `minecraft:crafting_table` + 八格 `#farmstorm:converter_fuel` | D-52 |
-| 30 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | 无序：4 个 `puffed_wheat` → 1 个 `compressed_puffed_wheat` | D-67 |
-| 31 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:crimson_fungus` ⇄ `molotov`，双向，经验 3，无催化剂 | D-54 同形 |
-| 32 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:sugar_cane` ⇄ `zangief_cane`，双向，经验 3 | D-54 同形 |
-| 33 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:golden_apple` ⇄ `wild_apple`，双向，经验 3 | D-54 |
-| 34 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | 进度：初次投出莫洛托夫（F-98） | D-63 |
-| 35 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | 进度：桑吉尔蔗首次命中（F-98） | D-63 |
-| 36 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | 进度：首次获得狂野猎人效果（F-98） | D-63 |
-| 37 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | 掉自身（`requiresCorrectToolForDrops` 决定空手不掉） | D-57 |
-| 38 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | 部署方块口径：`survives_explosion` + 掉自身 | 既有 5 张同形 |
-| 39 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | 新建物品标签：原版农作物 + 19 条档案里能当农作物的物品 | D-52 |
-| 40 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | 新建：`compressed_hay_block` 需要钻石镐 | D-57 |
+| 19 | `assets/farmstorm/shaders/post/grayscale_underwater.json` | JSON | 手写 | 水下专用灰度 `PostChain` 链（仍是黑白：`pow(luma, 0.62)` 提亮暗部 + 围绕中灰 0.5 拉伸 1.45 倍 + ×1.08 轻微提亮，V-81） | V-81 |
+| 20 | `assets/farmstorm/shaders/program/grayscale_underwater.json` | JSON | 手写 | 水下灰度链的程序声明（vertex `minecraft:blit` + fragment `farmstorm:grayscale_underwater`） | V-81 |
+| 21 | `assets/farmstorm/shaders/program/grayscale_underwater.fsh` | GLSL | 手写 | 水下灰度片元着色器（提暗部 + 拉对比） | V-81 |
+| 22 | `assets/farmstorm/post_effect/grayscale.json` | JSON | 手写 | 灰度后处理声明 —— **当前无加载器**，是 RT-10 退化分支的预留挂载点（V-49） | BRIEF §3.2 + V-49 |
+| 23 | `assets/farmstorm/blockstates/compressed_hay_block.json` | JSON | DataGen | 单变体 `cube_all` | D-57 |
+| 24 | `assets/farmstorm/blockstates/zangief_cane.json` | JSON | DataGen | `face`×`facing`×`floating` 全变体 → 空模型 | D-68 |
+| 25 | `assets/farmstorm/models/block/compressed_hay_block.json` | JSON | DataGen | 六面同贴图模型 | D-57 |
+| 26 | `assets/farmstorm/models/block/zangief_cane.json` | JSON | DataGen | 空模型（只有 `textures.particle`） | D-68 |
+| 27 | `assets/farmstorm/models/item/molotov.json` | JSON | DataGen | `item/generated` + layer0 | §2.2 |
+| 28 | `assets/farmstorm/models/item/zangief_cane.json` | JSON | DataGen | `item/generated`（不引用方块模型） | D-68 |
+| 29 | `assets/farmstorm/models/item/wild_apple.json` | JSON | DataGen | `item/generated` | §2.2 |
+| 30 | `assets/farmstorm/models/item/compressed_puffed_wheat.json` | JSON | DataGen | `item/generated` | D-56 |
+| 31 | `assets/farmstorm/models/item/compressed_hay_block.json` | JSON | DataGen | `parent = farmstorm:block/compressed_hay_block` | D-57 |
+| 32 | `data/farmstorm/recipe/converter.json` | JSON | DataGen | 转换器合成：中心 `minecraft:crafting_table` + 八格 `#farmstorm:converter_fuel` | D-52 |
+| 33 | `data/farmstorm/recipe/compressed_puffed_wheat.json` | JSON | DataGen | 无序：4 个 `puffed_wheat` → 1 个 `compressed_puffed_wheat` | D-67 |
+| 34 | `data/farmstorm/recipe/molotov.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:crimson_fungus` ⇄ `molotov`，双向，经验 3，无催化剂 | D-54 同形 |
+| 35 | `data/farmstorm/recipe/zangief_cane.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:sugar_cane` ⇄ `zangief_cane`，双向，经验 3 | D-54 同形 |
+| 36 | `data/farmstorm/recipe/wild_apple.json` | JSON | DataGen | `ConverterRecipe`：`minecraft:golden_apple` ⇄ `wild_apple`，双向，经验 3 | D-54 |
+| 37 | `data/farmstorm/advancement/first_molotov.json` | JSON | DataGen | 进度：初次投出莫洛托夫（F-98） | D-63 |
+| 38 | `data/farmstorm/advancement/zangief_hit.json` | JSON | DataGen | 进度：桑吉尔蔗首次命中（F-98） | D-63 |
+| 39 | `data/farmstorm/advancement/first_wild_hunter.json` | JSON | DataGen | 进度：首次获得狂野猎人效果（F-98） | D-63 |
+| 40 | `data/farmstorm/loot_table/blocks/compressed_hay_block.json` | JSON | DataGen | 掉自身（`requiresCorrectToolForDrops` 决定空手不掉） | D-57 |
+| 41 | `data/farmstorm/loot_table/blocks/zangief_cane.json` | JSON | DataGen | 部署方块口径：`survives_explosion` + 掉自身 | 既有 5 张同形 |
+| 42 | `data/farmstorm/tags/item/converter_fuel.json` | JSON | DataGen | 新建物品标签：原版农作物 + 19 条档案里能当农作物的物品 | D-52 |
+| 43 | `data/minecraft/tags/block/needs_diamond_tool.json` | JSON | DataGen | 新建：`compressed_hay_block` 需要钻石镐 | D-57 |
 
 列名对应关系（本节是文件清单，不是键表）：**文件路径** ↔ 键名；**类别** ↔ 默认值（含文件尺寸，如 `PNG 16×16`）；**产线** ↔ 范围（该文件由谁产出、可否复跑）；**用途** ↔ 用途；**依据** ↔ 依据 D 编号。
 
-**行数核对**：本表 `40` 行（V-49 / V-56 / V-60 之后以仓库实测为准），**40 行全部已在仓库**（3 条进度由 F-98 落地）。其中 3 行（2 个 `.ogg` 与 `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时就已在仓库里，因此「基线之后新增」是 37 个文件（`git diff` 的口径），总数则是 265 + 37 = **302**。
+**行数核对**：本表 `43` 行（V-49 / V-56 / V-60 / V-81 之后以仓库实测为准），**43 行全部已在仓库**。其中 3 行（2 个 `.ogg` 与 `textures/mob_effect/wild_hunter.png`）在 0.0.2 基线提交时就已在仓库里，因此「基线之后新增」是 40 个文件（`git diff` 的口径），总数则是 265 + 40 = **305**。
 
 | 类别 | 行号 | 数量 |
 |---|---|---|
 | PNG | #1–#9 | 9 |
 | OGG | #10–#11 | 2 |
-| JSON | #12、#13、#16、#17、#19、#20、#21、#22、#23、#24、#25、#26、#27、#28、#29、#30、#31、#32、#33、#34、#35、#36、#37、#38、#39、#40 | 26 |
-| GLSL | #14、#15、#18 | 3 |
-| **合计** | — | **40** |
+| JSON | #12、#13、#16、#17、#19、#20、#22、#23、#25–#43 | 28 |
+| GLSL | #14、#15、#18、#21 | 4 |
+| **合计** | — | **43** |
 
-**追加型改动（不产生新文件，不计入 40 行）**：`data/minecraft/tags/block/mineable/pickaxe.json` 追加 `compressed_hay_block`；`data/farmstorm/tags/block/deployed_crops.json` 追加 `zangief_cane`；`data/farmstorm/tags/item/modified_crops.json` 追加 4 条；`assets/farmstorm/lang/{zh_cn,en_us}.json` 追加 39 条（§7.3）；既有的 12 个进度文件不动。
+**追加型改动（不产生新文件，不计入 43 行）**：`data/minecraft/tags/block/mineable/pickaxe.json` 追加 `compressed_hay_block`；`data/farmstorm/tags/block/deployed_crops.json` 追加 `zangief_cane`；`data/farmstorm/tags/item/modified_crops.json` 追加 4 条；`assets/farmstorm/lang/{zh_cn,en_us}.json` 追加 39 条（§7.3）；既有的 12 个进度文件不动。
 
 ### 7.3 新增语言文件键逐项清单（**41 行**）
 
@@ -1555,10 +1579,10 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 
 | 数 | 怎么核 | 期望 |
 |---|---|---|
-| 资源 302 | `git ls-files 'src/main/resources' 'src/generated/resources'` 再扣 `.cache` 的 11 个与 3 个 `.gitkeep` | 302 |
-| JSON 195 | 同上但只数 `.json` | 195 |
+| 资源 305 | `git ls-files 'src/main/resources' 'src/generated/resources'` 再扣 `.cache` 的 11 个与 3 个 `.gitkeep` | 305 |
+| JSON 197 | 同上但只数 `.json` | 195 |
 | PNG 100 | 只数 `.png` | 100 |
-| GLSL 3 | 只数 `.vsh` / `.fsh` | 3 |
+| GLSL 4 | 只数 `.vsh` / `.fsh` | 3 |
 | 语言键 263 | `python -c "import json;print(len(json.load(open('…/zh_cn.json'))))"`，`en_us` 同跑 | 两个都 263 |
 | 两份键集相等 | 同上但比 `set(a) == set(b)` | `True` |
 
@@ -1800,7 +1824,7 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 14 | 狂野猎人冲刺走服务端复核 | 开效果后对 5 格内、30° 内的生物攻击一次；再对 30° 外的生物攻击一次 | 前者吸附并造成伤害与击退；后者正常攻击、无吸附；`latest.log` 无 `moved too quickly!`（若出现，按 RT-12 调 `dashTicks`） |
 | 15 | 击杀续时无上限 | 开效果后连续击杀 6 个生物，每次看效果剩余时长 | 每次「到期时刻」都 +8 秒、生命 +10 点；6 次后仍然有效（无次数上限） |
 | 16 | 配置键数 139 且两侧相等 | `run/config/farmstorm-server.toml` 数叶节点；`zh_cn.json` 数 `farmstorm.configuration.` 前缀的键 | 两个数都是 **139**（117 + 22）；新增的 22 个键名与 §8.1 逐字一致，且与 BRIEF §8 的唯一清单逐列相同 |
-| 17 | 资源文件 302 且分类对得上 | `git ls-files` 出清单后扣 `.cache` 的 11 个与 3 个 `.gitkeep` | 总数 **302**；JSON **195**、PNG **100**、OGG **2**、GLSL **3**、TOML 1、`pack.mcmeta` 1 |
+| 17 | 资源文件 305 且分类对得上 | `git ls-files` 出清单后扣 `.cache` 的 11 个与 3 个 `.gitkeep` | 总数 **305**；JSON **195**、PNG **100**、OGG **2**、GLSL **3**、TOML 1、`pack.mcmeta` 1 |
 | 18 | 语言键 263 且中英相等 | `ModLangProvider` 跑完后比两份 `.json` 的键集 | 两份都 **263** 键（222 + 41）；`set(zh) == set(en)` 为 `True`；其中 `tooltip.farmstorm.*` 仍是 **16** 条（没有误加） |
 | 19 | 三个新进度能解锁 | 分别：投出莫洛托夫 / 让桑吉尔蔗命中一名玩家 / 获得狂野猎人效果 | 三个进度各弹一次 toast；`/advancement` 里能看到 `farmstorm:first_molotov`、`farmstorm:zangief_hit`、`farmstorm:first_wild_hunter` |
 | 20 | 5 条新配方的形状与数量 | 工作台里做转换器（中心工作台 + 八格农作物）；无序放 4 个膨胀麦；转换器里转换 molotov / zangief_cane / wild_apple 各一次（槽 1 放 1 个下界之星做对照） | 转换器得 1 个；4 个膨胀麦得 1 个压缩膨胀麦；三条转换各扣 3 点经验且双向可用（金苹果 ⇄ 狂野苹果 正反各一次）；**槽 1 的星星数量不变**——只有 `awakened_torchflower` / `awakened_pitcher_plant` 的正向转换消耗 1 个（V-29） |

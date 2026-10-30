@@ -188,6 +188,41 @@ Get-Process java | Where-Object { $_.MainWindowTitle } | Select-Object Id, MainW
 
 **临时探针规则**：验证完必须删干净——源码、`build/classes`、jar 三处都不能留 `*Probe*`；日志里不要留高频 `LOGGER.info`。**证据要落 `.work/`，不要只留在 `run-*/logs/latest.log`**：run 目录的日志重启就轮转，前一版的矩阵结果就是从 `.log.gz` 里捞回来的（V-15）。验收前先查 `git status` 有无 `debug/`、`*Probe*` 残留。
 
+## 8.4 发布前必查（四处一致，缺一处就是发错东西）
+
+GitHub 的 release 页面上除了你上传的资产，还有两份**自动生成的 `Source code` 压缩包**——它们是**按 tag 打的包**。
+所以「发了新 jar」不等于「发布件是对的」：
+
+| # | 检查项 | 为什么会错 | 怎么核 |
+|---|---|---|---|
+| 1 | **tag 指向 == HEAD** | `gh release create --target main` 只在**创建时**决定 tag 位置；之后 `git push` **不会**移动 tag。tag 停在旧提交时，`Source code` 是旧快照，而 jar 是新的 | `gh api repos/<owner>/<repo>/git/refs/tags/<tag>` 对比 `git rev-parse HEAD` |
+| 2 | **release 里的 jar == 本地 dist 的 jar** | 改完代码只 build 没重传，或传错文件 | 比对资产 `digest` 与 `Get-FileHash` |
+| 3 | **`install-notes.txt` 也跟着更新** | 最容易漏：只改了 release 正文（`--notes-file`），忘了**附件**里的说明。正文说了新特性、附件还是旧版，读者拿到的是旧行为描述 | 比对 `digest` 与本地 `dist/安装说明.txt` |
+| 4 | **release 正文提到本版的改动** | 正文停在上一版文字 | 人工看一眼，或让它含「更新」小节 |
+
+**这一步不要靠记性，跑脚本**：
+
+```
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools\verify_release.ps1 -Tag v0.0.2
+```
+
+四项全 PASS 才发；任一项 FAIL 会打印原因并以 exit 1 结束。脚本已自测过失败路径（用旧 tag 跑会正确报 FAIL），不是「永远绿」的摆设。
+
+**写 .ps1 的两个坑**（都踩过）：
+1. **非 ASCII 的 .ps1 必须带 UTF-8 BOM**：`powershell.exe`（5.1）默认按 GBK 读脚本，中文会被打乱、直接变成语法错误。注意这与 **TOML 相反**——配置文件必须**无 BOM**（V-33）；
+2. 别在双引号字符串里嵌 `$(if (...) { ... } else { "" })`：5.1 会解析失败。先把值算进变量再插值。
+
+**发布顺序（照这个走，四项自然一致）**：
+```
+1. 改完代码 → build → 把 jar 拷进 dist/
+2. 更新 dist/安装说明.txt（正文与 jar 同步改，别只改一处）
+3. git commit && git push（分支）
+4. git tag -f <tag> HEAD && git push --force origin refs/tags/<tag>   ← 保证 tag == HEAD
+5. gh release upload --clobber <jar> <install-notes>
+6. gh release edit --notes-file <正文>
+7. 跑 tools/verify_release.ps1，四项全 PASS
+```
+
 ## 8.5 已知限制（玩家可见，不是缺陷）
 
 | 现象 | 原因 | 处置 |

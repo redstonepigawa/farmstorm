@@ -270,7 +270,7 @@ F-100 修 verify_project.py 0.5
 - **依赖**：F-106
 - **交付物**：`behavior/QbounceMountController.java`——`EntityType.ARMOR_STAND.create(level)` + 五项属性覆写（`setInvisible` / `setNoGravity` / `setInvulnerable` / `setSilent` / `setMarker`）、`startRiding(stand, true)`、`Map<UUID, MountRecord>` 记账表（只存内存）、每 tick 三条校验、四条退出路径（死亡 / 掉线 / 换维度 / 服务器停止）+ 每 tick 兜底、重挂超过 20 次放弃并打一行 warn；只在这条分支读 `qbounce.poseMode`。
 - **验收**：
-  1. `qbounce.poseMode = mount` 时，受效果僵尸的 `/data get entity` 里 `RootVehicle` 指向一个 `minecraft:armor_stand`（A-12）；僵尸死亡后世界里不再有该 ArmorStand（`18-TECH-0.0.3.md §11 #4`）。
+  1. `qbounce.poseMode = mount` 时，受效果僵尸的**坐骑侧**能读到它——`/execute as @e[type=minecraft:armor_stand] run data get entity @s Passengers` 里出现该僵尸（A-12）。**不要用骑手侧的 `RootVehicle`**：21.1.213 实测骑手侧读不到该键（`Found no elements matching RootVehicle`），原判据据此订正；僵尸死亡后世界里不再有该 ArmorStand（`18-TECH-0.0.3.md §11 #4`）。
   2. 效果期间 `kill` 该生物、断线重连、走传送门各一次，世界里不残留 ArmorStand（用 `/data get entity` 或日志行验证；RT-18 验法②）。
   3. 切 `poseMode` 两次（render → mount → render），每次切换后记账表被清空、坐骑全部 `discard()`（§4.1 的切换时机行）。
   4. 坐骑类型不是自定义实体：注册自检的 `entity_types` 仍是 13、增量仍是 +2（D-102）。

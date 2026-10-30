@@ -54,8 +54,8 @@
 | 已实测 | config 139 键 | `FarmstormConfig` 的 133 条 `defineInRange` + 4 条 `define` + 2 条 `defineEnum/defineList` = 139；`assets/farmstorm/lang/en_us.json` 的 `farmstorm.configuration.*` 也是 139 |
 | 已实测 | 语言键 263 | `tools/verify_project.py` §3 的实际输出（中英各 263，键集一致） |
 | 已实测 | 作物档案 19 条 / 幸运浆果池 16 条 | `util/CropProfile.java` 的 `ALL`（19 项）与 `LUCKY_BERRY_POOL`（19 − 3 项） |
-| 增量 | +13（注册）/ +19（config 键）/ +37（语言键）/ +8 PNG / +1 OGG | 本文 §2 / §8 / §9 |
-| 目标值 | 注册 90、config 158、语言键 300 | 实测值 + 增量，逐项列在 §2.4 / §8.3 / §9.4 |
+| 增量 | +13（注册）/ +16（config 键）/ +34（语言键）/ +8 PNG / +1 OGG | 本文 §2 / §8 / §9 |
+| 目标值 | 注册 90、config 155、语言键 297 | 实测值 + 增量，逐项列在 §2.4 / §8.3 / §9.4 |
 | 禁止 | 任何未经本节两条证据支持的注册总数 | D-80 的数字纪律；本文 §1 已解除该禁令（工具缺口与实测值都已给出） |
 
 ### 0.5 「待验证」的登记规则
@@ -170,7 +170,7 @@ menu types             1
 
 **哪边可能错**：工具的期望值与分母。实现侧没错——工具的 §3 段自己数出 263 且与实现一致。
 
-**关闭（作者裁定，修）**：按下表的四段改法执行，目标是 0.0.2 基线 **77 / 77** 与 `结论：FAIL 0 项`；v0.0.3 落地后再收到 **90 / 90**、config **158**、lang **300**。§11 #1 的判据就是这条输出，**不许降级成人工签字**。
+**关闭（作者裁定，修）**：按下表的四段改法执行，目标是 0.0.2 基线 **77 / 77** 与 `结论：FAIL 0 项`；v0.0.3 落地后再收到 **90 / 90**、config **155**、lang **297**。§11 #1 的判据就是这条输出，**不许降级成人工签字**。
 
 **修到 0.0.2 基线的目标**（作为 §11 #1 的验收项）：
 
@@ -180,7 +180,7 @@ menu types             1
 | §2 `EXPECTED` | items 22 / blocks 20 / entity 9 | items 27 / blocks 22 / entity 11（补 `compressed_hay_block`、`zangief_cane`、`molotov`、`compressed_puffed_wheat`） |
 | §2 分母 | 64 | 77，且逐类小计与 §1.2 相等（12 类，见 §2.1） |
 | §2 裸 ID 字面量 | 5 个（`converting` / `main` / `void_bolt` / `crop_blast` / `temporary_enchantments`） | 补齐剩余 5 个（含 recipe serializer 与 menu），使 12 类全部走「逐类小计」而不是裸字面量 |
-| §3 语言 | 263 | 保持不变（v0.0.3 落地后改为 300，见 §9.4） |
+| §3 语言 | 263 | 保持不变（v0.0.3 落地后改为 297，见 §9.4） |
 
 #### (d) PNG 增量：8 与「分项相加」的缺口
 
@@ -737,10 +737,12 @@ D-94 的 8 行数值表里 4 行变、4 行不变。**其中 3 行的实现改�
 
 | 项 | 0.0.2 | 增量 | 0.0.3 |
 |---|---|---|---|
-| config 键 | 139 | +19 | **158** |
-| `farmstorm.configuration.*` 语言键 | 139 | +19 | **158** |
+| config 键 | 139 | +16 | **155** |
+| `farmstorm.configuration.*` 语言键 | 139 | +16 | **155** |
 
-两者恒相等，因为每个键都由 `FarmstormConfig.tr(path)`（`"farmstorm.configuration." + path`）生成一个语言键，`ModLangProvider.config(path)` 一一对应地写一条。`verify_project.py` §1 的修法见 §1.4(c)：期望键集 = `01-DESIGN.md` §3.8 的 117 + `12-TECH-0.0.2.md` §8.1 的 22 = 139，v0.0.3 起再 + 本表 19 = 158。
+> 注：§8.1 的 19 行里 #13/#14/#15 是既有键改默认值（键名不变），故键数为 139 + 16 = **155**；旧稿按 139 + 19 = 158 计算时把这三个键重复计入。
+
+两者恒相等，因为每个键都由 `FarmstormConfig.tr(path)`（`"farmstorm.configuration." + path`）生成一个语言键，`ModLangProvider.config(path)` 一一对应地写一条。`verify_project.py` §1 的修法见 §1.4(c)：期望键集 = `01-DESIGN.md` §3.8 的 117 + `12-TECH-0.0.2.md` §8.1 的 22 = 139，v0.0.3 起再 + 本表新增 16 = 155。
 
 ### 8.4 明确不进 config 的常量（逐条给理由）
 
@@ -836,14 +838,14 @@ D-94 的 8 行数值表里 4 行变、4 行不变。**其中 3 行的实现改�
 | # | 文件 | 追加什么 |
 |---|---|---|
 | A1 | `assets/farmstorm/sounds.json` | +1 个事件 `friend_chives`（`category: player`、`subtitle: subtitles.farmstorm.friend_chives`、单条 sound、`stream: false`）；事件数 2 → 3 |
-| A2 | `assets/farmstorm/lang/zh_cn.json` | +37 键（见 §9.4） |
-| A3 | `assets/farmstorm/lang/en_us.json` | +37 键（键集与 A2 逐字相同） |
+| A2 | `assets/farmstorm/lang/zh_cn.json` | +34 键（见 §9.4） |
+| A3 | `assets/farmstorm/lang/en_us.json` | +34 键（键集与 A2 逐字相同） |
 | A4 | `data/farmstorm/tags/item/converter_fuel.json` | +1 项 `farmstorm:friend_chives`（D-84） |
 | A5 | `data/farmstorm/tags/block/deployed_crops.json` 与 `data/minecraft/tags/block/mineable/pickaxe.json` | 各 +2 项（`point_defense_fungus`、`vibration_bean`） |
 
 A5 的另一半说明：0.0.2 的 `MINEABLE_WITH_PICKAXE` 里没有收 `zangief_cane`（既有状态），本版不补，只保证两个新方块与既有部署方块一致。
 
-### 9.4 语言键增量（**37 键**）
+### 9.4 语言键增量（**34 键**）
 
 | 前缀 | 0.0.2 | 增量 | 0.0.3 | 来源 |
 |---|---|---|---|---|
@@ -851,13 +853,13 @@ A5 的另一半说明：0.0.2 的 `MINEABLE_WITH_PICKAXE` 里没有收 `zangief_
 | `block.farmstorm.*` | 22 | +3 | 25 | `friend_chives_crop` / `point_defense_fungus` / `vibration_bean` |
 | `effect.farmstorm.*` | 2 | +2 | 4 | `q_bounce` / `confusion` |
 | `subtitles.farmstorm.*` | 2 | +1 | 3 | `friend_chives` |
-| `farmstorm.configuration.*` | 139 | +19 | 158 | §8.1 的 19 个键 |
+| `farmstorm.configuration.*` | 139 | +16 | 155 | §8.1 中纯新增的 16 个键 |
 | `advancements.farmstorm.*` | 30 | +6 | 36 | 3 条进度 × 2（title + description） |
 | `death.attack.farmstorm.*` | 4 | +2 | 6 | `zangief_slam` + `zangief_slam.player`（照既有 2 个伤害类型各 2 键的形态） |
 | 其余（`tooltip` 16 / `entity` 11 / `gui` 8 / `container` 1 / `itemGroup` 1） | 37 | +0 | 37 | 不改（16 + 11 + 8 + 1 + 1 = 37） |
-| **合计** | **263** | **+37** | **300** | |
+| **合计** | **263** | **+34** | **297** | |
 
-**三列合计的核对式**（逐行相加，两列都落在合计行上）：0.0.2 列：27+22+2+2+139+30+4+37 = **263**；0.0.3 列：31+25+4+3+158+36+6+37 = **300**；增量列：4+3+2+1+19+6+2+0 = **+37**。三处同时成立。
+**三列合计的核对式**（逐行相加，两列都落在合计行上）：0.0.2 列：27+22+2+2+139+30+4+37 = **263**；0.0.3 列：31+25+4+3+155+36+6+37 = **297**；增量列：4+3+2+1+16+6+2+0 = **+34**。三处同时成立。
 
 `+0` 的三类为什么不动：`tooltip.farmstorm.*` 的 16 键按类别（陷阱 / 炮台 / buff / 破障 / 伤害 / 建造）与「无原版对应物」等固定条目组织，两个新部署物复用既有类别行；`entity.farmstorm.*` 的 11 键与新 `entity_type` 的关系是「有独立显示名才给一条」，两个新投射物沿用物品名做显示名（`ThrownCropEntity#getDefaultItem` 从作物档案取物品，名称自然来自 `item.farmstorm.*`）。
 
@@ -935,7 +937,7 @@ A5 的另一半说明：0.0.2 的 `MINEABLE_WITH_PICKAXE` 里没有收 `zangief_
 | 触发条件 | 任何人现在跑这个工具；任何人照 §4 第 22 行把 `DeployedKind` 当 +1；任何人复制粘贴「77」而不看 §1.2 |
 | 首要缓释 | 本文 §1.2 已把 77 逐类数出并与 `Farmstorm#logRegistrySelfCheck` 的 12 条运行期断言对齐，因此 90 是**两条独立证据 + 一次加法**的结果，不是猜的；工具的修法逐段写在 §1.4(c) 的表里 |
 | 兜底 | 若作者的意图是「工具永不改、只当红」，则 §11 #1 改为「工具保持红，但把它的输出与本表逐段对照并在验收记录里签字」——这会失去自动化价值，因此只在作者明确否决修工具时使用 |
-| 实现阶段怎么验 | ① 修完后跑一次：出现 `已核 registry 对象: 77 / 77` 且 `结论：FAIL 0 项`、退出码 0；② v0.0.3 落地后再跑一次：`90 / 90`、config `139`（v0.0.3 后 `158`）、lang `263`（v0.0.3 后 `300`）；③ 每次改注册类后重跑，任一小计不符立即红 |
+| 实现阶段怎么验 | ① 修完后跑一次：出现 `已核 registry 对象: 77 / 77` 且 `结论：FAIL 0 项`、退出码 0；② v0.0.3 落地后再跑一次：`90 / 90`、config `139`（v0.0.3 后 `155`）、lang `263`（v0.0.3 后 `297`）；③ 每次改注册类后重跑，任一小计不符立即红 |
 
 ---
 
@@ -961,6 +963,6 @@ A5 的另一半说明：0.0.2 的 `MINEABLE_WITH_PICKAXE` 里没有收 `zangief_
 | 14 | 满血玩家站在 8 格内，让 6 个投掷物被拦 | 血量、饥饿、坐标逐点不变；方块与方块状态无变化；日志里没有 `Explosion` 构造行 | D-89 |
 | 15 | 刺球：按 D-94 的 8 行逐项验 | 3.0 格不触发、2.5 格触发；内圈 5 个先出（第 2 刻）、外圈 8 个后出（第 4 刻），两圈间隔 2 刻；被尖牙**实际造成伤害**的玩家获得缓慢 V（amplifier 4）60 刻且只施加一次；被动画扫到但没掉血的玩家**不**获得缓慢 | D-93 ~ D-95、RT-22 |
 | 16 | 桑吉尔蔗：默认 16 格拉升后自然下落；再关掉 `cancelFallDamage` 落一次 | 默认：落地瞬间恰好减 7.5 点，日志里没有原版坠落伤害；关掉后：伤害 > 7.5 且随高度变化；死亡消息显示 `death.attack.farmstorm.zangief_slam`，归属陷阱所有者 | D-96、RT-22 |
-| 17 | 资源与语言键计数自洽 | `textures/` 下新增 PNG 恰好 8 张且与 §9.1 逐条同名（其中 4 张是 `friend_chives_stage0..3`，**洋红 #D81E8A 占位，非终稿**）；`sounds/` 下新增 OGG 1 个；`sounds.json` 事件数 3；`zh_cn.json` 与 `en_us.json` 各 300 键且键集逐字相等；新增 JSON 文件 22 个且与 §9.3 逐条同名 | §9.1 – §9.4 |
+| 17 | 资源与语言键计数自洽 | `textures/` 下新增 PNG 恰好 8 张且与 §9.1 逐条同名（其中 4 张是 `friend_chives_stage0..3`，**洋红 #D81E8A 占位，非终稿**）；`sounds/` 下新增 OGG 1 个；`sounds.json` 事件数 3；`zh_cn.json` 与 `en_us.json` 各 297 键且键集逐字相等；新增 JSON 文件 22 个且与 §9.3 逐条同名 | §9.1 – §9.4 |
 
 **覆盖声明**：17 条里，注册与 config 数字 2 条（#1 / #2）、Q弹 两分支 3 条（#3 / #4 / #5）、混乱 2 条（#6 / #7）、近防菌 4 条（#8 / #9 / #13 / #14）、震动豆 2 条（#10 / #11）、朋友的韭 1 条（#12）、刺球 1 条（#15）、桑吉尔蔗 1 条（#16）、资源与语言键 1 条（#17）。七条 RT 全部被至少一条覆盖：RT-17 → #3；RT-18 → #4；RT-19 → #7；RT-20 → #8 / #9；RT-21 → #10；RT-22 → #15 / #16；RT-23 → #1 / #2。

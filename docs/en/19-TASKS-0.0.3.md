@@ -53,7 +53,7 @@ The 9 items below are this round's convention disagreements together with this f
 | A-11 | Whether the Vibration Bean profile's `DeployedKind` is filled with `null` or with `VIBRATION_BEAN` | `16-DECISIONS-0.0.3.md` §4 line 22 (that line **once read “—”** and has been corrected to `VIBRATION_BEAN`); `18-TECH-0.0.3.md` §1.4(b), §2.2 note 3 | **Fill in `DeployedKind.VIBRATION_BEAN`**: `DeployedCropBlockEntity#kindOf` throws `IllegalStateException` outright for any block that is not a `DeployedCropBlock`, and `kind` is taken from `profile.kind()`, so filling in `null` falls back to `BLAST_CARROT` and the trap turns into an explosion trap. The enum goes from 6 values to **8** (`POINT_DEFENSE_FUNGUS`, `VIBRATION_BEAN`); an enum constant is not a registered object, so the registration total is unaffected. **Upstream corrected**: §4 line 22 of document 16 now reads `VIBRATION_BEAN`; this item is kept as traceability | F-103, F-105 |
 | A-12 | What carries the mount in Q-Bounce's `mount` branch | `16-DECISIONS-0.0.3.md` §3.6 D-102; `18-TECH-0.0.3.md` §4.3 | **`minecraft:armor_stand`** (a vanilla existing entity type), no new `entity_type`, and the `entity_types` increment is always **+2**; five attribute overrides `setInvisible` / `setNoGravity` / `setInvulnerable` / `setSilent` / `setMarker`, discarded with `discard()` the instant the creature dies | F-109, F-112 |
 | A-13 | Whether the Point Defense Fungus intercept sound and the Vibration Bean explosion sound need new `sound_event`s | `16-DECISIONS-0.0.3.md` §3.6 D-100; `18-TECH-0.0.3.md` §8.4, §9.2 appendix | **Both reuse vanilla events**: the intercept sound `SoundEvents.SHIELD_BLOCK`, the explosion sound `SoundEvents.GENERIC_EXPLODE`; the code writes the Java constants only, never a `minecraft:***` string. The `sound_events` increment is **always +1** (only `friend_chives`), and the event count of `sounds.json` goes 2 → 3 | F-120, F-124, F-131 |
-| A-14 | When `tools/verify_project.py` lags behind the implementation, whether acceptance may be downgraded to a handwritten signature | `16-DECISIONS-0.0.3.md` §6 item 10; `18-TECH-0.0.3.md` §1.4(c), §11 #1 | **No downgrade allowed**: the tool must be fixed to the 0.0.2 baseline **77 / 77** (config 139, lang 263, `结论：FAIL 0 项`, exit code 0), and after v0.0.3 lands be raised to **90 / 90** (config 158, lang 300). The “keep the tool red + sign by hand” fallback cell of RT-23 is enabled only when the author explicitly rejects fixing the tool; it does not apply this round | F-100, F-135 |
+| A-14 | When `tools/verify_project.py` lags behind the implementation, whether acceptance may be downgraded to a handwritten signature | `16-DECISIONS-0.0.3.md` §6 item 10; `18-TECH-0.0.3.md` §1.4(c), §11 #1 | **No downgrade allowed**: the tool must be fixed to the 0.0.2 baseline **77 / 77** (config 139, lang 263, `结论：FAIL 0 项`, exit code 0), and after v0.0.3 lands be raised to **90 / 90** (config 155, lang 297). The “keep the tool red + sign by hand” fallback cell of RT-23 is enabled only when the author explicitly rejects fixing the tool; it does not apply this round | F-100, F-135 |
 | A-15 | The default values of the three `qbounce` pose parameters once had two readings: `rotateDegreesPerTick` and `squashPeriodTicks` at 24.0 / 6, or at 12.0 / 10 | `17-DESIGN-0.0.3.md` §2.3, §2.5, §11.1 (once read 24.0 / 0.15 / 6); `18-TECH-0.0.3.md` §4.2, §8.1 #2–#4, §8.2, §11 #3 (once read 12.0 / 0.15 / 10) | **Take 24.0 degrees/tick, 0.15, 6 ticks** (= 480 degrees/s, one turn in 15 ticks, and 1 second holds about 3.3 squash cycles): that is the same set of values D-81 carries in document 17 §2.3 and in the construction fact card §3.3, while those three rows of document 18 §8.1 carry the note “default values supplemented by this document” (i.e. they are not derived from a decision). **The range column still has document 18 §8.1 as its only source** (0.0–360.0 / 0.0–0.90 / 2–100). The 12.0 / 10 ticks / 240 degrees per second of document 18 §4.2, §8.1 #2–#4, §8.2 and §11 #3 have been changed to 24.0 / 6 ticks / 480 degrees per second under this item. **Upstream corrected**; this item is kept as traceability | F-104, F-107, F-108 |
 | A-16 | The PNG increment once appeared in two writings, 7 files and 8 files | `16-DECISIONS-0.0.3.md` §8 (once read +7 / +1); `17-DESIGN-0.0.3.md` §1.3 (once read +7 / +1); `18-TECH-0.0.3.md` §1.4(d), §9.1 (8 rows) | **8 files**: the 8th is the Vibration Bean item icon (the `basicItem` fallback branch of `ModItemModelProvider` always references `farmstorm:item/<id>`, handled the same way as the three invisible traps of 0.0.2). The resource increment is PNG 8 + OGG 1 + JSON 22 = **31**. **Upstream corrected**: §1.3 of document 17 now reads +8, and §8 of document 16 was changed to +8 in the same batch; this item is kept as traceability | F-130, F-135 |
 | A-17 | The IDs and file names of the three new advancements once had two sets of writings | `17-DESIGN-0.0.3.md` §10.1 (`first_q_bounce` / `point_defense_intercept` / `vibration_bean_trigger`); `18-TECH-0.0.3.md` §2.3, §9.3 #20–#22 (once read `first_q_bounce` / `first_intercept` / `first_vibration_bean`) | **Take the three of document 17 §10.1**: `farmstorm:first_q_bounce`, `farmstorm:point_defense_intercept`, `farmstorm:vibration_bean_trigger`, with the JSON file names equal to the IDs. The two short names in document 18 §2.3 and §9.3 #21 / #22 have been changed to the same IDs under this item (document 17 §10.1 is the only source for the display names, parents and trigger criteria of these three). **Upstream corrected**; this item is kept as traceability | F-133 |
@@ -86,7 +86,7 @@ Phase 17 / 18 / 19 do not depend on one another; they share only the registry la
 ```text
 F-100 Fix verify_project.py 0.5
 ├─ F-101 Baseline three-ledger reconciliation 0.5 ── F-102 Version and build baseline 0.5 ── F-103 Registry wiring 3.0
-│   ├─ F-104 config 19 keys 1.5
+│   ├─ F-104 config 16 keys 1.5
 │   ├─ F-105 Three profiles and a 19-entry pool 1.5 ── F-114 Friend Chives planting form 1.5 ── F-115 Impact settlement 1.5 ── F-116 Hit sound 0.5
 │   ├─ F-106 Two effect classes 1.5
 │   │   ├─ F-107 Client state machine 1.5 ── F-108 render branch 3.0
@@ -103,7 +103,7 @@ F-100 Fix verify_project.py 0.5
 └─ Phase 20: F-130 PNG 8 files 1.5, F-131 audio pipeline 1.5 (both wait only on F-102)
     └─ F-132 DataGen 19 JSON 3.0 (F-103 + F-123 + F-128)
         └─ F-133 Three advancements 1.5 (F-115 + F-119 + F-124)
-            └─ F-134 Language keys 37 entries 1.5 (F-104 + F-132 + F-133)
+            └─ F-134 Language keys 34 entries 1.5 (F-104 + F-132 + F-133)
                 └─ F-135 Full acceptance 3.0 (F-113, F-121, F-129, F-130 ~ F-134)
 ```
 
@@ -143,7 +143,7 @@ Reconciliation equation: `6 × 0.5 + 22 × 1.5 + 8 × 3.0 = 3.0 + 33.0 + 24.0 = 
 
 Phase goal: first fix “getting the numbers” (RT-23) so that the 0.0.2 baseline **77** becomes a recomputable measured value instead of an assertion; then stand up all at once the 13 registered objects, 19 lines of config change and 3 new crop profiles of v0.0.3, so that the four later phases only fill in behavior.
 
-Phase exit criteria: `tools/verify_project.py` outputs `77 / 77` and `结论：FAIL 0 项` (A-14); `.tools\gw.cmd build` exits with code 0; the registration self-check line of the startup log reads 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1 per category (90 in total), the crop self-check 22 species and the pool 19 species; `config/farmstorm-server.toml` has 158 leaf nodes.
+Phase exit criteria: `tools/verify_project.py` outputs `77 / 77` and `结论：FAIL 0 项` (A-14); `.tools\gw.cmd build` exits with code 0; the registration self-check line of the startup log reads 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1 per category (90 in total), the crop self-check 22 species and the pool 19 species; `config/farmstorm-server.toml` has 155 leaf nodes.
 
 #### F-100 · Fix `tools/verify_project.py` to the 0.0.2 Baseline 77
 
@@ -190,22 +190,22 @@ Phase exit criteria: `tools/verify_project.py` outputs `77 / 77` and `结论：F
   - `tools/verify_project.py`: the expected values and denominators of §2 go from the 77 that F-100 fixed (items 27 / blocks 22 / entity_types 11) to 90 (items 31 / blocks 25 / entity_types 13, 12 categories each); the config section stays 139 (it only moves after F-104) and the lang section is not changed by a single line (that section only compares key sets and prints the actual key count — it has no expected value to change).
 - **Acceptance**:
   1. The startup log prints verbatim `自检 注册对象 90 个：items 31 / blocks 25 / block_entities 6 / entity_types 13 / mob_effects 4 / sound_events 3 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 3 / data_components 1 / menu_types 1 → OK` (the v0.0.3 column of `18-TECH-0.0.3.md §2.1` + §11 #2).
-  2. On the v0.0.3 code, `tools/verify_project.py` outputs `90 / 90` and the registry section `结论` is a pass (at this point the config section is still 139 and the lang section prints the actual key count of the moment, 263; both sections still pass — config's 158 is closed in F-104, and lang's 300 grows naturally out of F-104's 19 and F-134's 18, with no expected value on the tool side).
+  2. On the v0.0.3 code, `tools/verify_project.py` outputs `90 / 90` and the registry section `结论` is a pass (at this point the config section is still 139 and the lang section prints the actual key count of the moment, 263; both sections still pass — config's 155 is closed in F-104, and lang's 297 grows naturally out of F-104's 16 and F-134's 18, with no expected value on the tool side).
   3. The 13 new IDs agree character for character with the 13 rows of `18-TECH-0.0.3.md §2.2` (once each for `/give` on the four items, once each for `/setblock` on the three blocks, once each for `/summon` on the two entities, `/effect` completion for both effects, and `/playsound` completion for one sound event).
   4. All 8 values of `DeployedKind` print, and `VIBRATION_BEAN`'s scan interval is 10 ticks; `git diff behavior/DeployedKind.java` contains added lines only and not one of the six existing constants is changed (A-11).
   5. `.tools\gw.cmd build` exits with code 0 and the compile log has no `the switch expression does not cover all possible input values`.
 
-#### F-104 · The 19 config Lines and the 19 `configuration` Language Keys
+#### F-104 · The 19 config Lines and the 16 `configuration` Language Keys
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-103
-- **Deliverables**: `config/FarmstormConfig.java` — four new groups `qbounce` 4 keys / `friend_chives` 3 keys / `point_defense_fungus` 3 keys / `vibration_bean` 2 keys (12 pure additions) + `fang_trap_cactus` gaining 2 new keys and changing 3 existing defaults + `zangief_cane` gaining 2 new keys (19 lines in total = 16 pure additions + 3 existing defaults changed); the 19 `farmstorm.configuration.*` entries of `datagen/ModLangProvider`; the generated `config/farmstorm-server.toml`; the expected key set of §1 of `tools/verify_project.py` updated from 139 to **158** (the 19 lines added line by line, not one total changed).
+- **Deliverables**: `config/FarmstormConfig.java` — four new groups `qbounce` 4 keys / `friend_chives` 3 keys / `point_defense_fungus` 3 keys / `vibration_bean` 2 keys (12 pure additions) + `fang_trap_cactus` gaining 2 new keys and changing 3 existing defaults + `zangief_cane` gaining 2 new keys (19 lines in total = 16 pure additions + 3 existing defaults changed); the 16 `farmstorm.configuration.*` entries of `datagen/ModLangProvider`; the generated `config/farmstorm-server.toml`; the expected key set of §1 of `tools/verify_project.py` updated from 139 to **155** (the 16 pure-addition lines added line by line, not one total changed).
 - **Acceptance**:
-  1. `config/farmstorm-server.toml` has **158** leaf nodes (139 + 19), and the four new groups are appended at the end of the file in alphabetical order (the TOML fragment of `18-TECH-0.0.3.md §8.2`).
+  1. `config/farmstorm-server.toml` has **155** leaf nodes (139 + 16), and the four new groups are appended at the end of the file in alphabetical order (the TOML fragment of `18-TECH-0.0.3.md §8.2`).
   2. The three changed existing defaults read back: `fang_trap_cactus.triggerRadius = 2.5`, `outerDelayTicks = 4`, `innerDelayTicks = 2`; the `min` / `max` of the existing keys and their language keys are kept character for character (the note under the §8.1 table).
   3. The three pose parameters read back 24.0 / 0.15 / 6 (A-15); the defaults of the other 16 pure additions are row-for-row equal to §8.1.
   4. The `confusion` group holds no key at all: `grep -c "[confusion]" config/farmstorm-server.toml` is 0 (the 1 non-key line of §8.1; D-83).
-  5. `farmstorm.configuration.*` language keys are likewise 158 entries, always equal to the config key count, with identical Chinese and English key sets (character for character, §8.3).
+  5. `farmstorm.configuration.*` language keys are likewise 155 entries, always equal to the config key count, with identical Chinese and English key sets (character for character, §8.3).
   6. Change `point_defense_fungus.maxIntercepts` to 3 → `/reload` → read back 3, then change it back to 6 and read back 6 (the existing `bake()` convention).
 
 #### F-105 · Three New Profiles, `ALL` at 22 Entries and the Lucky Berry Pool at 19 Entries
@@ -533,9 +533,9 @@ Phase subtotal: **8 tasks, 14.0 person-days** (S 1 / M 5 / L 2).
 
 ## 7. Phase 20 · Resources, Audio, Advancements and Acceptance (F-130 ~ F-135)
 
-Phase goal: deliver all at once the three kinds of work the first four phases left behind — 8 PNGs (4 of them magenta placeholders), 1 OGG plus the expanded media pipeline, 22 new JSON files plus the 5 appends to existing files, 3 advancements and 37 language keys; finally run the 17 self-checks and the four counts of `18-TECH-0.0.3.md §11`.
+Phase goal: deliver all at once the three kinds of work the first four phases left behind — 8 PNGs (4 of them magenta placeholders), 1 OGG plus the expanded media pipeline, 22 new JSON files plus the 5 appends to existing files, 3 advancements and 34 language keys; finally run the 17 self-checks and the four counts of `18-TECH-0.0.3.md §11`.
 
-Phase exit criteria: `tools/verify_project.py` outputs `90 / 90`, config 158, lang 300, `结论：FAIL 0 项`; resources 8 PNG + 1 OGG + 22 JSON; `dist/farmstorm-0.0.3+mc1.21.1.jar` exists.
+Phase exit criteria: `tools/verify_project.py` outputs `90 / 90`, config 155, lang 297, `结论：FAIL 0 项`; resources 8 PNG + 1 OGG + 22 JSON; `dist/farmstorm-0.0.3+mc1.21.1.jar` exists.
 
 #### F-130 · 8 PNGs (4 of Them Magenta Placeholders)
 
@@ -582,27 +582,27 @@ Phase exit criteria: `tools/verify_project.py` outputs `90 / 90`, config 158, la
   3. Each of the three trigger rules is verified once: `first_q_bounce` does not restrict the source (applying it with `/effect` also advances it), `point_defense_intercept` honors only the 1st non-ally interception (an ally passing through does not advance it), and `vibration_bean_trigger` also advances when an ally steps on it (the three of §10.2).
   4. The 15 existing advancements are all unchanged: `git diff` contains only the 3 new files, and the advancement total goes 15 → 18 (the count row of §10.3).
 
-#### F-134 · 37 Language Keys (300 Each in Chinese and English)
+#### F-134 · 34 Language Keys (297 Each in Chinese and English)
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-104, F-132, F-133
-- **Deliverables**: +37 keys in each of `assets/farmstorm/lang/zh_cn.json` and `en_us.json` — `item` +4, `block` +3, `effect` +2, `subtitles` +1, `farmstorm.configuration.*` +19, `advancements` +6, `death.attack` +2; the other three categories (`tooltip` / `entity` / `gui` and the rest) stay +0. **The §3 language section of `tools/verify_project.py` needs no change** — it only compares whether the Chinese and English key sets are equal and prints the actual key count, with no hard-coded expected value; the acceptance of this task becomes “run the tool and record the actual key count of the moment in the report” (282 after F-104, 300 when this task closes).
+- **Deliverables**: +34 keys in each of `assets/farmstorm/lang/zh_cn.json` and `en_us.json` — `item` +4, `block` +3, `effect` +2, `subtitles` +1, `farmstorm.configuration.*` +16, `advancements` +6, `death.attack` +2; the other three categories (`tooltip` / `entity` / `gui` and the rest) stay +0. **The §3 language section of `tools/verify_project.py` needs no change** — it only compares whether the Chinese and English key sets are equal and prints the actual key count, with no hard-coded expected value; the acceptance of this task becomes “run the tool and record the actual key count of the moment in the report” (279 after F-104, 297 when this task closes).
 - **Acceptance**:
-  1. The second half of `18-TECH-0.0.3.md §11 #17`: both files carry **300** keys each and their key sets are identical character for character (the 7-row subtotals of §9.4 add up to 37).
-  2. The 19 `farmstorm.configuration.*` entries share names key by key with the 19 lines landed in F-104, and the key count equals the 158 config keys (§8.3).
+  1. The second half of `18-TECH-0.0.3.md §11 #17`: both files carry **297** keys each and their key sets are identical character for character (the 7-row subtotals of §9.4 add up to 34).
+  2. The 16 `farmstorm.configuration.*` entries share names key by key with the 16 pure-addition lines landed in F-104, and the key count equals the 155 config keys (§8.3).
   3. `advancements.farmstorm.*` gains 6 entries (3 advancements × title + description), with short phrases for the titles (carrying over the A-09 convention of document 13).
   4. `death.attack.farmstorm.*` gains 2 entries: `zangief_slam` and `zangief_slam.player` (following the shape of 2 keys each for the two existing damage types; row 7 of §9.4).
   5. The Chinese name of the Fang Trap Cactus is still “刺球” and the English is still `Fang Trap Cactus`; this item may not change it back (A-10).
   6. `tooltip.farmstorm.*` is still 16 entries and `entity.farmstorm.*` is still 11 entries (“why the three +0 categories do not move” under the §9.4 table).
-  7. §3 of `python -X utf8 tools/verify_project.py` prints `lang 键集一致，共 300 键`, and `git diff` shows `tools/verify_project.py` **unchanged** in this task (it should only have moved in F-100 and F-104).
+  7. §3 of `python -X utf8 tools/verify_project.py` prints `lang 键集一致，共 297 键`, and `git diff` shows `tools/verify_project.py` **unchanged** in this task (it should only have moved in F-100 and F-104).
 
 #### F-135 · Full Acceptance: the 17 Items of §11 and the Four Counts
 
 - **Complexity**: L | **Person-days**: 3.0
 - **Depends on**: F-113, F-121, F-129, F-130, F-131, F-132, F-133, F-134
-- **Deliverables**: an execution record, item by item, of the 17 self-checks of `18-TECH-0.0.3.md §11`; the two expected values of `tools/verify_project.py` (registry 90 from F-103, config 158 from F-104) closed into their final values, with the lang section setting no expected value and recording **300** as the measured key count in the output, together with the final output; `dist/farmstorm-0.0.3+mc1.21.1.jar`.
+- **Deliverables**: an execution record, item by item, of the 17 self-checks of `18-TECH-0.0.3.md §11`; the two expected values of `tools/verify_project.py` (registry 90 from F-103, config 155 from F-104) closed into their final values, with the lang section setting no expected value and recording **297** as the measured key count in the output, together with the final output; `dist/farmstorm-0.0.3+mc1.21.1.jar`.
 - **Acceptance**:
-  1. The tool outputs `已核 registry 对象: 90 / 90`, a config section of **158** keys with no FAIL, `lang 键集一致，共 300 键` and `结论：FAIL 0 项`, and exits with code 0 (the v0.0.3 closure of §11 #1; A-14).
+  1. The tool outputs `已核 registry 对象: 90 / 90`, a config section of **155** keys with no FAIL, `lang 键集一致，共 297 键` and `结论：FAIL 0 项`, and exits with code 0 (the v0.0.3 closure of §11 #1; A-14).
   2. All four startup self-check lines are OK: registered **90** (per category 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1), crops **22** (Throwable 12 / Deployable 7 / Edible 3, Demolition 4) and the lucky berry pool **19** (§11 #2); entity renderers **13 / 13** (supplemented by this file: `entity_types` grows from 11 to 13, so the “11 / 11” of 0.0.2 becomes 13 / 13 with it).
   3. Each of #3 – #17 of §11 has an observable record: Q-Bounce 3 items (#3 / #4 / #5), Confusion 2 items (#6 / #7), Point Defense Fungus 4 items (#8 / #9 / #13 / #14), Vibration Bean 2 items (#10 / #11), Friend Chives 1 item (#12), Fang Trap Cactus 1 item (#15), Zangief Cane 1 item (#16), resources and language keys 1 item (#17).
   4. The four counts: PNG +8, OGG +1, JSON +22, `sounds.json` events 3 (§11 #17).
@@ -698,7 +698,7 @@ All 19 lines land their keys in F-104; the “Consuming task” column names the
 | 19 | `zangief_cane.cancelFallDamage` | `true` | boolean | F-104 | F-128 |
 | **Total** | **19 lines = 16 pure additions (#1–#12, #16–#19) + 3 existing defaults changed (#13–#15)** | | | **19 / 19** | **19 / 19 with an implementation read point** |
 
-`139 + 19 = 158`, aligned item by item with the “158 toml leaf nodes” of F-104 and F-135; the 19 `farmstorm.configuration.*` language keys for the 19 keys are landed by F-104 and rechecked by F-134 (the equality of §8.3). That 1 row outside the table is not a key: the `confusion` group **sets no key at all** (the duration is written by `vibration_bean.confusionTicks`), so it is not counted into the 19 lines (the note under the table of `18-TECH-0.0.3.md §8.1`).
+`139 + 16 = 155`, aligned item by item with the “155 toml leaf nodes” of F-104 and F-135; the 16 `farmstorm.configuration.*` language keys for the 16 keys are landed by F-104 and rechecked by F-134 (the equality of §8.3). That 1 row outside the table is not a key: the `confusion` group **sets no key at all** (the duration is written by `vibration_bean.confusionTicks`), so it is not counted into the 19 lines (the note under the table of `18-TECH-0.0.3.md §8.1`).
 
 ### 9.3 31 New Resource Files (coverage 31 / 31)
 
@@ -724,7 +724,7 @@ The 8 PNG rows are named one by one, the OGG occupies 1 row, and the 22 JSON row
 | 16 | advancements 3: `first_q_bounce.json`, `point_defense_intercept.json`, `vibration_bean_trigger.json` (file names per A-17) | JSON | F-133 |
 | **Total** | **PNG 8 + OGG 1 + JSON 22 = 31 files** | | **31 / 31, 0 uncovered** |
 
-**Append-only changes (they create no new file and therefore do not count toward the 31)** 5 spots: A1 `sounds.json` +1 event (F-131), A2 / A3 +37 keys in each of the two language files (F-134), A4 `data/farmstorm/tags/item/converter_fuel.json` +1 entry (F-132), A5 `data/farmstorm/tags/block/deployed_crops.json` and `data/minecraft/tags/block/mineable/pickaxe.json` +2 entries each (F-132).
+**Append-only changes (they create no new file and therefore do not count toward the 31)** 5 spots: A1 `sounds.json` +1 event (F-131), A2 / A3 +34 keys in each of the two language files (F-134), A4 `data/farmstorm/tags/item/converter_fuel.json` +1 entry (F-132), A5 `data/farmstorm/tags/block/deployed_crops.json` and `data/minecraft/tags/block/mineable/pickaxe.json` +2 entries each (F-132).
 
 ### 9.4 9 Data Entries (coverage 9 / 9)
 
@@ -755,7 +755,7 @@ Count check: converting recipes `21 → 23` (+2, D-86 / D-90); advancements `15 
 | 4 | RT-20 | Point Defense Fungus: per-tick scanning, counting and “deduct only once per tick” | F-118 (the Euclidean recheck and the non-ally filter), F-119 (the dedup marker and the 6-intercept cap), F-121 (several fungi in the same tick) |
 | 5 | RT-21 | Vibration Bean: the unattached block and world maintenance | F-123 (`unattached` orthogonal to `supportsFloating`, chunk reload), F-124 (the operator at both ends), F-129 (boundary re-run) |
 | 6 | RT-22 | Zangief Cane and Fang Trap Cactus: hooking onto the damage event chain | F-127 (the fang ownership table and the hit definition), F-128 (cancellation and settlement paired), F-129 (the two-state control) |
-| 7 | RT-23 | Number discipline and the gap in `tools/verify_project.py` | F-100 (fixed to 77 / 77), F-101 (three-ledger reconciliation), F-135 (90 / 90, 158, 300) |
+| 7 | RT-23 | Number discipline and the gap in `tools/verify_project.py` | F-100 (fixed to 77 / 77), F-101 (three-ledger reconciliation), F-135 (90 / 90, 155, 297) |
 | **Total** | **7 items** | | **7 / 7, 0 uncovered** |
 
 ---
@@ -766,16 +766,16 @@ M12 ~ M16 map one-to-one onto Phase 16 ~ Phase 20. Each milestone gives two work
 
 | Milestone | Name | Phases included | Tasks | Bare workload | With 25% buffer | Cumulative (after buffer) | One-line exit |
 |---|---|---|---|---|---|---|---|
-| M12 | Baseline and Tool Repair | Phase 16 | 6 | 7.5 | 9.375 | 9.375 | The tool starts at 77 / 77 and closes at 90 / 90; all 90 registered objects sit inside the registry and 158 config keys are generated |
+| M12 | Baseline and Tool Repair | Phase 16 | 6 | 7.5 | 9.375 | 9.375 | The tool starts at 77 / 77 and closes at 90 / 90; all 90 registered objects sit inside the registry and 155 config keys are generated |
 | M13 | Two Status Effects | Phase 17 | 8 | 14.0 | 17.500 | 26.875 | One chive bounces a creature up: sitting pose + rotation + squash-and-stretch + full lock, and Confusion applied alone only reverses the direction |
 | M14 | Friend Chives and Point Defense Fungus | Phase 18 | 8 | 12.5 | 15.625 | 42.500 | Plant chives → harvest → throw → a 6-block sphere hit; the Point Defense Fungus disappears after intercepting 6 chives from its own side |
 | M15 | Vibration Bean and Two Reworks | Phase 19 | 8 | 14.0 | 17.500 | 60.000 | The floating trap triggers below 4.0 and is silently removed; all eight rows of the Fang Trap Cactus values are right; Zangief Cane lands for exactly 7.5 points |
-| M16 | Resources, Audio, Advancements and Acceptance | Phase 20 | 6 | 12.0 | 15.000 | 75.000 | 8 / 1 / 22 / 300 / 300 / 158 / 90 all align, the jar is releasable |
+| M16 | Resources, Audio, Advancements and Acceptance | Phase 20 | 6 | 12.0 | 15.000 | 75.000 | 8 / 1 / 22 / 297 / 297 / 155 / 90 all align, the jar is releasable |
 | **Total** | | **5 Phases** | **36** | **60.0** | **75.000** | | |
 
 ### M12 · Baseline and Tool Repair (Phase 16)
 
-- **Completion criteria**: ① the tool first outputs `已核 registry 对象: 77 / 77` and `结论：FAIL 0 项` on the 0.0.2 baseline (F-100 / F-101), then `90 / 90`, config 158 and `lang 键集一致，共 282 键` (263 + the 19 config keys of F-104) with `结论：FAIL 0 项` and exit code 0 on the v0.0.3 code (F-103 / F-104); ② `.tools\gw.cmd build` exits with code 0 and produces `build/libs/farmstorm-0.0.3+mc1.21.1.jar`; ③ the startup log reads 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1 per category (90 in total), 22 crop species and 19 pool species, all four lines OK; ④ `config/farmstorm-server.toml` has 158 leaf nodes; ⑤ the five-part change of `18-TECH-0.0.3.md §1.4(c)` lands part by part and `01-DESIGN.md` is not written back into.
+- **Completion criteria**: ① the tool first outputs `已核 registry 对象: 77 / 77` and `结论：FAIL 0 项` on the 0.0.2 baseline (F-100 / F-101), then `90 / 90`, config 155 and `lang 键集一致，共 279 键` (263 + the 16 config keys of F-104) with `结论：FAIL 0 项` and exit code 0 on the v0.0.3 code (F-103 / F-104); ② `.tools\gw.cmd build` exits with code 0 and produces `build/libs/farmstorm-0.0.3+mc1.21.1.jar`; ③ the startup log reads 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1 per category (90 in total), 22 crop species and 19 pool species, all four lines OK; ④ `config/farmstorm-server.toml` has 155 leaf nodes; ⑤ the five-part change of `18-TECH-0.0.3.md §1.4(c)` lands part by part and `01-DESIGN.md` is not written back into.
 - **What is playable at the end of this milestone**: a trustworthy count of the registry / config / language trio from one command; the 4 new items in the creative tab; `/setblock` places the 3 new blocks; `/summon` brings out the 2 new throwables (no behavior on impact — that arrives in M13 ~ M15); `/effect` tries out the two new effects; every new ID is visible in the `/give` and `/playsound` completion lists.
 
 ### M13 · Two Status Effects (Phase 17)
@@ -795,7 +795,7 @@ M12 ~ M16 map one-to-one onto Phase 16 ~ Phase 20. Each milestone gives two work
 
 ### M16 · Resources, Audio, Advancements and Acceptance (Phase 20)
 
-- **Completion criteria**: ① `tools/verify_project.py` outputs `90 / 90`, config 158, lang 300 and `结论：FAIL 0 项`; ② resources PNG 8 / OGG 1 / JSON 22 and `sounds.json` events 3; ③ both language files carry 300 keys each with identical key sets character for character; ④ each of the three new advancements pops one toast; ⑤ all 17 items of `18-TECH-0.0.3.md §11` pass; ⑥ `dist/farmstorm-0.0.3+mc1.21.1.jar` exists and `jar tf` shows `friend_chives.ogg` and `q_bounce.png`.
+- **Completion criteria**: ① `tools/verify_project.py` outputs `90 / 90`, config 155, lang 297 and `结论：FAIL 0 项`; ② resources PNG 8 / OGG 1 / JSON 22 and `sounds.json` events 3; ③ both language files carry 297 keys each with identical key sets character for character; ④ each of the three new advancements pops one toast; ⑤ all 17 items of `18-TECH-0.0.3.md §11` pass; ⑥ `dist/farmstorm-0.0.3+mc1.21.1.jar` exists and `jar tf` shows `friend_chives.ogg` and `q_bounce.png`.
 - **What is playable at the end of this milestone**: the all-Chinese interface has no missing glyphs (the Fang Trap Cactus displays as “刺球”); the 8 new images each sit in their place (the 4 crop textures are magenta placeholders — visible, but obviously not final art); the hit sound is audible; each of the three advancements pops one toast (“弹起来了 / 一颗都不放 / 留个纪念”); drop the jar into a dedicated server and players need only the mod itself to take part.
 
 ---
@@ -816,7 +816,7 @@ F-100 Fix verify_project.py 0.5            (cumulative 0.5)
                      └─ F-118 Four filters 3.0 (cumulative 10.5)
                          └─ F-119 Count and dedup 1.5 (cumulative 12.0)
                              └─ F-133 Three advancements 1.5 (cumulative 13.5)
-                                 └─ F-134 Language keys 37 entries 1.5 (cumulative 15.0)
+                                 └─ F-134 Language keys 34 entries 1.5 (cumulative 15.0)
                                      └─ F-135 Full acceptance 3.0 (cumulative 18.0)
 ```
 
@@ -840,7 +840,7 @@ All five chains end at F-135, so M16 is the junction of every content line. Chai
 - Three compressible points:
   1. **Split F-133's three advancements into three 0.5 person-day tasks**: their trigger points can each land right after F-115, F-119 and F-124, without waiting for all three lines to close. Once split, `point_defense_intercept` can finish right behind F-119, and the critical path drops from `F-119 → F-133 → F-134 → F-135` to `F-119 → F-134 → F-135` (the language keys only wait for the advancement IDs to be final, not for all three implementations), making the critical path **17.0 person-days / 11 tasks** and saving 1.0 person-day.
   2. **Relax F-117's prerequisites**: work can start as soon as the Point Defense Fungus block registration (F-103) lands, and `F-105` is only a soft prerequisite for the profile it reads. Changing F-117's prerequisites from “F-103, F-105” to “F-103” lets it start at the same time as F-105, whose 1.5 person-days on the critical path then overlap with F-105's, saving another 1.5 person-days. The price: F-117 verifies early with an `owner` fabricated by hand through `/setblock`, and re-runs once after the profile is settled.
-  3. **Two segments not recommended for compression**: `F-100 → F-101` (getting the numbers before fixing the tool is impossible — compress it away and you are back on the old path of “declare 90 on the strength of +13”, exactly what RT-23 guards against) and `F-134 → F-135` (the 37 language keys and the 17-item acceptance are M16's DoD threshold; compressing them defers §11 #17 to after the release).
+  3. **Two segments not recommended for compression**: `F-100 → F-101` (getting the numbers before fixing the tool is impossible — compress it away and you are back on the old path of “declare 90 on the strength of +13”, exactly what RT-23 guards against) and `F-134 → F-135` (the 34 language keys and the 17-item acceptance are M16's DoD threshold; compressing them defers §11 #17 to after the release).
 - The real calendar bottleneck is **M12**: within its 7.5 person-days, 4.5 are the sequential chain of the tool and the registry layer (F-100 → F-101 → F-102 → F-103), and with no parallelism in M12 not one of the four later milestones can start. It is recommended that M12 be owned exclusively by the lead programmer and not compete for people with other lines.
 
 ---
@@ -856,9 +856,9 @@ Every key number appearing in this file has its upstream location in the table b
 | 1 | Registered objects **77** (v0.0.2 baseline) | F-100, F-101, §0.4 A-14 | `18-TECH-0.0.3.md §1.2` (measured per category, 12 categories), the v0.0.2 column of §2.1, the note under the §2.2 table | Consistent |
 | 2 | Registered objects **90** (v0.0.3) | F-103, F-121, F-135, §10 | `18-TECH-0.0.3.md §2.1` (12 categories + an increment of 13), the two algorithms of §2.4, §11 #2 | Consistent |
 | 3 | config **139** (v0.0.2) | F-100, F-104, F-135 | `18-TECH-0.0.3.md §0.4` (133 + 4 + 2 = 139), §8.3; `16-DECISIONS-0.0.3.md` §1, §8 | Consistent |
-| 4 | config **158** (v0.0.3) | F-104, F-134, F-135, §10 | `18-TECH-0.0.3.md §8.3` (139 + 19) | Consistent |
+| 4 | config **155** (v0.0.3) | F-104, F-134, F-135, §10 | `18-TECH-0.0.3.md §8.3` (139 + 16) | Consistent |
 | 5 | Language keys **263** (v0.0.2) | F-100, F-135 | `18-TECH-0.0.3.md §0.4`, the total row of §9.4; `16-DECISIONS-0.0.3.md` §1, §8 | Consistent |
-| 6 | Language keys **300** (v0.0.3) | F-134, F-135, §10 | `18-TECH-0.0.3.md §9.4` (263 + 37) | Consistent |
+| 6 | Language keys **297** (v0.0.3) | F-134, F-135, §10 | `18-TECH-0.0.3.md §9.4` (263 + 34) | Consistent |
 | 7 | PNG **8** | F-130, F-135, §9.3 | `18-TECH-0.0.3.md §9.1` (8 rows), the closing item of §1.4(d) | Consistent (A-16: +7 is the old value; §8 of document 16 and §1.3 of document 17 have been corrected to +8) |
 | 8 | OGG **1** | F-131, §9.3 | `18-TECH-0.0.3.md §9.2` (1 row) | Consistent (the +1 of document 16 §8 has the same value) |
 | 9 | JSON **22** | F-132, F-133, F-135, §9.3 | `18-TECH-0.0.3.md §9.3` (22 rows) + the seven subtotals under the table | Consistent |
@@ -868,7 +868,7 @@ Every key number appearing in this file has its upstream location in the table b
 | 13 | `ThrownCropEntity` family **12** (10 in 0.0.2 + 2 in 0.0.3) | F-118, the §5 phase exit | `16-DECISIONS-0.0.3.md` §3.6 D-98; the 12-row table of `18-TECH-0.0.3.md §6.1` | Consistent (the “9 kinds” of D-87 has been corrected by D-98; this file does not cite the old value) |
 | 14 | `DeployedKind` **6 → 8** | F-103, F-105, F-117, §0.4 A-11 | `18-TECH-0.0.3.md §1.4(b)` (+2 values, enum 6 → 8); `16-DECISIONS-0.0.3.md` §4 line 21 | Consistent (§4 line 22 of document 16 once read “—” and has been corrected to `VIBRATION_BEAN` per A-11) |
 | 15 | Crop profiles **19 → 22** | F-105, §5, §9.2 | `16-DECISIONS-0.0.3.md` §4 (the 22-row table and the count under it); `18-TECH-0.0.3.md §1.3` (19 constant rows, `ALL` at 19 entries) | Consistent |
-| 16 | Language key increment **37** | F-134, the append-only changes of §9.3 | the seven-row subtotal of `18-TECH-0.0.3.md §9.4` | Consistent |
+| 16 | Language key increment **34** | F-134, the append-only changes of §9.3 | the seven-row subtotal of `18-TECH-0.0.3.md §9.4` | Consistent |
 | 17 | Registration increment **+13** and its breakdown (items 4 / blocks 3 / entity_types 2 / mob_effects 2 / sound_events 1 / damage_types 1) | F-103, §9.1 | `18-TECH-0.0.3.md §2.1`, the 13 rows of §2.2; the table of `16-DECISIONS-0.0.3.md` §3.1 | Consistent |
 | 18 | Acceptance self-checks **17 entries** | F-135, §10 | `18-TECH-0.0.3.md §11` (#1 – #17 and the coverage statement at the end of the table) | Consistent |
 | 19 | Lucky berry pool **16 → 19** | F-105, §5 | `16-DECISIONS-0.0.3.md` §3.5 D-97; `18-TECH-0.0.3.md §1.3` | Consistent |
@@ -913,7 +913,7 @@ The four former inconsistencies share one trait: **none of them changes any regi
 
 ## Translator's notes
 
-1. The source letter-spaces nothing and uses no typographic device, but it does keep several Chinese **string literals** in code spans — the startup self-check lines (`自检 注册对象 90 个：… → OK`, `自检 作物 22 种：… → OK`, `自检 幸运浆果池 19 种（…）→ OK`), the tool output lines (`已核 registry 对象: 77 / 77`, `lang 键集一致，共 263 键`, `lang 键集一致，共 300 键`, `结论：FAIL 0 项`), the log fragments (`q_bounce t=0`, `本刻已拦过` / “already intercepted this tick”) and the language values (`刺球`, “赢过输过没死过”). They are kept character for character, because they are Java literals, log lines or `zh_cn.json` values, not prose.
+1. The source letter-spaces nothing and uses no typographic device, but it does keep several Chinese **string literals** in code spans — the startup self-check lines (`自检 注册对象 90 个：… → OK`, `自检 作物 22 种：… → OK`, `自检 幸运浆果池 19 种（…）→ OK`), the tool output lines (`已核 registry 对象: 77 / 77`, `lang 键集一致，共 263 键`, `lang 键集一致，共 297 键`, `结论：FAIL 0 项`), the log fragments (`q_bounce t=0`, `本刻已拦过` / “already intercepted this tick”) and the language values (`刺球`, “赢过输过没死过”). They are kept character for character, because they are Java literals, log lines or `zh_cn.json` values, not prose.
 2. `man瓜 missile` (acceptance 1 of F-118) is an in-game item name that mixes Latin letters and Chinese characters; it is left verbatim rather than translated, since the source gives no English reading for it.
 3. The Fang Trap Cactus is the one place where the Chinese and English names deliberately do not correspond (A-10 / D-93): the Chinese display name is “刺球” while the English name is Fang Trap Cactus and the registry id stays `fang_trap_cactus`. No attempt was made to align them, and no “Spike Ball” reading was introduced.
 4. The buffer total is written `75.0` in §2 and **75.000** in the §10 table, and the source keeps them that way; this file preserves the precision of each occurrence instead of normalising them.

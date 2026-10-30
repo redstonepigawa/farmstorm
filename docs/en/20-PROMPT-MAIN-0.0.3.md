@@ -27,8 +27,8 @@ This file writes only v0.0.3's increments and the execution discipline that land
 
 You are the **implementation engineer** for this repository in v0.0.3, making increments on the code already released as v0.0.2.
 
-- **Target shape**: the Minecraft 1.21.1 NeoForge mod `farmstorm` v0.0.3 — **22** crop profiles (19 → 22), **90** registered objects (77 → 90), **158** config keys (139 → 158), **300** language keys (263 → 300), **31** new resource files (PNG 8 / OGG 1 / JSON 22), a Lucky Berry pool of **19** (16 → 19); the seven items (Q-Bounce, Confusion, Friend Chives, Point Defense Fungus, Vibration Bean, Fang Trap Cactus, Zangief Cane) hang off the v0.0.2 profile model and deployment framework.
-- **Delivery criteria**: `.tools\gw.cmd build` exits 0 and produces `build/libs/farmstorm-0.0.3+mc1.21.1.jar`; `python -X utf8 tools/verify_project.py` outputs `已核 registry 对象: 90 / 90`, the config section has no FAIL, `lang 键集一致，共 300 键`, `结论：FAIL 0 项`, exit code 0; `.tools\gw.cmd runServer` starts a server and the log has no `NoClassDefFoundError`; the two count groups 90 / 158 / 300 and 8 / 1 / 22 match item by item (`18-TECH-0.0.3.md` §11 #1, #2, #17).
+- **Target shape**: the Minecraft 1.21.1 NeoForge mod `farmstorm` v0.0.3 — **22** crop profiles (19 → 22), **90** registered objects (77 → 90), **155** config keys (139 → 155), **297** language keys (263 → 297), **31** new resource files (PNG 8 / OGG 1 / JSON 22), a Lucky Berry pool of **19** (16 → 19); the seven items (Q-Bounce, Confusion, Friend Chives, Point Defense Fungus, Vibration Bean, Fang Trap Cactus, Zangief Cane) hang off the v0.0.2 profile model and deployment framework.
+- **Delivery criteria**: `.tools\gw.cmd build` exits 0 and produces `build/libs/farmstorm-0.0.3+mc1.21.1.jar`; `python -X utf8 tools/verify_project.py` outputs `已核 registry 对象: 90 / 90`, the config section has no FAIL, `lang 键集一致，共 297 键`, `结论：FAIL 0 项`, exit code 0; `.tools\gw.cmd runServer` starts a server and the log has no `NoClassDefFoundError`; the two count groups 90 / 155 / 297 and 8 / 1 / 22 match item by item (`18-TECH-0.0.3.md` §11 #1, #2, #17).
 - **Task scale**: tasks start at **F-100** and Phases at **Phase 16**; the breakdown and the workload are in `19-TASKS-0.0.3.md` (D-80's numbering relay).
 
 Three statements of self-positioning (carried over from `05-PROMPT-MAIN.md` §1 and 14 §1, tightened for the v0.0.3 increment):
@@ -51,9 +51,9 @@ You will only ever see this file plus the task prompt for the current Phase. **D
 | Registered objects · baseline | **77** (measured class by class across 12 classes: 27 + 22 + 6 + 11 + 2 + 2 + 1 + 1 + 1 + 2 + 1 + 1) | `18-TECH-0.0.3.md` §1.2, §1.3 |
 | Registered objects · target | **90** (77 + an increment of 13) | `18-TECH-0.0.3.md` §2.4 |
 | config keys · baseline | **139** | `18-TECH-0.0.3.md` §0.4, §1.3 |
-| config keys · target | **158** (139 + 19) | `18-TECH-0.0.3.md` §8.3 |
+| config keys · target | **155** (139 + 16) | `18-TECH-0.0.3.md` §8.3 |
 | Language keys · baseline | **263** (Chinese and English identical) | `18-TECH-0.0.3.md` §0.4, §1.3 |
-| Language keys · target | **300** (263 + 37) | `18-TECH-0.0.3.md` §9.4 |
+| Language keys · target | **297** (263 + 34) | `18-TECH-0.0.3.md` §9.4 |
 | Resource increment | **31** = PNG **8** + OGG **1** + JSON **22**; plus appends to 6 existing files (not counted in the 31) | `18-TECH-0.0.3.md` §9.1, §9.2, §9.3 |
 
 Copy the numbers as written; do not recount them. Apart from the two entries 'Java file count 103' and '814,935 B', which come from `.work/v003-BRIEF.md` §1 (16 and 18 do not carry these two values), every cell of the table above points to a specific subsection of 18. Two numbers being equal inside one table is a coincidence, not a check; the checks use §6's DoD and the self-check item IDs in `18-TECH-0.0.3.md` §11.
@@ -68,7 +68,7 @@ These five come from RT-17 ~ RT-23 in `18-TECH-0.0.3.md` §10. They are the five
 | 2 | **The consequences of the mount branch changing entity relations**: the seat is a real entity, it lifts the passenger, changes collision and the 'what is the player riding' determination, and any cleanup path that is missed leaves an invisible entity pinning the player in place (RT-18) | `18-TECH-0.0.3.md` §4.3, §10 RT-18 | A ledger `Map<UUID, MountRecord>` + three checks every tick (is the effect there / is the passenger still it / is the seat still there) that do not depend on events; all four exit paths are written (death / disconnect / dimension change / server stop); give up after more than 20 re-mounts and log one warn line. **Do not** add an `entity_type` for this (D-102) |
 | 3 | **Point Defense Fungus's per-tick scan and 'only one deduction per tick'**: put the de-duplication mark on the wrong object and you get either 'N fungi each charge once in the same tick' or 'charged but not intercepted' (RT-20) | `18-TECH-0.0.3.md` §6.2, §6.3, §6.4, §10 RT-20 | Put the mark on the **projectile** as `lastInterceptTick` (a `long` field, not in NBT); scan interval 10 ticks + `floorMod(pos.hashCode(), 10)` staggering; the first step of `fire` is `if (target.markIntercepted(now)) return;`. AABB is only a coarse sieve, and the hit determination must be re-checked in Euclidean terms with `distanceTo` |
 | 4 | **Cancelling fall damage conflicting with other mods**: scope the cancellation too wide and it touches slow falling / immunity / flight, too narrow and it becomes 'flat 7.5 + natural fall' stacked (RT-22) | `18-TECH-0.0.3.md` §3.11, §10 RT-22 | The predicate recognises only 'carries `farmstorm:zangief_piledriver` and `amplifier == 2`' + the `zangief_cane.cancelFallDamage` switch, and does not touch the global fall logic; the cancellation and the settlement are written in the same phase state machine. If `LivingFallEvent.setCanceled(true)` only affects distance, hook `LivingIncomingDamageEvent` instead and cancel when the damage type is fall |
-| 5 | **`tools/verify_project.py` must be fixed before it is run**: it still enumerates by 0.0.1 (items 22 / blocks 20 / entity 9), uses a denominator of 64, and reads its config expectations only from the 117 of `01-DESIGN.md` §3.8, so running it now is bound to go red (RT-23) | `18-TECH-0.0.3.md` §1.4(c), §10 RT-23, §11 #1 | First fix the tool to the 0.0.2 baseline by the four-part method of §1.4(c) (`77 / 77`, `结论：FAIL 0 项`, exit code 0), then move it to 0.0.3's 90 / 158 / 300. **Do not** change `01-DESIGN.md` to make the tool go green (D-80 freezes 00 – 15), and **do not** sign off on a red light as a pass |
+| 5 | **`tools/verify_project.py` must be fixed before it is run**: it still enumerates by 0.0.1 (items 22 / blocks 20 / entity 9), uses a denominator of 64, and reads its config expectations only from the 117 of `01-DESIGN.md` §3.8, so running it now is bound to go red (RT-23) | `18-TECH-0.0.3.md` §1.4(c), §10 RT-23, §11 #1 | First fix the tool to the 0.0.2 baseline by the four-part method of §1.4(c) (`77 / 77`, `结论：FAIL 0 项`, exit code 0), then move it to 0.0.3's 90 / 155 / 297. **Do not** change `01-DESIGN.md` to make the tool go green (D-80 freezes 00 – 15), and **do not** sign off on a red light as a pass |
 
 ## 3. Hard Constraints You Must Not Violate (HC-29 ~ HC-50)
 
@@ -79,9 +79,9 @@ HC-01 ~ HC-14 are in `05-PROMPT-MAIN.md` §3 and HC-15 ~ HC-28 are in `14-PROMPT
   - Consequence of violation: §11 #1 goes red (the tool's line is not 90 / 90); the §11 #2 self-check line disagrees with the number in the report, and the self-check line itself becomes a fake pass; if the numbers are taken from 0.0.1's enumeration, the per-class subtotals 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1 do not add up.
   - Source: D-80 (number discipline); `18-TECH-0.0.3.md` §0.4, §1.2, §2.1, §2.4; RT-23.
 
-- **HC-30 · config 158 and the 300 language keys always contain the same batch of keys**
-  - Constraint: config keys 139 + 19 = **158**, language keys 263 + 37 = **300**; the 19 config keys are all '16 purely new + 3 changed existing defaults', plus 1 non-key line of explanation (the `confusion` group has no keys and is not counted in the 19); `farmstorm.configuration.*` is always equal to the config keys.
-  - Consequence of violation: the leaf nodes of `config/farmstorm-server.toml` are not 158; the two language files are not 300 keys each or their key sets differ; §11 #17 goes red; one of the 19 keys has its read point in the implementation missing, so changing that config changes no behaviour.
+- **HC-30 · config 155 and the 297 language keys always contain the same batch of keys**
+  - Constraint: config keys 139 + 16 = **155**, language keys 263 + 34 = **297**; the 19 config keys are all '16 purely new + 3 changed existing defaults', plus 1 non-key line of explanation (the `confusion` group has no keys and is not counted in the 19); `farmstorm.configuration.*` is always equal to the config keys.
+  - Consequence of violation: the leaf nodes of `config/farmstorm-server.toml` are not 155; the two language files are not 297 keys each or their key sets differ; §11 #17 goes red; one of the 19 keys has its read point in the implementation missing, so changing that config changes no behaviour.
   - Source: `18-TECH-0.0.3.md` §8.1, §8.3, §9.4; `.work/v003-BRIEF.md` §3.3.
 
 - **HC-31 · Only 31 new resource files are allowed, and existing files may only take appends in 6 files**
@@ -90,7 +90,7 @@ HC-01 ~ HC-14 are in `05-PROMPT-MAIN.md` §3 and HC-15 ~ HC-28 are in `14-PROMPT
   - Source: `18-TECH-0.0.3.md` §9.1, §9.2, §9.3; `.work/v003-BRIEF.md` §3.4.
 
 - **HC-32 · Fix the verification tool before running it; a red light may not be signed off**
-  - Constraint: no registry / config / language-key number is fit to be written into a document or a report until `tools/verify_project.py` has been fixed. The order of the fix is fixed: first to the 0.0.2 baseline (`已核 registry 对象: 77 / 77`, `结论：FAIL 0 项`, exit code 0), then to 0.0.3's 90 / 158 / 300.
+  - Constraint: no registry / config / language-key number is fit to be written into a document or a report until `tools/verify_project.py` has been fixed. The order of the fix is fixed: first to the 0.0.2 baseline (`已核 registry 对象: 77 / 77`, `结论：FAIL 0 项`, exit code 0), then to 0.0.3's 90 / 155 / 297.
   - Consequence of violation: §11 #1 goes red; before the tool is fixed no total assertion holds (RT-23 clause ①); declaring 90 straight from the '+13' without counting is RT-23 clause ④; changing `01-DESIGN.md` to make the tool go green breaks D-80 and HC-36 at once.
   - Source: RT-23; `18-TECH-0.0.3.md` §1.4(c), §10 RT-23, §11 #1.
 
@@ -262,8 +262,8 @@ A task counts as done when **all** of the following hold; missing one means it i
 
 1. Every acceptance item listed in the task prompt can be pointed at code, a resource or a command reading.
 2. `.tools\gw.cmd compileJava` passes; where DataGen is involved `.tools\gw.cmd runData` passes and its output lands in `src/generated/resources`; at the end `.tools\gw.cmd build` exits with code 0 and produces `build/libs/farmstorm-0.0.3+mc1.21.1.jar`.
-3. `python -X utf8 tools/verify_project.py` outputs `已核 registry 对象: 90 / 90`, 158 config keys with no FAIL, `lang 键集一致，共 300 键`, `结论：FAIL 0 项`, exit code 0 (while the tool is not yet fixed, do HC-32's repair task first and do not hand in a red light).
-4. Three count groups hold: 90 registered, class by class 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1; config 158; each of the two language files 300 keys with `set(zh) == set(en)`; the resource increment 8 / 1 / 22 (31 in all) and the 6 append points in existing files match item by item.
+3. `python -X utf8 tools/verify_project.py` outputs `已核 registry 对象: 90 / 90`, 155 config keys with no FAIL, `lang 键集一致，共 297 键`, `结论：FAIL 0 项`, exit code 0 (while the tool is not yet fixed, do HC-32's repair task first and do not hand in a red light).
+4. Three count groups hold: 90 registered, class by class 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1; config 155; each of the two language files 297 keys with `set(zh) == set(en)`; the resource increment 8 / 1 / 22 (31 in all) and the 6 append points in existing files match item by item.
 5. All three self-check lines of the startup log are present and end with `OK`: 90 registered objects, 22 crops (Throwable 12 / Deployable 7 / Edible 3, Demolition 4), a Lucky Berry pool of 19.
 6. The red lines are decidable: `grep -r "CustomPacketPayload" src/main/java` is 0; `grep -rn "Mixin" src/main/java` is 0.
 7. No out-of-bounds changes: `git status` shows only new files and the existing files named by `18-TECH-0.0.3.md`; `.work/v003-BRIEF.md`, `docs/zh/00` ~ `15` and `docs/en/00` ~ `15` are untouched; 16 – 21 are this round's deliverables, and changes land only on these six documents, 16 – 21.
@@ -284,10 +284,10 @@ When the task ends, output the template below exactly as given; do not improvise
   - .tools\gw.cmd compileJava → BUILD SUCCESSFUL (<duration>)
   - .tools\gw.cmd runData → generated N files into src/generated/resources
   - .tools\gw.cmd build → exit code 0, artifact build/libs/farmstorm-0.0.3+mc1.21.1.jar
-  - python -X utf8 tools/verify_project.py → 已核 registry 对象: 90 / 90；config 158；lang 300；结论：FAIL 0 项（退出码 0）
+  - python -X utf8 tools/verify_project.py → 已核 registry 对象: 90 / 90；config 155；lang 297；结论：FAIL 0 项（退出码 0）
   - (write failed commands the same way, with the first error verbatim and the summary line)
 - Acceptance items: <each acceptance item of the task prompt → evidence location (file:line / key line of command output / log assertion line / self-check item number of 18's §11)>
-- Counts and red lines: <present values of the 90 / 158 / 300 / 8 / 1 / 22 involved here; match counts for CustomPacketPayload and Mixin; sounds.json event count>
+- Counts and red lines: <present values of the 90 / 155 / 297 / 8 / 1 / 22 involved here; match counts for CustomPacketPayload and Mixin; sounds.json event count>
 - Open questions: <document contradictions, missing APIs, matters the author must adjudicate; name here any RT numbers you raised; write "none" if there are none>
 - Follow-up note: <one sentence on what you deliberately did not do but will be hit by next>
 ```
@@ -344,8 +344,8 @@ First, four that run through the whole repository: **`neoForge { }` is case-sens
 | Zangief Cane lands for 0 damage, or the damage drifts with height | Cancel without settle, or settle without cancel, or the order reversed into '`finish` first, `hurt` after' | Write the cancellation and the settlement in the same phase state machine, in the fixed order 'settle first, `finish` after'; the control experiment with `cancelFallDamage` switched off must show damage above 7.5 varying with height | D-96; `18-TECH` §3.11; RT-22 |
 | The ogg file does not match last time's, and the conversion is suspected | An ogg's **stream serial number is random** on every re-encode, so the bytes are not reproducible and the md5 differs by nature | The criterion is the three readings 'duration / channels / bitrate' (`ffprobe`), **not an md5 comparison**; re-encode the single file once and keep both the old and the new readings | `12-TECH-0.0.2.md` §6.4 |
 | No audio can be produced / the build succeeds but there is no sound | ffmpeg is at `D:\dsh\default\sf6_audio\tools\ffmpeg.exe` but is **not on PATH**; Trae CN's 6.1.1 has no libvorbis and is unusable | Pass `-Ffmpeg` with an absolute path; when ffmpeg is missing the script exits with code 1 and prints installation guidance; audio tasks go first in the resource stage | `12-TECH-0.0.2.md` §6.4; RT-14; the `-Ffmpeg` parameter of `tools/convert_media.ps1` |
-| `verify_project.py` stays red, and gets redder the more it is fixed | The tool still enumerates by 0.0.1, uses a denominator of 64, and reads its config expectations only from the 117 of `01-DESIGN.md` §3.8, while that file is in the frozen zone and cannot be changed back | Fix it by the four-part method of `18-TECH` §1.4(c): expected key set to 139, `EXPECTED` to 27 / 22 / 11, denominator to 77, and fill in the remaining 5 bare IDs; then move it on to 90 / 158 / 300 | `18-TECH` §1.4(c), §10 RT-23, §11 #1 |
-| A config default was changed but the behaviour in game did not change | An already generated `config/farmstorm-server.toml` is not rewritten when the default changes | Delete that file and regenerate it, or change the value by hand; check for 158 leaf nodes | `08-DEV-GUIDE.md` §4.3; 14 §9 |
+| `verify_project.py` stays red, and gets redder the more it is fixed | The tool still enumerates by 0.0.1, uses a denominator of 64, and reads its config expectations only from the 117 of `01-DESIGN.md` §3.8, while that file is in the frozen zone and cannot be changed back | Fix it by the four-part method of `18-TECH` §1.4(c): expected key set to 139, `EXPECTED` to 27 / 22 / 11, denominator to 77, and fill in the remaining 5 bare IDs; then move it on to 90 / 155 / 297 | `18-TECH` §1.4(c), §10 RT-23, §11 #1 |
+| A config default was changed but the behaviour in game did not change | An already generated `config/farmstorm-server.toml` is not rewritten when the default changes | Delete that file and regenerate it, or change the value by hand; check for 155 leaf nodes | `08-DEV-GUIDE.md` §4.3; 14 §9 |
 | Two `runServer`s collide on `session.lock` and overwrite each other's logs | Parallel servers share one run directory | Add `-PfsRunDir=run-xxx` before starting the second one, each with its own directory | `08-DEV-GUIDE.md` §4.2 |
 | Throwing a new projectile crashes the client with `entityrenderer is null` | The new `entity_type` has no client renderer registered | All 13 `entity_type`s each `registerEntityRenderer`, and the self-check line must read 13/13; the two new projectiles use `ThrownItemRenderer` | `18-TECH` §2.1 row 4; 14 §9 |
 | With no players around Vibration Bean / Point Defense Fungus do not respond at all | Chunks with nobody in them do not tick | `forceload add` before testing, and poll until the block entity really is in the world before timing anything | `08-DEV-GUIDE.md` §7 |
@@ -355,7 +355,7 @@ First, four that run through the whole repository: **`neoForge { }` is case-sens
 | ID | Constraint summary | Source |
 |---|---|---|
 | HC-29 | The registration total has only one source: baseline 77, increment +13, target 90 | D-80; `18-TECH` §0.4, §1.2, §2.1, §2.4; RT-23 |
-| HC-30 | config 158 and the 300 language keys always contain the same batch of keys (19 lines = 16 new + 3 changed) | `18-TECH` §8.1, §8.3, §9.4; `.work/v003-BRIEF.md` §3.3 |
+| HC-30 | config 155 and the 297 language keys always contain the same batch of keys (19 lines = 16 new + 3 changed) | `18-TECH` §8.1, §8.3, §9.4; `.work/v003-BRIEF.md` §3.3 |
 | HC-31 | Only 31 new resource files are allowed (PNG 8 / OGG 1 / JSON 22), and existing files only take appends in 6 files | `18-TECH` §9.1, §9.2, §9.3; `.work/v003-BRIEF.md` §3.4 |
 | HC-32 | verify_project.py is fixed before it is run; a red light may not be signed off | RT-23; `18-TECH` §1.4(c), §10, §11 #1 |
 | HC-33 | Zero custom packets; effect state rides vanilla MobEffect synchronisation | C-6, D-50; `16-DECISIONS` §7.2; 14 §3 HC-15 |
@@ -382,6 +382,6 @@ First, four that run through the whole repository: **`neoForge { }` is case-sens
 ## Translator's notes
 
 1. **Resolved in the upstream source**: the field-name difference with `17-DESIGN-0.0.3.md` is closed — both documents now write `lastInterceptTick`, as this one always did; and HC-31 has been aligned to the finalised append list of **6 existing files**, with A1 – A5 kept from `18-TECH-0.0.3.md` §9.3 because the single entry A5 covers the last two tag files.
-2. **Chinese command output is kept verbatim**: the self-check strings the agent must match — `已核 registry 对象: 90 / 90`, `lang 键集一致，共 300 键`, `结论：FAIL 0 项` — and the same strings inside the §7 report template are left in Chinese, because they are the literal output of `tools/verify_project.py` and a translation would make the acceptance criterion unmatchable.
+2. **Chinese command output is kept verbatim**: the self-check strings the agent must match — `已核 registry 对象: 90 / 90`, `lang 键集一致，共 297 键`, `结论：FAIL 0 项` — and the same strings inside the §7 report template are left in Chinese, because they are the literal output of `tools/verify_project.py` and a translation would make the acceptance criterion unmatchable.
 3. **The §7 report template is translated**, following `docs/en/14-PROMPT-MAIN-0.0.2.md` §7; inside it, `.tools\gw.cmd`, the artifact and directory paths and the version strings are unchanged.
 4. **刺球 is rendered as 'Fang Trap Cactus'** in running prose, per this version's fixed terminology. Where the Chinese display name is quoted as a **value** (HC-48: 赢过输过没死过 → 刺球), the literal strings are kept in source form, because they are what gets written into `zh_cn.json`. All registry ids, class and method names, package paths, config keys, language keys, file paths, commands and code fragments are reproduced unchanged.

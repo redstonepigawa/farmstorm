@@ -61,7 +61,7 @@
 | **A-11** | 震动豆档案的 `DeployedKind` 填什么 | 曾按 `16` §4 第 22 行的「—」把该列读成 `null`；也有把两个新枚举值当 +1 的写法 | 填 `DeployedKind.VIBRATION_BEAN`；枚举 6 → **8**（`POINT_DEFENSE_FUNGUS`、`VIBRATION_BEAN`）。枚举常量不是注册对象，注册总数不受影响；填 `null` 会回落到 `BLAST_CARROT`，让陷阱跑成爆炸陷阱 | F-103、F-105 |
 | **A-12** | Q弹 的 `mount` 分支用什么承载坐骑 | 曾打算为坐骑新增一个 `entity_types` 注册对象（增量写成 +3） | 用原版 `minecraft:armor_stand`，`entity_types` 增量**恒为 +2**；五项属性覆写 `setInvisible` / `setNoGravity` / `setInvulnerable` / `setSilent` / `setMarker`，随生物死亡立即 `discard()` | F-109、F-112 |
 | **A-13** | 拦截音与震动豆爆炸音要不要新增 `sound_event` | 曾打算给拦截音与爆炸音各新增一个 `sound_event`（`sound_events` 写成 +3、`sounds.json` 事件数写成 5） | 都复用原版事件：`SoundEvents.SHIELD_BLOCK` 与 `SoundEvents.GENERIC_EXPLODE`，代码里只写 Java 常量、不写 `minecraft:***` 字符串；`sound_events` 增量**恒为 +1**（只有 `friend_chives`），`sounds.json` 事件数 2 → 3 | F-120、F-124、F-131 |
-| **A-14** | 工具滞后时验收能不能降级 | 曾有一条兜底写「工具保持红 + 人工签字」 | **不许降级**：先修到 0.0.2 基线 **77 / 77**（config 139、lang 263、`结论：FAIL 0 项`、退出码 0），v0.0.3 落地后再收到 **90 / 90**（config 158、lang 300）。RT-23 兜底栏的「保持红 + 人工签字」只在作者明确否决修工具时启用，本轮不适用 | F-100、F-135 |
+| **A-14** | 工具滞后时验收能不能降级 | 曾有一条兜底写「工具保持红 + 人工签字」 | **不许降级**：先修到 0.0.2 基线 **77 / 77**（config 139、lang 263、`结论：FAIL 0 项`、退出码 0），v0.0.3 落地后再收到 **90 / 90**（config 155、lang 297）。RT-23 兜底栏的「保持红 + 人工签字」只在作者明确否决修工具时启用，本轮不适用 | F-100、F-135 |
 | **A-15** | `qbounce` 三个姿态参数的默认值 | 曾同时存在两套读数：24.0 / 0.15 / 6 与 12.0 / 0.15 / 10（240 度/秒） | 取 **24.0 度/刻、0.15、6 刻**（= 480 度/秒、一圈 15 刻、1 秒约 3.3 个压缩周期）；范围列以 `18` §8.1 为唯一出处（0.0–360.0 / 0.0–0.90 / 2–100）。上游已订正 | F-104、F-107、F-108 |
 | **A-16** | PNG 增量 | 曾出现 7 张的写法（`16` §8 与 `17` §1.3 的「+7 / +1」） | 取 **8 张**：第 8 张是震动豆的物品图标（`basicItem` 的兜底分支固定引用 `farmstorm:item/<id>`，与 0.0.2 三个隐形陷阱同处置）；资源增量 8 PNG + 1 OGG + 22 JSON = **31**。上游已订正 | F-130、F-135 |
 | **A-17** | 三条新进度的 ID 与文件名 | 曾出现两套写法（`first_intercept` / `first_vibration_bean`） | 取 `farmstorm:first_q_bounce`、`farmstorm:point_defense_intercept`、`farmstorm:vibration_bean_trigger`，JSON 文件名与 ID 一致。上游已订正 | F-133 |
@@ -76,9 +76,9 @@
 | 1 | 注册对象（v0.0.2 基线） | **77**（12 类逐类：27 / 22 / 6 / 11 / 2 / 2 / 1 / 1 / 1 / 2 / 1 / 1） | `18` §1.2（逐类实测）、§2.1 的 v0.0.2 列、§11 #1；`16` 的数字纪律段 |
 | 2 | 注册对象（v0.0.3） | **90**（77 + 13） | `18` §2.1 / §2.4 / §11 #2；`19` F-103、F-135 |
 | 3 | config 键（v0.0.2） | **139**（133 条 `defineInRange` + 4 条 `define` + 2 条 `defineEnum` / `defineList`） | `18` §0.4 / §8.3；`16` §8 |
-| 4 | config 键（v0.0.3） | **158**（139 + 19） | `18` §8.3；`16` §8 |
+| 4 | config 键（v0.0.3） | **155**（139 + 16） | `18` §8.3；`16` §8 |
 | 5 | 语言键（v0.0.2） | **263**（中英各 263，键集一致） | `18` §0.4 / §9.4；`16` §8 |
-| 6 | 语言键（v0.0.3） | **300**（263 + 37） | `18` §9.4 的七行小计 |
+| 6 | 语言键（v0.0.3） | **297**（263 + 34） | `18` §9.4 的七行小计 |
 | 7 | config 变更 | **19 行** = 纯新增 **16** + 改既有默认值 **3**；另有 1 行「`confusion` 无键」的说明不计入 | `18` §8.1（逐项清单 19 行）、§8.3；`16` §5.4 / §8 的「19 / 16 / 3 / 1」行 |
 | 8 | 资源文件 | **31** 个 = PNG **8** + OGG **1** + JSON **22** | `18` §9.1（8 行）/ §9.2（1 行）/ §9.3（22 行）；A-16、A-18 |
 | 9 | `ThrownCropEntity` 家族 | **12**（0.0.2 的 10 + 0.0.3 的 2） | `16` §3.6 D-98；`18` §6.1 的 12 行表 |
@@ -92,7 +92,7 @@
 两条口径提醒：
 
 - **77 与 90 是「两次实测 + 一次加法」**，不是猜的：77 来自 `18` §1.2 的逐类实测并与 `Farmstorm#logRegistrySelfCheck` 的 12 条运行期断言逐项相等，90 = 77 + 13。任何在工具修好（F-100）之前写下的总数都不成立（`18` §0.4；RT-23 风险④）。
-- **本版只加三笔小账**：注册 +13、config +19、语言 +37；资源另按文件数 8 + 1 + 22 = 31。0.0.2 的 77 / 139 / 263 是这三笔账的起点，不重算（`19` §12.1）；子表 3 与子表 4 不相加（A-18）。
+- **本版只加三笔小账**：注册 +13、config +16、语言 +34；资源另按文件数 8 + 1 + 22 = 31。0.0.2 的 77 / 139 / 263 是这三笔账的起点，不重算（`19` §12.1）；子表 3 与子表 4 不相加（A-18）。
 
 ---
 
@@ -100,11 +100,11 @@
 
 | Phase | 标题 | 任务数 | 任务 ID | 人日 | 前置 Phase | 出口判据（一句话） |
 |---|---|---|---|---|---|---|
-| Phase 16 | 基线与工具修复 | 6 | F-100 ~ F-105 | 7.5 | — | 工具先在 0.0.2 基线上跑出 77 / 77 与 `FAIL 0 项`；再立稳 90 个注册对象（逐类 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1）、作物 22 种、池 19 种、`farmstorm-server.toml` 叶节点 158 |
+| Phase 16 | 基线与工具修复 | 6 | F-100 ~ F-105 | 7.5 | — | 工具先在 0.0.2 基线上跑出 77 / 77 与 `FAIL 0 项`；再立稳 90 个注册对象（逐类 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1）、作物 22 种、池 19 种、`farmstorm-server.toml` 叶节点 155 |
 | Phase 17 | 两个状态效果 | 8 | F-106 ~ F-113 | 14.0 | Phase 16 | `18` §11 的 #3 ~ #7 全过：坐姿 + 压低 + 旋转 + 压缩 + 全锁，混乱只反方向且在锁生效时让位；两条坐姿分支各跑一次都能过；`CustomPacketPayload` 与 `Mixin` 匹配数都是 0 |
 | Phase 18 | 朋友的韭与近防菌 | 8 | F-114 ~ F-121 | 12.5 | Phase 16 | `18` §11 的 #8 / #9 / #12 / #13 / #14 全过：欧氏 6 格球 + 命中音 32 格、8 格四筛（含非己方）、6 次后静默移除；己方投掷物与原版射弹全部穿过 |
 | Phase 19 | 震动豆与两处重做 | 8 | F-122 ~ F-129 | 14.0 | Phase 16 | `18` §11 的 #10 / #11 / #15 / #16 全过；`16` §5.3 的 8 行差量表 4 变 4 不变；震动豆两端同一把尺子；`damage_types` 小计 3 |
-| Phase 20 | 资源、音频、进度与验收 | 6 | F-130 ~ F-135 | 12.0 | Phase 16 + 17 + 18 + 19 | 工具 90 / 90、config 158、lang 300、`FAIL 0 项`；资源 8 PNG + 1 OGG + 22 JSON；`sounds.json` 事件 3；`dist/farmstorm-0.0.3+mc1.21.1.jar` 在位 |
+| Phase 20 | 资源、音频、进度与验收 | 6 | F-130 ~ F-135 | 12.0 | Phase 16 + 17 + 18 + 19 | 工具 90 / 90、config 155、lang 297、`FAIL 0 项`；资源 8 PNG + 1 OGG + 22 JSON；`sounds.json` 事件 3；`dist/farmstorm-0.0.3+mc1.21.1.jar` 在位 |
 | **合计** | **5 个 Phase** | **36** | **F-100 ~ F-135** | **60.0** | | 加 25 % 缓冲 **75.0 人日** |
 
 读表要点：
@@ -134,7 +134,7 @@
 
 ### 2.2 本阶段目标
 
-先用 F-100 / F-101 把「取数」这件事修对：让 0.0.2 的基线 **77** 成为 `tools/verify_project.py` 可复算的实测值，而不是一句断言（RT-23；A-14）。再用 F-102 ~ F-105 把 v0.0.3 的 **13 个注册对象**、**19 行 config 变更**（纯新增 16 + 改既有默认值 3）与 **3 条新作物档案**一次立稳：注册自检从 77 改到 90、`farmstorm-server.toml` 叶节点从 139 到 158、作物档案从 19 到 22、幸运浆果池从 16 到 19。四条启动自检行（注册 90 / 作物 22 / 池 19，加 F-101 的对账结论）与 158 这个数一成形，后面四个 Phase 只往里填行为，不再改它们的形状。
+先用 F-100 / F-101 把「取数」这件事修对：让 0.0.2 的基线 **77** 成为 `tools/verify_project.py` 可复算的实测值，而不是一句断言（RT-23；A-14）。再用 F-102 ~ F-105 把 v0.0.3 的 **13 个注册对象**、**19 行 config 变更**（纯新增 16 + 改既有默认值 3）与 **3 条新作物档案**一次立稳：注册自检从 77 改到 90、`farmstorm-server.toml` 叶节点从 139 到 155、作物档案从 19 到 22、幸运浆果池从 16 到 19。四条启动自检行（注册 90 / 作物 22 / 池 19，加 F-101 的对账结论）与 155 这个数一成形，后面四个 Phase 只往里填行为，不再改它们的形状。
 
 ### 2.3 任务清单
 
@@ -144,7 +144,7 @@
 | F-101 | 0.0.2 基线的三账对账与取数 | S / 0.5 | F-100 | 一次只读的复算：启动日志自检行、工具四段输出、`12-TECH-0.0.2.md` §2.1 的 12 行表逐项对账，结论写进提交信息（不改源码） |
 | F-102 | 版本号切换与构建基线 | S / 0.5 | F-101 | `gradle.properties` 的 `mod_version` 从 0.0.2 改 0.0.3（第 11 行），`build.gradle` 零改动；产物变 `farmstorm-0.0.3+mc1.21.1.jar` |
 | F-103 | 13 个注册对象、`DeployedKind` +2 与 11 个新类骨架 | L / 3.0 | F-102 | registry 七个注册类的 +13、`DeployedKind` 新增两个值（6 → 8）、`block_entities` 的两个 case、11 个新类编译期骨架、自检 12 条断言改 90、工具的 registry 段同步到 90 |
-| F-104 | config 19 行变更与 19 条 configuration 语言键 | M / 1.5 | F-103 | 四个新分组 12 键 + `fang_trap_cactus` 追加 2 键并改 3 个既有默认值 + `zangief_cane` 追加 2 键（合计 19 行）；19 条 `farmstorm.configuration.*`；工具的期望键集 139 → 158 |
+| F-104 | config 19 行变更与 16 条 configuration 语言键 | M / 1.5 | F-103 | 四个新分组 12 键 + `fang_trap_cactus` 追加 2 键并改 3 个既有默认值 + `zangief_cane` 追加 2 键（合计 19 行）；16 条 `farmstorm.configuration.*`；工具的期望键集 139 → 155 |
 | F-105 | 三条新档案、`ALL` 22 条与幸运浆果池 19 条 | M / 1.5 | F-103 | `CropProfile` 加 `FRIEND_CHIVES` / `POINT_DEFENSE_FUNGUS` / `VIBRATION_BEAN` 三条常量（后两条的方块与种子为 `null`、`kind` 照实填）、`ALL` 22 条、池推导式一行不改，并同步两行自检文案 |
 
 阶段小计：**6 个任务、7.5 人日**（S 3 / M 2 / L 1）。
@@ -161,20 +161,20 @@
 - [ ] **F-103 工具同步到 90**：怎么验：再跑一次工具。通过的样子：registry 段 `90 / 90`；config 段仍是 139、lang 段仍照旧通过（这两段分别在 F-104 与 F-134 之后才动）。
 - [ ] **F-103 13 个新 ID**：怎么验：`/give` 四个物品各一次、`/setblock` 三个方块各一次、`/summon` 两个实体各一次、两张效果在 `/effect` 的补全里、`farmstorm:friend_chives` 在 `/playsound` 的补全里。通过的样子：命令全部返回成功，ID 与 `18` §2.2 的 13 行逐字一致；`/summon` 后客户端不崩（两个投掷物走 `ThrownItemRenderer`；渲染器 13 / 13 的正式核对在 F-135，`19` 自注「本文补充」）。
 - [ ] **F-103 枚举与穷尽 switch**：怎么验：读启动日志的 kind 映射行 + 编译日志 + `git diff behavior/DeployedKind.java`。通过的样子：8 个值全部打印，`VIBRATION_BEAN` 的扫描间隔为 10 刻；编译日志无 `the switch expression does not cover all possible input values`；`git diff` 只含新增行，六个既有常量一个未改（A-11）。
-- [ ] **F-104 config 158**：怎么验：起服后数 `run/config/farmstorm-server.toml` 的叶节点（`19` 里简写为 `config/farmstorm-server.toml`）。通过的样子：**158** 个；`qbounce` / `friend_chives` / `point_defense_fungus` / `vibration_bean` 四个新分组按字母序追加在文件末尾（`18` §8.2 的 TOML 片段）。
+- [ ] **F-104 config 155**：怎么验：起服后数 `run/config/farmstorm-server.toml` 的叶节点（`19` 里简写为 `config/farmstorm-server.toml`）。通过的样子：**155** 个；`qbounce` / `friend_chives` / `point_defense_fungus` / `vibration_bean` 四个新分组按字母序追加在文件末尾（`18` §8.2 的 TOML 片段）。
 - [ ] **F-104 三个改值与姿态三参数**：怎么验：读 TOML 的这六个键。通过的样子：`fang_trap_cactus.triggerRadius = 2.5`、`outerDelayTicks = 4`、`innerDelayTicks = 2`、`qbounce.rotateDegreesPerTick = 24.0`、`squashAmplitude = 0.15`、`squashPeriodTicks = 6`；既有键的 `min` / `max` 与语言键逐字保留（A-15；`18` §8.1 表下注）。
 - [ ] **F-104 无 `confusion` 组**：怎么验：`grep -c "[confusion]" run/config/farmstorm-server.toml`。通过的样子：命中 **0**（D-83；`18` §8.1 的「1 行非键说明」）。
-- [ ] **F-104 语言键与 config 相等**：怎么验：数 `farmstorm.configuration.*` 前缀的键（中英各数一次）。通过的样子：**158** 条，中英键集逐字相同。注意此时语言文件总键数是 **282**（263 + 本阶段的 19），不是 300——300 在 F-134 收口（37 = 本阶段的 19 + 其余 18）。
+- [ ] **F-104 语言键与 config 相等**：怎么验：数 `farmstorm.configuration.*` 前缀的键（中英各数一次）。通过的样子：**155** 条，中英键集逐字相同。注意此时语言文件总键数是 **279**（263 + 本阶段的 16），不是 297——297 在 F-134 收口（34 = 本阶段的 16 + 其余 18）。
 - [ ] **F-104 热重载**：怎么验：把 `point_defense_fungus.maxIntercepts` 改成 3 → `/reload` → 读回；再改回 6 → `/reload` → 读回。通过的样子：两次读数分别为 3 与 6（既有 `bake()` 口径）。
 - [ ] **F-105 两条自检行**：怎么验：读 `logs/latest.log`。通过的样子：逐字出现 `自检 作物 22 种：投掷型 12 / 部署型 7 / 食用型 3；破障类 4 → OK` 与 `自检 幸运浆果池 19 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK`。
 - [ ] **F-105 冻结件与两个断言**：怎么验：`git diff util/CropProfile.java` + 一次游戏内读数。通过的样子：既有 19 条档案的八个字段一个字符未改、`LUCKY_BERRY_POOL` 那一行的 diff 为空；`CropProfile.VIBRATION_BEAN.kind() == DeployedKind.VIBRATION_BEAN`（不是 `null`，A-11）；两个新部署档案的 `block()` / `seed()` 返回 `null`。
-- [ ] **阶段级**：怎么验：同一次会话里跑完上面全部 + `.tools\gw.cmd build`。通过的样子：构建退出码 0；三条启动自检行（注册 90 / 作物 22 / 池 19）全 OK；`farmstorm-server.toml` 叶节点 158（`19` §3 的阶段出口判据）。
+- [ ] **阶段级**：怎么验：同一次会话里跑完上面全部 + `.tools\gw.cmd build`。通过的样子：构建退出码 0；三条启动自检行（注册 90 / 作物 22 / 池 19）全 OK；`farmstorm-server.toml` 叶节点 155（`19` §3 的阶段出口判据）。
 
 ### 2.5 常见翻车点
 
 1. **没修工具就先宣布 90**（RT-23 风险④）：表现是任务标记完成、工具却仍输出 `62 / 64` 或 `FAIL 1 项`，于是「90」这个数没有任何证据支撑。提前发现：F-103 的验收顺序必须是「先跑工具、再读日志」；工具的分母还是 64、或 §1 config 段还在跟 `01-DESIGN.md` 的 117 比，就说明 F-100 没落地。
 2. **为了让工具变绿去回改冻结文档**（RT-23 风险③；D-80）：有人看到 §1 config 段报「toml 多 22 个键」就去改 `01-DESIGN.md` 的 117。表现是 `git diff --stat` 里冒出 `docs/`，冻结区被破坏。提前发现：F-100 的第 3 条验收就是这条断言，提交前跑一次 `git diff --stat` 即可。
-3. **把工具的期望键数从 139 一步改成 158，而不是逐行加 19 行**（F-104 的交付物要求）：改一个总数只需一行，但键名一条都没核；表现是 config 段「不 FAIL 但也没核过任何一个新键」。提前发现：把 `18` §8.1 的 19 行抄成核对表逐行对 TOML，键名逐字比；再数带 `farmstorm.configuration.` 前缀的键，两个数都必须是 158。
+3. **把工具的期望键数从 139 一步改成 155，而不是逐行加 19 行**（F-104 的交付物要求）：改一个总数只需一行，但键名一条都没核；表现是 config 段「不 FAIL 但也没核过任何一个新键」。提前发现：把 `18` §8.1 的 19 行抄成核对表逐行对 TOML，键名逐字比；再数带 `farmstorm.configuration.` 前缀的键，两个数都必须是 155。
 4. **`DeployedKind` 只加一个值**（A-11；`18` §1.4(b)）：照 `16` §4 第 22 行旧读法把震动豆填 `null` 时编译能过、`/setblock` 也能放，但 `kindOf` 取不到值会静默回落 `BLAST_CARROT`，于是「陷阱」跑成「爆炸陷阱」。提前发现：F-105 的验收直接断言 `kind()` 不是 `null`；F-103 的验收要求 8 个值全部打印。
 5. **穷尽 switch 只补一处**（F-103 的交付物）：`DeployedBehaviors` 与 `FarmstormBlockEntities.deployedOf` 两处都要加 `case`。漏一处是编译报 `the switch expression does not cover all possible input values`；更糟的是用 `throw new UnsupportedOperationException()` 糊过去——编译绿了、区块加载时崩服。提前发现：加完两个枚举值立刻 build；注册自检里 `block_entities` 仍是 6（变成 7 说明顺手新注册了一个 BE，那是改错）。
 6. **把 `ALL` 或既有 19 条档案「整理」一遍**（F-105 第 3 条；`16` §5.7）：加三条常量时重排数组顺序、或顺手把 `LUCKY_BERRY_POOL` 的推导式重写，都会碰到既有 19 条档案的字段。提前发现：`git diff util/CropProfile.java` 只允许纯新增行，出现 `-` 行即翻车；池那一行的 diff 必须为空。
@@ -185,7 +185,7 @@
 - 三账对账的结论：启动日志四行 / 工具四段 / `12-TECH-0.0.2.md` §2.1 的 12 行，逐项相等或指出差在哪一项。
 - `build/libs` 的产物路径、`jar tf` 里的 `neoforge.mods.toml` 版本行、`build.gradle` 的 `git diff` 是否为空。
 - 注册自检行（90 与逐类 12 个小计）、作物 22 种行、池 19 种行的**原文**（贴日志，不转述）。
-- `farmstorm-server.toml` 的叶节点计数（158）+ 四个新分组名 + 六个抽样默认值（2.5 / 4 / 2 / 24.0 / 0.15 / 6）。
+- `farmstorm-server.toml` 的叶节点计数（155）+ 四个新分组名 + 六个抽样默认值（2.5 / 4 / 2 / 24.0 / 0.15 / 6）。
 - `DeployedKind` 的 8 行 kind → 单例映射，以及 `VIBRATION_BEAN` 的扫描间隔读数。
 - 未关闭的问题（例如工具里是否仍存在第二处硬编码总数、两个新投掷物在客户端是否真的用 `ThrownItemRenderer` 渲染）。
 
@@ -429,15 +429,15 @@
 ### 6.1 投喂前必须已就绪
 
 - Phase 17 / 18 / 19 三条线全部收口：`F-113` / `F-121` / `F-129` 的回归记录都在，且 `F-128` 已完成（它的 `damage_type` data json 与 `F-132` 同一批）。
-- `F-102` 的 0.0.3 构建基线在位；`F-104` 已把 config 段收口到 158；工具此刻的状态是「registry 段 90、config 段 158」，只剩 lang 段要等 `F-134` 之后到 300（`F-135` 收口）。
-- `18` §9.1（PNG 8 行）、§9.2（OGG 1 行 + 音效事件总表）、§9.3（JSON 22 行 + 既有文件追加 5 处）、§9.4（语言键 37 键的七行小计）、§11 #17 已读；`17` §10（三条进度与触发口径）、§4.7（占位贴图不是终稿）已读。
+- `F-102` 的 0.0.3 构建基线在位；`F-104` 已把 config 段收口到 155；工具此刻的状态是「registry 段 90、config 段 155」，只剩 lang 段要等 `F-134` 之后到 297（`F-135` 收口）。
+- `18` §9.1（PNG 8 行）、§9.2（OGG 1 行 + 音效事件总表）、§9.3（JSON 22 行 + 既有文件追加 5 处）、§9.4（语言键 34 键的七行小计）、§11 #17 已读；`17` §10（三条进度与触发口径）、§4.7（占位贴图不是终稿）已读。
 - 音频管线的前置：源文件 `pengyoudejiu.mp3`（7,450,588 B，文件名保留不改）在位，`ffmpeg` 在 `D:\dsh\default\sf6_audio\tools\ffmpeg.exe`、**不在 PATH 上**（脚本用 `-Ffmpeg` 指过去）。
 - 4 张 `friend_chives_stage0..3.png` 是洋红 `#D81E8A` 占位、**不是终稿**，本阶段不要求画完（`17` §4.7；A-16）。
-- 三条增量的口径已确认：语言键 37 = `item` 4 + `block` 3 + `effect` 2 + `subtitles` 1 + `farmstorm.configuration.*` 19 + `advancements` 6 + `death.attack` 2（其中 19 条 config 键已在 F-104 落地，本阶段直接续写其余 18 条并整体核到 300）。
+- 三条增量的口径已确认：语言键 34 = `item` 4 + `block` 3 + `effect` 2 + `subtitles` 1 + `farmstorm.configuration.*` 16 + `advancements` 6 + `death.attack` 2（其中 16 条 config 键已在 F-104 落地，本阶段直接续写其余 18 条并整体核到 297）。
 
 ### 6.2 本阶段目标
 
-把前四个 Phase 留下的三类交付一次补齐：**8 张 PNG**（含 4 张洋红占位）、**1 个 OGG** 与扩充后的媒体管线、**22 个新 JSON** 与既有文件追加、**3 条进度**、**37 条语言键**；最后跑 `18` §11 的 17 条自检与四项计数，并把 `tools/verify_project.py` 的三处期望值收口到 **90 / 158 / 300**。阶段结束时：全程中文界面无缺字（刺球显示为「刺球」）；8 张新图各就各位；命中音能听；三条进度各弹一次 toast；`dist/farmstorm-0.0.3+mc1.21.1.jar` 可发布。
+把前四个 Phase 留下的三类交付一次补齐：**8 张 PNG**（含 4 张洋红占位）、**1 个 OGG** 与扩充后的媒体管线、**22 个新 JSON** 与既有文件追加、**3 条进度**、**34 条语言键**；最后跑 `18` §11 的 17 条自检与四项计数，并把 `tools/verify_project.py` 的三处期望值收口到 **90 / 155 / 297**。阶段结束时：全程中文界面无缺字（刺球显示为「刺球」）；8 张新图各就各位；命中音能听；三条进度各弹一次 toast；`dist/farmstorm-0.0.3+mc1.21.1.jar` 可发布。
 
 ### 6.3 任务清单
 
@@ -447,8 +447,8 @@
 | F-131 | 媒体管线扩建与 `friend_chives.ogg` | M / 1.5 | F-102 | `tools/convert_media.ps1` 从 0.0.2 的两音一图扩到本轮素材；产出 mono 64 kbps 的 `sounds/friend_chives.ogg`；`sounds.json` 追加 1 个事件（2 → 3） |
 | F-132 | DataGen：19 个新 JSON 与 5 处既有文件追加中的 3 处 | L / 3.0 | F-103、F-123、F-128 | `18` §9.3 的 #1–#19 共 19 个新 JSON（blockstate 3 + block 模型 6 + item 模型 4 + damage_type 1 + recipe 2 + loot_table 3）+ 既有文件追加 3 处（`converter_fuel` +1 项、`deployed_crops.json` 与 `mineable/pickaxe.json` 各 +2 项） |
 | F-133 | 三条进度 | M / 1.5 | F-115、F-119、F-124 | 3 个 advancement JSON（`first_q_bounce` / `point_defense_intercept` / `vibration_bean_trigger`）与三处服务端 `award` 触发点 |
-| F-134 | 语言键 37 条（中英各 300） | M / 1.5 | F-104、F-132、F-133 | `zh_cn.json` 与 `en_us.json` 各 +37 键（`item` +4 / `block` +3 / `effect` +2 / `subtitles` +1 / `farmstorm.configuration.*` +19 / `advancements` +6 / `death.attack` +2），其余三类保持 +0；工具 lang 段期望值收口到 300 |
-| F-135 | 全量验收：§11 的 17 条与四项计数 | L / 3.0 | F-113、F-121、F-129、F-130、F-131、F-132、F-133、F-134 | `18` §11 的 17 条自检逐条执行记录；工具三处期望值收口到 90 / 158 / 300 并给出最终输出；`dist/farmstorm-0.0.3+mc1.21.1.jar` |
+| F-134 | 语言键 34 条（中英各 297） | M / 1.5 | F-104、F-132、F-133 | `zh_cn.json` 与 `en_us.json` 各 +34 键（`item` +4 / `block` +3 / `effect` +2 / `subtitles` +1 / `farmstorm.configuration.*` +16 / `advancements` +6 / `death.attack` +2），其余三类保持 +0；工具 lang 段期望值收口到 297 |
+| F-135 | 全量验收：§11 的 17 条与四项计数 | L / 3.0 | F-113、F-121、F-129、F-130、F-131、F-132、F-133、F-134 | `18` §11 的 17 条自检逐条执行记录；工具三处期望值收口到 90 / 155 / 297 并给出最终输出；`dist/farmstorm-0.0.3+mc1.21.1.jar` |
 
 阶段小计：**6 个任务、12.0 人日**（S 0 / M 4 / L 2）。
 
@@ -470,15 +470,15 @@
 - [ ] **F-133 三条进度各弹一次**：怎么验：分别触发三次，再 `/advancement` 查询。通过的样子：各弹一次 toast；形态是 `frame = task`、`show_toast = true`、`announce_to_chat = false`。
 - [ ] **F-133 父进度与触发口径**：怎么验：读两条父进度；再按三条细则各测一次。通过的样子：父进度分别是 `farmstorm:root`（Q弹）与 `farmstorm:first_deploy`（另两条），不新建根节点；`first_q_bounce` 用 `/effect` 施加也推进、`point_defense_intercept` 只在第 1 次非己方拦截推进（己方穿过不推进）、`vibration_bean_trigger` 己方踩中也推进。
 - [ ] **F-133 既有进度一条未改**：怎么验：`git diff`。通过的样子：只含 3 个新文件；进度总数 15 → 18。
-- [ ] **F-134 两份 300 键**：怎么验：分别数 `zh_cn.json` 与 `en_us.json` 的键，再比键集。通过的样子：各 **300** 键，键集逐字相等（`18` §11 #17 后半）。
-- [ ] **F-134 七类分项与三处 +0**：怎么验：按前缀分类点数。通过的样子：`item` 4 / `block` 3 / `effect` 2 / `subtitles` 1 / `configuration` 19 / `advancements` 6 / `death.attack` 2 = 37；`farmstorm.configuration.*` 合计 158（与 config 键数相等）；`tooltip.farmstorm.*` 仍是 16、`entity.farmstorm.*` 仍是 11。
+- [ ] **F-134 两份 297 键**：怎么验：分别数 `zh_cn.json` 与 `en_us.json` 的键，再比键集。通过的样子：各 **297** 键，键集逐字相等（`18` §11 #17 后半）。
+- [ ] **F-134 七类分项与三处 +0**：怎么验：按前缀分类点数。通过的样子：`item` 4 / `block` 3 / `effect` 2 / `subtitles` 1 / `configuration` 16 / `advancements` 6 / `death.attack` 2 = 34；`farmstorm.configuration.*` 合计 155（与 config 键数相等）；`tooltip.farmstorm.*` 仍是 16、`entity.farmstorm.*` 仍是 11。
 - [ ] **F-134 死亡消息与刺球名**：怎么验：读 `death.attack.farmstorm.*` 的两条；再看游戏内刺球显示名。通过的样子：`zangief_slam` 与 `zangief_slam.player` 两条都在；中文仍是「刺球」、英文仍是 `Fang Trap Cactus`（A-10，本阶段不许改回去）。
-- [ ] **F-135 工具收口**：怎么验：`python -X utf8 tools/verify_project.py`。通过的样子：`已核 registry 对象: 90 / 90`、config 段 **158** 键无 FAIL、`lang 键集一致，共 300 键`、`结论：FAIL 0 项`，退出码 0（A-14；`18` §11 #1）。
+- [ ] **F-135 工具收口**：怎么验：`python -X utf8 tools/verify_project.py`。通过的样子：`已核 registry 对象: 90 / 90`、config 段 **155** 键无 FAIL、`lang 键集一致，共 297 键`、`结论：FAIL 0 项`，退出码 0（A-14；`18` §11 #1）。
 - [ ] **F-135 四条启动自检行**：怎么验：起服读日志。通过的样子：注册 **90**（逐类 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1）、作物 **22**（投掷 12 / 部署 7 / 食用 3、破障 4）、幸运浆果池 **19**、实体渲染器 **13 / 13**，四行全 OK（`19` F-135 的「本文补充」）。
 - [ ] **F-135 十七条约满**：怎么验：按 `18` §11 逐条跑。通过的样子：#3 – #17 每条都有一份可观测记录（Q弹 3 条、混乱 2 条、近防菌 4 条、震动豆 2 条、朋友的韭 1 条、刺球 1 条、桑吉尔蔗 1 条、资源与语言键 1 条）。
 - [ ] **F-135 四项计数与 jar**：怎么验：数资源 + `jar tf dist/farmstorm-0.0.3+mc1.21.1.jar`。通过的样子：PNG +8、OGG +1、JSON +22、`sounds.json` 事件 3；jar 里能看到 `assets/farmstorm/sounds/friend_chives.ogg` 与 `assets/farmstorm/textures/mob_effect/q_bounce.png`。
 - [ ] **F-135 红线复跑**：怎么验：两条 grep + `git diff docs/zh/`。通过的样子：`CustomPacketPayload` 0 个、`Mixin` 0 个；`docs/zh` 里 00 – 18 号文件的 diff 为空（D-80；`19` F-135 第 6 条）。
-- [ ] **阶段级**：怎么验：把上面全部放进一次交付。通过的样子：工具 90 / 90 + 158 + 300 + `FAIL 0 项`；资源 8 PNG + 1 OGG + 22 JSON；`dist` 里的 jar 存在（`19` §7 的阶段出口判据）。
+- [ ] **阶段级**：怎么验：把上面全部放进一次交付。通过的样子：工具 90 / 90 + 155 + 297 + `FAIL 0 项`；资源 8 PNG + 1 OGG + 22 JSON；`dist` 里的 jar 存在（`19` §7 的阶段出口判据）。
 
 ### 6.5 常见翻车点
 
@@ -486,7 +486,7 @@
 2. **把 PNG 数成 7 张**（A-16 的旧值）：漏掉的是震动豆的物品图标——它不是「好看不好看」的问题，`basicItem` 的兜底分支固定引用 `farmstorm:item/vibration_bean`，缺了它就是运行时紫黑方块。提前发现：8 个文件名逐条对 `18` §9.1 的 8 行，一条不对就是少了一张。
 3. **给近防菌或震动豆补方块贴图**（`18` §9.1 的两条「不新增」）：一旦补上，PNG 变 10 张、与 8 的账对不上，A-16 的验收直接红。提前发现：`textures/` 下这两个名字应为 0 命中。
 4. **把 4 张洋红占位当终稿、或反过来当缺陷删掉**（F-130 第 2 条；`17` §4.7）：取色不是 `#D81E8A` 判不过；删掉则 PNG 只剩 7 张。提前发现：逐张取色 + 数张数，两个动作都做。
-5. **语言键只凑总数不凑分项**（F-134 的交付物）：总键数到了 300，但 `configuration` 是 157 或 `advancements` 只有 4 条——「总数对、结构错」，而 `farmstorm.configuration.*` 必须与 config 键数 158 恒相等。提前发现：按七个前缀逐类点数，再把 `configuration` 与 158 比一次。
+5. **语言键只凑总数不凑分项**（F-134 的交付物）：总键数到了 297，但 `configuration` 是 154 或 `advancements` 只有 4 条——「总数对、结构错」，而 `farmstorm.configuration.*` 必须与 config 键数 155 恒相等。提前发现：按七个前缀逐类点数，再把 `configuration` 与 155 比一次。
 6. **进度 ID 用了短名**（A-17 的旧写法 `first_intercept` / `first_vibration_bean`）：JSON 文件名与 ID 不一致时 `/advancement` 查不到、toast 也不弹。提前发现：三条 ID 逐字对 `17` §10.1，文件名与 ID 一致。
 7. **`ffmpeg` 不在 PATH 上**（F-131 的交付物）：脚本直接报「找不到 ffmpeg」，或者随便找了个转码器产出 44.1 kHz 双声道。提前发现：`ffprobe` 必须读出 mono 与 64 kbps 两个值，只报「有声音」不算过。
 8. **拦截音或爆炸音改成了新 `sound_event`**（A-13；D-100）：`sound_events` 从 3 变 4、`sounds.json` 从 3 变 4，与 A-13 和 F-131 的验收同时冲突。提前发现：代码里只允许出现 `SoundEvents.SHIELD_BLOCK` 与 `SoundEvents.GENERIC_E*` 这类常量，不出现 `minecraft:` 字符串。
@@ -498,8 +498,8 @@
 - `sounds.json` 的事件数（3）与新事件的四个字段原文。
 - 19 个新 JSON 的文件名清单、两条转换配方的对端物品与参数、`vibration_bean` 战利品表那一行的原文、`zangief_slam.json` 的四个字段。
 - 三条进度的 ID 与文件名、三次 toast 的截图或观察记录、父进度、三条触发口径的测试结果。
-- 两份语言文件的键数（各 300）与七个前缀的分项点数；`tooltip.farmstorm.*` 16 条、`entity.farmstorm.*` 11 条。
-- 工具的最终输出（`90 / 90`、158、`共 300 键`、`结论：FAIL 0 项`）与退出码；四条启动自检行的原文。
+- 两份语言文件的键数（各 297）与七个前缀的分项点数；`tooltip.farmstorm.*` 16 条、`entity.farmstorm.*` 11 条。
+- 工具的最终输出（`90 / 90`、155、`共 297 键`、`结论：FAIL 0 项`）与退出码；四条启动自检行的原文。
 - `18` §11 的 17 条逐条结论表（编号 / 结论 / 证据位置），缺任何一条就写「未验证」。
 - `dist/farmstorm-0.0.3+mc1.21.1.jar` 的路径与 `jar tf` 里 ogg 与 `q_bounce.png` 两行。
 - 未关闭的问题（尤其是 4 张占位贴图何时画完、§11 里任何一条只做到「看起来对」而拿不出读数的项）。
@@ -511,7 +511,7 @@
 模板（把方括号换成实际内容，一次只发一条）：
 
 ~~~text
-上一阶段（Phase N · [标题]）已按 21-PROMPT-TASKS-0.0.3.md 的出口判据验收通过：[一句话证据，例如「工具 77 / 77 与 FAIL 0 项、注册自检 90、config 158」]。
+上一阶段（Phase N · [标题]）已按 21-PROMPT-TASKS-0.0.3.md 的出口判据验收通过：[一句话证据，例如「工具 77 / 77 与 FAIL 0 项、注册自检 90、config 155」]。
 本阶段开始：Phase N+1 · [标题]。
 请严格按 21-PROMPT-TASKS-0.0.3.md「Phase N+1」一节的六项执行：先逐条确认「投喂前必须已就绪」并回报，再动第一行代码；只做该节任务清单里的 F-xx，不要提前实现下一阶段，完成后按 20-PROMPT-MAIN-0.0.3.md 的回报格式交回。
 ~~~
@@ -520,11 +520,11 @@
 
 | 交接 | 可直接粘贴的一句话 |
 |---|---|
-| Phase 16 → 17 | 上一阶段（Phase 16 · 基线与工具修复）已完成：`tools/verify_project.py` 在 0.0.2 基线上跑出 `77 / 77`、config 139、lang 263、`结论：FAIL 0 项`、退出码 0；v0.0.3 代码上 registry 段 90 / 90；启动自检四行全 OK（注册 90 逐类 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1、作物 22 种、池 19 种）；`farmstorm-server.toml` 叶节点 158；`build/libs/farmstorm-0.0.3+mc1.21.1.jar` 在位。本阶段开始 Phase 17 · 两个状态效果，请按 21-PROMPT-TASKS-0.0.3.md「Phase 17」一节执行，先逐条确认「投喂前必须已就绪」再动第一行代码，只做 F-106 ~ F-113，完成后按 20-PROMPT-MAIN-0.0.3.md 的回报格式交回。 |
+| Phase 16 → 17 | 上一阶段（Phase 16 · 基线与工具修复）已完成：`tools/verify_project.py` 在 0.0.2 基线上跑出 `77 / 77`、config 139、lang 263、`结论：FAIL 0 项`、退出码 0；v0.0.3 代码上 registry 段 90 / 90；启动自检四行全 OK（注册 90 逐类 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1、作物 22 种、池 19 种）；`farmstorm-server.toml` 叶节点 155；`build/libs/farmstorm-0.0.3+mc1.21.1.jar` 在位。本阶段开始 Phase 17 · 两个状态效果，请按 21-PROMPT-TASKS-0.0.3.md「Phase 17」一节执行，先逐条确认「投喂前必须已就绪」再动第一行代码，只做 F-106 ~ F-113，完成后按 20-PROMPT-MAIN-0.0.3.md 的回报格式交回。 |
 | Phase 17 → 18 | 上一阶段（Phase 17 · 两个状态效果）已完成：`18` §11 的 #3 ~ #7 全过（坐姿 + 压低 0.35 格 + 约 480 度/秒旋转 + 6 刻压缩周期 + 七段全锁、ESC 例外；混乱只反方向，叠加时位移为 0）；`qbounce.poseMode` 两条分支各跑一次都能过，落选分支代码仍在、默认值仍是 `render`；`CustomPacketPayload` 与 `Mixin` 匹配数都是 0。本阶段开始 Phase 18 · 朋友的韭与近防菌，请按 21-PROMPT-TASKS-0.0.3.md「Phase 18」一节执行，只做 F-114 ~ F-121，完成后按 20 的回报格式交回。 |
 | Phase 18 → 19 | 上一阶段（Phase 18 · 朋友的韭与近防菌）已完成：`18` §11 的 #8 / #9 / #12 / #13 / #14 全过（6 次计数逐次 1..6 且第 6 次无掉落、三菌同刻只 +1、32 格与 33 格音频对照成立、五类原版射弹全部穿过、己方投掷物穿过且不扣次数、被拦后无任何后续）；`sound_events` 3、`block_entities` 6、`entity_types` 13 三个小计不变。本阶段开始 Phase 19 · 震动豆与两处重做，请按 21-PROMPT-TASKS-0.0.3.md「Phase 19」一节执行，内部先做 F-123 再做 F-122，只做 F-122 ~ F-129，完成后按 20 的回报格式交回。 |
 | Phase 19 → 20 | 上一阶段（Phase 19 · 震动豆与两处重做）已完成：`18` §11 的 #10 / #11 / #15 / #16 全过（悬空方块六面各挖一个仍在、区块重载后仍在、活塞推不动；震动豆 3.9 格触发 / 4.1 格不触发且两端共用同一个 `<`；刺球 2.5 格触发 / 3.0 格不触发、缓慢 V 60 刻只给实际掉血的人；桑吉尔蔗落地恰好 7.5 点、关掉 `cancelFallDamage` 后伤害随高度变化）；`16` §5.3 的 8 行差量表 4 变 4 不变；`damage_types` 3。本阶段开始 Phase 20 · 资源、音频、进度与验收，请按 21-PROMPT-TASKS-0.0.3.md「Phase 20」一节执行，内部按 F-130 / F-131 → F-132 → F-133 → F-134 → F-135 的顺序做，完成后按 20 的回报格式交回。 |
-| Phase 20 → 收尾 | 上一阶段（Phase 20 · 资源、音频、进度与验收）已完成：工具 90 / 90、config 158、lang 300、`结论：FAIL 0 项`；资源 8 PNG + 1 OGG + 22 JSON、`sounds.json` 事件 3；两份语言文件各 300 键且键集逐字相等；三条进度各弹一次 toast；`18` §11 的 17 条逐条留读数；`dist/farmstorm-0.0.3+mc1.21.1.jar` 已产出。现在按 21-PROMPT-TASKS-0.0.3.md §8 的「全项目收尾提示词」做一次发布前自检，只核对与修复，不新增任何功能。 |
+| Phase 20 → 收尾 | 上一阶段（Phase 20 · 资源、音频、进度与验收）已完成：工具 90 / 90、config 155、lang 297、`结论：FAIL 0 项`；资源 8 PNG + 1 OGG + 22 JSON、`sounds.json` 事件 3；两份语言文件各 297 键且键集逐字相等；三条进度各弹一次 toast；`18` §11 的 17 条逐条留读数；`dist/farmstorm-0.0.3+mc1.21.1.jar` 已产出。现在按 21-PROMPT-TASKS-0.0.3.md §8 的「全项目收尾提示词」做一次发布前自检，只核对与修复，不新增任何功能。 |
 
 ---
 
@@ -534,10 +534,10 @@
 项目收尾。请对 farmstorm v0.0.3 做一次完整交付核对，只做核对与修复，不新增任何功能。
 
 1. 先跑修好的取数工具（RT-23 的关闭条件，A-14）
-   跑 python -X utf8 tools/verify_project.py，三处期望值必须是 90 / 158 / 300，不许回落到 77 / 139 / 263：
+   跑 python -X utf8 tools/verify_project.py，三处期望值必须是 90 / 155 / 297，不许回落到 77 / 139 / 263：
    ① registry 段输出「已核 registry 对象: 90 / 90」，12 类逐类小计为 31 / 25 / 6 / 13 / 4 / 3 / 1 / 1 / 1 / 3 / 1 / 1；
-   ② config 段 158 键无 FAIL，键集与 run/config/farmstorm-server.toml 逐字一致；
-   ③ lang 段输出「lang 键集一致，共 300 键」。
+   ② config 段 155 键无 FAIL，键集与 run/config/farmstorm-server.toml 逐字一致；
+   ③ lang 段输出「lang 键集一致，共 297 键」。
    三段全绿且「结论：FAIL 0 项」、退出码 0 才算过。任何一段红就先停下汇报，不要宣布可以发布。
 
 2. 构建
@@ -555,8 +555,8 @@
 
 4. 四项计数与语言键
    PNG +8、OGG +1、JSON +22、sounds.json 事件 3（与 18-TECH-0.0.3.md §9.1 / §9.2 / §9.3 逐条对名）；
-   两份语言文件各 300 键、set(zh) == set(en) 为 True；按七个前缀点数：
-   item 4 / block 3 / effect 2 / subtitles 1 / farmstorm.configuration.* 19（合计 158，与 config 键数相等）/ advancements 6 / death.attack 2 = 37；
+   两份语言文件各 297 键、set(zh) == set(en) 为 True；按七个前缀点数：
+   item 4 / block 3 / effect 2 / subtitles 1 / farmstorm.configuration.* 16（合计 155，与 config 键数相等）/ advancements 6 / death.attack 2 = 34；
    tooltip.farmstorm.* 仍是 16 条、entity.farmstorm.* 仍是 11 条；
    4 张 friend_chives_stage*.png 的颜色是 #D81E8A 占位、非终稿，报告里要写明这一点，不要当成已完成的美术。
 
@@ -598,7 +598,7 @@
 
 收尾时的三条判据（人眼复核，不看代理的自我陈述）：
 
-1. 工具的三处期望值确实是 **90 / 158 / 300**，且 12 类逐类小计相加是 90、`farmstorm.configuration.*` 的条数与 config 键数都是 158（A-14；RT-23）。工具仍然是红的就不许发布。
+1. 工具的三处期望值确实是 **90 / 155 / 297**，且 12 类逐类小计相加是 90、`farmstorm.configuration.*` 的条数与 config 键数都是 155（A-14；RT-23）。工具仍然是红的就不许发布。
 2. 资源清点表的三类加总 = **8 + 1 + 22 = 31**，且每一行都能指到一个文件；4 张占位贴图被明确标注为「非终稿」而不是混在终稿里（A-16；A-18）。
 3. 任务核对表 **36 行**，「未达成」为 0；`18` §11 的 **17 条**全绿且每条都有证据位置——#5（七段全锁）与 #8（己方不拦）这两条必须单独点名。
 

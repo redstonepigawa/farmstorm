@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.Level;
@@ -54,15 +55,38 @@ public final class QbounceMountController {
      */
     public static final int MAX_REMOUNT = 20;
 
+    /**
+     * 重启后补扫的间隔（刻）＝ 20。一次补扫要把所有维度里<b>全部</b>已加载实体走一遍，逐刻扫没有意义；
+     * 1 秒的粒度仍然让「重启后自动认领」在用户看来是即时的——存档实体在起服头几刻就回到世界，
+     * 20 刻既不会跨过这个窗口，也把补扫成本压到每秒最多一次。
+     */
+    private static final int ADOPT_RESCAN_INTERVAL_TICKS = 20;
+
+    /**
+     * 补扫次数上限 ＝ 10（另加翻转那一 tick 的第一次扫描，每次翻转最多 11 次世界扫描）。
+     * 10 次 × 20 刻 ≈ 起服后 10 秒：起服 10 秒还没把存档实体放回世界属于异常（日志里会有区块加载报错），
+     * 再扫只是空转；用完即彻底停扫，长跑的服务器不会长期付这份开销，也不会对「永远够不着」的实体无限重试。
+     */
+    private static final int MAX_ADOPT_RESCANS = 10;
+
     /** 只存内存：乘客 UUID → 坐骑记录。服务器重启即清空，不写存档。 */
     private static final Map<UUID, MountRecord> ACTIVE = new HashMap<>();
 
     /**
-     * 上一个 tick 是否处于 {@code mount} 模式：只在「翻转」的那一 tick 扫一次世界，把已经在效果里的生物认领进来
+     * 上一个 tick 是否处于 {@code mount} 模式：翻转那一 tick 扫一次世界，把已经在效果里的生物认领进来
      * （§4.1：切到 mount 时，已在效果中的生物从下一个 tick 起挂坐骑），平时每 tick 只看表里的记录。
      * <p>初值 {@code false} 让「起服后第一个 tick」也算一次翻转：存档里带着效果的生物在重启后同样会被认领。
+     * <p>V-101：翻转那一 tick 是<b>唯一</b>机会时，重启后实测从未生效——存档实体要等区块被加载进世界
+     * 才会出现在 {@code getAllEntities()} 里，那个 tick 往往还没到。所以认领改成「翻转 tick + 有界补扫」
+     * （见 {@link #ADOPT_RESCAN_INTERVAL_TICKS} / {@link #MAX_ADOPT_RESCANS}）。
      */
     private static boolean mountModeArmed;
+
+    /** 本次 {@code mount} 期还允许补扫几次（从 {@link #MAX_ADOPT_RESCANS} 起算；0 ＝ 不再扫）。 */
+    private static int adoptRescansLeft;
+
+    /** 距离下一次补扫还要等几刻。 */
+    private static int adoptRescanCooldown;
 
     private QbounceMountController() {}
 
@@ -143,6 +167,8 @@ public final class QbounceMountController {
     /**
      * 主循环 + 兜底：三条校验同时成立才保留坐骑（§4.3），否则 discard 并清表。
      * <p>{@code poseMode} 切回 {@code render} 的那个 tick 也在这里收口（§4.1）。
+     * <p>翻转 tick 之后还有 {@link #MAX_ADOPT_RESCANS} 轮补扫（每 {@link #ADOPT_RESCAN_INTERVAL_TICKS} 刻一次），
+     * 补完即停——这是 V-101 的修法，见 {@link #mountModeArmed}。
      */
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
@@ -150,13 +176,21 @@ public final class QbounceMountController {
         if (!isMountMode()) {
             if (mountModeArmed || !ACTIVE.isEmpty()) {
                 mountModeArmed = false;
+                adoptRescansLeft = 0;
+                adoptRescanCooldown = 0;
                 releaseAll(server, "切回 render");
             }
             return;
         }
         if (!mountModeArmed) {
             mountModeArmed = true;
-            adoptExisting(server);
+            adoptExisting(server, 0);                  // 翻转那一 tick 的即时认领（原有行为，不变）
+            adoptRescansLeft = MAX_ADOPT_RESCANS;
+            adoptRescanCooldown = ADOPT_RESCAN_INTERVAL_TICKS;
+        } else if (adoptRescansLeft > 0 && --adoptRescanCooldown <= 0) {
+            adoptRescanCooldown = ADOPT_RESCAN_INTERVAL_TICKS;
+            adoptRescansLeft--;
+            adoptExisting(server, MAX_ADOPT_RESCANS - adoptRescansLeft);
         }
         tickRecords(server);
     }
@@ -166,23 +200,42 @@ public final class QbounceMountController {
         return POSE_MODE_MOUNT.equalsIgnoreCase(FarmstormConfig.qbouncePoseMode.get());
     }
 
-    /** 翻转成 {@code mount} 时的一次性认领：先收集再挂，避免边遍历实体列表边 addFreshEntity。 */
-    private static void adoptExisting(MinecraftServer server) {
+    /**
+     * §12.3：正拉着拴绳的生物不挂隐形坐骑。
+     * <p>21.1.213 里 {@code isLeashed()} 是 {@link Leashable} 的 default 方法（只有 {@code Mob} 实现它），
+     * {@link Entity} / {@link LivingEntity} 都没有这个方法，所以先 instanceof 再问。
+     */
+    private static boolean isLeashed(LivingEntity living) {
+        return living instanceof Leashable leashable && leashable.isLeashed();
+    }
+
+    /**
+     * 认领扫描（§4.1 的翻转 tick + §12.3 的补扫共用）：先收集再挂，避免边遍历实体列表边 addFreshEntity。
+     * <p>{@code scan} 只作读数：0 ＝ 翻转那一 tick，1..{@link #MAX_ADOPT_RESCANS} ＝ 重启后的补扫轮次。
+     * <p>行尾打一行「扫描#k 候选/新挂/表内/游戏刻」，补扫上限内最多 11 行，运维据此判断重启后是第几刻认领上的。
+     */
+    private static void adoptExisting(MinecraftServer server, int scan) {
         List<LivingEntity> candidates = new ArrayList<>();
         for (ServerLevel level : server.getAllLevels()) {
             for (Entity entity : level.getAllEntities()) {
                 if (entity instanceof LivingEntity living
                         && !living.isRemoved()
                         && !living.isPassenger()
+                        && !isLeashed(living)
                         && !ACTIVE.containsKey(living.getUUID())
                         && living.hasEffect(FarmstormMobEffects.Q_BOUNCE)) {
                     candidates.add(living);
                 }
             }
         }
+        int before = ACTIVE.size();
         for (LivingEntity living : candidates) {
             ensureMount(living);
         }
+        Farmstorm.LOGGER.info(String.format(Locale.ROOT,
+                "q_bounce mount 认领扫描#%d 候选=%d 新挂=%d 表内=%d 游戏刻=%d",
+                scan, candidates.size(), ACTIVE.size() - before, ACTIVE.size(),
+                server.overworld().getGameTime()));
     }
 
     /** 挂一个隐形坐骑：五项属性覆写 → {@code addFreshEntity} → {@code startRiding(force)} → 记账。 */
@@ -191,8 +244,8 @@ public final class QbounceMountController {
             return;
         }
         UUID passengerId = living.getUUID();
-        if (ACTIVE.containsKey(passengerId) || living.isPassenger()) {
-            return;                                   // 已在表里 / 已经有坐骑（别抢别人的马）
+        if (ACTIVE.containsKey(passengerId) || living.isPassenger() || isLeashed(living)) {
+            return;                                   // 已在表里 / 已经有坐骑（别抢别人的马）/ 正拉着拴绳（§12.3）
         }
         ArmorStand stand = EntityType.ARMOR_STAND.create(level);
         if (stand == null) {

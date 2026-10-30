@@ -53,9 +53,13 @@ public final class FarmstormBlocks {
     /** D-68：陷阱口径与尖牙仙人掌逐项一致；与它共用同一个 BlockEntityType（RT-04）。 */
     public static final DeferredBlock<DeployedCropBlock> ZANGIEF_CANE =
             deployed(CropProfile.ZANGIEF_CANE, false, false, false);
-    /** D-86：近防菌，炮台类外观（不隐形）；拦截逻辑在 F-118 ~ F-120。 */
+    /**
+     * D-86：近防菌，炮台类外观（不隐形）；索敌在 F-118，结算与图效在 F-119 / F-120。
+     * 三个旗标文档没有逐项点名，按同类（炮台类只有 {@link #PUMPKIN_TURRET} 一个既有实例）比出来：
+     * 悬空 = true（DESIGN §5.7 的「依附丢失后保留并标记」描述的就是这条）、固定硬挖 = true（炮台类口径）、爆炸免疫 = false（只有火把花 / 瓶子草免疫）。
+     */
     public static final DeferredBlock<DeployedCropBlock> POINT_DEFENSE_FUNGUS =
-            deployed(CropProfile.POINT_DEFENSE_FUNGUS, false, true, false);
+            deployed(CropProfile.POINT_DEFENSE_FUNGUS, true, true, false);
     /** D-91：震动豆，隐形空模型；不依附方块的第 5 个旗标 {@code unattached} 由 F-123 加，此处仍是 4 参形态。 */
     public static final DeferredBlock<DeployedCropBlock> VIBRATION_BEAN =
             deployed(CropProfile.VIBRATION_BEAN, false, false, false);

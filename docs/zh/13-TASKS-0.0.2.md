@@ -358,15 +358,15 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
   2. F3 的 hunger 行投前投后差为 **4** 点，`Saturation` 差为**原版金苹果同值（实测 9.6）**——1.21.1 的 `FoodData#eat` 是 `saturation += nutrition × saturationModifier × 2.0F`，文档原先漏了末尾的 ×2；同一次探针里原版金苹果也是 9.6，与 DESIGN「取原版同值」一致，所以**代码不动、判据不写死数字**（裁决 V-35）。
   3. 用转换器把狂野苹果换回金苹果：产出 1 个 `minecraft:golden_apple`，且食用金苹果不授予 `farmstorm:wild_hunter`（D-54 的双向配方）。
 
-#### F-78 · 索敌算法：5 格球与 30° 夹角
+#### F-78 · 索敌算法：5 格三维锥与 60° 全顶角
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-76
-- **交付物**：`combat/WildHunterCombat#resolveTarget(ServerPlayer)`（半径读 `wild_hunter.searchRadius` 5.0、夹角读 `searchAngleDegrees` 30.0；排除自己 / 同队伍玩家 / 旁观者；夹角最小优先，夹角相同取距离近）；日志一行 `狂野猎人 目标 {id} 夹角 {A} 度 距离 {D}`
+- **交付物**：`combat/WildHunterCombat#resolveTargets(Player)`（半径读 `wild_hunter.searchRadius` 5.0、锥读 `searchAngleDegrees` **60.0 = 全顶角**（比较时取半角 30°，含俯仰）；排除自己 / 同队伍玩家 / 旁观者；返回锥内**全部**目标，夹角最小优先、相同取近）；日志一行 `狂野猎人 目标 {id} 夹角 {A} 度 距离 {D}`
 - **验收**：
   1. 正前方 5 格内放一只猪并攻击一次，日志出现 `狂野猎人 目标 minecraft:pig 夹角 {A} 度 距离 {D}` 且 `A <= 30`。
   2. 左右同距离各放一只，右侧夹角更小时目标为右侧那只；改成夹角相同、一侧更近时取近的那只。
-  3. 背后（夹角 > 30°）的生物不被选；同队伍玩家与旁观者不被选。
+  3. 背后（夹角 > 30°，即超出 60° 全顶角的一半）的生物不被选；同队伍玩家与旁观者不被选；把 `searchAngleDegrees` 改成 90 后正面 45° 内仍被选、50° 外被排除（全顶角语义，V-82）。
   4. 把 `wild_hunter.searchRadius` 改成 `1.0` 后，5 格外的猪不再被选中（键生效）。
 
 #### F-79 · 冲刺的客户端预测位移
@@ -381,26 +381,29 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
   4. `logs/latest.log` 无 `moved too quickly!`；若出现，按 RT-12 调 `wild_hunter.dashTicks` 后重测。
   5. `grep -r "CustomPacketPayload" src/main/java` 仍为 **0** 处（D-50 红线）。
 
-#### F-80 · 服务端复核与伤害 / 击退结算
+#### F-80 · 服务端复核与伤害 / 击退结算（锥形多目标 + 剑斧专精）
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-78
-- **交付物**：`combat/WildHunterCombat` 的服务端入口（用与客户端同一套 `resolveTarget` 独立算目标，结算伤害并在「成功造成伤害」时调原版 `LivingEntity#knockback` 默认强度）。**服务端拿不到 `ServerboundSwingPacket` 的公开事件**（NeoForge 1.21.1 没有，且 D-40 禁 Mixin、D-50 禁自订包）：改为在 `PlayerTickEvent.Post` 用「swing 状态跃变 + 冲刺水平位移」双信号感知——**两者允许跨 tick 配对**（记 `swingTick`，`SWING_WINDOW = 2` 刻内都算配对；不能要求同刻，位移常晚 1–2 刻，V-66）——并与 `AttackEntityEvent` 去抖（`DEDUPE_TICKS = 1` + `lastDirectHit`），同一次挥击只结算一次（裁决 V-44 / V-66）
+- **交付物**：`combat/WildHunterCombat` 的服务端入口（用与客户端同一套 `resolveTargets` 取**锥内全部目标**并逐个结算，结算伤害并在「成功造成伤害」时调原版 `LivingEntity#knockback` 默认强度）。**服务端拿不到 `ServerboundSwingPacket` 的公开事件**（NeoForge 1.21.1 没有，且 D-40 禁 Mixin、D-50 禁自订包）：改为在 `PlayerTickEvent.Post` 用「swing 状态跃变 + 冲刺水平位移」双信号感知——**两者允许跨 tick 配对**（记 `swingTick`，`SWING_WINDOW = 2` 刻内都算配对；不能要求同刻，位移常晚 1–2 刻，V-66）——并与 `AttackEntityEvent` 去抖（`DEDUPE_TICKS = 1` + `lastDirectHit`），同一次挥击只结算一次（V-44 / V-66）。**剑斧专精（V-82）**：持剑时攻速 `ADD_MULTIPLIED_TOTAL +2.0`（1.6 → 4.8）、单次伤害上限 **5**、命中非玩家生物 `setNoAi` **2 刻**、持剑时通用 +30% 让位（按 id 精确摘除）；持斧时攻速 `ADD_VALUE +0.8`（铁斧 0.9 → 1.7、钻石斧 1.0 → 1.8）、无视对方 **50% 盔甲**；续时封顶 `min(1000, 当前 + 增量)`（50 秒）
 - **验收**：
-  1. 攻击 30° 内的猪一次：`/data get entity <target> Health` 的减少量等于 `/attribute @s minecraft:generic.attack_damage get` 的加成后读数（**F3 面板不显示属性数值**，裁决 V-61）。
-  2. 结算后目标被推开：`/data get entity <target> Pos` 前后差 >= 0.2 格（D-75 原版默认强度，不自订数值）。
-  3. 攻击 30° 外的生物：正常攻击、无吸附，玩家坐标不变。
-  4. 目标是同队伍玩家时既不吸附也不掉血。
-  5. **跨 tick 配对（V-66）**：开效果后从 5 格外**真的冲过去**打一次（不是直接调 `tick()`、不是站着空挥）。通过的样子：日志出现 `狂野猎人 吸附挥击 速度 {S}`（`S ≥ 0.55`），目标掉血；**位移比 swing 晚 1–2 刻到达时也必须结算**——这一条直接卡 `SWING_WINDOW = 2`，写成同刻判据就是零结算。同一次挥击只出**一条**该日志（`DEDUPE_TICKS = 1` + `lastDirectHit`）。
+  1. 攻击 30°（= 全顶角 60°）内的猪一次：`/data get entity <target> Health` 的减少量等于 `/attribute @s minecraft:generic.attack_damage get` 的加成后读数（**F3 面板不显示属性数值**，V-61），且日志出现**双读数** `名义伤害 X 实际掉血 Y`——只打名义值时 8.4 与实际掉 5 的差异会被误判成「封顶没生效」（V-82）。
+  2. **多目标**：把两只猪并排放在锥内，一次挥击**两只都掉血**（旧实现只结算最近的那只）。
+  3. **剑专精**：持剑时攻速读数从 1.6 变 **4.8**；单次伤害封顶 **5**（超出按 5 结算）；命中非玩家生物后该生物 **2 刻**不动（`NoAI`）。
+  4. **斧专精**：持铁斧攻速 0.9 → **1.7**、持钻石斧 1.0 → **1.8**（是加法不是倍率）；对穿满附魔盔甲的目标，实际掉血比不带斧时多出「全额减免 − 半额减免」之差。
+  5. 结算后目标被推开：`/data get entity <target> Pos` 前后差 >= 0.2 格（D-75 原版默认强度）。
+  6. 攻击锥外的生物：正常攻击、无吸附，玩家坐标不变；同队伍玩家既不吸附也不掉血。
+  7. **续时封顶**：连续击杀把剩余时长推到 **1000 刻（50 秒）**后不再增加（`/effect` 读数停在 1000 ± 2）。
+  8. **跨 tick 配对（V-66）**：开效果后从 5 格外**真的冲过去**打一次（不是直接调 `tick()`、不是站着空挥）。通过的样子：日志出现 `狂野猎人 吸附挥击 速度 {S}`（`S ≥ 0.55`），目标掉血；**位移比 swing 晚 1–2 刻到达时也必须结算**；同一次挥击只出**一条**该日志。
 
 #### F-81 · 击杀续时无次数上限
 
 - **复杂度**：S ｜ **折算人日**：0.5
 - **依赖**：F-80
-- **交付物**：`WildHunterCombat` 的击杀钩子（剩余时长 += `killExtensionTicks` 160 刻、回复 `killHealPoints` 10 点生命，不设计数器）；日志一行 `狂野猎人 续时 {N}`
+- **交付物**：`WildHunterCombat` 的击杀钩子（剩余时长 += `killExtensionTicks` 160 刻、回复 `killHealPoints` 10 点生命，不设计数器；**总时长封顶 `MAX_DURATION_TICKS = 1000` 刻（50 秒）**，`min(1000, 当前 + 增量)`，超出丢弃，V-82）；日志一行 `狂野猎人 续时 {N}`
 - **验收**：
   1. 连杀 6 只，每杀一只 `/effect` 里剩余时长 **+160 刻**，日志出现 6 行 `狂野猎人 续时`。
-  2. 第 6 次之后效果仍然存在（无次数上限）；生命值每次击杀 +10 点（上限按原版 20 点）。
+  2. 第 6 次之后效果仍然存在（**无次数上限**，但**总时长封顶 1000 刻 / 50 秒**：继续杀只回血、时长停在 1000 ± 2，V-82）；生命值每次击杀 +10 点（上限按原版 20 点）。
   3. 源码里不存在任何击杀计数器：`git grep -nE "killCount|maxKill"` 无输出（D-74 不得自加计数器）。
 
 #### F-82 · 世界灰度（HUD 保持原色）
@@ -701,7 +704,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 | 7 | `wild_hunter.killExtensionTicks` | 160 刻（8 秒） | F-61 | F-81 |
 | 8 | `wild_hunter.killHealPoints` | 10.0 点 | F-61 | F-81 |
 | 9 | `wild_hunter.searchRadius` | 5.0 格 | F-61 | F-78 |
-| 10 | `wild_hunter.searchAngleDegrees` | 30.0 度 | F-61 | F-78 |
+| 10 | `wild_hunter.searchAngleDegrees` | **60.0** 度（全顶角 = 半角 30°） | F-61 | F-78 |
 | 11 | `wild_hunter.dashTicks` | 3 刻 | F-61 | F-79、F-80 |
 | 12 | `wild_hunter.speedBonusPercent` | 30.0 % | F-61 | F-76 |
 | 13 | `wild_hunter.attackSpeedBonusPercent` | 30.0 % | F-61 | F-76 |

@@ -685,7 +685,7 @@ How to verify during implementation: the log lines `桑吉尔蔗 相位 {n} 结�
 
 | Method | Rule | Basis |
 |---|---|---|
-| `resolveTarget(Player)` | candidates = `LivingEntity` within `wild_hunter.searchRadius` (5.0 blocks) of the player as sphere center, with an angle of at most `wild_hunter.searchAngleDegrees` (30.0°) to the view direction; exclude self, same-team players (`player.isAlliedTo(other)`), spectators | D-64 |
+| `resolveTargets(Player)` | candidates = `LivingEntity` within `wild_hunter.searchRadius` (5.0 blocks) of the player as sphere center, with an angle of at most `wild_hunter.searchAngleDegrees` (30.0°) to the view direction; exclude self, same-team players (`player.isAlliedTo(other)`), spectators | D-64 |
 | Ordering | smallest angle first; on equal angles the nearer one (`Comparator.comparingDouble(angle).thenComparingDouble(distSqr)`) | D-64 |
 | `onSwing(ServerPlayer)` | hooking `PlayerInteractEvent.LeftClickEmpty` is not enough (that covers empty swings only), and NeoForge 1.21.1 has **no public event** for `ServerboundSwingPacket` ⇒ the server has to observe the swing sideways, see "How the server knows the player swung" below; on a hit, settle damage with the player's own attack power | D-65 + BRIEF §7.6 + V-44 |
 | Knockback | on a successful hit, call `target.knockback(0.4, dx, dz)` with the vanilla default strength; no custom value | D-75 |
@@ -706,6 +706,23 @@ How to verify during implementation: the log lines `桑吉尔蔗 相位 {n} 结�
 6. Hence "a successful attraction check means a guaranteed hit": as long as a legal target is inside the cone and this swing was sensed by the server, damage is settled with the player's own attack power regardless of whether the vanilla hit actually touched the entity.
 
 **Which config keys it reads**: `wild_hunter.searchRadius`, `wild_hunter.searchAngleDegrees`, `wild_hunter.killExtensionTicks`, `wild_hunter.killHealPoints`, `wild_hunter.dashTicks`.
+**`searchAngleDegrees` is a breaking semantic fix (V-82)**: the old code used the value as a **half-angle**, so 90 produced a 180° hemisphere; it is now a **full apex angle** and the comparison uses `maxAngle * 0.5`. The default also moved from 30.0 to **60.0** (= 30° half-angle, behaviourally identical to the old one). Any config tuned against the old meaning must be reset.
+
+**Nine new Wild Hunter features (author-verified; #9 "wall cling" was dropped by the author and is not implemented)**:
+
+| # | Feature | Implementation / numbers |
+|---|---|---|
+| 1 | **60° 3-D cone + multiple targets** | `resolveTargets(Player)` returns **every** target in the cone and settlement iterates over them; `searchAngleDegrees` is the full apex (default 60 = 30° half-angle) including pitch |
+| 2 | Red smoke particles | the server emits **4** `ParticleTypes.DUST` every **3** ticks, colour **(1, 0.15, 0.15)** matching D-62; `CRIMSON_SPORE` was rejected (orange-ish and drifts) |
+| 3 | Extension capped at 50 seconds | `min(1000, current + delta)` (`MAX_DURATION_TICKS = 1000` ticks); the excess is discarded |
+| 4 | Right-click four-way dash + charge bar | distance **5 blocks**, **2 charges**, one refilled every **100 ticks**; direction from the WASD main axis; consumes right-click only when "effect present + charge available + movement input + no screen open", **otherwise the vanilla interaction passes through**; two **20×4** bars above the hotbar at `y = h − 39`, hidden when `screen != null` or `hideGui` |
+| 5 | Sword specialisation | attack speed `ADD_MULTIPLIED_TOTAL +2.0` (1.6 → 4.8); single-hit damage cap **5**; non-player mobs get `setNoAi` for **2 ticks**; the generic +30% attack speed steps aside (removed by exact id) |
+| 6 | Axe specialisation | attack speed `ADD_VALUE +0.8` (iron axe 0.9 → 1.7, diamond axe 1.0 → 1.8, **not a multiplier**); ignores **50%** of the target's armour |
+| 7 | Step height 1.5 | a transient `Attributes.STEP_HEIGHT` modifier of **Δ+0.9** (base 0.6 → 1.5), removed by exact id, so effect expiry / death / leaving the world are covered |
+| 8 | Sound range 32 | `sounds.json` `wild_hunter_loop` `attenuation_distance` 16 → **32**, and the client mirror constant follows |
+
+**The settlement log must carry two readings (V-82)**: both the damage cap and the armour reduction are resolved inside `hurt()` (nominal 8.4, actual 5), so logging only the nominal value looks like "the cap did not apply". The log format is fixed as `名义伤害 X 实际掉血 Y`.
+
 **Which registry objects it writes**: none.
 
 ### 3.13 The 6 client classes
@@ -1535,7 +1552,7 @@ The key set is written out column by column from the same `ENTRIES` table of `Mo
 | 24 | `farmstorm.configuration.wild_hunter.killExtensionTicks` | 每次击杀延长的时长（tick） | Duration added per kill (ticks) | §8.1 #7 |
 | 25 | `farmstorm.configuration.wild_hunter.killHealPoints` | 每次击杀回复的生命点数 | Health restored per kill | §8.1 #8 |
 | 26 | `farmstorm.configuration.wild_hunter.searchRadius` | 索敌球半径（格） | Target search radius (blocks) | §8.1 #9 |
-| 27 | `farmstorm.configuration.wild_hunter.searchAngleDegrees` | 索敌视线夹角上限（度） | Target search view angle limit (degrees) | §8.1 #10 |
+| 27 | `farmstorm.configuration.wild_hunter.searchAngleDegrees` | 索敌锥全顶角（度） | Target cone full apex angle (degrees) | §8.1 #10 |
 | 28 | `farmstorm.configuration.wild_hunter.dashTicks` | 吸附冲刺跨越的刻数 | Ticks the dash takes | §8.1 #11 |
 | 29 | `farmstorm.configuration.wild_hunter.speedBonusPercent` | 移动速度加成（%） | Movement speed bonus (%) | §8.1 #12 |
 | 30 | `farmstorm.configuration.wild_hunter.attackSpeedBonusPercent` | 攻击速度加成（%） | Attack speed bonus (%) | §8.1 #13 |
@@ -1591,7 +1608,7 @@ This table **copies `.work/v002-BRIEF.md` §8 "sole inventory of new config keys
 | 7 | `wild_hunter.killExtensionTicks` | int | 160 ticks (8 seconds) | 0–72000 | extension per kill while the effect is active; no cap on the number of kills | D-74 |
 | 8 | `wild_hunter.killHealPoints` | double | 10.0 points | 0.0–40.0 | health points restored per kill | D-74 |
 | 9 | `wild_hunter.searchRadius` | double | 5.0 blocks | 0.0–32.0 | target search sphere radius | D-64 |
-| 10 | `wild_hunter.searchAngleDegrees` | double | 30.0 degrees | 0.0–180.0 | upper limit of the angle between a candidate and the view direction | D-64 |
+| 10 | `wild_hunter.searchAngleDegrees` | double | **60.0** degrees (**full apex** = 30° half-angle) | 0.0–180.0 | full apex of the target cone (3-D, includes pitch); the comparison uses `maxAngle × 0.5`. **Semantic fix (V-82)**: the old code used it as a half-angle, so 90 produced a 180° hemisphere | D-64 + V-82
 | 11 | `wild_hunter.dashTicks` | int | 3 ticks | 1–20 | ticks the attraction dash takes to cross to the target | D-65 |
 | 12 | `wild_hunter.speedBonusPercent` | double | 30.0 % | 0.0–1000.0 | movement speed bonus | plan0.0.2.txt line 40 |
 | 13 | `wild_hunter.attackSpeedBonusPercent` | double | 30.0 % | 0.0–1000.0 | attack speed bonus | plan0.0.2.txt line 40 |
@@ -1639,7 +1656,7 @@ durationTicks = 700                # 35 seconds
 killExtensionTicks = 160           # D-74: +8 seconds, no cap on the number of kills
 killHealPoints = 10.0              # D-74: +10 health points
 searchRadius = 5.0                 # D-64: 5 blocks
-searchAngleDegrees = 30.0          # D-64: 30 degrees
+searchAngleDegrees = 60.0          # D-64 + V-82: full apex 60° = 30° half-angle
 dashTicks = 3                      # D-65: 3 ticks to cross
 speedBonusPercent = 30.0           # +30% movement speed
 attackSpeedBonusPercent = 30.0     # +30% attack speed

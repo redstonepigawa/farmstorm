@@ -687,8 +687,8 @@ player.setDeltaMovement(0.0, Math.min(remaining / n, MAX_RISE_SPEED), 0.0);
 
 | 方法 | 规则 | 依据 |
 |---|---|---|
-| `resolveTarget(Player)` | 候选 = 以玩家为球心 `wild_hunter.searchRadius`（5.0 格）内的 `LivingEntity`，且与视线方向夹角 ≤ `wild_hunter.searchAngleDegrees`（30.0°）；排除自己、同队伍玩家（`player.isAlliedTo(other)`）、旁观者 | D-64 |
-| 排序 | 夹角最小者优先；夹角相同取距离近者（`Comparator.comparingDouble(angle).thenComparingDouble(distSqr)`） | D-64 |
+| `resolveTargets(Player)` | 候选 = 以玩家眼睛为球心 `wild_hunter.searchRadius`（5.0 格）内的 `LivingEntity`，且与**视线方向的三维夹角** ≤ `searchAngleDegrees * 0.5`（**配置值是全顶角**：默认 60.0 → 半角 30°，含俯仰）；排除自己、同队伍玩家（`player.isAlliedTo(other)`）、旁观者。返回**锥内全部目标**的 `List`，结算时逐个遍历 | D-64 + V-82 |
+| 排序 | 夹角最小者优先；夹角相同取距离近者（`Comparator.comparingDouble(angle).thenComparingDouble(distSqr)`）；**结算遍历全部目标**，不再只取第一个 | D-64 + V-82 |
 | `onSwing(ServerPlayer)` | 挂 `PlayerInteractEvent.LeftClickEmpty` 不够（那只覆盖空挥），真正的入口是 `ServerboundSwingPacket` 的服务端处理路径 ⇒ 用 `PlayerEvent`/原版攻击流程的**服务端结算点**复核目标；命中即按玩家自身攻击力结算伤害 | D-65 + BRIEF §7.6 |
 | 击退 | 伤害成功后调 `target.knockback(0.4, dx, dz)` 的原版默认强度，不自订数值 | D-75 |
 | `onKill(ServerPlayer)` | `LivingDeathEvent` 里判 killer 是持有效果的玩家 ⇒ 剩余时长 + `killExtensionTicks`（160 刻 = 8 秒）、回复 `killHealPoints`（10 点生命）；**没有次数上限** | D-74 |
@@ -698,7 +698,24 @@ player.setDeltaMovement(0.0, Math.min(remaining / n, MAX_RISE_SPEED), 0.0);
 
 **关键：服务端独立算一遍，不听客户端的**。BRIEF §7.6 的原文是「客户端在『本地按下攻击键 + 自己持有效果 + 本地算出合法目标』时立刻朝目标方向给速度，服务端在收到 `ServerboundSwingPacket` 时用同一套确定性算法独立算一遍目标并结算伤害与击退」。「同一套」的意思就是：`resolveTarget` 的**代码只有一份**，客户端与服务端都调它，只是客户端那份跑在 `ClientLevel` 上（要给 `Level` 泛型或传 `LivingEntity` 列表，不能写死 `ServerLevel`）。
 
-**读哪些 config 键**：`wild_hunter.searchRadius`、`wild_hunter.searchAngleDegrees`、`wild_hunter.killExtensionTicks`、`wild_hunter.killHealPoints`、`wild_hunter.dashTicks`。
+**读哪些 config 键**：`wild_hunter.searchRadius`、`wild_hunter.searchAngleDegrees`（**全顶角语义**，默认 60.0）、`wild_hunter.killExtensionTicks`、`wild_hunter.killHealPoints`、`wild_hunter.dashTicks`。
+
+**`searchAngleDegrees` 是破坏性语义修正（V-82）**：旧实现把这个值当**半角**用，设 90 会得到 180° 半球；现在按**全顶角**解释、比较时取 `maxAngle * 0.5`。默认值同时由 30.0 改为 **60.0**（= 半角 30°，与旧行为等价）。任何按旧口径调过这个键的配置都要重设。
+
+**狂野猎人九项新特性（作者实测通过，第 9 项「墙面贴附」已被作者去掉，不实现）**：
+
+| # | 特性 | 实现 / 数值 |
+|---|---|---|
+| 1 | **60° 三维锥 + 多目标** | `resolveTargets(Player)` 返回锥内**全部**目标，结算遍历；`searchAngleDegrees` = 全顶角（默认 60 = 半角 30），含俯仰 |
+| 2 | 红色烟雾粒子 | 服务端每 **3 刻**发 **4 个** `ParticleTypes.DUST`，颜色 **(1, 0.15, 0.15)** 对齐 D-62；不选 `CRIMSON_SPORE`（偏橙且带漂移） |
+| 3 | 续时封顶 50 秒 | `min(1000, 当前 + 增量)`（`MAX_DURATION_TICKS = 1000` 刻），超出部分丢弃 |
+| 4 | 右键四向位移 + 充能条 | 距离 **5 格**、**2 充能**、每 **100 刻**回 1；方向取 WASD 主轴；仅在「效果在身 + 有充能 + 有移动输入 + 无界面」时吃掉右键，**其余放行原版交互**；HUD 两条 **20×4** 条画在快捷栏上方 `y = h − 39`，`screen != null` 或 `hideGui` 时隐藏 |
+| 5 | 剑专精 | 攻速 `ADD_MULTIPLIED_TOTAL +2.0`（1.6 → 4.8）；单次伤害上限 **5**；命中非玩家生物 `setNoAi` **2 刻**；持剑时通用 +30% 让位（按 id 精确摘除） |
+| 6 | 斧专精 | 攻速 `ADD_VALUE +0.8`（铁斧 0.9 → 1.7、钻石斧 1.0 → 1.8，**不是倍率**）；无视对方 **50% 盔甲**（补回「全额减免 − 半额减免」之差） |
+| 7 | 跨越高度 1.5 | `Attributes.STEP_HEIGHT` 的瞬态修饰符 **Δ+0.9**（基础 0.6 → 1.5），按 id 精确摘除，天然覆盖效果结束 / 死亡 / 退出世界 |
+| 8 | 音效 32 格 | `sounds.json` 的 `wild_hunter_loop` `attenuation_distance` 16 → **32**，客户端镜像常量同步 |
+
+**结算日志必须是双读数（V-82）**：封顶与盔甲减免都在 `hurt()` 内部结算（名义 8.4 实际掉 5），只打名义值会误判「封顶没生效」。日志格式固定为 `名义伤害 X 实际掉血 Y`。
 **写哪些注册对象**：无。
 
 ### 3.13 客户端 6 个类
@@ -1546,7 +1563,7 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | 24 | `farmstorm.configuration.wild_hunter.killExtensionTicks` | 每次击杀延长的时长（tick） | Duration added per kill (ticks) | §8.1 #7 |
 | 25 | `farmstorm.configuration.wild_hunter.killHealPoints` | 每次击杀回复的生命点数 | Health restored per kill | §8.1 #8 |
 | 26 | `farmstorm.configuration.wild_hunter.searchRadius` | 索敌球半径（格） | Target search radius (blocks) | §8.1 #9 |
-| 27 | `farmstorm.configuration.wild_hunter.searchAngleDegrees` | 索敌视线夹角上限（度） | Target search view angle limit (degrees) | §8.1 #10 |
+| 27 | `farmstorm.configuration.wild_hunter.searchAngleDegrees` | 索敌锥全顶角（度） | Target cone full apex angle (degrees) | §8.1 #10 |
 | 28 | `farmstorm.configuration.wild_hunter.dashTicks` | 吸附冲刺跨越的刻数 | Ticks the dash takes | §8.1 #11 |
 | 29 | `farmstorm.configuration.wild_hunter.speedBonusPercent` | 移动速度加成（%） | Movement speed bonus (%) | §8.1 #12 |
 | 30 | `farmstorm.configuration.wild_hunter.attackSpeedBonusPercent` | 攻击速度加成（%） | Attack speed bonus (%) | §8.1 #13 |
@@ -1605,7 +1622,7 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | 7 | `wild_hunter.killExtensionTicks` | int | 160 刻（8 秒） | 0–72000 | 效果期间每击杀一个生物的续时；无次数上限 | D-74 |
 | 8 | `wild_hunter.killHealPoints` | double | 10.0 点 | 0.0–40.0 | 每次击杀回复的生命点数 | D-74 |
 | 9 | `wild_hunter.searchRadius` | double | 5.0 格 | 0.0–32.0 | 索敌球半径 | D-64 |
-| 10 | `wild_hunter.searchAngleDegrees` | double | 30.0 度 | 0.0–180.0 | 候选与视线方向的夹角上限 | D-64 |
+| 10 | `wild_hunter.searchAngleDegrees` | double | **60.0** 度（**全顶角** = 半角 30°） | 0.0–180.0 | 索敌锥的全顶角（含俯仰的三维锥）；比较时取 `maxAngle × 0.5`。**语义修正（V-82）**：旧实现当半角用，设 90 会得到 180° 半球 | D-64 + V-82 |
 | 11 | `wild_hunter.dashTicks` | int | 3 刻 | 1–20 | 吸附冲刺跨越到位所用的刻数 | D-65 |
 | 12 | `wild_hunter.speedBonusPercent` | double | 30.0 % | 0.0–1000.0 | 移动速度加成 | plan0.0.2.txt 第 40 行 |
 | 13 | `wild_hunter.attackSpeedBonusPercent` | double | 30.0 % | 0.0–1000.0 | 攻击速度加成 | plan0.0.2.txt 第 40 行 |
@@ -1652,7 +1669,7 @@ durationTicks = 700                # 35 秒
 killExtensionTicks = 160           # D-74：+8 秒，无次数上限
 killHealPoints = 10.0              # D-74：+10 点生命
 searchRadius = 5.0                 # D-64：5 格
-searchAngleDegrees = 30.0          # D-64：30 度
+searchAngleDegrees = 60.0          # D-64 + V-82：全顶角 60° = 半角 30°
 dashTicks = 3                      # D-65：3 刻跨到位
 speedBonusPercent = 30.0           # +30% 移速
 attackSpeedBonusPercent = 30.0     # +30% 攻速

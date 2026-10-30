@@ -358,11 +358,11 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
   2. The F3 hunger line differs by **4** points before and after, and `Saturation` by **the same value as the vanilla golden apple (9.6 measured)** — `FoodData#eat` is `nutrition × saturationModifier × 2.0F` (V-35).
   3. Converting Wild Apple back to golden apple in the converter yields 1 `minecraft:golden_apple`, and eating a golden apple grants no `farmstorm:wild_hunter` (the bidirectional recipe of D-54).
 
-#### F-78 · Targeting Algorithm: a 5-Block Sphere and a 30° Angle
+#### F-78 · Targeting Algorithm: a 5-Block 3-D Cone with a 60° Full Apex
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-76
-- **Deliverables**: `combat/WildHunterCombat#resolveTarget(ServerPlayer)` (radius reads `wild_hunter.searchRadius` 5.0, angle reads `searchAngleDegrees` 30.0; excludes self / same-team players / spectators; smallest angle wins, equal angles fall back to the shorter distance); one log line `狂野猎人 目标 {id} 夹角 {A} 度 距离 {D}`
+- **Deliverables**: `combat/WildHunterCombat#resolveTargets(Player)` (radius reads `wild_hunter.searchRadius` 5.0; the cone reads `searchAngleDegrees` **60.0 = full apex**, compared as a 30° half-angle and including pitch; excludes self / same-team / spectators; returns **every** target in the cone, smallest angle first, nearest on ties) + one target log line
 - **Acceptance**:
   1. Place a pig within 5 blocks straight ahead and attack once: the log shows `狂野猎人 目标 minecraft:pig 夹角 {A} 度 距离 {D}` with `A <= 30`.
   2. Place one on each side at the same distance: when the right one has the smaller angle it becomes the target; make the angles equal and the nearer side wins.
@@ -381,22 +381,26 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
   4. `logs/latest.log` has no `moved too quickly!`; if one appears, tune `wild_hunter.dashTicks` per RT-12 and retest.
   5. `grep -r "CustomPacketPayload" src/main/java` still matches **0** times (the D-50 red line).
 
-#### F-80 · Server-Side Recheck and Damage / Knockback Settlement
+#### F-80 · Server-Side Recheck and Damage / Knockback Settlement (cone with multiple targets + sword/axe specialisation)
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-78
-- **Deliverables**: the server-side entry of `combat/WildHunterCombat` (on receiving `ServerboundSwingPacket`, resolve the target independently with the same algorithm as the client, settle the damage, and on “damage actually dealt” call the vanilla `LivingEntity#knockback` at default strength)
+- **Deliverables**: the server entry of `combat/WildHunterCombat` (uses the same `resolveTargets` as the client to take **every target inside the cone** and settles them one by one, calling the vanilla `LivingEntity#knockback` default strength on "damage actually dealt"). **The server has no public event** for `ServerboundSwingPacket` (NeoForge 1.21.1 does not provide one, and D-40 forbids Mixin while D-50 forbids a custom packet): it senses the swing in `PlayerTickEvent.Post` from the "swing state transition + horizontal dash displacement" pair — **the two may pair across ticks** (`swingTick` with `SWING_WINDOW = 2` ticks; a same-tick requirement never holds because the displacement arrives 1–2 ticks late, V-66) — de-duplicated against `AttackEntityEvent` (`DEDUPE_TICKS = 1` + `lastDirectHit`), so one swing settles once (V-44 / V-66). **Sword / axe specialisation (V-82)**: with a sword, attack speed `ADD_MULTIPLIED_TOTAL +2.0` (1.6 → 4.8), single-hit damage capped at **5**, non-player mobs get `setNoAi` for **2 ticks**, and the generic +30% attack speed steps aside (removed by exact id); with an axe, attack speed `ADD_VALUE +0.8` (iron axe 0.9 → 1.7, diamond axe 1.0 → 1.8) and **50%** of the target's armour is ignored; the kill extension is capped at `min(1000, current + delta)` (50 s)
 - **Acceptance**:
-  1. Attack a pig within 30° once: the drop in `/data get entity <target> Health` equals the reading of `/attribute @s minecraft:generic.attack_damage get` (**the F3 panel does not show attribute values**, V-61).
-  2. After settlement the target is pushed away: the before/after difference of `/data get entity <target> Pos` is >= 0.2 blocks (D-75 vanilla default strength, no custom number).
-  3. Attacking a creature beyond 30°: a normal attack, no snap, and the player's coordinates do not change.
-  4. When the target is a same-team player, neither a snap nor any health loss occurs.
+  1. Attack a pig inside the cone (full apex 60° = 30° half-angle) once: the drop in `/data get entity <target> Health` equals the reading of `/attribute @s minecraft:generic.attack_damage get` (**the F3 panel does not show attribute values**, V-61), and the log carries the **two readings** `名义伤害 X 实际掉血 Y` — logging only the nominal value makes the 8.4-vs-5 difference look like "the cap did not apply" (V-82).
+  2. **Multiple targets**: place two pigs side by side inside the cone; one swing makes **both** lose health (the old implementation settled only the nearest).
+  3. **Sword**: with a sword the attack-speed reading goes from 1.6 to **4.8**; single-hit damage is capped at **5**; a non-player mob stops moving for **2 ticks** (`NoAI`).
+  4. **Axe**: iron axe attack speed 0.9 → **1.7**, diamond axe 1.0 → **1.8** (additive, not a multiplier); against a fully armoured target the actual damage is higher by "full reduction − half reduction".
+  5. After settlement the target is pushed away: `/data get entity <target> Pos` differs by ≥ 0.2 blocks (D-75 vanilla default strength).
+  6. Attack a mob outside the cone: a normal attack, no attraction, the player's position unchanged; a same-team player is neither attracted nor damaged.
+  7. **Extension cap**: after enough kills the remaining duration stops at **1000 ticks (50 s)** (`/effect` reads 1000 ± 2).
+  8. **Cross-tick pairing (V-66)**: with the effect on, **actually dash** from 5 blocks away and hit once (never call `tick()` from a probe, never swing on the spot). Passing looks like: the log shows `狂野猎人 吸附挥击 速度 {S}` (`S ≥ 0.55`) and the target loses health; a displacement arriving 1–2 ticks after the swing must still settle; one swing produces **exactly one** such line.
 
 #### F-81 · Kill Extension With No Cap
 
 - **Complexity**: S | **Person-days**: 0.5
 - **Depends on**: F-80
-- **Deliverables**: the kill hook of `WildHunterCombat` (remaining duration += `killExtensionTicks` 160 ticks, restore `killHealPoints` 10 health, no counter designed in); one log line `狂野猎人 续时 {N}`
+- **Deliverables**: the kill hook of `WildHunterCombat` (remaining duration += `killExtensionTicks` 160 ticks, restores `killHealPoints` 10 health, no counter; **total duration capped at `MAX_DURATION_TICKS = 1000` ticks (50 s)** via `min(1000, current + delta)` with the excess discarded, V-82); one log line `狂野猎人 续时 {N}`
 - **Acceptance**:
   1. Kill 6 in a row: each kill adds **+160 ticks** to the remaining duration under `/effect`, and the log shows 6 `狂野猎人 续时` lines.
   2. After the 6th the effect is still there (no cap); health rises by 10 per kill (capped at the vanilla 20).
@@ -697,7 +701,7 @@ All 22 keys land in F-61; the “Consuming task” column names the implementati
 | 7 | `wild_hunter.killExtensionTicks` | 160 ticks (8 s) | F-61 | F-81 |
 | 8 | `wild_hunter.killHealPoints` | 10.0 points | F-61 | F-81 |
 | 9 | `wild_hunter.searchRadius` | 5.0 blocks | F-61 | F-78 |
-| 10 | `wild_hunter.searchAngleDegrees` | 30.0 degrees | F-61 | F-78 |
+| 10 | `wild_hunter.searchAngleDegrees` | **60.0** degrees (full apex = 30° half-angle) | F-61 | F-78 |
 | 11 | `wild_hunter.dashTicks` | 3 ticks | F-61 | F-79, F-80 |
 | 12 | `wild_hunter.speedBonusPercent` | 30.0 % | F-61 | F-76 |
 | 13 | `wild_hunter.attackSpeedBonusPercent` | 30.0 % | F-61 | F-76 |

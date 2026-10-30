@@ -689,6 +689,20 @@ Three prohibitions (BRIEF §7.1, copied verbatim): ① faking greyscale with a c
 | Underwater blue overlay | cancel `RenderBlockScreenEffectEvent` (`OverlayType.WATER`) | V-81 |
 | Grayscale (underwater) | **a dedicated chain underwater** (`pow(luma, 0.62)` lifts the shadows + a 1.45× stretch around mid grey 0.5 + ×1.08), **the chain is swapped, not disabled** | V-81 |
 
+### 7.6.2 The nine new features (author-verified; #9 "wall cling" was dropped and is not implemented)
+
+| # | Feature | Behaviour |
+|---|---|---|
+| 1 | **60° 3-D cone + multiple targets** | targeting is a 3-D cone (includes pitch); `searchAngleDegrees` is the **full apex** (default 60 = 30° half-angle); **every** target in the cone is settled, not just the nearest one |
+| 2 | Red smoke particles | 4 red dust particles every 3 ticks (DUST, colour (1, 0.15, 0.15), the same red as the silhouette) |
+| 3 | Extension capped at 50 seconds | kill extension can push the remaining duration up to 1000 ticks (50 s) at most |
+| 4 | Right-click four-way dash + charge bar | dashes 5 blocks along the WASD main axis; 2 charges, one refilled every 100 ticks; eats right-click only when "effect + charge + movement input + no screen", otherwise the vanilla interaction goes through; two 20×4 bars above the hotbar, hidden with a screen open or the HUD hidden |
+| 5 | Sword specialisation | attack speed ×3 (1.6 → 4.8), single-hit damage capped at 5, non-player mobs frozen for 2 ticks; the generic +30% attack speed steps aside instead of stacking |
+| 6 | Axe specialisation | attack speed **+0.8** (iron axe 0.9 → 1.7, diamond axe 1.0 → 1.8, not a multiplier); ignores 50% of the target's armour |
+| 7 | Step height 1.5 | steps up 1.5 blocks (vanilla 0.6); a transient modifier, removed on effect expiry / death / leaving the world |
+| 8 | Sound range 32 | looping sound audible at 16 → **32** blocks |
+| 9 | ~~Wall cling~~ | **dropped by the author, not implemented**; not described here |
+
 ### 7.7 Red highlight
 
 | Item | Specification | Basis |
@@ -963,7 +977,7 @@ Key names are written uniformly as `<group>.<key>` (ruling A-04); language keys 
 | 7 | `wild_hunter.killExtensionTicks` | int | 160 ticks (8 seconds) | 0–72000 | extension per mob killed while the effect is active; no count cap | D-74 |
 | 8 | `wild_hunter.killHealPoints` | double | 10.0 points | 0.0–40.0 | health points restored per kill | D-74 |
 | 9 | `wild_hunter.searchRadius` | double | 5.0 blocks | 0.0–32.0 | radius of the target-acquisition sphere | D-64 |
-| 10 | `wild_hunter.searchAngleDegrees` | double | 30.0 degrees | 0.0–180.0 | cap on the angle between a candidate and the look direction | D-64 |
+| 10 | `wild_hunter.searchAngleDegrees` | double | **60.0** degrees (full apex = 30° half-angle) | 0.0–180.0 | full apex of the target cone (includes pitch); the comparison uses `maxAngle × 0.5`, and the old half-angle reading was twice as wide (V-82) | D-64 + V-82 |
 | 11 | `wild_hunter.dashTicks` | int | 3 ticks | 1–20 | ticks the snap dash takes to span the distance | D-65 |
 | 12 | `wild_hunter.speedBonusPercent` | double | 30.0 % | 0.0–1000.0 | movement speed bonus | line 40 of `plan0.0.2.txt` |
 | 13 | `wild_hunter.attackSpeedBonusPercent` | double | 30.0 % | 0.0–1000.0 | attack speed bonus | line 40 of `plan0.0.2.txt` |

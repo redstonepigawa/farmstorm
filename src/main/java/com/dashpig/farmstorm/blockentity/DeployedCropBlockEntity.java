@@ -1,10 +1,12 @@
 package com.dashpig.farmstorm.blockentity;
 
+import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.behavior.DeployedBehavior;
 import com.dashpig.farmstorm.behavior.DeployedBehaviors;
 import com.dashpig.farmstorm.behavior.DeployedKind;
 import com.dashpig.farmstorm.behavior.impl.FangTrapCactusTrap;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
+import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.util.DeployedOwnership;
 import java.util.ArrayList;
@@ -52,6 +54,7 @@ public class DeployedCropBlockEntity extends BlockEntity {
     private static final String TAG_PENDING_WAVES = "pendingWaves";
     private static final String TAG_FUSE_TICKS = "fuseTicks";
     private static final String TAG_DETACHED = "detached";
+    private static final String TAG_INTERCEPT_COUNT = "interceptCount";
     private static final String TAG_WAVE_AT_TICK = "atTick";
     private static final String TAG_WAVE_COUNT = "count";
     private static final String TAG_WAVE_RADIUS = "radius";
@@ -95,6 +98,8 @@ public class DeployedCropBlockEntity extends BlockEntity {
     private String ownerName;
     private long placedGameTime;
     private int cooldown;
+    /** 近防菌的拦截计数（§3.10）：每成功拦下一次 +1，到上限那一次先完成拦截再静默移除自己。 */
+    private int interceptCount;
     private List<FangWave> pendingWaves = List.of();
     private int fuseTicks;
     private boolean detached;
@@ -293,6 +298,26 @@ public class DeployedCropBlockEntity extends BlockEntity {
         return level.getServer().getPlayerList().getPlayer(this.ownerUuid);
     }
 
+    /** 近防菌的拦截计数（§3.10）。 */
+    public int interceptCount() {
+        return this.interceptCount;
+    }
+
+    /**
+     * 记一次成功拦截（TECH §3.10 / §6.2 第 6 步第四步）：计数 +1 → 到 {@code maxIntercepts} 就走
+     * {@link #consume()}（{@code removeBlock} + 破坏粒子，不走战利品表，D-72）。
+     * 上限读 config 而不是写死常量：6 次是 D-88 明写的可调数值。
+     */
+    public void recordIntercept(long now) {
+        this.interceptCount++;
+        this.setChanged();
+        int max = FarmstormConfig.pointDefenseFungusMaxIntercepts.get();
+        Farmstorm.LOGGER.info("近防菌 拦截 t={} 计数 {}/{} @ {}", now, this.interceptCount, max, this.getBlockPos());
+        if (this.interceptCount >= max) {
+            this.consume();
+        }
+    }
+
     /** 一次性部署物（陷阱）自毁：移除方块并播破坏粒子（§4.5）。 */
     public void consume() {
         if (!(this.level instanceof ServerLevel server)) {
@@ -379,6 +404,7 @@ public class DeployedCropBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         this.writeSynced(tag, registries);
+        tag.putInt(TAG_INTERCEPT_COUNT, this.interceptCount);
     }
 
     @Override
@@ -389,6 +415,7 @@ public class DeployedCropBlockEntity extends BlockEntity {
         this.placedGameTime = tag.getLong(TAG_PLACED_GAME_TIME);
         this.fuseTicks = tag.getInt(TAG_FUSE_TICKS);
         this.detached = tag.getBoolean(TAG_DETACHED);
+        this.interceptCount = tag.getInt(TAG_INTERCEPT_COUNT);
         this.pendingWaves = readWaves(tag);
     }
 

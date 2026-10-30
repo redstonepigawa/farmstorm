@@ -335,7 +335,7 @@ menu types             1
 | `kind()` | `DeployedKind.POINT_DEFENSE_FUNGUS` |
 | `cooldownTicks()` | **0**。返回 0 让 `default tick` 里的 `setCooldown(0)` 成为空操作，于是每次错峰扫描都能拦。这里不能用 `cooldown` 表达 6 次上限——上限是**方块生命**而不是节奏，二者语义不同 |
 | `findTarget` | `level.getEntitiesOfClass(ThrownCropEntity.class, box, predicate)` 取最近的一个；predicate 的五道筛（未移除 / 非子母弹 / 欧氏 8 格内 / **非己方**）见 §6.2 第 4 步 |
-| `fire` | 三条动作顺序固定：① 在投掷物位置 `server.sendParticles(ParticleTypes.CRIT, x, y, z, interceptParticles, 0.3, 0.3, 0.3, 0.05)`；② `level.playSound(null, pos, SoundEvents.SHIELD_BLOCK, SoundSource.BLOCKS, 0.8F, 1.2F)`（原版音，不新增 sound_event，否则 §2 的 +13 破）；③ `target.markIntercepted(now)` 打刻标记 → `be.recordIntercept(now)` → `target.discard()`（不调 `hurt`、不写方块、不 new `Explosion`）。**`discard()` 必须在 `onImpact` 之前返回**：被拦的投掷物当场从世界里消失，不结算落点——不爆炸、不写方块、不施加效果、不掉落（**D-99**） |
+| `fire` | **四步顺序固定**（V-113：旧稿写成「粒子→音效→标记」，与 §6.2/§6.3 矛盾，标记必须是第一件事，否则同刻去重失效）：① `if (target.markIntercepted(now)) return;`；② 在**投掷物位置** `server.sendParticles(ParticleTypes.CRIT, x, y, z, interceptParticles, 0.3, 0.3, 0.3, 0.05)`；③ 在**方块位置** `level.playSound(null, pos, SoundEvents.SHIELD_BLOCK, SoundSource.BLOCKS, …)`（声音取方块、粒子取投掷物，**刻意不同源**，不是笔误）；④ `be.recordIntercept(now)` 后 `target.discard()`。**没有任何走 `onImpact` 的分支** |
 | 非己方筛选（D-98） | `final Entity thrower = target.getOwner()`；`thrower instanceof Player p && be.isAlly(p)` 为真 ⇒ **己方，直接跳过**（不扣次数、不发粒子、不 discard）；其余一律算非己方（含 `owner == null` 的发射器 / 指令生成，沿用 `DeployedOwnership#isAlly` L47–L52「无归属者时对所有人都是非己方」的既有口径）。判据只有 `be.isAlly(Player)` 这一处调用，不新写队伍比较 |
 | 6 次上限 | `recordIntercept` 内部判 `count >= maxIntercepts` 后调 `be.consume()`（`removeBlock(pos, false)` + 破坏粒子，不走战利品表，D-72 的路径） |
 | 读哪些 config 键 | `point_defense_fungus.interceptRadius`（8.0 格）、`point_defense_fungus.maxIntercepts`（6 次）、`point_defense_fungus.interceptParticles`（8 个） |
@@ -421,7 +421,7 @@ D-94 的 8 行数值表里 4 行变、4 行不变。**其中 3 行的实现改�
 |---|---|---|
 | 字段 | `private long lastInterceptTick = Long.MIN_VALUE;` | 服务端内存态 |
 | 方法 | `public boolean markIntercepted(long now)` | 若 `lastInterceptTick == now` 返回 `true`（本刻已被拦过，跳过）；否则写入 `now` 并返回 `false` |
-| 方法 | `public boolean wasInterceptedAt(long now)` | 只读判定，供日志与自检用 |
+| 方法 | `public boolean wasInterceptedAt(long now)` | 只读判定。**`findTarget` 的筛里要用它**：挡「同一刻已被另一台菌拦过、但尚未从实体段摘除」的窗口——只靠 `!isRemoved()` 会让去重依赖 discard 的时序，属「碰巧成立」而非「显式成立」（V-112） |
 
 **不进 NBT**：`addAdditionalSaveData` / `readAdditionalSaveData` 不动。理由：标记的有效期只有 1 刻，跨存档没有意义；写进去反而会让「读档后首次拦截」被误判成「本刻已拦」。
 
@@ -430,7 +430,7 @@ D-94 的 8 行数值表里 4 行变、4 行不变。**其中 3 行的实现改�
 | 项 | 内容 |
 |---|---|
 | 新增字段 | `private int interceptCount;`（默认 0） |
-| 新增方法 | `public int interceptCount()`、`public void recordIntercept(long now)`——后者 `interceptCount++`、`setChanged()`，并在 `interceptCount >= FarmstormConfig.pointDefenseMaxIntercepts.get()` 时调 `consume()` |
+| 新增方法 | `public int interceptCount()`、`public void recordIntercept(long now)`——后者 `interceptCount++`、`setChanged()`，并在 `interceptCount >= FarmstormConfig.pointDefenseFungusMaxIntercepts.get()` 时调 `consume()` |
 | NBT | `saveAdditional` / `loadAdditional` 各加一行（键名 `interceptCount`），与既有 `placedGameTime` / `detached` 的写法一致。**这一条与 §3.9 相反**：计数要跨存档，因为「第 6 次后消失」是方块的生命周期，不是单刻语义 |
 | 上限来源 | `point_defense_fungus.maxIntercepts`（6 次）。**不写死常量**：0.0.2 的 `HARD_MINE_TICKS` / `DEPLOY_COOLDOWN_TICKS` 是常量，因为它们没有「作者可能想调」的属性；6 次是明写在 D-88 里的可调数值 |
 | 读哪些 config 键 | `point_defense_fungus.maxIntercepts` |
@@ -957,7 +957,7 @@ A5 的另一半说明：0.0.2 的 `MINEABLE_WITH_PICKAXE` 里没有收 `zangief_
 | 6 | 对玩家施加混乱，按 W 再按 A | W 向后走、A 向右平移，**速度幅度与正常一致**（用 F3 的坐标逐刻差算）；视角鼠标转向正常、跳跃与潜行正常、左键能打到人 | D-83 |
 | 7 | 先施加 Q弹 再施加混乱（或反之），按 W | 玩家完全不动（位移为 0）；锁的日志行已打印；效果结束的下一 tick 恢复反向移动 | D-83、RT-19 |
 | 8 | 三段一起做：① 摆 1 个近防菌连投 6 个朋友的韭；② 再摆 3 个近防菌围同一投掷物投 1 个；③ 让**放置者本人**与**同队队友**各投 1 个 | ① 第 6 次拦截结束瞬间方块消失且**无掉落物**，日志里 `interceptCount` 逐次为 1..6，被拦的投掷物落地无任何后续（不爆炸 / 不写方块 / 不施加效果，D-99）；② `interceptCount` 总共只 +1，另外 2 个菌没有粒子；③ 两次投掷都**穿过**（落点照常结算），`interceptCount` **不变**、无粒子——己方不拦也不扣（D-98） | D-87、D-88、D-98、D-99、RT-20 |
-| 9 | 单菌在同一刻面对 2 个投掷物 | 只有 1 个被拦，`interceptCount` 单次只 +1；日志里「本刻已拦过」分支被走到至少一次 | D-88、RT-20 |
+| 9 | 单菌在同一刻面对 2 个投掷物 | 只有 1 个被拦，`interceptCount` 单次只 +1。**「本刻已拦过」分支是兜底**：加了 `findTarget` 的同刻筛后正常流程走不到它，取证靠探针直调 `fire`（V-112/V-115） | D-88、RT-20 |
 | 10 | 放置震动豆陷阱后，把东西南北上下 6 个相邻方块各挖掉一个 | 方块仍在原位；方块状态里的 `FLOATING` 始终为 false；走出 200 格再回来（强制区块重载）后仍在 | D-91、RT-21 |
 | 11 | 玩家（非己方）走到距震动豆 3.9 格 / 4.1 格各一次 | 3.9 格触发（4 格内所有玩家获得 80 刻混乱 + 一次爆炸音效）；4.1 格不触发；触发后方块静默消失、无掉落 | D-92 |
 | 12 | 朋友的韭：一次命中 1 只生物、一次空投 | 命中：6 格内全部生物获得 200 刻 Q弹，落点播一次音，32 格内可闻、33 格外不可闻；空投：范围外生物不获得效果、**不播音** | D-85 |

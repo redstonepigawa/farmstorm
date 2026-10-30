@@ -396,7 +396,7 @@ F-100 修 verify_project.py 0.5
 - **交付物**：`blockentity/DeployedCropBlockEntity.java` 的 `interceptCount` 与 `recordIntercept(now)`；`entity/ThrownCropEntity.java` 的 `lastInterceptTick` 与 `markIntercepted(now)`（**不**写进 `addAdditionalSaveData`）；第 6 次之后走 `consume()` → `removeBlock`，不触战利品表。
 - **验收**：
   1. `18-TECH-0.0.3.md §11 #8` 第一段：单菌连投 6 个朋友的韭，日志里 `interceptCount` 逐次为 1..6，第 6 次结束瞬间方块消失且无掉落物（D-72 口径）。
-  2. `18-TECH-0.0.3.md §11 #9`：单菌同一刻面对 2 个投掷物只拦 1 个，计数只 +1，日志里「本刻已拦过」分支至少被走到一次。
+  2. `18-TECH-0.0.3.md §11 #9`：单菌同一刻面对 2 个投掷物只拦 1 个，计数只 +1。**「本刻已拦过」分支的取证方式已改**（V-112/V-115）：加了 `findTarget` 的同刻筛之后，正常双菌流程会在索敌阶段就被挡掉、走不到 `fire` 里那条分支，所以该分支自此是**兜底**，只能靠**探针直调 `fire`** 取证（实测：同刻对同一实体直调两次 `fire`，计数只 +1、日志出现 `近防菌 本刻已拦过 … 跳过`）。不要再要求生产日志里出现该行。
   3. 3 个近防菌围同一投掷物：`interceptCount` 总共只 +1，另外 2 个菌没有粒子（D-88 的去重；RT-20 验法①）。
   4. 读档不残留标记：`grep -c "lastInterceptTick" ` 在 `addAdditionalSaveData` 附近的命中为 0（§6.3 的「绝不持久化」）。
   5. 上限可调：把 `maxIntercepts` 改成 2，第 2 次拦截后方块消失（§8.1 第 9 行）；验完改回 6。

@@ -32,6 +32,9 @@ public abstract class ThrownCropEntity extends ThrowableItemProjectile {
 
     private boolean settled;
 
+    /** 本刻已被某个近防菌拦过（TECH §6.3）：只存刻号，**不持久化**。 */
+    private long lastInterceptTick = Long.MIN_VALUE;
+
     protected ThrownCropEntity(EntityType<? extends ThrownCropEntity> type, Level level) {
         super(type, level);
     }
@@ -120,6 +123,23 @@ public abstract class ThrownCropEntity extends ThrowableItemProjectile {
 
     public boolean isSubmunition() {
         return this.getEntityData().get(DATA_SUBMUNITION);
+    }
+
+    /**
+     * 同刻去重（TECH §3.9 / §6.3）：{@code now} 与上次标记相同 ⇒ 本刻已被别的菌扣过，返回 {@code true}；
+     * 否则写入 {@code now} 并返回 {@code false}。标记的有效期只有 1 刻——刻号一变就不相等，因此不需要清除代码。
+     */
+    public boolean markIntercepted(long now) {
+        if (this.lastInterceptTick == now) {
+            return true;
+        }
+        this.lastInterceptTick = now;
+        return false;
+    }
+
+    /** 只读判定，供日志与自检用（§3.9）。 */
+    public boolean wasInterceptedAt(long now) {
+        return this.lastInterceptTick == now;
     }
 
     @Override

@@ -15,8 +15,8 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 22 个方块（TECH §2.2）：14 个作物 + 6 个部署 + 1 个转换器 + 1 个压缩干草块。
- * 14 个作物方块共用一个类且不注册 BlockItem（D-34 / T-01）。
+ * 25 个方块（TECH §2.2）：15 个作物 + 8 个部署 + 1 个转换器 + 1 个压缩干草块。
+ * 作物方块共用一个类且不注册 BlockItem（D-34 / T-01）。
  */
 public final class FarmstormBlocks {
     public static final DeferredRegister.Blocks REGISTER = DeferredRegister.createBlocks(Farmstorm.MOD_ID);
@@ -37,6 +37,10 @@ public final class FarmstormBlocks {
     public static final DeferredBlock<FarmstormCropBlock> BROWN_MUSHROOM_PUFF_BLOCK = crop(CropProfile.BROWN_MUSHROOM_PUFF);
     public static final DeferredBlock<FarmstormCropBlock> LUCKY_BERRY_BUSH = crop(CropProfile.LUCKY_BERRY);
 
+    // ---- v0.0.3 新增的 3 个方块（TECH §2.1 第 2 行 +3）----
+    /** D-84：朋友的韭的种植形态，注册 ID 由档案的作物方块键给出（{@code friend_chives_crop}）；4 个 age 由 F-114 落。 */
+    public static final DeferredBlock<FarmstormCropBlock> FRIEND_CHIVES_CROP = crop(CropProfile.FRIEND_CHIVES);
+
     // ---- 6 个部署方块（kind / 悬空 / 固定硬挖 / 爆炸免疫）----
     public static final DeferredBlock<DeployedCropBlock> BLAST_CARROT = deployed(CropProfile.BLAST_CARROT, false, false, false);
     public static final DeferredBlock<DeployedCropBlock> PUMPKIN_TURRET = deployed(CropProfile.PUMPKIN_TURRET, true, true, false);
@@ -49,6 +53,12 @@ public final class FarmstormBlocks {
     /** D-68：陷阱口径与尖牙仙人掌逐项一致；与它共用同一个 BlockEntityType（RT-04）。 */
     public static final DeferredBlock<DeployedCropBlock> ZANGIEF_CANE =
             deployed(CropProfile.ZANGIEF_CANE, false, false, false);
+    /** D-86：近防菌，炮台类外观（不隐形）；拦截逻辑在 F-118 ~ F-120。 */
+    public static final DeferredBlock<DeployedCropBlock> POINT_DEFENSE_FUNGUS =
+            deployed(CropProfile.POINT_DEFENSE_FUNGUS, false, true, false);
+    /** D-91：震动豆，隐形空模型；不依附方块的第 5 个旗标 {@code unattached} 由 F-123 加，此处仍是 4 参形态。 */
+    public static final DeferredBlock<DeployedCropBlock> VIBRATION_BEAN =
+            deployed(CropProfile.VIBRATION_BEAN, false, false, false);
 
     // ---- 1 个功能方块 ----
     public static final DeferredBlock<ConverterBlock> CONVERTER = REGISTER.registerBlock("converter", ConverterBlock::new,

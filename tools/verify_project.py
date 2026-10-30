@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-r"""Farmstorm v0.0.2 静态验收器。
+r"""Farmstorm v0.0.3 静态验收器。
 
 期望值全部从上游文档现算，不手抄：
   - 139 个配置键  <- docs/zh/01-DESIGN.md §3.8（117）+ docs/zh/12-TECH-0.0.2.md §8.1（22），
-                     并与 run/config/farmstorm-server.toml 逐键比对
-  - 77 个注册 ID  <- docs/zh/12-TECH-0.0.2.md §2.1 逐类小计（12 类，相加 77）
+                     并与 run/config/farmstorm-server.toml 逐键比对（v0.0.3 的 19 行由 F-104 落地后再回到 158）
+  - 90 个注册 ID  <- docs/zh/18-TECH-0.0.3.md §2.1 的 v0.0.3 列逐类小计（12 类，相加 90）
 
 用法：python -X utf8 tools/verify_project.py [--root <仓库根>]
 """
@@ -95,6 +95,8 @@ CROP_IDS = [
     "melon_slice_bomb", "melon_grenade", "pumpkin_turret", "awakened_torchflower",
     "awakened_pitcher_plant", "fang_trap_cactus", "bamboo_firecracker",
     "red_mushroom_puff", "brown_mushroom_puff", "lucky_berry",
+    # v0.0.3 的 3 条新档案（18-TECH §2.2 #1~#11 的作物面）
+    "friend_chives", "point_defense_fungus", "vibration_bean",
 ]
 
 EXPECTED = {
@@ -103,6 +105,7 @@ EXPECTED = {
         "puffed_wheat_seeds", "power_beet_seeds", "melon_grenade_seeds",
         "pumpkin_turret_seeds", "awakened_torchflower_seeds",
         "awakened_pitcher_plant_pod", "converter", "compressed_hay_block",
+        "chive_seeds",
     ],
     "blocks": [
         "puffed_wheat_crop", "blast_carrot_crop", "ubi_server_crop", "toxic_ubi_server_crop",
@@ -112,6 +115,7 @@ EXPECTED = {
         "lucky_berry_bush",
         "blast_carrot", "pumpkin_turret", "awakened_torchflower", "awakened_pitcher_plant",
         "fang_trap_cactus", "converter", "zangief_cane", "compressed_hay_block",
+        "friend_chives_crop", "point_defense_fungus", "vibration_bean",
     ],
     "block_entity_type": [
         "blast_carrot", "pumpkin_turret", "awakened_torchflower",
@@ -120,16 +124,32 @@ EXPECTED = {
     "entity_type": [
         "puffed_wheat", "ubi_server", "toxic_ubi_server", "melon_slice_bomb", "melon_grenade",
         "bamboo_firecracker", "red_mushroom_puff", "brown_mushroom_puff", "turret_bullet",
-        "molotov", "compressed_puffed_wheat",
+        "molotov", "compressed_puffed_wheat", "friend_chives", "vibration_bean",
     ],
-    "mob_effect": ["wild_hunter", "zangief_piledriver"],
-    "sound_event": ["wild_hunter_loop", "zangief_piledriver"],
+    "mob_effect": ["wild_hunter", "zangief_piledriver", "q_bounce", "confusion"],
+    "sound_event": ["wild_hunter_loop", "zangief_piledriver", "friend_chives"],
     "recipe_type": ["converting"],
     "recipe_serializer": ["converting"],
     "creative_mode_tab": ["main"],
-    "damage_type": ["void_bolt", "crop_blast"],
+    "damage_type": ["void_bolt", "crop_blast", "zangief_slam"],
     "data_component_type": ["temporary_enchantments"],
     "menu_type": ["converter"],
+}
+
+# 18-TECH-0.0.3 §2.1 的 v0.0.3 列：12 类逐类小计，相加 90。ID 清单少一个、多一个都在这里露出来。
+EXPECTED_COUNTS = {
+    "items": 31,
+    "blocks": 25,
+    "block_entity_type": 6,
+    "entity_type": 13,
+    "mob_effect": 4,
+    "sound_event": 3,
+    "recipe_type": 1,
+    "recipe_serializer": 1,
+    "creative_mode_tab": 1,
+    "damage_type": 3,
+    "data_component_type": 1,
+    "menu_type": 1,
 }
 
 
@@ -183,7 +203,7 @@ def main() -> int:
     else:
         warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
 
-    print("== 2. 77 个注册 ID 逐字核对（全源码树） ==")
+    print("== 2. 90 个注册 ID 逐字核对（全源码树） ==")
     total = 0
     for group, ids in EXPECTED.items():
         missed = [i for i in ids if f'"{i}"' not in all_java]
@@ -191,8 +211,11 @@ def main() -> int:
             fail(f"{group} 缺 {len(missed)} 个 ID: {missed[:6]}")
         else:
             ok(f"{group}: {len(ids)} 个 ID 齐全")
+        expected = EXPECTED_COUNTS[group]
+        if len(ids) != expected:
+            fail(f"{group}: 清单 {len(ids)} 个 ID，但 18-TECH §2.1 的 v0.0.3 列是 {expected} 个")
         total += len(ids)
-    print(f"  已核 registry 对象: {total} / 77")
+    print(f"  已核 registry 对象: {total} / 90")
 
     print("== 3. 语言文件键集一致 ==")
     gen = root / "src/generated/resources"

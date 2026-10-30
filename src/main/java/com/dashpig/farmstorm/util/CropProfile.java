@@ -104,6 +104,29 @@ public record CropProfile(
             categorySet(CropCategory.CONSTRUCTION),
             null, null, null, Set.of(), THROWABLE_STACK_TIER);
 
+    /**
+     * D-84：朋友的韭，v0.0.3 的第 20 条档案（DEC §4）。投掷型 + 纯 BUFF，可种植（作物方块与播种物都非空）。
+     * 它是三条新档案里唯一有作物方块与种子的一条。
+     */
+    public static final CropProfile FRIEND_CHIVES = throwable("friend_chives", "friend_chives_crop", "chive_seeds",
+            CropCategory.BUFF);
+    /**
+     * D-86：近防菌，v0.0.3 的第 21 条档案。部署型 + 炮台类；不可种植（方块与播种物为空）。
+     * kind 必须是 {@link DeployedKind#POINT_DEFENSE_FUNGUS}：置 null 会回落到 BLAST_CARROT（A-11）。
+     */
+    public static final CropProfile POINT_DEFENSE_FUNGUS = new CropProfile(
+            Farmstorm.id("point_defense_fungus"), CropType.DEPLOYABLE,
+            categorySet(CropCategory.TURRET),
+            null, null, DeployedKind.POINT_DEFENSE_FUNGUS, Set.of(AttachFace.FLOOR), OTHER_STACK_TIER);
+    /**
+     * D-90：震动豆，v0.0.3 的第 22 条档案。投掷型 + 陷阱类；不可种植（方块与播种物为空）。
+     * kind 必须是 {@link DeployedKind#VIBRATION_BEAN}：置 null 会回落到 BLAST_CARROT（A-11）。
+     */
+    public static final CropProfile VIBRATION_BEAN = new CropProfile(
+            Farmstorm.id("vibration_bean"), CropType.THROWABLE,
+            categorySet(CropCategory.TRAP),
+            null, null, DeployedKind.VIBRATION_BEAN, Set.of(AttachFace.FLOOR), THROWABLE_STACK_TIER);
+
     /** DEC §4 的 19 条，顺序即 00-DECISIONS §4 的行号。 */
     public static final List<CropProfile> ALL = List.of(
             PUFFED_WHEAT, BLAST_CARROT, UBI_SERVER, TOXIC_UBI_SERVER, POWER_BEET,

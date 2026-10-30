@@ -10,7 +10,7 @@ import net.minecraft.world.level.Level;
 import javax.annotation.Nullable;
 
 /**
- * 2 个数据驱动的伤害类型（D-39）。
+ * 3 个数据驱动的伤害类型（D-39 / D-96）。
  * 伤害类型的实例由数据包 JSON 提供，代码侧只持有 ResourceKey，因此不参与 DeferredRegister（R-02）。
  * 取用一律走这里的静态方法，保证 {@code #minecraft:is_projectile} / {@code #minecraft:is_explosion} 标签的语义
  * （爆炸保护与抗性附魔据此生效）在调用点不被绕开。
@@ -21,6 +21,9 @@ public final class FarmstormDamageTypes {
 
     /** 所有作物爆炸的伤害来源。 */
     public static final ResourceKey<DamageType> CROP_BLAST = key("crop_blast");
+
+    /** D-96：桑吉尔蔗的坠落伤害（数据驱动，{@code data/farmstorm/damage_type/zangief_slam.json} 由 F-132 落地）。 */
+    public static final ResourceKey<DamageType> ZANGIEF_SLAM = key("zangief_slam");
 
     private FarmstormDamageTypes() {}
 

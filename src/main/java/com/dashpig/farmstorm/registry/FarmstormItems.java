@@ -23,7 +23,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 27 个物品（TECH §2.2）：19 个作物 + 6 个独立播种物 + 2 个方块物品（转换器 / 压缩干草块）。
+ * 31 个物品（TECH §2.2）：22 个作物 + 7 个独立播种物 + 2 个方块物品（转换器 / 压缩干草块）。
  * 堆叠数按 D-16 分两档，实际数值来自 stack.*（§4.11.5）。
  */
 public final class FarmstormItems {
@@ -80,7 +80,23 @@ public final class FarmstormItems {
             properties -> new ThrowableCropItem(CropProfile.COMPRESSED_PUFFED_WHEAT,
                     FarmstormEntityTypes.COMPRESSED_PUFFED_WHEAT::get, properties));
 
-    // ---- 6 个独立播种物 ----
+    // ---- v0.0.3 新增的 4 条（TECH §2.2 #1–#4）----
+    /** D-84 / D-85：朋友的韭，投掷物是 {@code farmstorm:friend_chives}；落点结算由 F-115 填。 */
+    public static final DeferredItem<ThrowableCropItem> FRIEND_CHIVES = cropItem(CropProfile.FRIEND_CHIVES,
+            properties -> new ThrowableCropItem(CropProfile.FRIEND_CHIVES,
+                    FarmstormEntityTypes.FRIEND_CHIVES::get, properties));
+    /** D-84：朋友的韭的播种物；4 个 age 的种植形态由 F-114 填。 */
+    public static final DeferredItem<SeedItem> CHIVE_SEEDS = seedItem("chive_seeds", CropProfile.FRIEND_CHIVES);
+    /** D-86：近防菌。{@code DeployableCropItem} 是 BlockItem 子类，因此 {@code Item.BY_BLOCK} 有映射（§2.2 注 1）。 */
+    public static final DeferredItem<DeployableCropItem> POINT_DEFENSE_FUNGUS = cropItem(CropProfile.POINT_DEFENSE_FUNGUS,
+            properties -> new DeployableCropItem(CropProfile.POINT_DEFENSE_FUNGUS,
+                    FarmstormBlocks.POINT_DEFENSE_FUNGUS.get(), properties));
+    /** D-90 / D-92：震动豆是投掷型作物，**不是** BlockItem——同名方块因此没有 BlockItem 映射（§2.2 注 2）。 */
+    public static final DeferredItem<ThrowableCropItem> VIBRATION_BEAN = cropItem(CropProfile.VIBRATION_BEAN,
+            properties -> new ThrowableCropItem(CropProfile.VIBRATION_BEAN,
+                    FarmstormEntityTypes.VIBRATION_BEAN::get, properties));
+
+    // ---- 7 个独立播种物 ----
     public static final DeferredItem<SeedItem> PUFFED_WHEAT_SEEDS = seedItem("puffed_wheat_seeds", CropProfile.PUFFED_WHEAT);
     public static final DeferredItem<SeedItem> POWER_BEET_SEEDS = seedItem("power_beet_seeds", CropProfile.POWER_BEET);
     public static final DeferredItem<SeedItem> MELON_GRENADE_SEEDS = seedItem("melon_grenade_seeds", CropProfile.MELON_GRENADE);

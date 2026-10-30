@@ -5,6 +5,7 @@ import com.dashpig.farmstorm.entity.TurretBullet;
 import com.dashpig.farmstorm.entity.thrown.BambooFirecrackerProjectile;
 import com.dashpig.farmstorm.entity.thrown.BrownMushroomPuffProjectile;
 import com.dashpig.farmstorm.entity.thrown.CompressedPuffedWheatProjectile;
+import com.dashpig.farmstorm.entity.thrown.FriendChivesProjectile;
 import com.dashpig.farmstorm.entity.thrown.MelonGrenadeProjectile;
 import com.dashpig.farmstorm.entity.thrown.MelonSliceProjectile;
 import com.dashpig.farmstorm.entity.thrown.MolotovProjectile;
@@ -12,6 +13,7 @@ import com.dashpig.farmstorm.entity.thrown.PuffedWheatProjectile;
 import com.dashpig.farmstorm.entity.thrown.RedMushroomPuffProjectile;
 import com.dashpig.farmstorm.entity.thrown.ToxicUbiServerProjectile;
 import com.dashpig.farmstorm.entity.thrown.UbiServerProjectile;
+import com.dashpig.farmstorm.entity.thrown.VibrationBeanProjectile;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -19,7 +21,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 11 个实体类型（TECH §3.4）：10 个投掷物 + 1 个炮台导弹。
+ * 13 个实体类型（TECH §3.4）：12 个投掷物 + 1 个炮台导弹。
  * 全部 MISC、投影 0.25 格（导弹 0.3）、tracking 4 格、每 10 tick 同步一次。
  */
 public final class FarmstormEntityTypes {
@@ -48,6 +50,12 @@ public final class FarmstormEntityTypes {
             projectile("molotov", MolotovProjectile::new);
     public static final DeferredHolder<EntityType<?>, EntityType<CompressedPuffedWheatProjectile>> COMPRESSED_PUFFED_WHEAT =
             projectile("compressed_puffed_wheat", CompressedPuffedWheatProjectile::new);
+
+    // v0.0.3 的两条（TECH §2.2 #8/#9）：投掷参数与上面 10 个逐字一致（MISC / 0.25×0.25 / tracking 4 / interval 10）。
+    public static final DeferredHolder<EntityType<?>, EntityType<FriendChivesProjectile>> FRIEND_CHIVES =
+            projectile("friend_chives", FriendChivesProjectile::new);
+    public static final DeferredHolder<EntityType<?>, EntityType<VibrationBeanProjectile>> VIBRATION_BEAN =
+            projectile("vibration_bean", VibrationBeanProjectile::new);
 
     public static final DeferredHolder<EntityType<?>, EntityType<TurretBullet>> TURRET_BULLET =
             REGISTER.register("turret_bullet", () -> EntityType.Builder

@@ -7,7 +7,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 2 个 sound_events（TECH §2.2 #12~#13、§3.4），对应 {@code assets/farmstorm/sounds.json} 的两个事件。
+ * 3 个 sound_events（TECH §2.2 #12、§9.2），对应 {@code assets/farmstorm/sounds.json} 的三个事件。
  * 两个都用 {@code createVariableRangeEvent}：可听距离要由 sounds.json 的
  * {@code attenuation_distance}（16 格，D-76）与客户端 {@code SoundInstance} 一起决定，
  * 固定距离事件会把半径钉死在服务端。
@@ -25,6 +25,11 @@ public final class FarmstormSounds {
     public static final DeferredHolder<SoundEvent, SoundEvent> ZANGIEF_PILEDRIVER =
             REGISTER.register("zangief_piledriver",
                     () -> SoundEvent.createVariableRangeEvent(Farmstorm.id("zangief_piledriver")));
+
+    /** D-85：朋友的韭命中音，只在至少命中 1 个生物时播放一次（空投不响）。可听距离同样由 sounds.json 与客户端决定。 */
+    public static final DeferredHolder<SoundEvent, SoundEvent> FRIEND_CHIVES =
+            REGISTER.register("friend_chives",
+                    () -> SoundEvent.createVariableRangeEvent(Farmstorm.id("friend_chives")));
 
     private FarmstormSounds() {}
 }

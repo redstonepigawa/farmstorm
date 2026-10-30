@@ -12,14 +12,17 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 /**
  * 6 个 BlockEntityType（TECH §3.3）。
  * 部署物的 5 个类型都用同一个 DeployedCropBlockEntity 类，靠 BlockEntityType 区分（RT-04）。
+ * v0.0.3 的两个新部署方块挂进既有 type 的合法方块集合，type 总数仍是 6（§2.2 注 3）。
  */
 public final class FarmstormBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> REGISTER =
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Farmstorm.MOD_ID);
 
+    /** 一个 type 收两个方块：BLAST_CARROT 与 v0.0.3 的近防菌共用它（§2.2 注 3，仍是 6 个 type）。 */
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DeployedCropBlockEntity>> BLAST_CARROT =
             REGISTER.register("blast_carrot", () -> BlockEntityType.Builder
-                    .of(DeployedCropBlockEntity::new, FarmstormBlocks.BLAST_CARROT.get()).build(null));
+                    .of(DeployedCropBlockEntity::new, FarmstormBlocks.BLAST_CARROT.get(),
+                            FarmstormBlocks.POINT_DEFENSE_FUNGUS.get()).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DeployedCropBlockEntity>> PUMPKIN_TURRET =
             REGISTER.register("pumpkin_turret", () -> BlockEntityType.Builder
                     .of(DeployedCropBlockEntity::new, FarmstormBlocks.PUMPKIN_TURRET.get()).build(null));
@@ -29,11 +32,11 @@ public final class FarmstormBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DeployedCropBlockEntity>> AWAKENED_PITCHER_PLANT =
             REGISTER.register("awakened_pitcher_plant", () -> BlockEntityType.Builder
                     .of(DeployedCropBlockEntity::new, FarmstormBlocks.AWAKENED_PITCHER_PLANT.get()).build(null));
-    /** 一个 type 收两个方块：ZANGIEF_CANE 与 FANG_TRAP_CACTUS 共用它（代码侧靠 {@link #deployedOf} 分流）。 */
+    /** 一个 type 收三个方块：ZANGIEF_CANE、FANG_TRAP_CACTUS 与 v0.0.3 的震动豆共用它（代码侧靠 {@link #deployedOf} 分流）。 */
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DeployedCropBlockEntity>> FANG_TRAP_CACTUS =
             REGISTER.register("fang_trap_cactus", () -> BlockEntityType.Builder
                     .of(DeployedCropBlockEntity::new, FarmstormBlocks.FANG_TRAP_CACTUS.get(),
-                            FarmstormBlocks.ZANGIEF_CANE.get()).build(null));
+                            FarmstormBlocks.ZANGIEF_CANE.get(), FarmstormBlocks.VIBRATION_BEAN.get()).build(null));
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ConverterBlockEntity>> CONVERTER =
             REGISTER.register("converter", () -> BlockEntityType.Builder
                     .of(ConverterBlockEntity::new, FarmstormBlocks.CONVERTER.get()).build(null));
@@ -49,6 +52,8 @@ public final class FarmstormBlockEntities {
             case AWAKENED_PITCHER_PLANT -> AWAKENED_PITCHER_PLANT.get();
             case FANG_TRAP_CACTUS -> FANG_TRAP_CACTUS.get();
             case ZANGIEF_CANE -> FANG_TRAP_CACTUS.get();        // 复用既有 type：block_entities 仍 6
+            case POINT_DEFENSE_FUNGUS -> BLAST_CARROT.get();     // 同上：不为新方块新建 type（§2.2 注 3）
+            case VIBRATION_BEAN -> FANG_TRAP_CACTUS.get();       // 同上
         };
     }
 }

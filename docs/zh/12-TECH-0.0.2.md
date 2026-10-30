@@ -382,7 +382,7 @@ public final class FarmstormSounds {
     public static final DeferredRegister<SoundEvent> REGISTER =
             DeferredRegister.create(Registries.SOUND_EVENT, Farmstorm.MOD_ID);
 
-    /** D-76：循环音，可听距离 16 格由客户端 SoundInstance 与 sounds.json 共同决定。 */
+    /** D-76 + V-83：循环音，可听距离 32 格由服务端广播半径（读 config）与 sounds.json 的 attenuation_distance 共同决定。 */
     public static final DeferredHolder<SoundEvent, SoundEvent> WILD_HUNTER_LOOP =
             REGISTER.register("wild_hunter_loop",
                     () -> SoundEvent.createVariableRangeEvent(Farmstorm.id("wild_hunter_loop")));
@@ -396,7 +396,7 @@ public final class FarmstormSounds {
 }
 ```
 
-**关键方法**：无。用 `createVariableRangeEvent` 而不是 `createFixedRangeEvent`：循环音的可听距离要由 §6.3 的 `sounds.json` 与 `SoundInstance` 一起控制（16 格），固定距离事件会把半径钉死在服务端。
+**关键方法**：无。用 `createVariableRangeEvent` 而不是 `createFixedRangeEvent`：循环音的广播半径要读 `wild_hunter.loopSoundRange`（默认 32 格），再由 §6.3 的 `sounds.json` 与客户端 `SoundInstance` 一起控制衰减，固定距离事件会把半径钉死在服务端。
 
 **读哪些 config 键**：不读。
 **写哪些注册对象**：`farmstorm:wild_hunter_loop`、`farmstorm:zangief_piledriver`（sound_events ×2）。
@@ -825,9 +825,8 @@ public static void tick() {
 |---|---|---|
 | `active()` | `boolean`：本地玩家此刻是否带着 `wild_hunter` | §4.1 灰度、§4.2 剪影的第一行开关；在 `ClientTickEvent.Post` 里算一次，渲染线程只读快照 |
 | `highlightRadius()` | `double`：红色剪影的最大距离（格），默认 `64.0` | §4.2 的距离过滤；值来自 §8.4 的镜像常量 `DEFAULT_HIGHLIGHT_RADIUS` |
-| `loopRange()` | `double`：循环音可听距离（格），默认 `16.0` | §4.6 的衰减距离；值来自 §8.4 的镜像常量 `DEFAULT_LOOP_SOUND_RANGE` |
 
-为什么要镜像而不是读 config：`FarmstormConfig` 是 `ModConfig.Type.SERVER`，单人游戏里客户端能读到，专用服务器上读不到。所以 `wild_hunter.highlightRadius`（§8.1 #15）与 `wild_hunter.loopSoundRange`（§8.1 #16）在客户端一律由本类返回**镜像常量**，与 §4.4 的降级口径同一套规则：改 config 默认值时必须同步改镜像，否则客户端表现会滞后（登记为已知偏差，不修——修它要新包，违反 D-50）。
+为什么要镜像而不是读 config：`FarmstormConfig` 是 `ModConfig.Type.SERVER`，单人游戏里客户端能读到，专用服务器上读不到。所以 `wild_hunter.highlightRadius`（§8.1 #15）在客户端由本类返回**镜像常量**（`DEFAULT_HIGHLIGHT_RADIUS`），与 §4.4 的降级口径同一套规则：改 config 默认值时必须同步改镜像，否则客户端表现会滞后（登记为已知偏差，不修——修它要新包，违反 D-50）。**`wild_hunter.loopSoundRange`（§8.1 #16）不走镜像**：它只在服务端用来挑广播收件人，客户端不需要这个值（V-83 之后 `loopRange()` 已删除，`sounds.json` 的 `attenuation_distance` 作为静态镜像与默认值 32 保持一致）。
 
 **资源与两种挂载形态**：
 
@@ -1081,12 +1080,12 @@ MC 里玩家位置本来就是客户端权威（服务端只做速度校验）�
 
 **触发条件**：本地玩家身上存在 `wild_hunter`。
 
-**实现**：客户端一个自写的 `SoundInstance` 子类，`isLooping() = true`，可听距离取 `WildHunterClientState.loopRange()`（= `wild_hunter.loopSoundRange`，默认 16.0 格，范围 0.0–64.0），声音分类 `SoundSource.PLAYERS`。**位置口径是本节最容易写错的地方，按 V-53 的字面落地**：
+**实现**：可听距离**读 config** `wild_hunter.loopSoundRange`（默认 **32.0** 格，范围 0.0–64.0；`WildHunterClientState.loopRange()` 已在 V-70 清理死代码时删除，不要再引用它）。**别人的那份由服务端广播**：`playSound` 走 `ClientboundSoundEntityPacket`（绑定实体、不是固定坐标），按收件人计时、**每 900 刻重发一次**；**本人那份仍是客户端 `relative=true` 的 `SoundInstance`**，所以不会双份。声音分类 `SoundSource.PLAYERS`。**位置口径是本节最容易写错的地方，按 V-53 的字面落地**：
 
 | 谁 | `relative` | 坐标 | 衰减 | 音量 |
 |---|---|---|---|---|
 | **自己**（持有 `wild_hunter` 的那个客户端） | **`true`** | **归零**（`0, 0, 0`）——相对声源的坐标是「相对听者的偏移」，不是世界坐标 | `Attenuation.NONE` | 恒 `1.0` |
-| **别人**（同服其他玩家） | `false` | 每 tick 更新到该玩家的世界坐标 | `Attenuation.LINEAR`，交给引擎按 16 格衰减 | 恒 `1.0` |
+| **别人**（同服其他玩家） | `false` | 每 tick 更新到该玩家的世界坐标 | `Attenuation.LINEAR`，交给引擎按 `attenuation_distance`（32）衰减 | 恒 `1.0` |
 
 ```java
 // client/audio/WildHunterLoopSound.java
@@ -1120,7 +1119,7 @@ public final class WildHunterLoopSound extends SoundInstance {
 
 **为什么不用服务端每刻重发播放指令**（D-76 原文）：服务端每刻发 `ClientboundSoundPacket` 是 20 包/秒/玩家，而循环音的生命周期恰好等于效果的生命周期——效果的存在本身就已经告诉客户端「该播」。客户端自己起一个 `SoundInstance` 是 0 包。
 
-**16 格衰减的落点（V-53 已定论）**：不压 `getVolume()`——那会与引擎衰减叠成双重衰减；自己那条用 `Attenuation.NONE` + 归零坐标，别人的那条用 `Attenuation.LINEAR` 让引擎按 `sounds.json` 的 `attenuation_distance`（16）算。原稿的「该压 volume 还是可听距离钩子」这个待验证项就此关闭。
+**32 格衰减的落点（V-53 已定论）**：不压 `getVolume()`——那会与引擎衰减叠成双重衰减；自己那条用 `Attenuation.NONE` + 归零坐标，别人的那条用 `Attenuation.LINEAR` 让引擎按 `sounds.json` 的 `attenuation_distance`（32）算。原稿的「该压 volume 还是可听距离钩子」这个待验证项就此关闭。
 
 - **怎么验**：站到 8 / 16 / 17 / 32 格处各听一次，记录「能听到 / 听不到 / 音量是否随距离变小」。同时把 `getVolume()` 从 1.0 调到 4.0 看远处是否变响（体积放大会不会被当作「传得更远」）。
 - **判定**：17 格仍清楚听到 = 衰减半径没生效，需要改压 `sounds.json` 里该事件的 `attenuation_distance`（若该字段存在，**待验证，挂 RT-14**）或改用 `getVolume()` 的手工距离衰减。
@@ -1329,7 +1328,7 @@ BRIEF §7.7 要求「`sounds.json` 两个事件：`wild_hunter_loop`（循环）
     "category": "player",
     "subtitle": "subtitles.farmstorm.wild_hunter_loop",
     "sounds": [
-      { "name": "farmstorm:wild_hunter_loop", "stream": false, "attenuation_distance": 16 }
+      { "name": "farmstorm:wild_hunter_loop", "stream": false, "attenuation_distance": 32 }
     ]
   },
   "zangief_piledriver": {
@@ -1346,7 +1345,7 @@ BRIEF §7.7 要求「`sounds.json` 两个事件：`wild_hunter_loop`（循环）
 |---|---|---|
 | `category` | `player` | 对应 `SoundSource.PLAYERS`（D-76：不占 `MUSIC`，不打断原版背景音乐） |
 | `stream` | `false` | 循环音每次循环都要重读；`stream` 会在接缝处留缝。`Animals` 转换后是低码率 mono，整段进内存没有压力 |
-| `attenuation_distance` | `16` | D-76 的「衰减距离 16 格」= `wild_hunter.loopSoundRange` 的**默认值**的静态镜像（json 读不到 config；config 改成别的值时以 §4.6 的程序侧衰减为准）；**待验证（挂 RT-14）**：该字段在 1.21.1 的 `SoundDefinition.Sound`（`sounds.json` 条目）里的键名与语义是否就是「可听距离」——验法见 §4.6 |
+| `attenuation_distance` | `32` | D-76 的「衰减距离」= `wild_hunter.loopSoundRange` 的**默认值**（32）的静态镜像（json 读不到 config；config 改成别的值时以 §4.6 的程序侧广播半径为准）；**待验证（挂 RT-14）**：该字段在 1.21.1 的 `SoundDefinition.Sound`（`sounds.json` 条目）里的键名与语义是否就是「可听距离」——验法见 §4.6 |
 | `subtitle` | `subtitles.farmstorm.<事件名>` | 对应 §7.3 的两条字幕键（打开字幕后显示） |
 
 ### 6.4 转换脚本 `tools/convert_media.ps1`
@@ -1628,7 +1627,7 @@ gray.save(out / "assets/farmstorm/textures/block/compressed_hay_block.png")
 | 13 | `wild_hunter.attackSpeedBonusPercent` | double | 30.0 % | 0.0–1000.0 | 攻击速度加成 | plan0.0.2.txt 第 40 行 |
 | 14 | `wild_hunter.attackDamageBonusPercent` | double | 40.0 % | 0.0–1000.0 | 攻击伤害加成 | plan0.0.2.txt 第 40 行 |
 | 15 | `wild_hunter.highlightRadius` | double | 64.0 格 | 0.0–256.0 | 红色剪影的最大距离 | D-62 |
-| 16 | `wild_hunter.loopSoundRange` | double | 16.0 格 | 0.0–64.0 | 循环音的可听距离 | D-76 |
+| 16 | `wild_hunter.loopSoundRange` | double | **32.0** 格 | 0.0–64.0 | 循环音的广播半径（服务端按它挑收件人）；**注意它曾是死键**：默认值长期停在 16 且没有代码读它，V-83 才接进 `WildHunterAura` 的广播半径 | D-76 + V-83 |
 | 17 | `zangief_cane.triggerRadius` | double | 1.5 格 | 0.0–8.0 | 触发球半径（球形欧氏距离） | D-73 |
 | 18 | `zangief_cane.stageDelayTicks` | int | 14 刻 | 0–200 | 相位 0（已倒转、等待抬升）的时长 | D-69 |
 | 19 | `zangief_cane.riseHeightBlocks` | int | **16** 格 | 1–64 | 相位 1 的总抬升高度（伺服上抬）。默认 16 而不是 15：取 15 实测只到 14.01 格，16 才实测 14.86 格 | 作者实机口径 |
@@ -1675,7 +1674,7 @@ speedBonusPercent = 30.0           # +30% 移速
 attackSpeedBonusPercent = 30.0     # +30% 攻速
 attackDamageBonusPercent = 40.0    # +40% 攻击伤害
 highlightRadius = 64.0             # D-62：红色剪影最大距离（格）
-loopSoundRange = 16.0              # D-76：循环音可听距离（格）
+loopSoundRange = 32.0              # D-76 + V-83：循环音广播半径（格）
 
 [zangief_cane]
 triggerRadius = 1.5                # D-73：球形 1.5 格
@@ -1761,7 +1760,7 @@ v0.0.1 的 C-6 是「0 个自定义网络包」；v0.0.2 的 13 个新注册对�
 | 「红色剪影的目标列表」 | 不需要下发列表：客户端自己遍历视野内的 `LivingEntity`，判据（距离 / 视线 / 队伍）都在客户端本地可算，且 D-62 只要求「给可见的、给自己看」 |
 | 「相位号」 | 就是 amplifier（#2） |
 | 「冲刺目标」 | 客户端自己算（服务端用同一份算法复核），BRIEF §7.6 的流程里没有一步需要服务端告诉客户端目标是谁 |
-| 「16 格可听距离」 | `sounds.json` 的 `attenuation_distance` + `SoundInstance` 在客户端本地 |
+| 「32 格可听距离」 | 服务端广播半径（`wild_hunter.loopSoundRange`，默认 32）+ `sounds.json` 的 `attenuation_distance`（32）+ 客户端 `SoundInstance` |
 | 「相位的精确切换时刻」 | 每个相位一个新的效果包，包本身带 duration，客户端用 duration 倒计时就能推出切换 |
 
 代价（对比 v0.0.1 的选择，`02-TECH-SPEC.md` §5.5 已列过一次）：新增包要写 `CustomPacketPayload` + `PayloadType` 注册 + 两端 handler + 版本兼容，还要为「客户端与服务端的相位号不一致」单独设计纠错——而全部收益只是省掉几个原版包的解析。在 D-50 已经判死的前提下，这条路的成本收益是负的。

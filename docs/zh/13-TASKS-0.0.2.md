@@ -434,11 +434,11 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 
 - **复杂度**：M ｜ **折算人日**：1.5
 - **依赖**：F-76
-- **交付物**：`client/WildHunterLoopSound.java`（`isLooping() = true`、`SoundSource.PLAYERS`、可听距离读 `wild_hunter.loopSoundRange` 16.0；**位置口径按 V-53**：自己那条 `relative = true` + 坐标**归零** + `Attenuation.NONE` + `getVolume()` 恒 1.0，别人的那条 `relative = false` + 世界坐标 + `Attenuation.LINEAR` 交给引擎按 16 格衰减——不要每刻手写音量，否则与引擎衰减叠成双重衰减）
+- **交付物**：`client/WildHunterLoopSound.java`（`isLooping() = true`、`SoundSource.PLAYERS`、可听距离读 `wild_hunter.loopSoundRange` **32.0**（服务端广播半径，V-83）；**位置口径按 V-53**：自己那条 `relative = true` + 坐标**归零** + `Attenuation.NONE` + `getVolume()` 恒 1.0，别人的那条 `relative = false` + 世界坐标 + `Attenuation.LINEAR` 交给引擎按 16 格衰减——不要每刻手写音量，否则与引擎衰减叠成双重衰减）
 - **验收**：
-  1. 双人实测：A 开效果，B 距 8 格能听到、20 格听不到（16 格衰减生效）；**A 自己横向左右平移时声音不卡顿、声像不来回跳**（`relative=true` + 归零坐标，V-53）。
+  1. 双人实测：A 开效果，B 距 8 格能听到、40 格听不到（**32 格**衰减生效）；**A 自己横向左右平移时声音不卡顿、声像不来回跳**（`relative=true` + 归零坐标，V-53）。
   2. 原版背景音乐不被切断：同时 `/playsound minecraft:music.game` 与循环音并存（分类是 `PLAYERS` 不是 `MUSIC`，D-76）。
-  3. `/effect clear @s farmstorm:wild_hunter` 后 1 刻内停止；玩家死亡重生后不残留循环音；音量恒 1.0（改 `loopSoundRange` 只影响别人的可听距离，不影响自己的音量）。
+  3. `/effect clear @s farmstorm:wild_hunter` 后 1 刻内停止；玩家死亡重生后不残留循环音；音量恒 1.0（改 `loopSoundRange` 只影响别人的可听距离，不影响自己的音量；**该键此前是死键，V-83 才接进广播半径**，所以现在改它才真的有效）。
   4. 服务端不逐刻重发播放指令：`logs/latest.log` 里 `wild_hunter_loop` 整段效果期间不超过 2 行。
 
 #### F-85 · Phase 13 出口回归
@@ -710,7 +710,7 @@ F-98 三个进度 0.5 ── F-97 语言 39 键 0.5 ── F-99 四计数核对 
 | 13 | `wild_hunter.attackSpeedBonusPercent` | 30.0 % | F-61 | F-76 |
 | 14 | `wild_hunter.attackDamageBonusPercent` | 40.0 % | F-61 | F-76 |
 | 15 | `wild_hunter.highlightRadius` | 64.0 格 | F-61 | F-83 |
-| 16 | `wild_hunter.loopSoundRange` | 16.0 格 | F-61 | F-84 |
+| 16 | `wild_hunter.loopSoundRange` | **32.0** 格 | F-61 | F-84 |
 | 17 | `zangief_cane.triggerRadius` | 1.5 格 | F-61 | F-87 |
 | 18 | `zangief_cane.stageDelayTicks` | 14 刻 | F-61 | F-88 |
 | 19 | `zangief_cane.riseHeightBlocks` | **16** 格 | F-61 | F-89 |
@@ -828,7 +828,7 @@ M7 ~ M11 与 Phase 11 ~ Phase 15 一一对应。每个里程碑给两个工作�
 
 ### M9 · 狂野猎人与两项表现层（Phase 13）
 
-- **完成判据**：① `12-TECH-0.0.2.md §11` 的 #13 / #14 / #15 三条全过；② 世界灰度、HUD 原色（`§11 #5` 的 shader 无报错 + 帧率差 < 3 ms，V-56）；③ 循环音 16 格衰减成立且不切断原版背景音乐；④ `CustomPacketPayload` 与 `Mixin` 的匹配数都为 0。
+- **完成判据**：① `12-TECH-0.0.2.md §11` 的 #13 / #14 / #15 三条全过；② 世界灰度、HUD 原色（`§11 #5` 的 shader 无报错 + 帧率差 < 3 ms，V-56）；③ 循环音 32 格广播与衰减成立且不切断原版背景音乐；④ `CustomPacketPayload` 与 `Mixin` 的匹配数都为 0。
 - **该里程碑结束时能做什么**：吃一颗狂野苹果进入 35 秒的狂野猎人——三项属性加成、对 5 格内准星最近的生物吸附冲刺、伤害与击退、击杀续时无上限；画面世界黑白（物品栏与血条保持彩色）、可见生物画红剪影、狩猎音乐跟着自己走。
 
 ### M10 · 桑吉尔蔗与输入锁（Phase 14）

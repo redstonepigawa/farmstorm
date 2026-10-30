@@ -274,7 +274,7 @@
 | F-81 | 击杀续时无次数上限 | S / 0.5 | F-80 | 每杀一个生物剩余时长 +160 刻、回复 10 点生命，不写任何计数器（D-74） |
 | F-82 | 世界灰度（HUD 保持原色） | L / 3.0 | F-60、F-76 | 原版 `PostChain`：`GameRenderer#loadEffect` 加载 `shaders/post/grayscale.json`（`targets` 必须是数组）+ `shaders/program/grayscale.json` + `shaders/core/grayscale.fsh`；`post_effect/grayscale.json` 保留为预留挂载点（当前无加载器） |
 | F-83 | 红色剪影：可见 + 不超过 64 格 | M / 1.5 | F-76 | `RenderLivingEvent.Post` 用 `LivingEntityRenderer#render(...)` 重绘、`MultiBufferSource` **按顶点格式过滤**（V-58）+ `hasLineOfSight` + 距离 ≤ 64；颜色烘进 `textures/misc/wild_hunter_red.png`（V-60）；`AFTER_ENTITIES` 捕获相机、`RenderGuiEvent.Pre` 在灰度之后重画 |
-| F-84 | 循环音 `SoundInstance` | M / 1.5 | F-76 | 客户端循环音实例，`isLooping() = true`、可听距离 16 格、`SoundSource.PLAYERS`；自己那条 `relative=true` + 坐标归零 + `Attenuation.NONE`、别人的 `relative=false` + 世界坐标 + `LINEAR`，音量恒 1.0（V-53） |
+| F-84 | 循环音 `SoundInstance` | M / 1.5 | F-76 | 客户端循环音实例，`isLooping() = true`、可听距离 **32 格**（`loopSoundRange` 默认 32，V-83）、`SoundSource.PLAYERS`；自己那条 `relative=true` + 坐标归零 + `Attenuation.NONE`、别人的 `relative=false` + 世界坐标 + `LINEAR`，音量恒 1.0（V-53） |
 | F-85 | Phase 13 出口回归 | S / 0.5 | F-77、F-79、F-80、F-81、F-82、F-83、F-84 | 七项能力一次跑通 + `§11 #13 / #14 / #15` 三条自检 + 0 包 0 Mixin |
 
 ### 4.4 本阶段出口判据
@@ -293,7 +293,7 @@
 - [ ] **F-81 连杀 6 只**：每次击杀后读 `/effect`。通过的样子：每只剩余时长 **+160 刻**、日志出现 6 行 `狂野猎人 续时`；第 6 次之后效果仍在；生命每次 +10 点；`git grep -nE "killCount|maxKill"` 无输出。
 - [ ] **F-82 世界灰度**：开效果后截一张带物品栏与聊天栏的 F3 图。通过的样子：**世界黑白、HUD 保持原色**（方块 / 实体 / 粒子为灰度，红心、绿色经验条、聊天栏彩色文字不变，V-56）；客户端日志无 `Could not load program` / `Shader … could not be loaded` 与 `GL_INVALID`；开与不开效果的 F3 `ms` 差 < 3 ms；`/effect clear` 后 1 刻内恢复彩色。
 - [ ] **F-83 剪影三条件**：站 5 格内直视一只猪、65 格外、墙前 / 墙后各一次；再把**带拴绳的生物**拉进 64 格内（V-58 的崩溃场景）。**并且必须人工看图**：剪影与本体轮廓贴合、**没有倒挂、没有悬空 1.5 格**（V-50 的两个变换），**无光洞穴里亮度不变**（`FULL_BRIGHT`）——红色像素计数只能证明「有没有红」，不能判断「像不像」。通过的样子：只有「≤ 64 格 + 无遮挡 + 非己方」的生物被画红色剪影，自己与同队玩家不画；客户端日志无 `StackOverflowError`，F3 `ms` 差 < 3 ms；把 `highlightRadius` 改成 `8.0` 后 10 格外的生物不再被画。
-- [ ] **F-84 循环音**：双人实测距离，**再让 A 自己左右平移跑一遍**，同时 `/playsound minecraft:music.game`。通过的样子：距 8 格能听到、20 格听不到（16 格衰减）；**A 自己横向平移时声音不卡顿、声像不来回跳**（V-53：`relative=true` + 归零坐标）；原版背景音乐不被切断（分类是 `PLAYERS` 不是 `MUSIC`）；`/effect clear` 后 1 刻内停；死亡重生不残留；整段效果期间 `latest.log` 里 `wild_hunter_loop` 不超过 2 行。
+- [ ] **F-84 循环音**：双人实测距离，**再让 A 自己左右平移跑一遍**，同时 `/playsound minecraft:music.game`。通过的样子：距 8 格能听到、40 格听不到（32 格衰减）；**A 自己横向平移时声音不卡顿、声像不来回跳**（V-53：`relative=true` + 归零坐标）；原版背景音乐不被切断（分类是 `PLAYERS` 不是 `MUSIC`）；`/effect clear` 后 1 刻内停；死亡重生不残留；整段效果期间 `latest.log` 里 `wild_hunter_loop` 不超过 2 行。
 - [ ] **F-85 出口回归**：跑一遍七项 + 两条结构性断言。通过的样子：`12-TECH` §11 #13 / #14 / #15 三条全过；`/effect clear @s` 后七项全部复位；`grep -r "CustomPacketPayload" src/main/java` 为 0 处；Mixin 查**实际用法**——`@Mixin` 注解 0 处、`mixins*.json` 0 个、`org.spongepowered` 引用 0 处、`build.gradle` 无 mixin 依赖（`grep -rn "Mixin"` 的 5 处命中全是解释性 javadoc，保留，V-47）。
 
 ### 4.5 常见翻车点
@@ -468,7 +468,7 @@
 |---|---|
 | Phase 11 → 12 | 上一阶段（Phase 11 · 基座与注册增量）已完成：`.tools\gw.cmd build` 退出码 0 并产出 `farmstorm-0.0.2+mc1.21.1.jar`，四条自检行全 OK（19 种作物 / 77 个注册对象 / 16 条浆果池 / 11-11 渲染器），`farmstorm-server.toml` 叶节点 139。本阶段开始 Phase 12 · 压缩物与莫洛托夫！，请按 15-PROMPT-TASKS-0.0.2.md「Phase 12」一节执行，先逐条确认「投喂前必须已就绪」再动第一行代码，只做 F-67 ~ F-75，完成后按 14-PROMPT-MAIN-0.0.2.md 的回报格式交回。 |
 | Phase 12 → 13 | 上一阶段（Phase 12 · 压缩物与莫洛托夫！）已完成：5 条新配方可用、投莫洛托夫只追加火与岩浆块且原方块一个不少、压缩干草块对瓜！与瓜片子不破而对育碧服务器与 TNT 破、转换配方总数 24。本阶段开始 Phase 13 · 狂 野 猎 人，请按 15-PROMPT-TASKS-0.0.2.md「Phase 13」一节执行，只做 F-76 ~ F-85，完成后按 14 的回报格式交回。 |
-| Phase 13 → 14 | 上一阶段（Phase 13 · 狂 野 猎 人）已完成：三项属性加成、5 格 30° 吸附冲刺、伤害与击退、击杀续时无上限、世界灰度（HUD 保持原色）、可见生物红剪影、16 格循环音七项均可观察，`/effect clear` 后全部复位，`CustomPacketPayload` 与 `Mixin` 匹配数都为 0。本阶段开始 Phase 14 · 桑吉尔蔗，请按 15-PROMPT-TASKS-0.0.2.md「Phase 14」一节执行，只做 F-86 ~ F-93，完成后按 14 的回报格式交回。 |
+| Phase 13 → 14 | 上一阶段（Phase 13 · 狂 野 猎 人）已完成：三项属性加成、5 格 30° 吸附冲刺、伤害与击退、击杀续时无上限、世界灰度（HUD 保持原色）、可见生物红剪影、32 格循环音七项均可观察，`/effect clear` 后全部复位，`CustomPacketPayload` 与 `Mixin` 匹配数都为 0。本阶段开始 Phase 14 · 桑吉尔蔗，请按 15-PROMPT-TASKS-0.0.2.md「Phase 14」一节执行，只做 F-86 ~ F-93，完成后按 14 的回报格式交回。 |
 | Phase 14 → 15 | 上一阶段（Phase 14 · 桑吉尔蔗）已完成：三相位（倒转 → 伺服上抬 16 格 / 15 刻 → 还重力自由下坠 + 自转）按时序走完（**14 / 15 / 22 刻**），抬升 14.86 格、坠落伤害 12.00，21 项键位手测只有 ESC 例外，`/data get entity @s Rotation` 全程不变。本阶段开始 Phase 15 · 资源、音频、进度与验收，请按 15-PROMPT-TASKS-0.0.2.md「Phase 15」一节执行，内部按 F-94 → F-95 → F-96 → F-98 → F-97 → F-99 的顺序做，完成后按 14 的回报格式交回。 |
 | Phase 15 → 收尾 | 上一阶段（Phase 15 · 资源、音频、进度与验收）已完成：资源 305 / 语言 263（中英相等）/ config 139 / 注册对象 77 四项对齐，`12-TECH` §11 的 23 条自检逐条留读数，`dist/farmstorm-0.0.2+mc1.21.1.jar` 已产出。现在按 15-PROMPT-TASKS-0.0.2.md §8 的「全项目收尾提示词」做一次发布前自检，只核对与修复，不新增任何功能。 |
 

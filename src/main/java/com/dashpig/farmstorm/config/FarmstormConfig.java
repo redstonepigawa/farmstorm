@@ -750,7 +750,7 @@ public final class FarmstormConfig {
                 .defineInRange("highlightRadius", 64.0, 0.0, 256.0);
         wildHunterLoopSoundRange = b.comment("D-76：循环音的可听距离")
                 .translation(tr("wild_hunter.loopSoundRange"))
-                .defineInRange("loopSoundRange", 16.0, 0.0, 64.0);
+                .defineInRange("loopSoundRange", 32.0, 0.0, 64.0);
         b.pop();
 
         b.push("zangief_cane");

@@ -799,7 +799,7 @@ Three details (【本文补充】): ① it is 'add 160 ticks', not 'set to 160 t
 | Source file | `Animals_from_3m04s.mp3` (a clip from 3m04s on, 47.14 s) converted to mono / 64 kbps Ogg Vorbis | D-53, D-66 + V-51 |
 | Playing party | one looping `SoundInstance` on the client, not re-sent by the server every tick | D-76 |
 | Position | **your own instance**: `relative=true`, coordinates **zeroed**, `Attenuation.NONE`, volume fixed at 1.0; **everyone else's**: `relative=false`, updated to their world position every tick, `Attenuation.LINEAR` (V-53) | D-76 |
-| Audible distance | 16 blocks | D-76 |
+| Audible distance | **32 blocks** (`wild_hunter.loopSoundRange` default 32) | D-76 + V-83 |
 | Sound category | `SoundSource.PLAYERS` | D-76 |
 | Start condition | the client detects `farmstorm:wild_hunter` appearing on the local player | D-50 |
 | Stop condition | effect disappears / player dies / quits the world, stop immediately | 【本文补充】 |
@@ -983,7 +983,7 @@ Key names are written uniformly as `<group>.<key>` (ruling A-04); language keys 
 | 13 | `wild_hunter.attackSpeedBonusPercent` | double | 30.0 % | 0.0–1000.0 | attack speed bonus | line 40 of `plan0.0.2.txt` |
 | 14 | `wild_hunter.attackDamageBonusPercent` | double | 40.0 % | 0.0–1000.0 | attack damage bonus | line 40 of `plan0.0.2.txt` |
 | 15 | `wild_hunter.highlightRadius` | double | 64.0 blocks | 0.0–256.0 | maximum distance of the red silhouette | D-62 |
-| 16 | `wild_hunter.loopSoundRange` | double | 16.0 blocks | 0.0–64.0 | audible distance of the looping sound | D-76 |
+| 16 | `wild_hunter.loopSoundRange` | double | **32.0** blocks | 0.0–64.0 | broadcast radius of the looping sound (the server picks recipients with it); a dead key until V-83 wired it in | D-76 + V-83 |
 | 17 | `zangief_cane.triggerRadius` | double | 1.5 blocks | 0.0–8.0 | radius of the trigger sphere (spherical Euclidean distance) | D-73 |
 | 18 | `zangief_cane.stageDelayTicks` | int | 14 ticks | 0–200 | duration of phase 0 (inverted, waiting for the lift) | D-69 |
 | 19 | `zangief_cane.riseHeightBlocks` | int | **16** blocks | 1–64 | total lift of phase 1 (servo); with 15 the measurement is only 14.01 blocks | author's in-game wording |
@@ -1089,7 +1089,7 @@ The numbering follows the style of §7 in `01-DESIGN.md`; this section is renumb
 - **Category isolation**: the looping sound goes through `SoundSource.PLAYERS` (D-76) and the jukebox through `SoundSource.RECORDS`; the two volume sliders in settings are independent and neither ducks the other.
 - **It does not take MUSIC**: so it **does not interrupt** vanilla background music (the explicit requirement of D-76). That is the only reason `PLAYERS` was chosen over `MUSIC`.
 - **Several instances coexist**: when two players hold Wild Hunter at the same time, both looping sounds exist, each following its own owner; they are not mutually exclusive, not merged and not noise-gated. 【本文补充】
-- **16-block attenuation**: beyond 16 blocks the sound falls off linearly to inaudible under vanilla rules. Whether 1.21.1 achieves this by clamping `getVolume` or by the audible-distance hook is an implementation-phase measurement item (the open point of BRIEF §7.7); the document fixes only the number '16 blocks'.
+- **32-block attenuation**: beyond 32 blocks the sound falls off linearly to inaudible under vanilla rules (`sounds.json`'s `attenuation_distance` = 32). Whether 1.21.1 achieves this by clamping `getVolume` or by the audible-distance hook is an implementation-phase measurement item (the open point of BRIEF §7.7); the document fixes only the number '16 blocks'.
 - **Stop has exactly three triggers**: the effect disappears, the player dies, the player quits the world. The server does not re-send play / stop instructions every tick (D-76), so there is no state split in which 'the server and the client each own half'.
 - **Conflicts with audio mods**: no runtime detection and no degradation (the same handling as RT-16); if a third-party mod has taken over sound categories, it wins and this mod does not fight for them.
 

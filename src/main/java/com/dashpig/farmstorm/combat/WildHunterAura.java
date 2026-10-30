@@ -57,11 +57,8 @@ public final class WildHunterAura {
      * 空档会让听者以为「效果结束了」。
      */
     private static final int LOOP_BROADCAST_INTERVAL_TICKS = 900;
-    /**
-     * 广播半径（格）：与 {@code sounds.json} 里本曲的 {@code attenuation_distance: 32} 对齐——
-     * 32 格外的玩家本来就听不见，发包纯属浪费带宽。
-     */
-    private static final double LOOP_BROADCAST_RADIUS = 32.0;
+    // 广播半径不在这里写常量：读 config 的 wild_hunter.loopSoundRange（默认 32），与 sounds.json 的
+    // attenuation_distance: 32 对齐。曾被写死成 32、而 config 默认值停在 16 ⇒ 那个键没有代码读，改了也无效。
     /**
      * 「这一对（持有者, 收件人）上次发包的 gameTime」。
      * <p>为什么按**收件人**计时而不是按持有者：按持有者统一发的话，刚走进 32 格的人、以及刚重连的人，
@@ -187,7 +184,7 @@ public final class WildHunterAura {
      *   <li><b>排除持有者本人</b>——他自己的那份由客户端 {@code WildHunterLoopSound}（{@code relative=true}）播放，
      *       这里再发一份他就会听到两层，表现为回声/叠加；</li>
      *   <li>原版包只播**一次**（本曲 47.14 s），所以按 {@link #LOOP_BROADCAST_INTERVAL_TICKS} 周期重发；</li>
-     *   <li>只发给 {@link #LOOP_BROADCAST_RADIUS} 内的玩家，与 {@code attenuation_distance: 32} 对齐。</li>
+     *   <li>只发给 {@code wild_hunter.loopSoundRange}（默认 32 格）内的玩家，与 {@code attenuation_distance: 32} 对齐。</li>
      * </ul>
      * 效果结束时不需要发「停止」：{@link #clear(ServerPlayer)} 摘掉重发记录，最后一次播放会在曲末自然结束。
      */
@@ -199,7 +196,8 @@ public final class WildHunterAura {
         // 玩家一走开声音留在原地（作者实测报的正是这个）。EntityBoundSoundInstance 每刻从实体读坐标，声音跟着人走。
         // 持有者本人就是那个实体（ServerPlayer 是 Entity）。
         long now = level.getGameTime();
-        double radiusSqr = LOOP_BROADCAST_RADIUS * LOOP_BROADCAST_RADIUS;
+        double radius = FarmstormConfig.wildHunterLoopSoundRange.get();
+        double radiusSqr = radius * radius;
         int sent = 0;
         for (ServerPlayer listener : level.players()) {
             if (listener == holder || listener.distanceToSqr(holder) > radiusSqr) {
@@ -218,7 +216,7 @@ public final class WildHunterAura {
         }
         if (sent > 0) {
             Farmstorm.LOGGER.info("狂野猎人 循环音 广播 t={} 持有者 {} → {} 人（半径 {} 格，排除持有者）",
-                    now, holder.getGameProfile().getName(), sent, (int) LOOP_BROADCAST_RADIUS);
+                    now, holder.getGameProfile().getName(), sent, (int) radius);
         }
     }
 

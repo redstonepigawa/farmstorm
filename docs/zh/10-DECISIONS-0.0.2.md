@@ -283,7 +283,7 @@ D:\project_farm\docs\zh\
 #### D-76 · 循环音用客户端 SoundInstance
 
 - **编号**：D-76
-- **结论**：Animals 由客户端一个循环 `SoundInstance` 持续播放，音源跟随玩家，衰减距离 16 格，声音分类 `SoundSource.PLAYERS`（不占用 `MUSIC`，不打断原版背景音乐）。服务端不每刻重发播放指令。
+- **结论**：Animals 由客户端一个循环 `SoundInstance` 持续播放，音源跟随玩家，衰减距离 16 格（V-83 校准：现为 **32 格**，见 `12-TECH §4.6`），声音分类 `SoundSource.PLAYERS`（不占用 `MUSIC`，不打断原版背景音乐）。服务端不每刻重发播放指令。
 - **依据**：服务端逐刻下发播放指令会产生大量原版包，且玩家移动时声音会抖；客户端循环 `SoundInstance` 自己跟随玩家，是唯一既不加包（D-50）又不抖动的做法。分类用 `PLAYERS` 才不会占用 `MUSIC` 通道、打断原版背景音乐。
 - **落地位置**：`client/FarmstormClient.java`（`SoundInstance` 子类，`isLooping() = true`，每 tick 更新位置）；`assets/farmstorm/sounds.json`（`wild_hunter_loop`）；`12-TECH-0.0.2.md` 的音频节与 RT-14。
 

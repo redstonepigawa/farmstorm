@@ -381,7 +381,7 @@ public final class FarmstormSounds {
     public static final DeferredRegister<SoundEvent> REGISTER =
             DeferredRegister.create(Registries.SOUND_EVENT, Farmstorm.MOD_ID);
 
-    /** D-76: looping sound; the 16-block audible range is decided jointly by the client SoundInstance and sounds.json. */
+    /** D-76 + V-83: looping sound; the 32-block range is decided jointly by the server broadcast radius (read from config) and sounds.json's attenuation_distance. */
     public static final DeferredHolder<SoundEvent, SoundEvent> WILD_HUNTER_LOOP =
             REGISTER.register("wild_hunter_loop",
                     () -> SoundEvent.createVariableRangeEvent(Farmstorm.id("wild_hunter_loop")));
@@ -395,7 +395,7 @@ public final class FarmstormSounds {
 }
 ```
 
-**Key methods**: none. `createVariableRangeEvent` is used instead of `createFixedRangeEvent` because the audible range of the looping sound must be controlled by `sounds.json` (§6.3) together with the `SoundInstance` (16 blocks); a fixed-range event pins the radius on the server.
+**Key methods**: none. `createVariableRangeEvent` is used instead of `createFixedRangeEvent` because the broadcast radius of the looping sound reads `wild_hunter.loopSoundRange` (default 32 blocks) and is then attenuated by `sounds.
 
 **Which config keys it reads**: none.
 **Which registry objects it writes**: `farmstorm:wild_hunter_loop`, `farmstorm:zangief_piledriver` (sound_events ×2).
@@ -832,9 +832,8 @@ public static void tick() {
 |---|---|---|
 | `active()` | `boolean`: whether the local player carries `wild_hunter` at this moment | the first-line switch of grayscale in §4.1 and of the silhouette in §4.2; computed once in `ClientTickEvent.Post`, the render thread only reads the snapshot |
 | `highlightRadius()` | `double`: maximum distance of the red silhouette (blocks), default `64.0` | the distance filter of §4.2; the value comes from the mirror constant `DEFAULT_HIGHLIGHT_RADIUS` of §8.4 |
-| `loopRange()` | `double`: audible range of the looping sound (blocks), default `16.0` | the attenuation distance of §4.6; the value comes from the mirror constant `DEFAULT_LOOP_SOUND_RANGE` of §8.4 |
 
-Why mirror instead of reading the config: `FarmstormConfig` is `ModConfig.Type.SERVER`, readable by the client in single-player but not on a dedicated server. So `wild_hunter.highlightRadius` (§8.1 #15) and `wild_hunter.loopSoundRange` (§8.1 #16) are always returned by this class as **mirror constants** on the client, the same rule as the degradation convention of §4.4: changing a config default requires changing the mirror in step, otherwise the client lags (registered as a known deviation, not fixed — fixing it needs a new packet, violating D-50).
+Why mirror instead of reading the config: `FarmstormConfig` is `ModConfig.Type.SERVER`, readable by the client in single-player but not on a dedicated server. So `wild_hunter.highlightRadius` (§8.1 #15) is returned by this class as a mirror constant (`DEFAULT_HIGHLIGHT_RADIUS`) under the same rule as the degradation convention of §4.4. **`wild_hunter.loopSoundRange` (§8.1 #16) is not mirrored**: the server alone uses it to pick broadcast recipients, the client never needs the value (after V-83 `loopRange()` is gone, and `sounds.json`'s `attenuation_distance` acts as the static mirror of the default 32).
 
 **Resources and which file actually runs**:
 
@@ -1074,12 +1073,12 @@ In MC the player position is client-authoritative to begin with (the server only
 
 **Trigger condition**: `farmstorm:wild_hunter` present on the local player.
 
-**Implementation**: one hand-written `SoundInstance` subclass on the client, `isLooping() = true`, audible range from `WildHunterClientState.loopRange()` (= `wild_hunter.loopSoundRange`, default 16.0 blocks, range 0.0–64.0), sound category `SoundSource.PLAYERS`. **The position convention is the easiest thing to get wrong in this section; land it literally as V-53 says**:
+**Implementation**: the audible range is **read from config** `wild_hunter.loopSoundRange` (default **32.0** blocks, range 0.0–64.0; `WildHunterClientState.loopRange()` was deleted during the V-70 dead-code cleanup and must not be referenced again). **Everyone else's copy is broadcast by the server**: `playSound` goes out as `ClientboundSoundEntityPacket` (bound to the entity, not a fixed position), timed per recipient and **re-sent every 900 ticks**; **your own copy is still the client-side `relative=true` `SoundInstance`**, so nothing is doubled. Sound category `SoundSource.PLAYERS`.
 
 | Who | `relative` | Coordinates | Attenuation | Volume |
 |---|---|---|---|---|
 | **Yourself** (the client carrying `wild_hunter`) | **`true`** | **zeroed** (`0, 0, 0`) — a relative source's coordinates are an offset from the listener, not world coordinates | `Attenuation.NONE` | fixed at `1.0` |
-| **Everyone else** (other players on the server) | `false` | updated to that player's world position every tick | `Attenuation.LINEAR`, letting the engine attenuate over 16 blocks | fixed at `1.0` |
+| **Everyone else** (other players on the server) | `false` | updated to that player's world position every tick | `Attenuation.LINEAR`, letting the engine attenuate over `attenuation_distance` (32) |
 
 ```java
 // client/audio/WildHunterLoopSound.java
@@ -1113,7 +1112,7 @@ public final class WildHunterLoopSound extends SoundInstance {
 
 **Why not re-send a play instruction from the server every tick** (D-76, verbatim): sending `ClientboundSoundPacket` every tick from the server is 20 packets/second/player, whereas the lifetime of the looping sound is exactly the lifetime of the effect — the presence of the effect already tells the client "play it". A client-side `SoundInstance` is 0 packets.
 
-**Where the 16-block attenuation lands (settled by V-53)**: it does not drive `getVolume()` — that would stack with the engine attenuation into double attenuation; your own copy uses `Attenuation.NONE` with zeroed coordinates, and everyone else's uses `Attenuation.LINEAR` so the engine applies the `attenuation_distance` (16) from `sounds.json`. The original pending item ("volume or the audible-range hook") is closed.
+**Where the 32-block attenuation lands (settled by V-53)**: it does not drive `getVolume()` — that would stack with the engine attenuation into double attenuation; your own copy uses `Attenuation.NONE` with zeroed coordinates, and everyone else's uses `Attenuation.LINEAR` so the engine applies the `attenuation_distance` (32) from `sounds.json`. The original pending item ("volume or the audible-range hook") is closed.
 
 - **How to verify**: stand at 8 / 16 / 17 / 32 blocks and listen once at each, recording "audible / not audible / does the volume fall with distance". Also raise `getVolume()` from 1.0 to 4.0 and check whether it gets louder at distance (whether a larger volume is treated as "carrying farther").
 - **Verdict**: still clearly audible at 17 blocks means the attenuation radius is not taking effect, and it must instead drive `attenuation_distance` of that event in `sounds.json` (if the field exists, **pending verification, attached to RT-14**) or switch to a manual distance attenuation through `getVolume()`.
@@ -1321,7 +1320,7 @@ BRIEF §7.7 requires "two events in `sounds.json`: `wild_hunter_loop` (looping),
     "category": "player",
     "subtitle": "subtitles.farmstorm.wild_hunter_loop",
     "sounds": [
-      { "name": "farmstorm:wild_hunter_loop", "stream": false, "attenuation_distance": 16 }
+      { "name": "farmstorm:wild_hunter_loop", "stream": false, "attenuation_distance": 32 }
     ]
   },
   "zangief_piledriver": {
@@ -1338,7 +1337,7 @@ BRIEF §7.7 requires "two events in `sounds.json`: `wild_hunter_loop` (looping),
 |---|---|---|
 | `category` | `player` | corresponds to `SoundSource.PLAYERS` (D-76: does not take `MUSIC`, does not interrupt vanilla background music) |
 | `stream` | `false` | a looping sound is re-read on every loop, and `stream` leaves a seam at the joint. `Animals` converts to low-bitrate mono and holds entirely in memory without pressure |
-| `attenuation_distance` | `16` | D-76's "attenuation distance 16 blocks" = a static mirror of the **default value** of `wild_hunter.loopSoundRange` (json cannot read the config; when the config is set to something else, the program-side attenuation of §4.6 prevails); **pending verification (attached to RT-14)**: whether the key name and semantics of this field in 1.21.1's `SoundDefinition.Sound` (the `sounds.json` entry) really are "audible distance" — see §4.6 for the verification |
+| `attenuation_distance` | `32` | D-76's "attenuation distance" = a static mirror of the **default value** (32) of `wild_hunter.loopSoundRange` (json cannot read the config; when the config is set to something else, the program-side attenuation of §4.6 prevails); **pending verification (attached to RT-14)**: whether the key name and semantics of this field in 1.21.1's `SoundDefinition.Sound` (the `sounds.json` entry) really are "audible distance" — see §4.6 for the verification |
 | `subtitle` | `subtitles.farmstorm.<event name>` | corresponds to the two subtitle keys of §7.3 (shown when subtitles are on) |
 
 ### 6.4 Conversion script `tools/convert_media.ps1`
@@ -1614,7 +1613,7 @@ This table **copies `.work/v002-BRIEF.md` §8 "sole inventory of new config keys
 | 13 | `wild_hunter.attackSpeedBonusPercent` | double | 30.0 % | 0.0–1000.0 | attack speed bonus | plan0.0.2.txt line 40 |
 | 14 | `wild_hunter.attackDamageBonusPercent` | double | 40.0 % | 0.0–1000.0 | attack damage bonus | plan0.0.2.txt line 40 |
 | 15 | `wild_hunter.highlightRadius` | double | 64.0 blocks | 0.0–256.0 | maximum distance of the red silhouette | D-62 |
-| 16 | `wild_hunter.loopSoundRange` | double | 16.0 blocks | 0.0–64.0 | audible range of the looping sound | D-76 |
+| 16 | `wild_hunter.loopSoundRange` | double | **32.0** blocks | 0.0–64.0 | broadcast radius of the looping sound (the server picks recipients with it); **note it used to be a dead key**: the default sat at 16 with no code reading it, and V-83 wired it into `WildHunterAura`'s broadcast radius | D-76 + V-83 |
 | 17 | `zangief_cane.triggerRadius` | double | 1.5 blocks | 0.0–8.0 | trigger sphere radius (spherical Euclidean distance) | D-73 |
 | 18 | `zangief_cane.stageDelayTicks` | int | 14 ticks | 0–200 | duration of phase 0 (flipped, waiting for the lift) | D-69 |
 
@@ -1662,7 +1661,7 @@ speedBonusPercent = 30.0           # +30% movement speed
 attackSpeedBonusPercent = 30.0     # +30% attack speed
 attackDamageBonusPercent = 40.0    # +40% attack damage
 highlightRadius = 64.0             # D-62: max red silhouette distance (blocks)
-loopSoundRange = 16.0              # D-76: looping sound audible range (blocks)
+loopSoundRange = 32.0              # D-76 + V-83: looping sound broadcast radius (blocks)
 
 [zangief_cane]
 triggerRadius = 1.5                # D-73: spherical 1.5 blocks
@@ -1749,7 +1748,7 @@ Proof by contradiction: to add a packet there must first be a state that "a vani
 | "the target list of the red silhouette" | no list has to be sent: the client itself walks the `LivingEntity`s in view, and the criteria (distance / line of sight / team) are all locally computable on the client; besides, D-62 only asks for "what is visible, shown to me" |
 | "the phase number" | it is the amplifier (#2) |
 | "the dash target" | the client computes it itself (the server re-checks with the same algorithm), and no step of BRIEF §7.6's flow needs the server to tell the client who the target is |
-| "the 16-block audible range" | `attenuation_distance` of `sounds.json` + `SoundInstance`, both local to the client |
+| "the 32-block audible range" | server broadcast radius (`wild_hunter.loopSoundRange`, default 32) + `sounds.json`'s `attenuation_distance` (32) + the client `SoundInstance` |
 | "the exact instant of a phase switch" | every phase gets a new effect packet, the packet itself carries a duration, and the client can derive the switch by counting the duration down |
 
 The cost (compared with v0.0.1's choice, already listed once in `02-TECH-SPEC.md` §5.5): adding a packet means writing `CustomPacketPayload` + a `PayloadType` registration + handlers on both ends + version compatibility, plus a separate error-correction design for "the client and server phase numbers disagree" — and the entire benefit is saving the parsing of a few vanilla packets. With D-50 already ruling it out, the cost-benefit of that road is negative.

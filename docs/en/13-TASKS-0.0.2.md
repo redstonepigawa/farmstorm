@@ -433,9 +433,9 @@ Phase exit criteria: within 700 ticks of eating one Wild Apple — the three att
 
 - **Complexity**: M | **Person-days**: 1.5
 - **Depends on**: F-76
-- **Deliverables**: `client/WildHunterLoopSound.java` (`isLooping() = true`, `SoundSource.PLAYERS`, audible range read from `wild_hunter.loopSoundRange` 16.0; **position convention per V-53**: your own instance uses `relative = true` with the coordinates **zeroed**, `Attenuation.NONE` and `getVolume()` fixed at 1.0, while everyone else's uses `relative = false` with world coordinates and `Attenuation.LINEAR` so the engine attenuates over 16 blocks — never hand-write the volume every tick, or it stacks with the engine attenuation into double attenuation)
+- **Deliverables**: `client/WildHunterLoopSound.java` (`isLooping() = true`, `SoundSource.PLAYERS`, audible range read from `wild_hunter.loopSoundRange` (**32.0**; the server broadcast radius, V-83) 16.0; **position convention per V-53**: your own instance uses `relative = true` with the coordinates **zeroed**, `Attenuation.NONE` and `getVolume()` fixed at 1.0, while everyone else's uses `relative = false` with world coordinates and `Attenuation.LINEAR` so the engine attenuates over 16 blocks — never hand-write the volume every tick, or it stacks with the engine attenuation into double attenuation)
 - **Acceptance**:
-  1. Two-player check: A turns the effect on, and B hears it at 8 blocks but not at 20 blocks (the 16-block attenuation holds); **A hears no stutter and no left/right image jumping while strafing left and right** (`relative=true` with zeroed coordinates, V-53).
+  1. Two-player check: A turns the effect on, and B hears it at 8 blocks but not at 40 blocks (the **32-block** attenuation holds); **A hears no stutter and no left/right image jumping while strafing left and right** (`relative=true` with zeroed coordinates, V-53).
   2. The vanilla background music is not cut off: `/playsound minecraft:music.game` and the loop sound coexist (the category is `PLAYERS`, not `MUSIC`, D-76).
   3. It stops within 1 tick of `/effect clear @s farmstorm:wild_hunter`; no loop sound is left behind after the player dies and respawns; the volume stays 1.0 (changing `loopSoundRange` only moves the audible distance for others, never your own volume).
   4. The server does not resend the play command every tick: `wild_hunter_loop` appears in `logs/latest.log` no more than 2 times over the whole effect period.
@@ -707,7 +707,7 @@ All 22 keys land in F-61; the “Consuming task” column names the implementati
 | 13 | `wild_hunter.attackSpeedBonusPercent` | 30.0 % | F-61 | F-76 |
 | 14 | `wild_hunter.attackDamageBonusPercent` | 40.0 % | F-61 | F-76 |
 | 15 | `wild_hunter.highlightRadius` | 64.0 blocks | F-61 | F-83 |
-| 16 | `wild_hunter.loopSoundRange` | 16.0 blocks | F-61 | F-84 |
+| 16 | `wild_hunter.loopSoundRange` | **32.0** blocks | F-61 | F-84 |
 | 17 | `zangief_cane.triggerRadius` | 1.5 blocks | F-61 | F-87 |
 | 18 | `zangief_cane.stageDelayTicks` | 14 ticks | F-61 | F-88 |
 | 19 | `zangief_cane.riseHeightBlocks` | **16** blocks | F-61 | F-89 |
@@ -825,7 +825,7 @@ M7 ~ M11 map one-to-one onto Phase 11 ~ Phase 15. Each milestone gives two workl
 
 ### M9 · Wild Hunter and Two Presentation Layers (Phase 13)
 
-- **Completion criteria**: ① all three of #13 / #14 / #15 in `12-TECH-0.0.2.md §11` pass; ② the world goes grayscale with the HUD in its original colours (the chain of `§11 #5` reports no error and the frame-time difference is < 3 ms, V-56); ③ the 16-block attenuation of the loop sound holds and the vanilla background music is not cut off; ④ the match counts for `CustomPacketPayload` and `Mixin` are both 0.
+- **Completion criteria**: ① all three of #13 / #14 / #15 in `12-TECH-0.0.2.md §11` pass; ② the world goes grayscale with the HUD in its original colours and the 32-block loop-sound falloff holds (the chain of `§11 #5` reports no error and the frame-time difference is < 3 ms, V-56); ③ the 16-block attenuation of the loop sound holds and the vanilla background music is not cut off; ④ the match counts for `CustomPacketPayload` and `Mixin` are both 0.
 - **What is playable at the end of this milestone**: eat one Wild Apple and enter 35 s of Wild Hunter — three attribute bonuses, a snapping dash to the creature nearest the crosshair within 5 blocks, damage and knockback, kill extension with no cap; the whole screen goes black and white (inventory included), visible creatures carry a red outline, and the hunting music follows the player.
 
 ### M10 · Zangief Cane and the Input Lock (Phase 14)

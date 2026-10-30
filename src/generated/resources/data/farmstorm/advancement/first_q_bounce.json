@@ -1,0 +1,27 @@
+{
+  "parent": "farmstorm:root",
+  "criteria": {
+    "first_q_bounce": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.first_q_bounce.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:friend_chives"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.first_q_bounce.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_q_bounce"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

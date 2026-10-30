@@ -6,10 +6,12 @@ import com.dashpig.farmstorm.behavior.TurretBehavior;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.entity.ThrownCropEntity;
+import com.dashpig.farmstorm.util.FarmstormAdvancements;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -99,6 +101,7 @@ public class PointDefenseFungusBehavior implements TurretBehavior {
             Farmstorm.LOGGER.info("近防菌 本刻已拦过 t={} 投掷物 id={} @ {} 跳过", now, projectile.getId(), be.getBlockPos());
             return;
         }
+        ServerPlayer deployer = be.owner(level);
         // ② 拦截图效之一：类型固定 CRIT，数量取 config（§6.5「只留粒子与音效」）。
         // 粒子取投掷物位置、声音取方块位置，两者刻意不同源（视觉爆点在被拦下的弹上，听觉来源是这台菌），不是笔误。
         Vec3 at = projectile.position();
@@ -109,6 +112,12 @@ public class PointDefenseFungusBehavior implements TurretBehavior {
         // ④ 先记账（第 6 次会在此静默移除方块），再让投掷物消失：顺序固定，不回滚（§6.3）。
         be.recordIntercept(now);
         projectile.discard();
+        // D-63 的扩充 / DESIGN §10.1 #17：第 1 次扣减生效即成立，与拦的是哪一种投掷物无关。
+        // 授予**部署者**（父进度 first_deploy 属于部署者那棵树，与 zangief_hit 同口径）；
+        // 归属者离线 / 无归属（/setblock、结构生成）时跳过。归属者必须在 ④ 之前取，第 6 次已 consume 掉方块。
+        if (deployer != null) {
+            FarmstormAdvancements.award(deployer, "point_defense_intercept");
+        }
     }
 
     @Override

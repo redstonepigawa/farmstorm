@@ -6,6 +6,7 @@ import com.dashpig.farmstorm.behavior.TrapBehavior;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.registry.FarmstormMobEffects;
+import com.dashpig.farmstorm.util.FarmstormAdvancements;
 import java.util.Locale;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -86,5 +87,12 @@ public final class VibrationBeanTrap implements TrapBehavior {
                 "震动豆 触发 @ %s 由 %s：球内玩家 %d 施加成功 %d（半径 %.2f 格，%d 刻，amplifier 0），爆炸音一次",
                 pos.toShortString(), target.getGameProfile().getName(), inRange, applied, radius, ticks));
         be.consume();
+        // D-63 的扩充 / DESIGN §10.1 #18 + §10.2 第 3 条：只认「结算完成」（施混乱 + 静默移除都执行完），
+        // 不认「谁踩的」——结算一完成就按效果端的口径给球内每个玩家各授一次（己方玩家同样推进，D-101）。
+        for (ServerPlayer player : level.players()) {
+            if (center.distanceTo(player.position()) < radius) {
+                FarmstormAdvancements.award(player, "vibration_bean_trigger");
+            }
+        }
     }
 }

@@ -40,7 +40,7 @@ public final class ModAdvancementProvider {
     /**
      * 需要服务端 {@code award} 的进度（{@code minecraft:impossible} 触发器）。
      * 原版 criteria 无法表达这些判定，判定点全在服务端；清单的作用是让「进度」与「授予点」保持同步
-     * ——改这里就必须同时改 {@code util/FarmstormAdvancements} 的调用点。v0.0.2 收口时 11 条已全部接线。
+     * ——改这里就必须同时改 {@code util/FarmstormAdvancements} 的调用点。v0.0.2 收口时 11 条已全部接线，v0.0.3 收到 14 条（+3）。
      */
     public static final List<String> AWARD_REQUIRED = List.of(
             "farmstorm:first_conversion",
@@ -54,7 +54,11 @@ public final class ModAdvancementProvider {
             // v0.0.2 的三条（D-63 / DESIGN §9.1）
             "farmstorm:first_molotov",
             "farmstorm:zangief_hit",
-            "farmstorm:first_wild_hunter");
+            "farmstorm:first_wild_hunter",
+            // v0.0.3 的三条（D-63 的扩充 / DESIGN §10.1）
+            "farmstorm:first_q_bounce",
+            "farmstorm:point_defense_intercept",
+            "farmstorm:vibration_bean_trigger");
 
     /** 根进度的背景贴图（DESIGN §6）。 */
     private static final ResourceLocation BACKGROUND =
@@ -152,6 +156,19 @@ public final class ModAdvancementProvider {
         // 15. 玩家首次获得 farmstorm:wild_hunter 效果（不限定来源）
         impossible("first_wild_hunter", root, FarmstormItems.WILD_APPLE.get(), false)
                 .save(output, "farmstorm:first_wild_hunter");
+
+        // ---- v0.0.3 的三条（D-63 的扩充 / DESIGN §10.1：父进度、图标、口径逐条照该表）----
+        // 16. 玩家首次获得 farmstorm:q_bounce（不限定来源，§10.2 第 1 条）
+        impossible("first_q_bounce", root, FarmstormItems.FRIEND_CHIVES.get(), false)
+                .save(output, "farmstorm:first_q_bounce");
+
+        // 17. 近防菌首次成功拦截一发非己方投掷物（第 1 次扣减生效即成立，§10.1 #17）
+        impossible("point_defense_intercept", firstDeploy, FarmstormItems.POINT_DEFENSE_FUNGUS.get(), false)
+                .save(output, "farmstorm:point_defense_intercept");
+
+        // 18. 震动豆首次被玩家踩中并完成结算（施混乱 + 静默移除都执行完，§10.1 #18）
+        impossible("vibration_bean_trigger", firstDeploy, FarmstormItems.VIBRATION_BEAN.get(), false)
+                .save(output, "farmstorm:vibration_bean_trigger");
     }
 
     /** 单个 {@code minecraft:impossible} 判定的进度：只有服务端 award 能授予。 */

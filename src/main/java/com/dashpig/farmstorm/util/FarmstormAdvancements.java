@@ -6,7 +6,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * 服务端授予 8 条 {@code minecraft:impossible} 进度（TECH §6.7「实现补充」）。
+ * 服务端授予 14 条 {@code minecraft:impossible} 进度（TECH §6.7「实现补充」；v0.0.1 是 8 条，v0.0.2 +3、v0.0.3 +3）。
  * 判定只在服务端做（HC-03）：不发网络包、不加指令（D-24）。
  * 清单见 {@code datagen/ModAdvancementProvider#AWARD_REQUIRED}，准则键与进度路径同名。
  */

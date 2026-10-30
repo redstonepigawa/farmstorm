@@ -1,0 +1,27 @@
+{
+  "parent": "farmstorm:first_deploy",
+  "criteria": {
+    "vibration_bean_trigger": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.vibration_bean_trigger.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "farmstorm:vibration_bean"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.vibration_bean_trigger.title"
+    }
+  },
+  "requirements": [
+    [
+      "vibration_bean_trigger"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

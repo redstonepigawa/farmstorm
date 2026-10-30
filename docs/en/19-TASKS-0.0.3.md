@@ -236,8 +236,8 @@ Phase exit criteria: all five of #3 ~ #7 in `18-TECH-0.0.3.md §11` pass; both b
 - **Depends on**: F-103
 - **Deliverables**: `effect/QbounceEffect.java` (`super(MobEffectCategory.HARMFUL, 0xFF6EC7)`; does not override `applyEffectTick` or `isDurationEffectTick`; sets no duration key of its own; reads no config key at all); `effect/ConfusionEffect.java` (same shape, hidden, no icon registered); neither effect body knows whether it is 10 seconds or 4 seconds.
 - **Acceptance**:
-  1. `/effect give @s farmstorm:q_bounce 200 0` and `/effect give @s farmstorm:confusion 80 0` both succeed; `/data get entity @s active_effects` shows both records, with `amplifier` 0 and `duration` 200 and 80 respectively (the constructor line of `18-TECH-0.0.3.md §3.1`).
-  2. The two effect classes read no config: `grep -c "FarmstormConfig" effect/` is 0 (“which config keys it reads: none” of §3.1).
+  1. `/effect give @s farmstorm:q_bounce 10 0` and `/effect give @s farmstorm:confusion 4 0` both succeed (note: the **3rd argument of `/effect` is in seconds** — 10/4 s ⇒ 200/80 ticks; writing 200/80 yields 4000/1600 ticks); `/data get entity @s active_effects` shows both records, with `amplifier` 0 and `duration` 200 and 80 respectively (the constructor line of `18-TECH-0.0.3.md §3.1`).
+  2. The two effect classes read no config: `grep -c "FarmstormConfig" effect/QbounceEffect.java effect/ConfusionEffect.java` is 0 (“which config keys it reads: none” of §3.1). **Scope is these two classes only** — `effect/WildHunterEffect.java` reading config per D-61/D-62 is existing design, not a violation.
   3. `confusion` registers no icon: `grep -rc "mob_effect/confusion" src/main/java/` is 0 and there is no `confusion.png` under `textures/mob_effect/` (D-83; §3.2).
   4. The dedicated server's startup log has no `NoClassDefFoundError` (both effect classes sit on the common side and do not depend on `Dist.CLIENT`).
 

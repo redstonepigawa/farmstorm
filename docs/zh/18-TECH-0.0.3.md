@@ -457,7 +457,9 @@ D-94 的 8 行数值表里 4 行变、4 行不变。**其中 3 行的实现改�
 | `QbounceClientState` | 每 tick 读一次自己身上的 `farmstorm:q_bounce`，把「在不在 / 剩余刻数 / 进入刻」摊成静态标量。照 `ZangiefClientState` 的形态写（`ClientTickEvent.Post` + 三个 static 字段），不新增网络包 | `active()`、`remainingTicks()`、`phaseTicks()` | 不读 |
 | `ConfusionInputHandler` | 混乱的反向输入（§5 全文） | `onMovementInput(MovementInputUpdateEvent)` | 不读 |
 
-**`render` 分支的三个参数怎么到客户端**：`farmstorm-server.toml` 在专用服务器上客户端读不到，0.0.2 对这类参数用的是「编译期镜像常量 + 注释说明必须同步改」（`client/ZangiefClientState.java` L27–L34 的 `DEFAULT_SPIN_DEGREES_PER_TICK`）。本文沿用：`QbouncePoseRenderer` 里定义 `DEFAULT_ROTATE_DEGREES_PER_TICK = 24.0F` / `DEFAULT_SQUASH_AMPLITUDE = 0.15F` / `DEFAULT_SQUASH_PERIOD_TICKS = 6` 三个常量，值必须与 `FarmstormConfig` 的默认值逐字相等。**`qbounce.poseMode` 是例外**：它决定服务端要不要挂坐骑，因此只在服务端读，客户端不需要镜像。
+**`render` 分支的三个参数怎么到客户端**：`farmstorm-server.toml` 在专用服务器上客户端读不到，0.0.2 对这类参数用的是「编译期镜像常量 + 注释说明必须同步改」（`client/ZangiefClientState.java` L27–L34 的 `DEFAULT_SPIN_DEGREES_PER_TICK`）。本文沿用：三个常量定义在 **`client/QbounceClientState.java`**（状态机持有者，渲染器只读它的 `rotateDegrees()` / `squashScaleX|Y|Z()`）：`DEFAULT_ROTATE_DEGREES_PER_TICK = 24.0F` / `DEFAULT_SQUASH_AMPLITUDE = 0.15F` / `DEFAULT_SQUASH_PERIOD_TICKS = 6`，值必须与 `FarmstormConfig` 的默认值逐字相等。
+
+> 口径说明（F-107 实施后订正）：旧稿写「在 `QbouncePoseRenderer` 里定义」，与 `19-TASKS` F-107 的交付物（`client/QbounceClientState.java` 三个镜像常量）矛盾。现统一为**放状态机**——常量是状态机的参数，渲染器只是消费者；放渲染器会让 F-107 无法自验「常量与 toml 逐值相等」。**`qbounce.poseMode` 是例外**：它决定服务端要不要挂坐骑，因此只在服务端读，客户端不需要镜像。
 
 ---
 

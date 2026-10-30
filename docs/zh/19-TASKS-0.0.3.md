@@ -236,8 +236,8 @@ F-100 修 verify_project.py 0.5
 - **依赖**：F-103
 - **交付物**：`effect/QbounceEffect.java`（`super(MobEffectCategory.HARMFUL, 0xFF6EC7)`；不重写 `applyEffectTick` 与 `isDurationEffectTick`；不设自己的时长键；不读任何 config 键）；`effect/ConfusionEffect.java`（同形，隐藏项、不注册图标）；两个效果的本体都不知道自己是 10 秒还是 4 秒。
 - **验收**：
-  1. `/effect give @s farmstorm:q_bounce 200 0` 与 `/effect give @s farmstorm:confusion 80 0` 都返回成功，`/data get entity @s active_effects` 里出现两条记录，`amplifier` 都是 0、`duration` 分别是 200 与 80（`18-TECH-0.0.3.md §3.1` 的构造器行）。
-  2. 两个效果类不读 config：`grep -c "FarmstormConfig" effect/` 为 0（§3.1 的「读哪些 config 键：不读」）。
+  1. `/effect give @s farmstorm:q_bounce 10 0` 与 `/effect give @s farmstorm:confusion 4 0` 都返回成功（**注意 `/effect` 第 3 参数单位是秒**：10/4 秒 ⇒ 200/80 刻；写 200/80 会得到 4000/1600 刻），`/data get entity @s active_effects` 里出现两条记录，`amplifier` 都是 0、`duration` 分别是 200 与 80（`18-TECH-0.0.3.md §3.1` 的构造器行）。
+  2. 两个效果类不读 config：`grep -c "FarmstormConfig" effect/QbounceEffect.java effect/ConfusionEffect.java` 为 0（§3.1 的「读哪些 config 键：不读」）。**范围只限这两个类**——`effect/WildHunterEffect.java` 按 D-61/D-62 读 config 是既有设计，不能算违规。
   3. `confusion` 不注册图标：`grep -rc "mob_effect/confusion" src/main/java/` 为 0，`textures/mob_effect/` 下没有 `confusion.png`（D-83；§3.2）。
   4. 专用服务器启动日志无 `NoClassDefFoundError`（两个效果类都在公共侧，不依赖 `Dist.CLIENT`）。
 

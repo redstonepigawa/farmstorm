@@ -1,10 +1,27 @@
-# tools/convert_media.ps1 -- v0.0.2 audio + effect-icon pipeline (D-53 / D-66 / RT-14)
+# tools/convert_media.ps1 -- v0.0.3 audio + effect-icon pipeline (D-53 / D-66 / RT-14)
 #
-# Converts the three out-of-repository source assets into what a Minecraft jar can actually load:
+# Converts the seven out-of-repository source assets into what a Minecraft jar can actually load:
+#   (the 0.0.2 three are untouched; 0.0.3 only appends the later four, still one single script -- F-131 check 3)
 #   Animals_from_3m04s.mp3 -> assets/farmstorm/sounds/wild_hunter_loop.ogg     (mono, 64 kbps Ogg Vorbis)
-#     (作者于 2026-10-29 指定改用 3 分 04 秒起的那段剪辑，47.14 s；旧的整体版 Animals.mp3 不再作为源)
+#     (the author picked the clip from 3:04 on 2026-10-29, 47.14 s; the old whole-track Animals.mp3 is no longer a source)
 #   SF6 clip .mp3          -> assets/farmstorm/sounds/zangief_piledriver.ogg   (mono, 64 kbps Ogg Vorbis)
 #   effect icon .jpg       -> assets/farmstorm/textures/mob_effect/wild_hunter.png (18x18 PNG, centre-cropped)
+#   -- added in 0.0.3 --
+#   pengyoudejiu.mp3       -> assets/farmstorm/sounds/friend_chives.ogg       (mono, 64 kbps Ogg Vorbis)
+#     (the source file name is kept as-is, D-66; the event id is friend_chives, see sounds.json)
+#   preview.jpg            -> assets/farmstorm/textures/mob_effect/q_bounce.png (18x18 PNG, centre-cropped)
+#     (Steam Workshop 3796093604 preview image = the Q-bounce icon source, D-81; 18x18 is the D-53 icon size)
+#   author item artwork x2 (1254x1254 RGBA; paths in plan0.0.3.txt)
+#                          -> assets/farmstorm/textures/item/friend_chives.png (16x16 PNG)
+#                          -> assets/farmstorm/textures/item/chive_seeds.png   (16x16 PNG)
+#     (this is the "final artwork" of doc 17 section 4.7: pixel art on a transparent canvas whose
+#      subject fills only part of the frame, so each entry carries its own square framing box -- see Vf)
+#
+# CAUTION: this file is ASCII on purpose. Windows PowerShell 5.1 decodes a BOM-less UTF-8 script with
+# the local ANSI code page, and non-ASCII comments silently corrupt the parse: a CJK comment line
+# inside the $Plan array literal dropped one plan entry (count 6 instead of 7, no error), and CJK
+# comments directly above the icon branch made $dim come out empty (ffmpeg: "Cannot parse
+# expression for width"). Both were found by bisection in F-130/F-131. Keep comments English.
 #
 # Contracts enforced here (do not weaken them):
 #   * never downloads anything
@@ -32,7 +49,11 @@ param(
     [string] $OutRoot = "src/main/resources",
     [string] $Animals = "D:\dsh\default\Animals_from_3m04s.mp3",
     [string] $Sfx     = "D:\dsh\default\sf6_audio\out\BV1qu411W7ha_846-850.mp3",
-    [string] $Icon    = "C:\Users\DASHpig\Desktop\e91bb6997d8e24cda1f596267c41da97500924726.jpg"
+    [string] $Icon    = "C:\Users\DASHpig\Desktop\e91bb6997d8e24cda1f596267c41da97500924726.jpg",
+    [string] $QIcon   = "C:\Program Files (x86)\Steam\steamapps\workshop\content\431960\3796093604\preview.jpg",
+    [string] $Chives  = "D:\dsh\default\pengyoudejiu.mp3",
+    [string] $ChivesArt = "C:\Users\DASHpig\Documents\Tencent Files\3207667404\nt_qq\nt_data\Pic\2026-10\Thumb\525a9e860f990952781b0f6e52540c21_720.png",
+    [string] $SeedsArt  = "C:\Users\DASHpig\Documents\Tencent Files\3207667404\nt_qq\nt_data\Pic\2026-10\Thumb\231896ac3a027c87bbb8f96f8b1a72ad_720.png"
 )
 
 $ErrorActionPreference = "Stop"
@@ -40,7 +61,20 @@ $ErrorActionPreference = "Stop"
 $Plan = @(
     @{ Tag = "audio"; Src = $Animals; Rel = "assets/farmstorm/sounds/wild_hunter_loop.ogg" },
     @{ Tag = "audio"; Src = $Sfx;     Rel = "assets/farmstorm/sounds/zangief_piledriver.ogg" },
-    @{ Tag = "icon";  Src = $Icon;    Rel = "assets/farmstorm/textures/mob_effect/wild_hunter.png" }
+    @{ Tag = "icon";  Src = $Icon;    Rel = "assets/farmstorm/textures/mob_effect/wild_hunter.png"; Size = 18 },
+    @{ Tag = "audio"; Src = $Chives;  Rel = "assets/farmstorm/sounds/friend_chives.ogg" },
+    @{ Tag = "icon";  Src = $QIcon;   Rel = "assets/farmstorm/textures/mob_effect/q_bounce.png";   Size = 18 },
+    # Framing boxes of the two author-art entries = a square grown 6% from the alpha>=32 bbox
+    # (side 1152 / 694, centred on the subject and clamped into the canvas); recompute with the
+    # recipe in .work/f130_crop_calc.py. premultiply/unpremultiply stop lanczos from bleeding the
+    # transparent area black into the edges (otherwise 16x16 gets a dirty dark fringe).
+    # NOTE: keep the comment lines INSIDE this array literal ASCII. PowerShell 5.1 decodes a
+    # BOM-less UTF-8 script with the ANSI code page, and a CJK comment line in here silently ate
+    # one $Plan entry (F-130/F-131 bisection: count 6 instead of 7). CJK comments elsewhere in
+    # this file are fine. The trailing lut zeroes the near-transparent lanczos ringing (alpha<8),
+    # which at 16x16 only shows up as coloured speckle around the silhouette.
+    @{ Tag = "icon";  Src = $ChivesArt; Rel = "assets/farmstorm/textures/item/friend_chives.png"; Size = 16; Vf = "crop=1152:1152:102:64,format=rgba,premultiply=inplace=1,scale=16:16:flags=lanczos,unpremultiply=inplace=1,lut=a='if(lt(val\,8)\,0\,val)'" },
+    @{ Tag = "icon";  Src = $SeedsArt;  Rel = "assets/farmstorm/textures/item/chive_seeds.png"; Size = 16; Vf = "crop=694:694:300:271,format=rgba,premultiply=inplace=1,scale=16:16:flags=lanczos,unpremultiply=inplace=1,lut=a='if(lt(val\,8)\,0\,val)'" }
 )
 
 function Resolve-Ffmpeg {
@@ -81,7 +115,7 @@ function Get-FfmpegProblem {
     return $null
 }
 
-Write-Host "== farmstorm v0.0.2 media pipeline ==" -ForegroundColor Cyan
+Write-Host "== farmstorm v0.0.3 media pipeline ==" -ForegroundColor Cyan
 
 $exe = $null
 try { $exe = Resolve-Ffmpeg -Explicit $Ffmpeg } catch { Write-Host ("FAIL  " + $_.Exception.Message) -ForegroundColor Red; exit 1 }
@@ -115,7 +149,7 @@ if ($missing.Count -gt 0) {
     Write-Host "      These live outside the repository; nothing was written."
     exit 1
 }
-Write-Host "  sources: all 3 present"
+Write-Host ("  sources: all " + $Plan.Count + " present")
 
 if ($CheckOnly) {
     Write-Host ""
@@ -146,7 +180,23 @@ foreach ($p in $Plan) {
     if ($p.Tag -eq "audio") {
         $ffArgs = @("-hide_banner", "-y", "-vn", "-i", $p.Src, "-ac", "1", "-c:a", "libvorbis", "-b:a", "64k", $dst)
     } else {
-        $ffArgs = @("-hide_banner", "-y", "-i", $p.Src, "-vf", "crop=ih:ih,scale=18:18:flags=lanczos", "-pix_fmt", "rgba", $dst)
+        # Two kinds of icon source:
+        #   * a single image WITH a background (wild_hunter.jpg, the Steam Workshop preview.jpg):
+        #     centre square crop + lanczos downscale. preview.jpg is a 1024x1024 workshop thumbnail
+        #     that carries a background, so it is inevitably soft at 18x18 -- that is the source, not
+        #     the encoding: if a clean Q-bounce icon turns up later, point -QIcon at it and re-run
+        #     this same branch; no code change needed.
+        #   * author artwork (pixel art on transparent): the entry carries its own Vf (a square
+        #     framing box derived from the alpha bbox), then the downscale.
+        # The trailing lut zeroes the near-transparent lanczos ringing (alpha<8), which at 16x16
+        # otherwise shows up as colour speckle around the silhouette.
+        $dim = if ($p.ContainsKey("Size")) { $p.Size } else { 18 }
+        if ($p.ContainsKey("Vf")) {
+            $vf = $p.Vf
+        } else {
+            $vf = "crop=ih:ih,scale=${dim}:${dim}:flags=lanczos"
+        }
+        $ffArgs = @("-hide_banner", "-y", "-i", $p.Src, "-vf", $vf, "-pix_fmt", "rgba", $dst)
     }
     $r = Invoke-Captured -Exe $exe -Arguments $ffArgs
     if ($r.Code -ne 0 -or -not (Test-Path -LiteralPath $dst)) {

@@ -11,11 +11,20 @@ r"""「农场风云 / Farmstorm」材质生成器（F-51 / TECH §6.5 的 87 张
   4. textures/gui/converter.png              —— 176x166 容器背景（面板 + 标题/背包刻线 + 输入→预览箭头 + 槽位），
      每个槽位方框的「内容区左上角」与 ConverterMenu 的 Slot 坐标逐像素相等。
 
+0.0.3 追加的 8 张里，本脚本只出 5 张（`--additions`，与上面 91 张分开放）：`vibration_bean`
+（16x16，作者没有给它的贴图素材，只能程序绘制）+ 4 张 `friend_chives_stage0..3` 洋红 #D81E8A
+纯色占位（17 号 §4.7，**占位非终稿**）。另外 3 张凡有源图可转的一律走 tools/convert_media.ps1：
+`mob_effect/q_bounce.png`（preview.jpg）、`item/friend_chives.png` 与 `item/chive_seeds.png`
+（作者 1254x1254 原画，路径见 plan0.0.3.txt）—— 有源转码就不手绘，避免两套图源打架。
+
 用法::
 
     python -X utf8 tools/gen_textures.py --list
     python -X utf8 tools/gen_textures.py --vanilla-assets <jar 或解包资源根> --out src/main/resources --dry-run
     python -X utf8 tools/gen_textures.py --vanilla-assets <jar 或解包资源根> --out src/main/resources
+
+    # 0.0.3 追加里没有源图可转的 5 张（1 张程序绘制物品图标 + 4 张洋红占位方块贴图），不读原版贴图：
+    python -X utf8 tools/gen_textures.py --additions --out src/main/resources
 
     --vanilla-assets 接受两种形态：
       * 客户端 jar（本机 = D:\minecraft\.minecraft\versions\26.3-NeoForge_26.3.0.99\26.3-NeoForge_26.3.0.99.jar），
@@ -64,6 +73,8 @@ KIND_ICON = "icon"
 KIND_STAGE = "stage"
 KIND_BLOCK = "block"
 KIND_GUI = "gui"
+# 0.0.3 追加：没有原版来源、纯程序绘制的物品图标（--additions 模式专用）。
+KIND_DRAWN = "drawn"
 
 STATUS_VANILLA = "原版命中"
 STATUS_SUBSTITUTE = "退回占位（主源缺失，改用次级原版贴图）"
@@ -95,6 +106,18 @@ GUI_ARROW = (99, 30, 113)
 # 转换按钮的矩形底，与 ConverterScreen 的 BUTTON_X/Y/WIDTH/HEIGHT 逐像素一致：(x0,y0,x1,y1)，含 1 像素边框。
 GUI_BUTTON = (8, 42, 167, 59)
 
+# 0.0.3 追加里唯一还是程序绘制的那张（震动豆）：调色板集中在这里，改配色不用翻画法。
+# 取值向作者原画（friend_chives / chive_seeds 的 1254x1254 素材）看齐：作者那两张的实色主体
+# 都很深（韭菜 #0D2C12~#123715、种子 #141314~#2F2F34），靠少量亮部提结构，所以这里的豆荚
+# 也用「近黑描边 + 暗棕主体 + 克制的亮豆 + 冷灰震纹」，不用高饱和橙棕。
+CLEAR = (0x00, 0x00, 0x00, 0x00)
+POD_DARK = (0x12, 0x0C, 0x07, 0xFF)
+POD_MID = (0x2E, 0x1C, 0x0E, 0xFF)
+POD_BEAN = (0x55, 0x37, 0x1A, 0xFF)
+POD_HI = (0x76, 0x51, 0x27, 0xFF)
+POD_STEM = (0x3F, 0x7A, 0x33, 0xFF)
+VIB_WAVE = (0xA9, 0xB6, 0xBC, 0xFF)
+
 
 @dataclass(frozen=True)
 class SourceRef:
@@ -122,6 +145,8 @@ class Spec:
     # TECH §6.5：压缩干草块必须是「原版干草块侧面的灰度版」——R=G=B 的纯灰度，
     # 不是「降低饱和度」（那会留色偏），所以走 convert("L") 再回 RGBA。
     monochrome: bool = False
+    # 0.0.3 追加：程序绘制图标取哪个画法（ITEM_DRAWERS 的键）；None 表示走原版来源解析。
+    drawer: str | None = None
 
 
 @dataclass(frozen=True)
@@ -146,8 +171,8 @@ class Report:
     procedural: int = 0
 
     def record(self, spec: Spec, resolved: Resolved) -> None:
-        # GUI 背景是程序绘制的，不参与「原版命中 / 退回 / 找不到」的三类统计。
-        if spec.kind == KIND_GUI:
+        # GUI 背景与 0.0.3 追加的程序绘制图标都是程序画的，不参与「原版命中 / 退回 / 找不到」的三类统计。
+        if spec.kind == KIND_GUI or spec.drawer is not None:
             self.procedural += 1
             return
         self.buckets[resolved.status].append(
@@ -449,6 +474,24 @@ class AssetSource:
         return Resolved(None, STATUS_MISSING, "纯色占位色块", primary)
 
 
+class NullSource:
+    """--additions 用的空源：那 5 张不读任何原版贴图（1 张程序绘制 + 4 张纯色占位）。"""
+
+    def __init__(self) -> None:
+        self.warnings: list[str] = []
+
+    def describe(self) -> str:
+        return "程序绘制 / 占位，不读原版贴图"
+
+    def close(self) -> None:
+        return None
+
+    def resolve(self, spec: Spec) -> Resolved:
+        if spec.drawer is not None:
+            return Resolved(None, STATUS_MISSING, "程序绘制", "-")
+        return Resolved(None, STATUS_MISSING, "纯色占位色块", "-")
+
+
 def build_marker(size: int = PLUS_SIZE, arm: int = PLUS_ARM) -> Image.Image:
     """渲染 size x size 的绿色「+」标记：居中的实心十字，臂宽 arm。
 
@@ -560,8 +603,74 @@ def draw_gui_background() -> Image.Image:
     return image
 
 
+def draw_vibration_bean() -> Image.Image:
+    """16x16「震动豆」物品图标：豆荚 + 三粒豆 + 右侧震纹（D-90；§1.4(d) 第 8 张）。
+
+    作者只给了朋友的韭与韭菜种子的原画（plan0.0.3.txt），震动豆没有贴图素材，因此这一张
+    仍是程序绘制；画法与配色按作者那两张的口径来 —— 近黑描边、暗主体、少量亮部，
+    而不是高饱和色块，这样三张物品图标并排时不显得是两个人画的。
+    """
+    image = Image.new("RGBA", (TEXTURE_SIZE, TEXTURE_SIZE), CLEAR)
+    draw = ImageDraw.Draw(image)
+    # 荚：外层近黑描边 + 内层暗棕主体
+    draw.ellipse((1, 4, 12, 13), fill=POD_DARK)
+    draw.ellipse((2, 5, 11, 12), fill=POD_MID)
+    # 三粒豆：竖条 + 每粒顶部一点亮部
+    for left in (3, 6, 9):
+        draw.ellipse((left, 6, left + 1, 11), fill=POD_BEAN)
+        draw.point((left, 7), fill=POD_HI)
+    # 荚面上沿一道高光
+    draw.line(((3, 5), (8, 5)), fill=POD_HI)
+    # 蒂：一段暗绿，与作者韭菜原画的绿色同族
+    draw.line(((4, 4), (2, 1)), fill=POD_STEM, width=2)
+    # 震纹：右侧三道，用种子原画那套冷灰亮部色
+    for top, right in ((4, 14), (7, 15), (10, 14)):
+        draw.line(((13, top), (right, top - 1)), fill=VIB_WAVE)
+    return image
+
+
+ITEM_DRAWERS = {
+    "vibration_bean": draw_vibration_bean,
+}
+
+# 0.0.3 的 4 张方块贴图：洋红占位，非终稿（17 号 §4.7 / A-16）。
+ADDITION_PLACEHOLDER_STAGES = 4
+
+
+def build_additions_specs() -> tuple[Spec, ...]:
+    """0.0.3 追加里有「源可转」之外的 5 张（1 张程序绘制物品图标 + 4 张洋红占位阶段贴图）。
+
+    另外 3 张都在 tools/convert_media.ps1：mob_effect/q_bounce.png（preview.jpg）与
+    item/friend_chives.png、item/chive_seeds.png（作者 1254x1254 原画）——凡是有源图可转的
+    都走那条管线，本脚本只负责没有源可转的那几张。
+    """
+    specs: list[Spec] = []
+    for item_id, zh_name in (
+        ("vibration_bean", "震动豆"),
+    ):
+        specs.append(
+            Spec(
+                rel_path=f"textures/item/{item_id}.png",
+                kind=KIND_DRAWN,
+                zh_name=f"{zh_name}（程序绘制）",
+                drawer=item_id,
+            )
+        )
+    for index in range(ADDITION_PLACEHOLDER_STAGES):
+        specs.append(
+            Spec(
+                rel_path=f"textures/block/friend_chives_stage{index}.png",
+                kind=KIND_BLOCK,
+                zh_name=f"朋友的韭 阶段 {index}（洋红 #D81E8A 占位，非终稿）",
+            )
+        )
+    return tuple(specs)
+
+
 def compose(spec: Spec, resolved: Resolved, marker: Image.Image) -> Image.Image:
     """按目标类型合成最终图（图标叠「+」/ 阶段缩放 / 方块原样 / GUI 程序绘制）。"""
+    if spec.drawer is not None:
+        return ITEM_DRAWERS[spec.drawer]()
     if spec.kind == KIND_GUI:
         return draw_gui_background()
 
@@ -654,6 +763,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="只解析并打印将写入的路径与源材质状态，不创建目录、不写文件",
     )
     parser.add_argument(
+        "--additions",
+        action="store_true",
+        help="只生成 0.0.3 追加里无源可转的 5 张（1 张程序绘制物品图标 + 4 张洋红占位），不读原版贴图；只需 --out",
+    )
+    parser.add_argument(
         "--list",
         dest="list_items",
         action="store_true",
@@ -669,14 +783,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     if args.list_items:
         return args
 
-    missing = [
-        flag
-        for flag, value in (
-            ("--vanilla-assets", args.vanilla_assets),
-            ("--out", args.out),
-        )
-        if value is None
-    ]
+    required = [("--out", args.out)]
+    if not args.additions:
+        required.insert(0, ("--vanilla-assets", args.vanilla_assets))
+    missing = [flag for flag, value in required if value is None]
     if missing:
         parser.error("缺少必需参数：{}（或改用 --list 只看目标表）".format("、".join(missing)))
     return args
@@ -695,17 +805,27 @@ def print_buckets(report: Report) -> None:
     print("\n程序绘制（无原版来源）：%d 张 —— textures/gui/converter.png" % report.procedural)
 
 
+def print_additions_summary(report: Report) -> None:
+    """--additions 的小结：程序绘制几张 + 占位几张（不涉及原版贴图，故不分三类）。"""
+    print(f"\n程序绘制物品图标：{report.procedural} 张")
+    placeholders = report.buckets[STATUS_MISSING]
+    print(f"洋红 #D81E8A 占位方块贴图：{len(placeholders)} 张（占位，非终稿）")
+    for rel_path, _used, _primary in placeholders:
+        print(f"  {rel_path:<48} 纯色占位")
+
+
 def main(argv: list[str] | None = None) -> int:
     """命令行入口。"""
     args = parse_args(argv)
-    specs = build_specs()
+    additions = args.additions
+    specs = build_additions_specs() if additions else build_specs()
 
     if args.list_items:
         print_listing(specs)
         return 0
 
     warnings: list[str] = []
-    source = AssetSource(args.vanilla_assets, warnings)
+    source = NullSource() if additions else AssetSource(args.vanilla_assets, warnings)
     marker = build_marker()
     report = Report()
 
@@ -716,7 +836,10 @@ def main(argv: list[str] | None = None) -> int:
             target = output_path(args.out, spec)
 
             if args.dry_run:
-                action = "纯色占位色块" if resolved.image is None else f"取自 {resolved.used}"
+                if spec.drawer is not None:
+                    action = "程序绘制"
+                else:
+                    action = "纯色占位色块" if resolved.image is None else f"取自 {resolved.used}"
                 if spec.add_plus:
                     action += " + 绿色「+」"
                 if spec.tint is not None:
@@ -744,7 +867,10 @@ def main(argv: list[str] | None = None) -> int:
     for warning in warnings:
         print(f"[警告] {warning}", file=sys.stderr)
 
-    print_buckets(report)
+    if additions:
+        print_additions_summary(report)
+    else:
+        print_buckets(report)
     if args.dry_run:
         print(
             f"\n[dry-run] 共 {len(specs)} 条：将写入 {report.planned} 个，"

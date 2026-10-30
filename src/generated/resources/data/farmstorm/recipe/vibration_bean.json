@@ -1,0 +1,11 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:cocoa_beans"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:vibration_bean"
+  },
+  "reverse_xp_cost": 3
+}

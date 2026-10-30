@@ -15,7 +15,7 @@ import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.damagesource.DamageType;
 
 /**
- * 2 个伤害类型条目（TECH §6.7 / §3.7）与 2 条并入 minecraft 的伤害类型标签。
+ * 3 个伤害类型条目（TECH §6.7 / §3.7）与 2 条并入 minecraft 的伤害类型标签。
  * 伤害类型是数据包注册表条目，没有 DeferredRegister（R-02），因此 JSON 由
  * {@link #REGISTRY_BUILDER} 交给 DatapackBuiltinEntriesProvider 生成（R-03）。
  */
@@ -39,6 +39,9 @@ public final class ModDamageTypeProvider extends DamageTypeTagsProvider {
                 DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER, 0.0F, DamageEffects.HURT));
         context.register(FarmstormDamageTypes.CROP_BLAST, new DamageType("farmstorm.crop_blast",
                 DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER, 0.1F, DamageEffects.HURT));
+        // D-96：桑吉尔蔗落地碾压；exhaustion 0.0 与 HURT 逐字照 TECH §9.3 第 14 行
+        context.register(FarmstormDamageTypes.ZANGIEF_SLAM, new DamageType("farmstorm.zangief_slam",
+                DamageScaling.WHEN_CAUSED_BY_LIVING_NON_PLAYER, 0.0F, DamageEffects.HURT));
     }
 
     @Override

@@ -37,7 +37,8 @@ public final class ModBlockStateProvider extends BlockStateProvider {
     /** 十字 / 平面几何（作物、火把花、瓶子草）都是带透明边的 PNG，必须自带 cutout：原版 render type 在 Java 里注册，不随 parent 继承。 */
     private static final String CUTOUT = "minecraft:cutout";
     /** 陷阱类部署方块：空模型（只有 particle，与原版 barrier.json 同构），世界里不渲染任何几何。 */
-    private static final Set<String> DEPLOYED_INVISIBLE = Set.of("blast_carrot", "fang_trap_cactus", "zangief_cane");
+    private static final Set<String> DEPLOYED_INVISIBLE =
+            Set.of("blast_carrot", "fang_trap_cactus", "zangief_cane", "vibration_bean");
     /**
      * 炮台 / 光环类部署方块：直接借用原版方块模型。
      * 瓶子草在原版是双格高植物，pitcher_plant_bottom/top 的几何都是 y -5~11（下沉 5 像素，单独占一格会插进下方方块），
@@ -46,9 +47,17 @@ public final class ModBlockStateProvider extends BlockStateProvider {
     private static final Map<String, String> DEPLOYED_VANILLA_PARENT = Map.of(
             "pumpkin_turret", "block/pumpkin",
             "awakened_torchflower", "block/torchflower",
-            "awakened_pitcher_plant", "block/pitcher_crop_top_stage_4");
-    /** 上述父模型里十字 / 平面的两个必须补 render_type；南瓜是原版 SOLID 满方块，保持默认。 */
-    private static final Set<String> DEPLOYED_CUTOUT = Set.of("awakened_torchflower", "awakened_pitcher_plant");
+            "awakened_pitcher_plant", "block/pitcher_crop_top_stage_4",
+            "point_defense_fungus", "block/warped_fungus");
+    /** 上述父模型里十字 / 平面的三个必须补 render_type；南瓜是原版 SOLID 满方块，保持默认。 */
+    private static final Set<String> DEPLOYED_CUTOUT =
+            Set.of("awakened_torchflower", "awakened_pitcher_plant", "point_defense_fungus");
+    /**
+     * 隐形方块的 particle 贴图：默认取自家 textures/block/&lt;id&gt;，震动豆没有自家方块贴图，
+     * 借原版可豆的成熟态（D-90 的对应物是可豆；TECH §9.1 第 8 张 PNG 只是物品图标）。
+     */
+    private static final Map<String, String> DEPLOYED_INVISIBLE_PARTICLE = Map.of(
+            "vibration_bean", "block/cocoa_stage2");
 
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
         super(output, Farmstorm.MOD_ID, existingFileHelper);
@@ -71,7 +80,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         }
     }
 
-    /** 14 个作物：age 0~3 → 模型 <base>_stage0..3，父模型 minecraft:block/crop。 */
+    /** 15 个作物：age 0~3 → 模型 <base>_stage0..3，父模型 minecraft:block/crop。 */
     private void cropStates(Block block) {
         String base = cropBase(registryPath(block));
         ModelFile[] stages = new ModelFile[CROP_AGES];
@@ -88,7 +97,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         }
     }
 
-    /** 5 个部署方块：face × facing × floating 全覆盖，全部指向同一个 models/block/<id>.json。 */
+    /** 8 个部署方块：face × facing × floating 全覆盖，全部指向同一个 models/block/<id>.json。 */
     private void deployedStates(Block block) {
         String name = registryPath(block);
         ModelFile model = deployedModel(name);
@@ -109,7 +118,9 @@ public final class ModBlockStateProvider extends BlockStateProvider {
     /** 陷阱类留空，炮台 / 光环类指向原版父模型；两张表都必须命中，避免新增部署方块时静默拿到错误外观。 */
     private ModelFile deployedModel(String name) {
         if (DEPLOYED_INVISIBLE.contains(name)) {
-            return models().getBuilder(name).texture("particle", modLoc("block/" + name));
+            String vanillaParticle = DEPLOYED_INVISIBLE_PARTICLE.get(name);
+            return models().getBuilder(name)
+                    .texture("particle", vanillaParticle != null ? mcLoc(vanillaParticle) : modLoc("block/" + name));
         }
         String vanillaParent = DEPLOYED_VANILLA_PARENT.get(name);
         if (vanillaParent == null) {
@@ -194,7 +205,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         return id.getPath();
     }
 
-    /** 本模组注册的 22 个方块：14 作物 + 6 部署 + 1 转换器 + 1 普通方块（compressed_hay_block）。 */
+    /** 本模组注册的 25 个方块：15 作物 + 8 部署 + 1 转换器 + 1 普通方块（compressed_hay_block）。 */
     private static List<Block> farmstormBlocks() {
         List<Block> blocks = new ArrayList<>();
         for (Block block : BuiltInRegistries.BLOCK) {

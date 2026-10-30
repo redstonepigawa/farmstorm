@@ -10,7 +10,7 @@ import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.world.item.Items;
 
 /**
- * 3 条 farmstorm 物品标签（TECH §6.7）：15 个改良作物 + 6 个独立播种物 + 36 项转换器燃料。
+ * 3 条 farmstorm 物品标签（TECH §6.7）：15 个改良作物 + 6 个独立播种物 + 37 项转换器燃料。
  * 条目全部取自注册对象与原版常量的 {@code Item} 实例，不写字符串 ID。
  */
 public final class ModItemTagsProvider extends ItemTagsProvider {
@@ -47,7 +47,7 @@ public final class ModItemTagsProvider extends ItemTagsProvider {
                 FarmstormItems.AWAKENED_TORCHFLOWER_SEEDS.get(),
                 FarmstormItems.AWAKENED_PITCHER_PLANT_POD.get());
 
-        // F-71 / D-52 / DESIGN §2.5：36 项 = 18 项原版农作物 + 18 条改良作物（19 条档案减 compressed_puffed_wheat）。
+        // F-71 / D-52 / DESIGN §2.5：37 项 = 18 项原版农作物 + 19 条改良作物（22 条档案减播种物 / 二级合成物 / 方块）。
         // 不入标签的三类：播种物（是种子不是农作物）、compressed_puffed_wheat（D-56 二级合成物）、
         // compressed_hay_block（方块不是农作物）。molotov / zangief_cane / wild_apple 虽无作物方块与种子，
         // 但它们是「改良作物」本身（D-51），按合并口径入标签——它们只从转换器产出，正是燃料集合的一员。
@@ -91,6 +91,8 @@ public final class ModItemTagsProvider extends ItemTagsProvider {
                 // 改良一侧：v0.0.2 新增的 3 条档案
                 FarmstormItems.MOLOTOV.get(),
                 FarmstormItems.ZANGIEF_CANE.get(),
-                FarmstormItems.WILD_APPLE.get());
+                FarmstormItems.WILD_APPLE.get(),
+                // 改良一侧：v0.0.3 的 1 条（D-84：朋友的韭能当合成材料，但它自己没有转换配方）
+                FarmstormItems.FRIEND_CHIVES.get());
     }
 }

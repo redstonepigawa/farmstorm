@@ -34,7 +34,7 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 /**
- * 22 张方块战利品表（TECH §6.7 + F-74）：14 张作物 + 6 张部署方块 + 1 张压缩干草块 + 1 张转换器。
+ * 25 张方块战利品表（TECH §6.7 + F-74）：15 张作物 + 8 张部署方块 + 1 张压缩干草块 + 1 张转换器。
  *
  * <p>作物表复用原版作物表的结构（成熟判定 + 数量区间 + 时运修正 + 爆炸衰减），只把 item 换成
  * 改良版的作物与播种物（DESIGN §3.2.4）；数量区间逐条照抄 TECH §6.7。
@@ -64,7 +64,7 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        // ---- 14 张作物表（TECH §6.7 的逐条比例）----
+        // ---- 15 张作物表（TECH §6.7 的逐条比例）----
         // 膨胀麦：1 作物 + 0~3 种子（时运加成）
         crop(FarmstormBlocks.PUFFED_WHEAT_CROP.get(), FarmstormItems.PUFFED_WHEAT.get(),
                 FarmstormItems.PUFFED_WHEAT_SEEDS.get(), ConstantValue.exactly(1), 3);
@@ -99,8 +99,11 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormItems.BROWN_MUSHROOM_PUFF.get(), UniformGenerator.between(1.0F, 2.0F), 0);
         crop(FarmstormBlocks.LUCKY_BERRY_BUSH.get(), FarmstormItems.LUCKY_BERRY.get(),
                 FarmstormItems.LUCKY_BERRY.get(), UniformGenerator.between(1.0F, 3.0F), 0);
+        // 朋友的韭（D-84）：1 作物 + 0~3 种子，参数照膨胀麦那条二项分布
+        crop(FarmstormBlocks.FRIEND_CHIVES_CROP.get(), FarmstormItems.FRIEND_CHIVES.get(),
+                FarmstormItems.CHIVE_SEEDS.get(), ConstantValue.exactly(1), 3);
 
-        // ---- 6 张部署方块表：掉自身，被爆炸破坏时掉 0 个 ----
+        // ---- 8 张部署方块表：掉自身，被爆炸破坏时掉 0 个 ----
         deployed(FarmstormBlocks.BLAST_CARROT.get());
         deployed(FarmstormBlocks.PUMPKIN_TURRET.get());
         deployed(FarmstormBlocks.AWAKENED_TORCHFLOWER.get());
@@ -108,6 +111,10 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
         deployed(FarmstormBlocks.FANG_TRAP_CACTUS.get());
         // F-74：桑吉尔蔗同形入表——玩家自挖掉自身；触发消失走 consume() 不经过战利品表（A-08）
         deployed(FarmstormBlocks.ZANGIEF_CANE.get());
+        // F-132：近防菌有 BlockItem，走同一条掉自身路径（TECH §9.3 第 18 行）
+        deployed(FarmstormBlocks.POINT_DEFENSE_FUNGUS.get());
+        // F-132：震动豆的方块没有 BlockItem（它的物品是 ThrowableCropItem），必须显式指物品（§2.2 注 2）
+        deployedAs(FarmstormBlocks.VIBRATION_BEAN.get(), FarmstormItems.VIBRATION_BEAN.get());
 
         // ---- 1 张压缩干草块表：掉自身（F-74；能否取出由 requiresCorrectToolForDrops + needs_diamond_tool 决定）----
         this.add(FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
@@ -152,8 +159,16 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
 
     /** 部署方块：掉自身；爆炸破坏时按原版 {@code survives_explosion} 掉 0 个。 */
     private void deployed(Block block) {
+        deployedAs(block, block.asItem());
+    }
+
+    /**
+     * 部署方块：掉指定的物品。震动豆的方块没有 BlockItem 映射，
+     * {@code lootTableItem(block)} 会经 {@code block.asItem()} 解析成空气，故必须显式给物品（TECH §2.2 注 2）。
+     */
+    private void deployedAs(Block block, Item item) {
         this.add(block, LootTable.lootTable().withPool(
-                LootPool.lootPool().when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(block))));
+                LootPool.lootPool().when(ExplosionCondition.survivesExplosion()).add(LootItem.lootTableItem(item))));
     }
 
     /** 成熟判定：作物方块且 {@code age == MATURE_AGE}。 */
@@ -186,6 +201,9 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormBlocks.AWAKENED_PITCHER_PLANT.get(),
                 FarmstormBlocks.FANG_TRAP_CACTUS.get(),
                 FarmstormBlocks.ZANGIEF_CANE.get(),
+                FarmstormBlocks.FRIEND_CHIVES_CROP.get(),
+                FarmstormBlocks.POINT_DEFENSE_FUNGUS.get(),
+                FarmstormBlocks.VIBRATION_BEAN.get(),
                 FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
                 FarmstormBlocks.CONVERTER.get());
     }

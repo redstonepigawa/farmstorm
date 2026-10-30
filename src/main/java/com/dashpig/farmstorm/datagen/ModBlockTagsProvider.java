@@ -28,7 +28,10 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
                 FarmstormBlocks.AWAKENED_PITCHER_PLANT.get(),
                 FarmstormBlocks.FANG_TRAP_CACTUS.get(),
                 // F-74：桑吉尔蔗也是部署方块（A-08 的「玩家自挖掉自身」与其它五个同一条路径）
-                FarmstormBlocks.ZANGIEF_CANE.get());
+                FarmstormBlocks.ZANGIEF_CANE.get(),
+                // F-132（A5）：v0.0.3 的两个新部署物
+                FarmstormBlocks.POINT_DEFENSE_FUNGUS.get(),
+                FarmstormBlocks.VIBRATION_BEAN.get());
 
         // D-14：任何爆炸都不得破坏
         tag(FarmstormTags.EXPLOSION_IMMUNE).add(
@@ -45,6 +48,9 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
                 FarmstormBlocks.AWAKENED_TORCHFLOWER.get(),
                 FarmstormBlocks.AWAKENED_PITCHER_PLANT.get(),
                 FarmstormBlocks.FANG_TRAP_CACTUS.get(),
+                // F-132（A5）：两个新部署物与既有部署方块一致（§9.3 A5 的另一半：zangief_cane 逐旧不补）
+                FarmstormBlocks.POINT_DEFENSE_FUNGUS.get(),
+                FarmstormBlocks.VIBRATION_BEAN.get(),
                 // F-74：压缩干草块硬度 30，只有镐可挖
                 FarmstormBlocks.COMPRESSED_HAY_BLOCK.get());
 

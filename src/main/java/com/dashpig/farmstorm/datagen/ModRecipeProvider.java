@@ -24,7 +24,7 @@ import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.registries.DeferredItem;
 
 /**
- * 24 条农产品转换配方（TECH §6.7 / D-11 / D-12；F-73 补 3 条，D-54）+ 1 条转换器合成配方（D-52 / F-71）
+ * 26 条农产品转换配方（TECH §6.7 / D-11 / D-12；F-73 补 3 条，D-54）+ 1 条转换器合成配方（D-52 / F-71）
  * + 1 条压缩膨胀麦无序合成配方（D-67 / F-72）。
  *
  * <p>转换配方全部共用自定义类型 {@code farmstorm:converting}，字段口径见 {@link ConverterRecipe} 的
@@ -90,6 +90,9 @@ public final class ModRecipeProvider extends RecipeProvider {
         twoWay(recipeOutput, "molotov", Items.CRIMSON_FUNGUS, FarmstormItems.MOLOTOV);
         twoWay(recipeOutput, "zangief_cane", Items.SUGAR_CANE, FarmstormItems.ZANGIEF_CANE);
         twoWay(recipeOutput, "wild_apple", Items.GOLDEN_APPLE, FarmstormItems.WILD_APPLE);
+        // 25-26：F-132 新增两条部署物双向（D-86 诡异菌 / D-90 可豆）；朋友的韭没有转换配方，只进 converter_fuel 标签（D-84）
+        twoWay(recipeOutput, "point_defense_fungus", Items.WARPED_FUNGUS, FarmstormItems.POINT_DEFENSE_FUNGUS);
+        twoWay(recipeOutput, "vibration_bean", Items.COCOA_BEANS, FarmstormItems.VIBRATION_BEAN);
     }
 
     /**

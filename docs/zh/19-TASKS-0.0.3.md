@@ -294,7 +294,7 @@ F-100 修 verify_project.py 0.5
 - **验收**：
   1. `18-TECH-0.0.3.md §11 #6`：只施加混乱时 W 向后走、A 向右平移，速度幅度与正常一致（F3 坐标逐刻差算），视角 / 跳跃 / 潜行 / 左键全部正常。
   2. `18-TECH-0.0.3.md §11 #7`：Q弹 + 混乱同时存在时按 W 位移为 0、锁日志已打印、效果结束的下一 tick 恢复反向。
-  3. 只订阅一个事件：`grep -c "MovementInputUpdateEvent" client/ConfusionInputHandler.java` 为 1；不写第二套锁（D-83、D-79）。
+  3. 只订阅一个事件：`grep -c "@SubscribeEvent" client/ConfusionInputHandler.java` 为 1；不写第二套锁（D-83、D-79）。**不要用 `grep -c "MovementInputUpdateEvent"` 当判据**——任何正常写法都要 import 该类，import 行与形参各命中一次，实测恒为 2；为凑 1 而改写成全限定名属本末倒置。
   4. 不碰速度与视角：`grep -c "MOVEMENT_SPEED" client/ConfusionInputHandler.java` 为 0、`grep -c "Sensitivity" client/ConfusionInputHandler.java` 为 0（`17-DESIGN-0.0.3.md` §3.4）。
 
 #### F-112 · 两条坐姿分支的真机对照与保留结论

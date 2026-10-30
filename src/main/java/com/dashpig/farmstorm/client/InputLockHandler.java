@@ -37,7 +37,14 @@ public final class InputLockHandler {
 
     /** 锁定判据只看「效果在不在」：三个相位都锁，少一个可能写错的数字（§4.3）。 */
     private static boolean locked() {
-        return ZangiefClientState.active() && Minecraft.getInstance().player != null;
+        return (ZangiefClientState.active() || QbounceClientState.active()) && Minecraft.getInstance().player != null;
+    }
+
+    /**
+     * 锁的公开判据（TECH §5.2 #1）：混乱用它做「锁优先」早退。锁的定义处仍只有本类的 {@link #locked()} 一处（D-79）。
+     */
+    public static boolean isLocked() {
+        return locked();
     }
 
     /**
@@ -51,9 +58,9 @@ public final class InputLockHandler {
             Options options = Minecraft.getInstance().options;
             options.keyAttack.setDown(false);
             options.keyUse.setDown(false);
-            Farmstorm.LOGGER.info("桑吉尔蔗 输入锁 生效");
+            Farmstorm.LOGGER.info("输入锁 生效");
         } else if (!nowLocked && wasLocked) {
-            Farmstorm.LOGGER.info("桑吉尔蔗 输入锁 解除");
+            Farmstorm.LOGGER.info("输入锁 解除");
         }
         wasLocked = nowLocked;
     }

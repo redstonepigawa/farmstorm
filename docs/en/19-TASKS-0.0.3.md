@@ -294,7 +294,7 @@ Phase exit criteria: all five of #3 ~ #7 in `18-TECH-0.0.3.md §11` pass; both b
 - **Acceptance**:
   1. `18-TECH-0.0.3.md §11 #6`: with Confusion alone applied, W walks backwards and A strafes right, with the speed magnitude equal to normal (computed tick by tick from the F3 coordinates), and the camera / jump / sneak / left click all behave normally.
   2. `18-TECH-0.0.3.md §11 #7`: with Q-Bounce and Confusion present together, pressing W gives a displacement of 0, the lock log has already been printed, and the reversal is restored on the tick after the effect ends.
-  3. Exactly one event is subscribed: `grep -c "MovementInputUpdateEvent" client/ConfusionInputHandler.java` is 1; no second set of locks is written (D-83, D-79).
+  3. Exactly one event is subscribed: `grep -c "@SubscribeEvent" client/ConfusionInputHandler.java` is 1; no second set of locks is written (D-83, D-79). **Do not use `grep -c "MovementInputUpdateEvent"` as the criterion** — any normal implementation imports that class, so the import line and the parameter each match once and the count is always 2; rewriting it as a fully-qualified name just to reach 1 is putting the cart before the horse.
   4. Speed and camera are untouched: `grep -c "MOVEMENT_SPEED" client/ConfusionInputHandler.java` is 0 and `grep -c "Sensitivity" client/ConfusionInputHandler.java` is 0 (`17-DESIGN-0.0.3.md` §3.4).
 
 #### F-112 · Real-Machine Comparison of the Two Sitting Branches and the Retention Conclusion

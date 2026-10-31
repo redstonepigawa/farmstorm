@@ -1,4 +1,4 @@
-# tools/convert_media.ps1 -- v0.0.3 audio + effect-icon pipeline (D-53 / D-66 / RT-14)
+# tools/convert_media.ps1 -- v0.0.4 audio + effect-icon pipeline (D-53 / D-66 / RT-14)
 #
 # Converts the seven out-of-repository source assets into what a Minecraft jar can actually load:
 #   (the 0.0.2 three are untouched; 0.0.3 only appends the later four, still one single script -- F-131 check 3)
@@ -9,6 +9,10 @@
 #   -- added in 0.0.3 --
 #   pengyoudejiu.mp3       -> assets/farmstorm/sounds/friend_chives.ogg       (mono, 64 kbps Ogg Vorbis)
 #     (the source file name is kept as-is, D-66; the event id is friend_chives, see sounds.json)
+#     -- changed in 0.0.4 --
+#     0.0.3 encoded the WHOLE 158.256 s track (1,242,039 B). The hit is a one-shot, so this
+#     entry now carries Seconds = 10 and only the first 10 s of the source is kept (-t as an
+#     output option: single pass, trim of the encode, not a second encode).
 #   preview.jpg            -> assets/farmstorm/textures/mob_effect/q_bounce.png (18x18 PNG, centre-cropped)
 #     (Steam Workshop 3796093604 preview image = the Q-bounce icon source, D-81; 18x18 is the D-53 icon size)
 #   author item artwork x2 (1254x1254 RGBA; paths in plan0.0.3.txt)
@@ -31,10 +35,13 @@
 #   * re-running is a no-op when every output is newer than its source (use -Force to rebuild)
 #     ride along inside the .ogg and Minecraft only expects one vorbis stream)
 #
-# NOTE: the .ogg files are NOT byte-reproducible. The Ogg muxer writes a random stream serial
-# number on every run, so two encodings of the same input differ in md5 even though the audio
-# is identical (-fflags +bitexact does not change this). Never use the md5 of an .ogg as an
-# acceptance criterion; compare duration, channels, bitrate or speech instead.
+# NOTE (corrected in 0.0.4): the .ogg files ARE byte-reproducible now. Without -fflags +bitexact
+# the muxer writes a random Ogg stream serial number on every run, so two encodings of the same
+# input differ in md5 even though the audio is identical. -serial_offset alone does NOT fix it
+# (measured: still two different hashes); -fflags +bitexact on the OUTPUT file does (measured:
+# two runs -> one SHA256). The audio branch passes it, so a rebuild can be diffed byte for
+# byte. On another ffmpeg build without that flag the md5 will differ again -- then fall back
+# to comparing duration / channels / bitrate.
 #
 # Usage:
 #   pwsh -File tools/convert_media.ps1 -CheckOnly
@@ -62,7 +69,9 @@ $Plan = @(
     @{ Tag = "audio"; Src = $Animals; Rel = "assets/farmstorm/sounds/wild_hunter_loop.ogg" },
     @{ Tag = "audio"; Src = $Sfx;     Rel = "assets/farmstorm/sounds/zangief_piledriver.ogg" },
     @{ Tag = "icon";  Src = $Icon;    Rel = "assets/farmstorm/textures/mob_effect/wild_hunter.png"; Size = 18 },
-    @{ Tag = "audio"; Src = $Chives;  Rel = "assets/farmstorm/sounds/friend_chives.ogg" },
+    # Seconds = 10 (0.0.4): 0.0.3 shipped the whole 158.256 s track here; the hit is a one-shot,
+    # so only the first 10 s are kept. The key is optional -- entries without it encode in full.
+    @{ Tag = "audio"; Src = $Chives;  Rel = "assets/farmstorm/sounds/friend_chives.ogg"; Seconds = 10 },
     @{ Tag = "icon";  Src = $QIcon;   Rel = "assets/farmstorm/textures/mob_effect/q_bounce.png";   Size = 18 },
     # Framing boxes of the two author-art entries = a square grown 6% from the alpha>=32 bbox
     # (side 1152 / 694, centred on the subject and clamped into the canvas); recompute with the
@@ -115,7 +124,7 @@ function Get-FfmpegProblem {
     return $null
 }
 
-Write-Host "== farmstorm v0.0.3 media pipeline ==" -ForegroundColor Cyan
+Write-Host "== farmstorm v0.0.4 media pipeline ==" -ForegroundColor Cyan
 
 $exe = $null
 try { $exe = Resolve-Ffmpeg -Explicit $Ffmpeg } catch { Write-Host ("FAIL  " + $_.Exception.Message) -ForegroundColor Red; exit 1 }
@@ -178,7 +187,13 @@ foreach ($p in $Plan) {
 
     Write-Host ("  convert " + (Split-Path -Leaf $p.Src) + " -> " + $p.Rel)
     if ($p.Tag -eq "audio") {
-        $ffArgs = @("-hide_banner", "-y", "-vn", "-i", $p.Src, "-ac", "1", "-c:a", "libvorbis", "-b:a", "64k", $dst)
+        $ffArgs = @("-hide_banner", "-y", "-vn", "-i", $p.Src, "-ac", "1", "-c:a", "libvorbis", "-b:a", "64k")
+        # Optional clip: only the first $p.Seconds of the SOURCE is encoded. -t sits after -i, so it is
+        # an output option and trims the encoded stream in the same pass (no temp file, no 2nd encode).
+        if ($p.ContainsKey("Seconds")) { $ffArgs += @("-t", [string]$p.Seconds) }
+        # Byte-reproducible output -- see the NOTE in the header. Without it the muxer picks a random
+        # Ogg stream serial number on every run.
+        $ffArgs += @("-fflags", "+bitexact", $dst)
     } else {
         # Two kinds of icon source:
         #   * a single image WITH a background (wild_hunter.jpg, the Steam Workshop preview.jpg):

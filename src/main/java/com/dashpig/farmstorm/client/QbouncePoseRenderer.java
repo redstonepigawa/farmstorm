@@ -21,7 +21,9 @@ import net.neoforged.neoforge.client.event.RenderLivingEvent;
  *
  * <p><b>参数来源</b>：三个姿态参数一律取 {@link QbounceClientState} 的编译期镜像常量（§3.12），本类不读 config——
  * {@code farmstorm-server.toml} 在专用服务器上客户端读不到，且服务端不下发姿态参数（D-81）。
- * 相位只有一份（本机玩家的本地累加刻数），因此同屏多个受效果生物共用同一个旋转角与压缩相位。
+ * <p><b>相位是每实体一份的</b>（0.0.4 起）：{@link QbounceClientState#phaseTicksOf} 给出该实体自己的 t——本机玩家
+ * 走本地累加刻数（与 0.0.3 逐字相同），其它实体走「当前刻 − 它自己进入效果的刻」。0.0.3 这里只有一份全局相位，
+ * 于是本机玩家没带效果时 {@code t} 恒为 0（旋转 0°、压缩 1.0），同屏别人的模型看起来纹丝不动。
  */
 @EventBusSubscriber(modid = Farmstorm.MOD_ID, value = Dist.CLIENT)
 public final class QbouncePoseRenderer {
@@ -49,13 +51,16 @@ public final class QbouncePoseRenderer {
         // mount 分支（乘客）出现。保留它是 TECH §4.2 的口径，两条分支的取舍留给 F-112，本任务不下结论。
         event.getRenderer().getModel().riding = true;
 
+        // 相位按实体取（0.0.4）：本机玩家 = 本地累加刻数，其它实体 = 当前刻 − 它自己进入效果的刻。
+        // 本机玩家这一条与 0.0.3 同一份数据、同一组算式，所以「现在能动的，改完还要能动」。
+        int phase = QbounceClientState.phaseTicksOf(entity);
         PoseStack poseStack = event.getPoseStack();
         poseStack.pushPose();
         poseStack.translate(0.0D, SINK_Y, 0.0D);
-        poseStack.scale(QbounceClientState.squashScaleX(),
-                QbounceClientState.squashScaleY(),
-                QbounceClientState.squashScaleZ());
-        poseStack.mulPose(Axis.YP.rotationDegrees(QbounceClientState.rotateDegrees()));
+        poseStack.scale(QbounceClientState.squashScaleX(phase),
+                QbounceClientState.squashScaleY(phase),
+                QbounceClientState.squashScaleZ(phase));
+        poseStack.mulPose(Axis.YP.rotationDegrees(QbounceClientState.rotateDegrees(phase)));
     }
 
     /**

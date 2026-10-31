@@ -27,47 +27,72 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
  * GUI（{@link ScreenEvent.Opening} 只放行暂停菜单）。
  * <p><b>ESC 不需要「放行」</b>：它走 {@code KeyboardHandler#keyPress} 里的 {@code pauseGame}，
  * 位置在 NeoForge 所有钩子之前，拦不拦都会生效（见 {@code .work/FINDING-RT13-INPUT-LOCK.md}）。
+ * <p><b>0.0.4 起锁定分成两个判据</b>（作者裁定）：桑吉尔蔗仍是<b>七段全锁</b>；Q弹 <b>只锁第①段</b>
+ * （WASD 移动 + 跳跃 + 潜行），其余六段（鼠标按键 / 攻击与使用 / 键盘 / 滚轮 / 视角灵敏度 / GUI）全部放开。
+ * 于是本类有两个判据：{@link #fullyLocked()} 只认桑吉尔蔗，供第②~⑦段；{@link #movementLocked()} 认
+ * 桑吉尔蔗 或 Q弹，供第①段与「进锁松键」那条 tick 逻辑。
+ * <p><b>分段判据对照</b>：①移动/跳跃/潜行 = 移动锁；②鼠标按下 / ③攻击与使用 / ④键盘 / ⑤滚轮 / ⑥视角 / ⑦GUI = 全锁。
  * <p><b>已知限制</b>（无 Mixin 够不着，验收时不算缺陷）：F11 全屏 / F2 截图 / F3 调试。
  */
 @EventBusSubscriber(modid = Farmstorm.MOD_ID, value = Dist.CLIENT)
 public final class InputLockHandler {
-    private static boolean wasLocked;
+    /** 上一次 tick 的<b>移动锁</b>状态（Q弹 也算）：只服务「进入锁定那一 tick 松键 + 打一行日志」。 */
+    private static boolean wasMovementLocked;
 
     private InputLockHandler() {}
 
-    /** 锁定判据只看「效果在不在」：三个相位都锁，少一个可能写错的数字（§4.3）。 */
-    private static boolean locked() {
-        return (ZangiefClientState.active() || QbounceClientState.active()) && Minecraft.getInstance().player != null;
+    /**
+     * <b>全锁</b>判据：只认桑吉尔蔗（七段全锁）。Q弹 不在这里——它只锁第①段（0.0.4 作者裁定）。
+     * <p>与 0.0.3 逐字相同的部分是「只看效果在不在 + 得有本地玩家」：三个相位都锁，少一个可能写错的数字（§4.3）。
+     */
+    private static boolean fullyLocked() {
+        return ZangiefClientState.active() && Minecraft.getInstance().player != null;
     }
 
     /**
-     * 锁的公开判据（TECH §5.2 #1）：混乱用它做「锁优先」早退。锁的定义处仍只有本类的 {@link #locked()} 一处（D-79）。
+     * <b>移动锁</b>判据：桑吉尔蔗 或 Q弹。只供第①段（{@link #onMovementInput}）与混乱的「锁优先」早退使用。
+     * <p>为什么 Q弹 也算移动锁：混乱反转的正是移动分量，两者作用在同一处，所以 Q弹 期间混乱同样不生效。
+     */
+    private static boolean movementLocked() {
+        return (ZangiefClientState.active() || QbounceClientState.active())
+                && Minecraft.getInstance().player != null;
+    }
+
+    /**
+     * 全锁的公开判据（TECH §5.2 #1）：第②~⑦段用它。锁的定义处仍只有本类的 {@link #fullyLocked()} 一处（D-79）。
      */
     public static boolean isLocked() {
-        return locked();
+        return fullyLocked();
+    }
+
+    /** 移动锁的公开判据：给混乱的「锁优先」早退用（{@link ConfusionInputHandler}）。 */
+    public static boolean isMovementLocked() {
+        return movementLocked();
     }
 
     /**
      * 进入锁定的那一 tick 主动复位按键状态（D-79 新增）：若玩家在按住左键挖掘的中途被锁定，
      * 之后不会再有新的「按下」事件，{@code keyAttack.isDown()} 会保持 true，挖掘就停不下来。
+     * <p><b>0.0.4 起这里判的是移动锁</b>：Q弹 期间不拦攻击/使用，松键只在「进入锁」那一 tick 做一次，
+     * 若跟着全锁走，Q弹（只锁移动）就永远不会松键、也就漏掉了这条保护。
      */
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
-        boolean nowLocked = locked();
-        if (nowLocked && !wasLocked) {
+        boolean nowLocked = movementLocked();
+        if (nowLocked && !wasMovementLocked) {
             Options options = Minecraft.getInstance().options;
             options.keyAttack.setDown(false);
             options.keyUse.setDown(false);
             Farmstorm.LOGGER.info("输入锁 生效");
-        } else if (!nowLocked && wasLocked) {
+        } else if (!nowLocked && wasMovementLocked) {
             Farmstorm.LOGGER.info("输入锁 解除");
         }
-        wasLocked = nowLocked;
+        wasMovementLocked = nowLocked;
     }
 
     @SubscribeEvent
     public static void onMovementInput(MovementInputUpdateEvent event) {
-        if (!locked()) {
+        if (!movementLocked()) {
             return;
         }
         Input input = event.getInput();
@@ -80,7 +105,7 @@ public final class InputLockHandler {
     /** 可取消且最早（{@code MouseHandler#onPress} 入口直接 return），比交互事件更靠前。 */
     @SubscribeEvent
     public static void onMouseButtonPre(InputEvent.MouseButton.Pre event) {
-        if (locked()) {
+        if (fullyLocked()) {
             event.setCanceled(true);
         }
     }
@@ -88,7 +113,7 @@ public final class InputLockHandler {
     /** 第二道网：{@code continueAttack} 每 tick 也会 fire 本事件，因此「按住左键持续挖掘」也能拦住。 */
     @SubscribeEvent
     public static void onInteractionKeyMappingTriggered(InputEvent.InteractionKeyMappingTriggered event) {
-        if (locked()) {
+        if (fullyLocked()) {
             event.setCanceled(true);
         }
     }
@@ -100,7 +125,7 @@ public final class InputLockHandler {
      */
     @SubscribeEvent
     public static void onKey(InputEvent.Key event) {
-        if (!locked()) {
+        if (!fullyLocked()) {
             return;
         }
         Options options = Minecraft.getInstance().options;
@@ -112,7 +137,7 @@ public final class InputLockHandler {
 
     @SubscribeEvent
     public static void onMouseScroll(InputEvent.MouseScrollingEvent event) {
-        if (locked()) {
+        if (fullyLocked()) {
             event.setCanceled(true);
         }
     }
@@ -123,7 +148,7 @@ public final class InputLockHandler {
      */
     @SubscribeEvent
     public static void onTurn(CalculatePlayerTurnEvent event) {
-        if (locked()) {
+        if (fullyLocked()) {
             event.setMouseSensitivity(0.0D);
             event.setCinematicCameraEnabled(false);
         }
@@ -136,7 +161,7 @@ public final class InputLockHandler {
      */
     @SubscribeEvent
     public static void onScreenOpening(ScreenEvent.Opening event) {
-        if (!locked()) {
+        if (!fullyLocked()) {
             return;
         }
         Screen target = event.getNewScreen();

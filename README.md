@@ -1,6 +1,6 @@
 # 农场风云 / Farmstorm
 
-Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已实现并发版）· v0.0.2（已实现并发版）· **v0.0.3（文档已就绪，未实现）**
+Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· **v0.0.4（当前发布版）**
 
 > 把原版农作物改造成 PvP 道具：同一种作物可以种在地里、扔出去、架在墙上、或者吃掉。
 > Vanilla crops re-armed as PvP gadgets: plant them, throw them, mount them, or eat them.
@@ -133,6 +133,20 @@ jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.w
 | [`docs/zh/13-TASKS-0.0.2.md`](docs/zh/13-TASKS-0.0.2.md) | [`docs/en/13-TASKS-0.0.2.md`](docs/en/13-TASKS-0.0.2.md) | 任务拆分与大纲：40 个任务 F-60~F-99、5 个 Phase、M7~M11、9 条裁决 A-01~A-09、四张覆盖对照表 |
 | [`docs/zh/14-PROMPT-MAIN-0.0.2.md`](docs/zh/14-PROMPT-MAIN-0.0.2.md) | [`docs/en/14-PROMPT-MAIN-0.0.2.md`](docs/en/14-PROMPT-MAIN-0.0.2.md) | v0.0.2 主提示词：14 条硬约束 HC-15~HC-28、14 条禁止行为 N-15~N-28、15 条已知陷阱 |
 | [`docs/zh/15-PROMPT-TASKS-0.0.2.md`](docs/zh/15-PROMPT-TASKS-0.0.2.md) | [`docs/en/15-PROMPT-TASKS-0.0.2.md`](docs/en/15-PROMPT-TASKS-0.0.2.md) | v0.0.2 分阶段任务清单：Phase 11~15 各一节（每节固定 6 项），可单独复制投喂 |
+
+### v0.0.4（当前发布版）/ v0.0.4 (current release)
+
+v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有新增增量文档（改动量与口径都写在这一节与 `.work/PLAN.md` 的 V-158 里）。
+
+| 改动 | 说明 | 验证方式 |
+|---|---|---|
+| 朋友的韭命中音 158 s → **10 s** | 之前是整首曲子没截断 | ffmpeg 输出侧 `-t 10`；独立 Vorbis 解析 granule 480,000 → **10.000000 s**；`-fflags +bitexact` 使三次重建字节相同 |
+| **别人也看得见 Q弹 的模型变化** | 两层根因：① 姿势参数取自本机玩家时钟；② **原版只把效果包发给实体自己的连接**，观察者根本不知道别人身上的效果 | 相位改按实体计时；服务端每 20 刻向 64 格内观察者补发原版效果包、三条快路径补发移除包。实测：持有者自收 1 条、观察者每秒 1 条、到期/清除/死亡各有移除包 |
+| **Q弹 只锁移动** | 之前与桑吉尔蔗 共用七段全锁 | 拆成 `fullyLocked()`（桑吉尔蔗，第②~⑦段）与 `movementLocked()`（含 Q弹，第①段）；混乱的锁优先改判移动锁 |
+| **Q弹 期间强制第三人称** | 按 F5 会被拉回，结束恢复 | 新增 `client/QbounceThirdPersonController`；记下 → 每刻写 `THIRD_PERSON_BACK` → 消失/死亡/退世界恢复 |
+
+红线未变：`CustomPacketPayload` **0**、`@Mixin` **0**（用的是原版效果包与声音包）。
+关键数字与 v0.0.3 相同：注册 **90** / config **155** / 语言键 **299 × 2** / 作物 22 / 进度 18。
 
 ### v0.0.3 增量文档 / v0.0.3 delta documents
 

@@ -96,7 +96,6 @@ public final class FarmstormBlocks {
                 BlockBehaviour.Properties.of()
                         .mapColor(MapColor.PLANT)
                         .noCollission()
-                        .randomTicks()
                         .instabreak()
                         .sound(SoundType.CROP));
     }

@@ -54,13 +54,13 @@ public record CropProfile(
             "toxic_ubi_server", CropCategory.BUFF, CropCategory.DEMOLITION, CropCategory.DAMAGE);
     public static final CropProfile POWER_BEET = crop("power_beet", "power_beet_crop", "power_beet_seeds",
             CropCategory.BUFF);
-    /** 瓜片子不可种植（§3.2.3），故作物方块与播种物为空。伤害类见 DEC §4，破障类是作者 2026-10-28 新增。 */
+    /** 瓜片子不可种植（§3.2.3），故作物方块与播种物为空。D-108：类别只剩伤害，破障类已删。 */
     public static final CropProfile MELON_SLICE_BOMB = new CropProfile(
             Farmstorm.id("melon_slice_bomb"), CropType.THROWABLE,
-            categorySet(CropCategory.DAMAGE, CropCategory.DEMOLITION),
+            categorySet(CropCategory.DAMAGE),
             null, null, null, Set.of(), THROWABLE_STACK_TIER);
     public static final CropProfile MELON_GRENADE = throwable("melon_grenade", "melon_grenade_stem", "melon_grenade_seeds",
-            CropCategory.DEMOLITION, CropCategory.DAMAGE);
+            CropCategory.DAMAGE);
     public static final CropProfile PUMPKIN_TURRET = deployed("pumpkin_turret", "pumpkin_turret_stem",
             "pumpkin_turret_seeds", DeployedKind.PUMPKIN_TURRET,
             categorySet(CropCategory.TURRET, CropCategory.DAMAGE),

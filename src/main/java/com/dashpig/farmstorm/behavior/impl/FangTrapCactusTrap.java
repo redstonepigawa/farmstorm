@@ -13,7 +13,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.projectile.EvokerFangs;
 
 /**
@@ -28,9 +29,13 @@ public final class FangTrapCactusTrap implements TrapBehavior {
         return DeployedKind.FANG_TRAP_CACTUS;
     }
 
-    /** 欧氏 ≤ {@code fang_trap_cactus.triggerRadius}（C-5 / D-20 的唯一例外）。 */
+    /**
+     * 欧氏 ≤ {@code fang_trap_cactus.triggerRadius}（C-5 / D-20 的唯一例外）。
+     * <p>D-114 的两遍：第一遍仍是玩家（三条豁免一字未改）；第二遍补敌对生物，复用同一个半径键与同一个欧氏
+     * （不写第二个数），生物恒按非己方。生物的缓慢 V 由伤害事件侧跳过，本类不筛。
+     */
     @Override
-    public Optional<Player> findTrigger(DeployedCropBlockEntity be) {
+    public Optional<LivingEntity> findTrigger(DeployedCropBlockEntity be) {
         if (!(be.getLevel() instanceof ServerLevel level)) {
             return Optional.empty();
         }
@@ -46,11 +51,18 @@ public final class FangTrapCactusTrap implements TrapBehavior {
                 return Optional.of(player);
             }
         }
+        for (Monster monster : level.getEntitiesOfClass(Monster.class, TrapBehavior.searchBox(pos, radius))) {
+            BlockPos target = monster.blockPosition();
+            if (DistanceMetrics.euclidean(target.getX() - pos.getX(), target.getY() - pos.getY(),
+                    target.getZ() - pos.getZ()) <= radius) {
+                return Optional.of(monster);
+            }
+        }
         return Optional.empty();
     }
 
     @Override
-    public void trigger(DeployedCropBlockEntity be, Player target) {
+    public void trigger(DeployedCropBlockEntity be, LivingEntity target) {
         if (!(be.getLevel() instanceof ServerLevel level)) {
             return;
         }

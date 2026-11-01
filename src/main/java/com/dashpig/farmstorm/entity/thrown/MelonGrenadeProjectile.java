@@ -22,9 +22,6 @@ import net.minecraft.world.phys.Vec3;
  * 顺序固定为「先生成、后爆炸」；子母弹不立即结算，按各自的地面碰撞重新走一次投掷型落点流程。
  */
 public class MelonGrenadeProjectile extends ThrownCropEntity {
-    /** 子母弹的水平初速（TECH §4.7），实现细节常量，不进 config。 */
-    private static final double SUBMUNITION_SPEED = 0.3;
-
     public MelonGrenadeProjectile(EntityType<? extends MelonGrenadeProjectile> type, Level level) {
         super(type, level);
     }
@@ -54,6 +51,8 @@ public class MelonGrenadeProjectile extends ThrownCropEntity {
         int count = FarmstormConfig.melonGrenadeSpawnCount.get();
         double offsetY = FarmstormConfig.melonGrenadeSpawnOffsetY.get();
         double jitter = FarmstormConfig.melonGrenadeHorizontalJitter.get();
+        // D-109：径向初速由硬编码常量改成 config 键，与抖动一起决定散开半径与散开速度。
+        double speed = FarmstormConfig.melonGrenadeSubmunitionSpeed.get();
         for (int index = 0; index < count; index++) {
             double x = pos.x + Mth.nextDouble(this.random, -jitter, jitter);
             double z = pos.z + Mth.nextDouble(this.random, -jitter, jitter);
@@ -63,7 +62,7 @@ public class MelonGrenadeProjectile extends ThrownCropEntity {
             slice.moveTo(x, pos.y + offsetY, z, 0.0F, 0.0F);
             slice.setSubmunition(true);
             double angle = this.random.nextDouble() * Math.PI * 2.0;
-            slice.setDeltaMovement(Math.cos(angle) * SUBMUNITION_SPEED, 0.0, Math.sin(angle) * SUBMUNITION_SPEED);
+            slice.setDeltaMovement(Math.cos(angle) * speed, 0.0, Math.sin(angle) * speed);
             level.addFreshEntity(slice);
         }
     }

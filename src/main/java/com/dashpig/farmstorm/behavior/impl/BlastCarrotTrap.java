@@ -16,7 +16,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -33,9 +34,13 @@ public final class BlastCarrotTrap implements TrapBehavior {
         return DeployedKind.BLAST_CARROT;
     }
 
-    /** 切比雪夫 ≤ {@code blast_carrot.triggerRadius}，原点与判定对象都取方块坐标（DESIGN §4.2）。 */
+    /**
+     * 切比雪夫 ≤ {@code blast_carrot.triggerRadius}，原点与判定对象都取方块坐标（DESIGN §4.2）。
+     * <p>D-114 的两遍：第一遍仍是玩家（创造 / 旁观 / 己方三条豁免一字未改）；第二遍补敌对生物，
+     * 复用同一个半径与同一个切比雪夫（不写第二个数），生物没有队伍归属因此恒按非己方。
+     */
     @Override
-    public Optional<Player> findTrigger(DeployedCropBlockEntity be) {
+    public Optional<LivingEntity> findTrigger(DeployedCropBlockEntity be) {
         if (!(be.getLevel() instanceof ServerLevel level)) {
             return Optional.empty();
         }
@@ -51,11 +56,18 @@ public final class BlastCarrotTrap implements TrapBehavior {
                 return Optional.of(player);
             }
         }
+        for (Monster monster : level.getEntitiesOfClass(Monster.class, TrapBehavior.searchBox(pos, radius))) {
+            BlockPos target = monster.blockPosition();
+            if (DistanceMetrics.chebyshev(target.getX() - pos.getX(), target.getY() - pos.getY(),
+                    target.getZ() - pos.getZ()) <= radius) {
+                return Optional.of(monster);
+            }
+        }
         return Optional.empty();
     }
 
     @Override
-    public void trigger(DeployedCropBlockEntity be, Player target) {
+    public void trigger(DeployedCropBlockEntity be, LivingEntity target) {
         if (!(be.getLevel() instanceof ServerLevel level)) {
             return;
         }

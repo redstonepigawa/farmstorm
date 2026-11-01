@@ -101,7 +101,7 @@ public final class Farmstorm {
             }
         }
         boolean taxonomyOk = CropProfile.ALL.size() == 22
-                && throwable == 12 && deployable == 7 && edible == 3 && demolition == 4;
+                && throwable == 12 && deployable == 7 && edible == 3 && demolition == 2;
         LOGGER.info("自检 作物 {} 种：投掷型 {} / 部署型 {} / 食用型 {}；破障类 {} → {}",
                 CropProfile.ALL.size(), throwable, deployable, edible, demolition, taxonomyOk ? "OK" : "FAIL");
 

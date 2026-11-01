@@ -14,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
@@ -89,26 +90,47 @@ public class PuffedWheatProjectile extends ThrownCropEntity {
     }
 
     /**
-     * 写满边长 edge 的立方体；D-38 / T-05 的防破坏底线（抗性 ≥ 3.6e6）之外的方块一律覆盖。
+     * 写满边长 edge 的立方体。两道判据是**叠加**关系，不是替换：
+     * 先是 D-38 / T-05 的防破坏底线（抗性 ≥ 3.6e6 跳过），再是 D-106 的白名单（只写空气与流体）。
      *
      * <p>抗性读「方块自身」的爆炸抗性而不是 context 敏感版本：DESIGN §7.11 明确膨胀麦是「写入」而非爆炸，
      * 会覆盖火把花 / 瓶子草这类把 context 抗性报成 3.6e6 的部署方块，只有基岩级方块才该挡住。
      * NeoForge 给无参版本标了 {@code @Deprecated}（指向 context 版本），此处刻意留在内禀口径上。
+     *
+     * <p>白名单由 {@code compressed.replaceOnlyAirAndFluid} 开关（默认 true）；关掉时回到 0.0.4 的行为，
+     * 只剩抗性底线——这是验收里的对照实验。压缩膨胀麦只重写 {@link #fillBlock()}，共用这一份判定。
      */
     @SuppressWarnings("deprecation")
     private void fillHay(ServerLevel level, BlockPos center, int edge) {
         int radius = edge / 2;
         BlockState hay = this.fillBlock();
+        boolean onlyAirAndFluid = FarmstormConfig.compressedReplaceOnlyAirAndFluid.get();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dy = -radius; dy <= radius; dy++) {
                 for (int dz = -radius; dz <= radius; dz++) {
                     BlockPos pos = center.offset(dx, dy, dz);
-                    if (level.getBlockState(pos).getBlock().getExplosionResistance() >= BlastRule.UNBREAKABLE_RESISTANCE) {
+                    BlockState current = level.getBlockState(pos);
+                    if (current.getBlock().getExplosionResistance() >= BlastRule.UNBREAKABLE_RESISTANCE) {
+                        continue;
+                    }
+                    if (onlyAirAndFluid && !isAirOrFluid(current)) {
                         continue;
                     }
                     level.setBlock(pos, hay, Block.UPDATE_ALL);
                 }
             }
         }
+    }
+
+    /**
+     * D-106 的白名单：只有空气与「整格就是流体」的方块可写。
+     *
+     * <p>不能用 {@code getFluidState().isEmpty()} 代替：含水楼梯 / 含水栅栏 / 海带 / 海草的水流体状态同样非空，
+     * 但方块本体不是流体，按 D-106 一律不写。判据取「方块是 {@link LiquidBlock}」——原版的水与岩浆都是它的实例，
+     * 且两者都带 {@code replaceable}；白名单外的方块因此天然满足「不可替换一律跳过」与「有方块实体一律跳过」
+     * 两条（空气与流体都不带方块实体）。
+     */
+    private static boolean isAirOrFluid(BlockState state) {
+        return state.isAir() || state.getBlock() instanceof LiquidBlock;
     }
 }

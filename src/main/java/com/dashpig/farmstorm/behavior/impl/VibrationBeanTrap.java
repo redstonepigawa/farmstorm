@@ -15,7 +15,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -36,11 +37,12 @@ public final class VibrationBeanTrap implements TrapBehavior {
     }
 
     /**
-     * 触发端只认**非己方玩家**，并沿用既有陷阱的创造 / 旁观豁免（HC-09 / D-92）；
+     * 触发端认**非己方玩家与敌对生物**（D-114），并沿用既有陷阱的创造 / 旁观豁免（HC-09 / D-92）；
      * 距离判据与效果端共用 {@code vibration_bean.triggerRadius} 与同一个严格小于（D-101）。
+     * <p>两遍遍历用同一个 {@code <} 与同一个半径键（不写第二个数）；生物没有队伍归属，因此恒按非己方。
      */
     @Override
-    public Optional<Player> findTrigger(DeployedCropBlockEntity be) {
+    public Optional<LivingEntity> findTrigger(DeployedCropBlockEntity be) {
         if (!(be.getLevel() instanceof ServerLevel level)) {
             return Optional.empty();
         }
@@ -54,6 +56,12 @@ public final class VibrationBeanTrap implements TrapBehavior {
                 return Optional.of(player);
             }
         }
+        for (Monster monster : level.getEntitiesOfClass(Monster.class,
+                TrapBehavior.searchBox(be.getBlockPos(), radius))) {
+            if (center.distanceTo(monster.position()) < radius) {
+                return Optional.of(monster);
+            }
+        }
         return Optional.empty();
     }
 
@@ -63,7 +71,7 @@ public final class VibrationBeanTrap implements TrapBehavior {
      * → {@code consume()} 静默移除，不触战利品表（D-72）。
      */
     @Override
-    public void trigger(DeployedCropBlockEntity be, Player target) {
+    public void trigger(DeployedCropBlockEntity be, LivingEntity target) {
         if (!(be.getLevel() instanceof ServerLevel level)) {
             return;
         }
@@ -85,7 +93,7 @@ public final class VibrationBeanTrap implements TrapBehavior {
         level.playSound(null, pos, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, EXPLODE_VOLUME, EXPLODE_PITCH);
         Farmstorm.LOGGER.info(String.format(Locale.ROOT,
                 "震动豆 触发 @ %s 由 %s：球内玩家 %d 施加成功 %d（半径 %.2f 格，%d 刻，amplifier 0），爆炸音一次",
-                pos.toShortString(), target.getGameProfile().getName(), inRange, applied, radius, ticks));
+                pos.toShortString(), target.getName().getString(), inRange, applied, radius, ticks));
         be.consume();
         // D-63 的扩充 / DESIGN §10.1 #18 + §10.2 第 3 条：只认「结算完成」（施混乱 + 静默移除都执行完），
         // 不认「谁踩的」——结算一完成就按效果端的口径给球内每个玩家各授一次（己方玩家同样推进，D-101）。

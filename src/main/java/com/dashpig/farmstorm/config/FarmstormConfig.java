@@ -8,7 +8,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * 服务端配置（DEC D-21 / D-22，TECH §4.11）。
  * 键是封闭集合（HC-07）：v0.0.1 的 117 个逐字对齐 01-DESIGN.md §3.8，v0.0.2 新增的 22 个逐字对齐
  * 12-TECH-0.0.2.md §8.1，v0.0.3 新增的 19 个逐字对齐 18-TECH-0.0.3.md §8.1（16 纯新增 + 3 改既有默认值），
- * 合计 139 + 19 = 158——不接受「差不多」。
+ * 合计 139 + 19 = 158——不接受「差不多」。v0.1.0 再加 12 行（新增 11 + 改默认值 1），键数 155 + 11 = 166（24-TECH §8.1）；
+ * 5 个新分组追加在 vibration_bean 之后。
  * 字段不能是 final——值在静态块里赋值。
  */
 public final class FarmstormConfig {
@@ -62,6 +63,7 @@ public final class FarmstormConfig {
     public static ModConfigSpec.DoubleValue melonGrenadeHorizontalJitter;
     public static ModConfigSpec.IntValue melonGrenadeExplosionPower;
     public static ModConfigSpec.IntValue melonGrenadeMaxDamage;
+    public static ModConfigSpec.DoubleValue melonGrenadeSubmunitionSpeed;
 
     public static ModConfigSpec.IntValue pumpkinTurretTargetRadius;
     public static ModConfigSpec.IntValue pumpkinTurretProjectileDamage;
@@ -212,6 +214,22 @@ public final class FarmstormConfig {
 
     public static ModConfigSpec.DoubleValue zangiefCaneSlamDamage;
     public static ModConfigSpec.BooleanValue zangiefCaneCancelFallDamage;
+
+    // ---- v0.1.0 的 5 个新分组（10 键；24-TECH §8.1 的第 1–9、12 行）----
+    public static ModConfigSpec.IntValue growthMinSeconds;
+    public static ModConfigSpec.IntValue growthMaxSeconds;
+
+    public static ModConfigSpec.IntValue trapImmunityTicks;
+    public static ModConfigSpec.IntValue trapDustIntervalTicks;
+    public static ModConfigSpec.IntValue trapMaxTrapsPerPlayer;
+
+    public static ModConfigSpec.IntValue farmlandLimitPerPlayer;
+
+    public static ModConfigSpec.IntValue outpostCoreFarmlandBonus;
+    public static ModConfigSpec.IntValue outpostCoreMaxPerPlayer;
+    public static ModConfigSpec.IntValue outpostCoreBoundaryParticleIntervalTicks;
+
+    public static ModConfigSpec.BooleanValue compressedReplaceOnlyAirAndFluid;
 
     // ---- 烘焙快照 ----
     /** 概率表条目数（§4.11.4 / §4.12）。 */
@@ -388,13 +406,16 @@ public final class FarmstormConfig {
                 .defineInRange("spawnOffsetY", 1, 0, 8);
         melonGrenadeHorizontalJitter = b.comment("x/z 轴随机偏移上界")
                 .translation(tr("melon_grenade.horizontalJitter"))
-                .defineInRange("horizontalJitter", 0.3, 0.0, 8.0);
+                .defineInRange("horizontalJitter", 0.05, 0.0, 8.0);
         melonGrenadeExplosionPower = b.comment("爆炸威力")
                 .translation(tr("melon_grenade.explosionPower"))
                 .defineInRange("explosionPower", 3, 0, 100);
         melonGrenadeMaxDamage = b.comment("伤害上限")
                 .translation(tr("melon_grenade.maxDamage"))
                 .defineInRange("maxDamage", 8, 0, 1000);
+        melonGrenadeSubmunitionSpeed = b.comment("瓜片子的径向初速（格/刻），原硬编码 0.3；范围 0.0 ~ 4.0")
+                .translation(tr("melon_grenade.submunitionSpeed"))
+                .defineInRange("submunitionSpeed", 0.1, 0.0, 4.0);
         b.pop();
 
         b.push("pumpkin_turret");
@@ -857,6 +878,51 @@ public final class FarmstormConfig {
         vibrationBeanConfusionTicks = b.comment("D-92：混乱时长（80 刻 = 4 秒）；confusion 组本身不设键，时长由施加方写入")
                 .translation(tr("vibration_bean.confusionTicks"))
                 .defineInRange("confusionTicks", 80, 20, 600);
+        b.pop();
+
+        b.push("growth");
+        growthMinSeconds = b.comment("成熟总时长下界（秒），范围 1 ~ 600")
+                .translation(tr("growth.minSeconds"))
+                .defineInRange("minSeconds", 20, 1, 600);
+        growthMaxSeconds = b.comment("成熟总时长上界（秒），范围 1 ~ 600")
+                .translation(tr("growth.maxSeconds"))
+                .defineInRange("maxSeconds", 45, 1, 600);
+        b.pop();
+
+        b.push("trap");
+        trapImmunityTicks = b.comment("触发后陷阱大类免疫的刻数，100 刻 = 5 秒；范围 0 ~ 1200")
+                .translation(tr("trap.immunityTicks"))
+                .defineInRange("immunityTicks", 100, 0, 1200);
+        trapDustIntervalTicks = b.comment("陷阱 dust 粒子的间隔（刻），100 刻 = 5 秒；范围 20 ~ 1200")
+                .translation(tr("trap.dustIntervalTicks"))
+                .defineInRange("dustIntervalTicks", 100, 20, 1200);
+        trapMaxTrapsPerPlayer = b.comment("每玩家陷阱名额，第 17 个挤掉最早的一个；范围 1 ~ 128")
+                .translation(tr("trap.maxTrapsPerPlayer"))
+                .defineInRange("maxTrapsPerPlayer", 16, 1, 128);
+        b.pop();
+
+        b.push("farmland");
+        farmlandLimitPerPlayer = b.comment("耕地额度的服务端默认值，0 = 开局谁也耕不了地；范围 0 ~ 4096")
+                .translation(tr("farmland.limitPerPlayer"))
+                .defineInRange("limitPerPlayer", 0, 0, 4096);
+        b.pop();
+
+        b.push("outpost_core");
+        outpostCoreFarmlandBonus = b.comment("每个据点核心增加的耕地上限；范围 0 ~ 1024")
+                .translation(tr("outpost_core.farmlandBonus"))
+                .defineInRange("farmlandBonus", 16, 0, 1024);
+        outpostCoreMaxPerPlayer = b.comment("每玩家可放置的核心数；范围 1 ~ 64")
+                .translation(tr("outpost_core.maxPerPlayer"))
+                .defineInRange("maxPerPlayer", 2, 1, 64);
+        outpostCoreBoundaryParticleIntervalTicks = b.comment("边界粒子刷新间隔（刻），40 刻 = 2 秒；范围 20 ~ 1200")
+                .translation(tr("outpost_core.boundaryParticleIntervalTicks"))
+                .defineInRange("boundaryParticleIntervalTicks", 40, 20, 1200);
+        b.pop();
+
+        b.push("compressed");
+        compressedReplaceOnlyAirAndFluid = b.comment("落地方块只替换空气与流体；false = 回到 0.0.4 的「只跳过抗性 ≥ 3.6e6」")
+                .translation(tr("compressed.replaceOnlyAirAndFluid"))
+                .define("replaceOnlyAirAndFluid", true);
         b.pop();
 
         SPEC = b.build();

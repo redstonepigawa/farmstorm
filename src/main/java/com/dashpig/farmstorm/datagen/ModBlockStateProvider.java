@@ -4,6 +4,7 @@ import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.block.ConverterBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.block.FarmstormCropBlock;
+import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,8 @@ public final class ModBlockStateProvider extends BlockStateProvider {
                 deployedStates(block);
             } else if (block instanceof ConverterBlock) {
                 converterStates(block);
+            } else if (block instanceof OutpostCoreBlock) {
+                outpostCoreStates(block);
             } else {
                 // 普通方块（compressed_hay_block）：cubeAll + 同名贴图。
                 // 没有这个分支时普通方块会被静默跳过，不生成 blockstate，客户端表现为缺模型。
@@ -176,6 +179,19 @@ public final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     /**
+     * 据点核心（F-166 / D-123）：顶 / 侧 / 底各一张 32 × 32，父模型 cube_bottom_top。
+     * 取 cube_bottom_top 而非 cube_all —— 作者给的就是三张不同的面，cube_all 会让另外两张白给。
+     */
+    private void outpostCoreStates(Block block) {
+        String name = registryPath(block);
+        BlockModelBuilder model = models().withExistingParent(name, mcLoc("block/cube_bottom_top"))
+                .texture("top", modLoc("block/" + name + "_top"))
+                .texture("side", modLoc("block/" + name + "_side"))
+                .texture("bottom", modLoc("block/" + name + "_bottom"));
+        simpleBlock(block, model);
+    }
+
+    /**
      * 朝向 → blockstate 的 y 旋转，与 vanilla furnace.json 的写法一致（north=0 / east=90 / south=180 / west=270）。
      * 不能用 Direction#toYRot()：它按 data2d 算，对这个约定整整差 180°，会让转换器正面背对玩家。
      */
@@ -205,7 +221,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         return id.getPath();
     }
 
-    /** 本模组注册的 25 个方块：15 作物 + 8 部署 + 1 转换器 + 1 普通方块（compressed_hay_block）。 */
+    /** 本模组注册的 26 个方块：15 作物 + 8 部署 + 1 转换器 + 1 普通方块（compressed_hay_block）+ 1 据点核心（outpost_core）。 */
     private static List<Block> farmstormBlocks() {
         List<Block> blocks = new ArrayList<>();
         for (Block block : BuiltInRegistries.BLOCK) {

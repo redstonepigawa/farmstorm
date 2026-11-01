@@ -115,8 +115,8 @@ public final class Farmstorm {
     }
 
     /**
-     * 注册对象自检（F-66 / F-103 / TECH §11 #2）：64 → 77 → 90 的那 12 类**当场数**（各 DeferredRegister 的条目数），
-     * 相加不等于 90、或任何一类的条目数与 §2.1 的 v0.0.3 列不符，就打 FAIL——不写死常量再自己跟自己比。
+     * 注册对象自检（F-66 / F-103 / TECH §11 #2）：64 → 77 → 90 → 93 的那 12 类**当场数**（各 DeferredRegister 的条目数），
+     * 相加不等于 93、或任何一类的条目数与 24 号 §2.1 的 v0.1.0 列不符，就打 FAIL——不写死常量再自己跟自己比。
      * 伤害类型是数据驱动（R-02：代码侧只有 ResourceKey、没有 DeferredRegister），
      * 因此这一类数的是 {@link FarmstormDamageTypes} 里声明的静态 ResourceKey 常量本身。
      */
@@ -135,8 +135,8 @@ public final class Farmstorm {
         int menuTypes = FarmstormMenus.REGISTER.getEntries().size();
         int total = items + blocks + blockEntities + entityTypes + mobEffects + soundEvents + recipeTypes
                 + recipeSerializers + creativeTabs + damageTypes + dataComponents + menuTypes;
-        boolean ok = total == 90
-                && items == 31 && blocks == 25 && blockEntities == 6 && entityTypes == 13
+        boolean ok = total == 93
+                && items == 32 && blocks == 26 && blockEntities == 7 && entityTypes == 13
                 && mobEffects == 4 && soundEvents == 3 && recipeTypes == 1 && recipeSerializers == 1
                 && creativeTabs == 1 && damageTypes == 3 && dataComponents == 1 && menuTypes == 1;
         LOGGER.info("自检 注册对象 {} 个：items {} / blocks {} / block_entities {} / entity_types {} / mob_effects {} / "
@@ -148,7 +148,7 @@ public final class Farmstorm {
 
     /**
      * 数据驱动的伤害类型没有 DeferredRegister，只能把声明出来的 ResourceKey 逐个列出来数。
-     * <p>新增伤害类型时**必须**同时加进这个列表：总数 90 的断言会因此失败，不会静默漂移。
+     * <p>新增伤害类型时**必须**同时加进这个列表：总数 93 的断言会因此失败，不会静默漂移。
      * 不用反射，是因为 {@code getDeclaredFields()} 依赖字段形状，改名或换个同类型常量都会悄悄改变结果。
      */
     private static int damageTypeCount() {

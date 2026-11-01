@@ -23,7 +23,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 31 个物品（TECH §2.2）：22 个作物 + 7 个独立播种物 + 2 个方块物品（转换器 / 压缩干草块）。
+ * 32 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心）：22 个作物 + 7 个独立播种物 + 3 个方块物品（转换器 / 压缩干草块 / 据点核心）。
  * 堆叠数按 D-16 分两档，实际数值来自 stack.*（§4.11.5）。
  */
 public final class FarmstormItems {
@@ -106,12 +106,15 @@ public final class FarmstormItems {
     public static final DeferredItem<SeedItem> AWAKENED_PITCHER_PLANT_POD =
             seedItem("awakened_pitcher_plant_pod", CropProfile.AWAKENED_PITCHER_PLANT);
 
-    // ---- 2 个方块物品 ----
+    // ---- 3 个方块物品 ----
     public static final DeferredItem<BlockItem> CONVERTER = REGISTER.registerItem("converter",
             properties -> new BlockItem(FarmstormBlocks.CONVERTER.get(), properties), otherProperties());
     /** DESIGN §3.4：方块物品沿用原版 64 上限，不纳入 stack.throwable。 */
     public static final DeferredItem<BlockItem> COMPRESSED_HAY_BLOCK = REGISTER.registerItem("compressed_hay_block",
             properties -> new BlockItem(FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(), properties), otherProperties());
+    /** D-119 第 5 项：据点核心的方块物品（掉落自身；战利品表在 F-168，配方在 D-122 第 3 项）。 */
+    public static final DeferredItem<BlockItem> OUTPOST_CORE = REGISTER.registerItem("outpost_core",
+            properties -> new BlockItem(FarmstormBlocks.OUTPOST_CORE.get(), properties), otherProperties());
 
     private FarmstormItems() {}
 
@@ -121,6 +124,7 @@ public final class FarmstormItems {
         items.addAll(SEED_ITEMS);
         items.add(CONVERTER);
         items.add(COMPRESSED_HAY_BLOCK);
+        items.add(OUTPOST_CORE);
         return items;
     }
 

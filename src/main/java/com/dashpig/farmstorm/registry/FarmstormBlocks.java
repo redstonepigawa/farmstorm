@@ -4,6 +4,7 @@ import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.block.ConverterBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.block.FarmstormCropBlock;
+import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import com.dashpig.farmstorm.util.CropProfile;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
@@ -15,7 +16,7 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 25 个方块（TECH §2.2）：15 个作物 + 8 个部署 + 1 个转换器 + 1 个压缩干草块。
+ * 26 个方块（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心）：15 个作物 + 8 个部署 + 1 个转换器 + 1 个压缩干草块 + 1 个据点核心。
  * 作物方块共用一个类且不注册 BlockItem（D-34 / T-01）。
  */
 public final class FarmstormBlocks {
@@ -76,6 +77,16 @@ public final class FarmstormBlocks {
                     .strength(30.0F, 6.0F)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.GRASS));
+
+    // ---- 1 个据点核心（D-119：硬度 30 / 抗爆 1200 / 任意镐可挖 / 不可推动；F-138 只落注册面，行为在 Phase 23）----
+    public static final DeferredBlock<OutpostCoreBlock> OUTPOST_CORE = REGISTER.registerBlock("outpost_core",
+            OutpostCoreBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.STONE)
+                    .strength(30.0F, 1200.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.STONE)
+                    .pushReaction(PushReaction.BLOCK));
 
     private FarmstormBlocks() {}
 

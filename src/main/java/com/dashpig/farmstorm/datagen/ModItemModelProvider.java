@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.datagen;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.block.ConverterBlock;
+import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 /**
  * 31 个物品模型（TECH §6.4）：15 个作物 + 7 个独立播种物 + 2 个二级合成物 + 4 个 v0.0.3 新物品 + 1 个转换器。
  * 部署方块的世界模型分两类（隐形的陷阱 / 原版的炮台光环），图标因此不再统一引用方块模型：
- * 炮台 / 光环类与瓜！指向原版方块模型，两个隐形陷阱指向自己的 item 贴图，只有转换器仍引用自家方块模型。
+ * 炮台 / 光环类与瓜！指向原版方块模型，两个隐形陷阱指向自己的 item 贴图，转换器与据点核心（D-123）引用自家方块模型。
  */
 public final class ModItemModelProvider extends ItemModelProvider {
     /** 炮台 / 光环类部署方块与瓜！：手持与投掷物都直接复用原版方块模型（3D 外观，与原版一致）。 */
@@ -40,7 +41,7 @@ public final class ModItemModelProvider extends ItemModelProvider {
             String vanillaParent = VANILLA_BLOCK_PARENT.get(path);
             if (vanillaParent != null) {
                 withExistingParent(path, mcLoc(vanillaParent));
-            } else if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ConverterBlock) {
+            } else if (item instanceof BlockItem blockItem && usesBlockModel(blockItem.getBlock())) {
                 withExistingParent(path, modLoc("block/" + blockPath(blockItem.getBlock())));
             } else if ("compressed_hay_block".equals(path)) {
                 // TECH §3.14：普通方块物品直接复用方块模型，不额外要一张 item 贴图。
@@ -49,6 +50,11 @@ public final class ModItemModelProvider extends ItemModelProvider {
                 basicItem(item);
             }
         }
+    }
+
+    /** 物品模型以自家方块模型为父的方块物品：转换器（FIX-5）与据点核心（D-123 第 2 项，不写 layer0）。 */
+    private static boolean usesBlockModel(Block block) {
+        return block instanceof ConverterBlock || block instanceof OutpostCoreBlock;
     }
 
     private static String registryPath(Item item) {

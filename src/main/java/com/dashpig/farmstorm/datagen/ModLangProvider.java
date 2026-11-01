@@ -24,6 +24,9 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 一个作物要能同时显示「炮台类、buff类」；再加一个 {@code tooltip.farmstorm.category_separator}
  * 让中英各自用自己的分隔符（「、」/ 「, 」）。这条沿革保留在 v0.0.1 的口径里（218 - 3 + 6 + 1 = 222）。
  *
+ * <p>v0.1.0 的 F-139 再加 **11** 条 {@code farmstorm.configuration.*}（12 行 config 里第 10 行只改既有键的默认值），
+ * 两份语言文件到 **310** 键、config 到 166；余下 5 条（{@code block} / {@code item} / 指令反馈两条 / 死亡消息一条）由 F-169 补齐到 315。
+ *
  * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
  * 155 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
  * 该 TOML 由 {@code FarmstormConfig} 的真实 spec 写出，可做机械比对。
@@ -370,6 +373,25 @@ public final class ModLangProvider extends LanguageProvider {
         config(entries, "zangief_cane.slamDamage", "落地固定伤害（点）", "Fixed landing damage (points)");
         config(entries, "zangief_cane.cancelFallDamage", "相位 2 期间取消自然坠落伤害",
                 "Cancel natural fall damage during phase 2");
+        // ---- v0.1.0 的 11 条新 config 键（F-139；24-TECH §8.1 的 12 行里第 10 行是改既有默认值，键不增）----
+        config(entries, "growth.minSeconds", "成熟总时长下界（秒）", "Maturity duration lower bound (seconds)");
+        config(entries, "growth.maxSeconds", "成熟总时长上界（秒）", "Maturity duration upper bound (seconds)");
+        config(entries, "trap.immunityTicks", "触发后陷阱大类免疫的刻数（100 刻 = 5 秒）",
+                "Ticks of trap-category immunity after a trigger (100 ticks = 5 s)");
+        config(entries, "trap.dustIntervalTicks", "陷阱 dust 粒子的间隔（刻，100 刻 = 5 秒）",
+                "Ticks between trap dust bursts (100 ticks = 5 s)");
+        config(entries, "trap.maxTrapsPerPlayer", "每玩家陷阱名额（第 N+1 个挤掉最早的一个）",
+                "Traps allowed per player (the next one evicts the oldest)");
+        config(entries, "farmland.limitPerPlayer", "耕地额度的服务端默认值（0 = 开局谁也耕不了地）",
+                "Server-side default farmland quota (0 = nobody can till at first)");
+        config(entries, "outpost_core.farmlandBonus", "每个据点核心增加的耕地上限", "Farmland quota added per outpost core");
+        config(entries, "outpost_core.maxPerPlayer", "每玩家可放置的据点核心数", "Outpost cores each player may place");
+        config(entries, "outpost_core.boundaryParticleIntervalTicks", "边界粒子刷新间隔（刻，40 刻 = 2 秒）",
+                "Boundary particle interval in ticks (40 ticks = 2 s)");
+        config(entries, "melon_grenade.submunitionSpeed", "瓜片子的径向初速（格/刻）",
+                "Radial launch speed of the melon slices (blocks/tick)");
+        config(entries, "compressed.replaceOnlyAirAndFluid", "落地方块只替换空气与流体",
+                "Landing block replaces only air and fluids");
         return List.copyOf(entries);
     }
 

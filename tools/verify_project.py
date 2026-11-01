@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-r"""Farmstorm v0.0.3 静态验收器。
+r"""Farmstorm v0.1.0 静态验收器。
 
 期望值全部从上游文档现算，不手抄：
   - config 键集  <- docs/zh/01-DESIGN.md §3.8（117）+ docs/zh/12-TECH-0.0.2.md §8.1（22）
-                   + docs/zh/18-TECH-0.0.3.md §8.1（v0.0.3 的 19 行，F-104），并与
-                   run/config/farmstorm-server.toml 逐键比对。19 行里 3 行是「改既有默认值」
-                   （fang_trap_cactus 的三个键），键名与 117 里的重名，按集合去重后是 155 个键
-  - 90 个注册 ID  <- docs/zh/18-TECH-0.0.3.md §2.1 的 v0.0.3 列逐类小计（12 类，相加 90）
+                   + docs/zh/18-TECH-0.0.3.md §8.1（v0.0.3 的 19 行，F-104）
+                   + docs/zh/24-TECH-0.1.0.md §8.1（v0.1.0 的 12 行，F-142），并与
+                   run/config/farmstorm-server.toml 逐键比对。两份 TECH 各含「改既有默认值」的行
+                   （v0.0.3 是 fang_trap_cactus 的三个键、v0.1.0 是 melon_grenade.horizontalJitter），
+                   键名与前面的清单重名，按集合去重后是 166 个键
+  - 93 个注册 ID  <- docs/zh/24-TECH-0.1.0.md §2.1 的 v0.1.0 列逐类小计（12 类，相加 93）
 
 用法：python -X utf8 tools/verify_project.py [--root <仓库根>]
 """
@@ -84,6 +86,49 @@ def expected_config_keys_v003(tech: str) -> list[str]:
         r"^\|\s*\d+\s*\|\s*`([A-Za-z0-9_.]+)`\s*\|", section, re.MULTILINE)]
 
 
+def expected_config_keys_v010(tech4: Path) -> tuple[list[str], list[str]]:
+    """24-TECH §8.1 的 12 行：返回（「新」列的 11 个键名，「改」列的 1 个既有键名）。
+
+    解析失败一律带（文件名 + 表格行号）抛出：静默跳过会让期望集悄悄退回 155，比报错更糟。
+    """
+    text = read(tech4)
+    head = re.search(r"^### 8\.1\b.*$", text, re.MULTILINE)
+    if not head:
+        seen = [f"第 {text[: m.start()].count(chr(10)) + 1} 行 {m.group(0)[:24]}"
+                for m in re.finditer(r"^### 8\.[^\n]*", text, re.MULTILINE)]
+        raise ValueError(f"{tech4.name}：找不到「### 8.1」的表格标题"
+                         f"（全文 {len(text.splitlines())} 行；现有的 8.x 标题：{seen or '无'}，表格格式变了？）")
+    base_line = text[:head.start()].count("\n") + 1
+    tail = re.search(r"^### 8\.2\b", text[head.start():], re.MULTILINE)
+    if not tail:
+        raise ValueError(f"{tech4.name}:{base_line}：§8.1 之后找不到「### 8.2」，无法界定表格范围")
+    fresh: list[tuple[int, str]] = []
+    changed: list[tuple[int, str]] = []
+    for offset, line in enumerate(text[head.start():head.start() + tail.start()].splitlines()):
+        row = re.match(r"^\|\s*(\d+)\s*\|\s*`([A-Za-z0-9_.]+)`\s*\|", line)
+        if not row:
+            continue
+        lineno = base_line + offset
+        cols = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cols) != 8:
+            raise ValueError(f"{tech4.name}:{lineno}：§8.1 的表行应 8 列，实际 {len(cols)} 列：{line.strip()}")
+        flag = cols[6].strip("*").strip()
+        if "新" in flag:
+            fresh.append((lineno, row.group(2)))
+        elif "改" in flag:
+            changed.append((lineno, row.group(2)))
+        else:
+            raise ValueError(f"{tech4.name}:{lineno}：§8.1 第 7 列既不是「新」也不是「改」：{cols[6]!r}")
+    rows = fresh + changed
+    if len(rows) != 12:
+        raise ValueError(f"{tech4.name}:{base_line}：§8.1 从第 {base_line} 行起只解析出 {len(rows)} 行"
+                         f"（新 {len(fresh)} + 改 {len(changed)}，行号 {[n for n, _ in rows]}），文档口径是 12 行")
+    if len(fresh) != 11:
+        raise ValueError(f"{tech4.name}:{base_line}：§8.1 的「新」列应 11 行、实际 {len(fresh)} 行"
+                         f"（行号 {[n for n, _ in fresh]}）：{[k for _, k in fresh]}")
+    return [k for _, k in fresh], [k for _, k in changed]
+
+
 def toml_keys(text: str) -> set[str]:
     out: set[str] = set()
     section = ""
@@ -115,7 +160,7 @@ EXPECTED = {
         "puffed_wheat_seeds", "power_beet_seeds", "melon_grenade_seeds",
         "pumpkin_turret_seeds", "awakened_torchflower_seeds",
         "awakened_pitcher_plant_pod", "converter", "compressed_hay_block",
-        "chive_seeds",
+        "chive_seeds", "outpost_core",  # v0.1.0 的 BlockItem（24-TECH §1.4 G1）
     ],
     "blocks": [
         "puffed_wheat_crop", "blast_carrot_crop", "ubi_server_crop", "toxic_ubi_server_crop",
@@ -126,10 +171,12 @@ EXPECTED = {
         "blast_carrot", "pumpkin_turret", "awakened_torchflower", "awakened_pitcher_plant",
         "fang_trap_cactus", "converter", "zangief_cane", "compressed_hay_block",
         "friend_chives_crop", "point_defense_fungus", "vibration_bean",
+        "outpost_core",  # v0.1.0 的据点核心方块（24-TECH §1.4 G1）
     ],
     "block_entity_type": [
         "blast_carrot", "pumpkin_turret", "awakened_torchflower",
         "awakened_pitcher_plant", "fang_trap_cactus", "converter",
+        "outpost_core",  # v0.1.0 新建的 BlockEntityType（24-TECH §2.2 注 1）
     ],
     "entity_type": [
         "puffed_wheat", "ubi_server", "toxic_ubi_server", "melon_slice_bomb", "melon_grenade",
@@ -146,11 +193,11 @@ EXPECTED = {
     "menu_type": ["converter"],
 }
 
-# 18-TECH-0.0.3 §2.1 的 v0.0.3 列：12 类逐类小计，相加 90。ID 清单少一个、多一个都在这里露出来。
+# 24-TECH-0.1.0 §2.1 的 v0.1.0 列：12 类逐类小计，相加 93。ID 清单少一个、多一个都在这里露出来。
 EXPECTED_COUNTS = {
-    "items": 31,
-    "blocks": 25,
-    "block_entity_type": 6,
+    "items": 32,
+    "blocks": 26,
+    "block_entity_type": 7,
     "entity_type": 13,
     "mob_effect": 4,
     "sound_event": 3,
@@ -175,20 +222,36 @@ def main() -> int:
     design = read(root / "docs/zh/01-DESIGN.md")
     tech = read(root / "docs/zh/12-TECH-0.0.2.md")
     tech3 = read(root / "docs/zh/18-TECH-0.0.3.md")
+    tech4 = root / "docs/zh/24-TECH-0.1.0.md"
     base = expected_config_keys(design)
     added = expected_config_keys_v002(tech)
     added3 = expected_config_keys_v003(tech3)
     if len(added3) != 19:
         fail(f"18-TECH §8.1 解析出 {len(added3)} 行，文档口径是 19 行（表格格式变了？）")
-    # 19 行里有若干行是「改既有默认值」——键名与上面的 117 / 22 重名，不是新键。
-    # 因此期望集是三个清单的并集（集合去重），重复行数现算、不写死：v0.0.3 是 3 行（139 + 16 = 155）。
-    overlap = set(added3) & (set(base) | set(added))
-    exp = set(base) | set(added) | set(added3)
-    print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}"
-          f" + 18-TECH §8.1 {len(added3)} 行；其中 {len(overlap)} 行是改既有默认值、键名已在上两份清单里，"
-          f"按并集去重后 {len(exp)} = {len(base) + len(added)} + {len(added3) - len(overlap)}）")
+    # 两份 TECH 的行里各有若干行是「改既有默认值」——键名与前面的清单重名，不是新键。
+    # 因此期望集是四个清单的并集（集合去重），重复行数现算、不写死：
+    # v0.0.3 是 3 行（139 + 16 = 155），v0.1.0 再加 1 行（155 + 11 = 166）。
+    try:
+        added4, changed4 = expected_config_keys_v010(tech4)
+    except (ValueError, OSError) as exc:
+        fail(f"24-TECH §8.1 解析失败，期望键集无法现算：{exc}")
+        added4 = None
+    if added4 is None:
+        exp_ok, exp = False, set()
+    else:
+        overlap = set(added3) & (set(base) | set(added))
+        overlap4 = set(added4) & (set(base) | set(added) | set(added3))
+        exp_ok, exp = True, set(base) | set(added) | set(added3) | set(added4)
+        print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}"
+              f" + 18-TECH §8.1 {len(added3)} 行"
+              f" + 24-TECH §8.1 {len(added4) + len(changed4)} 行（新 {len(added4)} + 改 {len(changed4)}）；"
+              f"其中 {len(overlap) + len(overlap4)} 行是改既有默认值、键名已在前几份清单里，"
+              f"按并集去重后 {len(exp)} = {len(base) + len(added)} + {len(added3) - len(overlap)}"
+              f" + {len(added4) - len(overlap4)}）")
     toml = root / "run/config/farmstorm-server.toml"
-    if toml.exists():
+    if not exp_ok:
+        print("  生成 toml 键数: 跳过（期望集没算出来，见上面的 [FAIL]）")
+    elif toml.exists():
         got = toml_keys(read(toml))
         print(f"  生成 toml 键数: {len(got)}")
         missing, extra = sorted(exp - got), sorted(got - exp)
@@ -222,7 +285,7 @@ def main() -> int:
     else:
         warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
 
-    print("== 2. 90 个注册 ID 逐字核对（全源码树） ==")
+    print("== 2. 93 个注册 ID 逐字核对（全源码树） ==")
     total = 0
     for group, ids in EXPECTED.items():
         missed = [i for i in ids if f'"{i}"' not in all_java]
@@ -232,9 +295,9 @@ def main() -> int:
             ok(f"{group}: {len(ids)} 个 ID 齐全")
         expected = EXPECTED_COUNTS[group]
         if len(ids) != expected:
-            fail(f"{group}: 清单 {len(ids)} 个 ID，但 18-TECH §2.1 的 v0.0.3 列是 {expected} 个")
+            fail(f"{group}: 清单 {len(ids)} 个 ID，但 24-TECH §2.1 的 v0.1.0 列是 {expected} 个")
         total += len(ids)
-    print(f"  已核 registry 对象: {total} / 90")
+    print(f"  已核 registry 对象: {total} / 93")
 
     print("== 3. 语言文件键集一致 ==")
     gen = root / "src/generated/resources"

@@ -11,8 +11,9 @@ import net.neoforged.neoforge.client.event.RenderGuiEvent;
 /**
  * 狂野猎人的充能条 HUD（作者 v0.0.2 #4）：快捷栏上方两条，满 = 可用、空/半满 = 冷却中。
  *
- * <p>位置算法（避开经验条）：快捷栏占 {@code y ∈ [h-22, h-1]}，经验条在 {@code y ∈ [h-29, h-27]}，
- * 所以两条充能条放在 {@code y = h-39 .. h-36}，两侧与快捷栏左右端对齐（快捷栏宽 182，居中）。
+ * <p>位置算法（避开三条行带）：快捷栏占 {@code y ∈ [h-22, h-1]}、经验条 {@code y ∈ [h-29, h-27]}、
+ * 生命与饥饿 {@code y ∈ [h-39, h-30]}，所以两条充能条放在 {@code y = h-52 .. h-49}（距底 [48, 52) 带，
+ * 与生命 / 饥饿行净空 9 px），两侧与快捷栏左右端对齐（快捷栏宽 182，居中）。
  * <p>只在带 {@code wild_hunter} 时画（{@link WildHunterClientState#active()}），别的效果/无效果都不画。
  */
 @EventBusSubscriber(modid = Farmstorm.MOD_ID, value = Dist.CLIENT)
@@ -23,7 +24,7 @@ public final class WildHunterHud {
     private static final int BAR_WIDTH = 20;
     private static final int BAR_HEIGHT = 4;
     private static final int BAR_GAP = 4;
-    private static final int BAR_Y_FROM_BOTTOM = 39;
+    private static final int BAR_Y_FROM_BOTTOM = 52;
 
     /** 满充能：狂野猎人的红色主题。 */
     private static final int COLOR_FULL = 0xFFFF4444;

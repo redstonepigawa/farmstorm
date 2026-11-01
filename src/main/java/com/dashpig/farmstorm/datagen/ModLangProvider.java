@@ -10,9 +10,9 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 语言文件（TECH §7）：zh_cn 与 en_us 各 **299** 键（v0.0.3 口径）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
- * 不存在「两份键各自维护」的可能。**条目构成（v0.0.3 实测，改表时必须同步本段）**：
- * 31 item + 25 block + 4 effect + 3 subtitles + 155 config + 36 advancement + 6 death
- * + 16 tooltip + 13 entity + 8 gui + 1 container + 1 itemGroup = **299**。
+ * 不存在「两份键各自维护」的可能。**条目构成（v0.1.0 实测，改表时必须同步本段）**：
+ * 32 item + 26 block + 4 effect + 3 subtitles + 166 config + 36 advancement + 6 death
+ * + 16 tooltip + 13 entity + 8 gui + 1 container + 1 itemGroup + 1 command + 2 message = **315**。
  *
  * <p>沿革：v0.0.1 是 222 键（22/20/9/1/1/8/16/4/24/117），v0.0.2 收到 263，
  * v0.0.3 收到 299（其中 16 条 `farmstorm.configuration.*` 由 F-132 的 runData 落地、
@@ -28,7 +28,8 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 两份语言文件到 310 键、config 到 166；F-160 再加 **1** 条指令反馈 {@code command.farmstorm.farmlandlimit.set}
  * （TECH §7.3），到 **311** 键；F-157 再加 **2** 条动作栏提示（{@code message.farmstorm.farmland.no_core}
  * / {@code message.farmstorm.farmland.quota_full}，24 号 §6.3 的第 2、3 步），到 **313** 键；
- * 余下 2 条（{@code block} / {@code item} 各 1）由 F-169 补齐到 315（299 + 16，TECH §9.4 的增量列）。
+ * F-169 再加 **2** 条（{@code block.farmstorm.outpost_core} / {@code item.farmstorm.outpost_core}），
+ * 到 **315** 键（299 + 16，TECH §9.4 的增量列，中英键集逐字相同）。
  *
  * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
  * 155 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
@@ -93,6 +94,8 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "chive_seeds", "朋友的韭种子", "Chive Seeds");
         item(entries, "point_defense_fungus", "近防菌", "Point Defense Fungus");
         item(entries, "vibration_bean", "震动豆", "Vibration Bean");
+        // ---- v0.1.0 的 1 个新物品（F-169 / 24-TECH §9.4）：据点核心的 BlockItem 名 ----
+        item(entries, "outpost_core", "据点核心", "Outpost Core");
         // ---- 20 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
         block(entries, "puffed_wheat_crop", "膨胀麦", "Puffed Wheat");
         block(entries, "blast_carrot_crop", "胡罗贝", "Blast Carrot");
@@ -121,6 +124,8 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "friend_chives_crop", "朋友的韭", "Friend Chives");
         block(entries, "point_defense_fungus", "近防菌", "Point Defense Fungus");
         block(entries, "vibration_bean", "震动豆", "Vibration Bean");
+        // ---- v0.1.0 的 1 个新方块（F-169 / 24-TECH §9.4）：据点核心的方块名 ----
+        block(entries, "outpost_core", "据点核心", "Outpost Core");
         // ---- 13 个实体类型（TECH §3.4）----
         entity(entries, "puffed_wheat", "膨胀麦", "Puffed Wheat");
         entity(entries, "ubi_server", "育碧服务器", "Ubi Server");

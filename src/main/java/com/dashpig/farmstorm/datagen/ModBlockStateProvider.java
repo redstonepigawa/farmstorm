@@ -75,8 +75,10 @@ public final class ModBlockStateProvider extends BlockStateProvider {
                 converterStates(block);
             } else if (block instanceof OutpostCoreBlock) {
                 outpostCoreStates(block);
+            } else if ("compressed_hay_block".equals(registryPath(block))) {
+                compressedHayStates(block);
             } else {
-                // 普通方块（compressed_hay_block）：cubeAll + 同名贴图。
+                // 兜底：其余普通方块走 cubeAll + 同名贴图。
                 // 没有这个分支时普通方块会被静默跳过，不生成 blockstate，客户端表现为缺模型。
                 simpleBlock(block);
             }
@@ -187,6 +189,19 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         BlockModelBuilder model = models().withExistingParent(name, mcLoc("block/cube_bottom_top"))
                 .texture("top", modLoc("block/" + name + "_top"))
                 .texture("side", modLoc("block/" + name + "_side"))
+                .texture("bottom", modLoc("block/" + name + "_bottom"));
+        simpleBlock(block, model);
+    }
+
+    /**
+     * 压缩麦方块（F-165 / D-107 第 1、2 项）：顶 / 侧 / 底三张不同，父模型 cube_bottom_top。
+     * 侧贴图沿用原文件名，只有顶 / 底带 _top / _bottom 后缀 —— 与据点核心的 _side 命名不同，故单独一个方法。
+     */
+    private void compressedHayStates(Block block) {
+        String name = registryPath(block);
+        BlockModelBuilder model = models().withExistingParent(name, mcLoc("block/cube_bottom_top"))
+                .texture("side", modLoc("block/" + name))
+                .texture("top", modLoc("block/" + name + "_top"))
                 .texture("bottom", modLoc("block/" + name + "_bottom"));
         simpleBlock(block, model);
     }

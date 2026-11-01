@@ -43,8 +43,9 @@ public final class ModItemModelProvider extends ItemModelProvider {
                 withExistingParent(path, mcLoc(vanillaParent));
             } else if (item instanceof BlockItem blockItem && usesBlockModel(blockItem.getBlock())) {
                 withExistingParent(path, modLoc("block/" + blockPath(blockItem.getBlock())));
-            } else if ("compressed_hay_block".equals(path)) {
-                // TECH §3.14：普通方块物品直接复用方块模型，不额外要一张 item 贴图。
+            } else if ("compressed_hay_block".equals(path) || "compressed_puffed_wheat".equals(path)) {
+                // TECH §3.14 / D-107 第 1、2 项：压缩麦的方块物品与压缩膨胀麦都直接复用方块模型
+                // （物品栏里是小方块），不额外要一张 item 贴图，故不写 item/generated + layer0。
                 withExistingParent(path, modLoc("block/compressed_hay_block"));
             } else {
                 basicItem(item);

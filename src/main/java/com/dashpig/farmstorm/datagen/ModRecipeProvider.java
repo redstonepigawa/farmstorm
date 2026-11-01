@@ -34,6 +34,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
  * <p>合成配方（F-71）属于 {@code minecraft:crafting_shaped}，与上面 21 条互不相干：
  * 合成不扣经验、不收下界之星，只是给转换器一条获得途径（DESIGN §2.6 #4/#5）。
  *
+ * <p>F-168 再加 1 条 3 × 3 合成配方：据点核心（D-122 第 3 条）。
+ *
  * <p>JSON 由 serializer codec 落盘（R-03：不手写数据包 JSON）。
  * codec 对「等于默认值」的可选字段会省略（R-23 同类现象）：{@code xp_cost} 的默认值就是 3、
  * {@code catalyst_count} 默认 1、非单向配方的 {@code bidirectional} 默认 true，故这三处不会出现在
@@ -59,6 +61,8 @@ public final class ModRecipeProvider extends RecipeProvider {
         converter(recipeOutput);
         // 压缩膨胀麦是二级合成物，原料就是膨胀麦（D-67）：先给出获得途径，转换配方表照旧不动
         compressedPuffedWheat(recipeOutput);
+        // 据点核心是工作台 3×3 配方（D-122 第 3 条）：没有获得途径就没有核心，第 2 个上限也就无从生效
+        outpostCore(recipeOutput);
         // 1-8：作物本体双向
         twoWay(recipeOutput, "puffed_wheat", Items.WHEAT, FarmstormItems.PUFFED_WHEAT);
         twoWay(recipeOutput, "blast_carrot", Items.CARROT, FarmstormItems.BLAST_CARROT);
@@ -129,6 +133,28 @@ public final class ModRecipeProvider extends RecipeProvider {
                 .requires(FarmstormItems.PUFFED_WHEAT.get(), 4)
                 .unlockedBy("has_puffed_wheat", has(FarmstormItems.PUFFED_WHEAT.get()))
                 .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("compressed_puffed_wheat"));
+    }
+
+    /**
+     * D-122 第 3 条 / F-168：有序 3 × 3，四角 {@code minecraft:stone}、正中 {@code minecraft:diamond}、
+     * 其余四格 {@code minecraft:redstone}，产出 1 个据点核心。
+     *
+     * <p>分类取 {@code DECORATIONS}（与转换器同形）：落进 JSON 的 {@code "category"} 不是这里的
+     * {@link RecipeCategory}，而是 {@code determineBookCategory} 折算出的 {@code CraftingBookCategory}
+     * （{@code DECORATIONS} ⇒ {@code misc}）。
+     *
+     * <p>同样剥掉配方解锁进度（{@link #recipeWithoutAdvancement}）：本 Provider 只产配方 JSON。
+     */
+    private static void outpostCore(RecipeOutput recipeOutput) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, FarmstormItems.OUTPOST_CORE.get())
+                .define('S', Items.STONE)
+                .define('R', Items.REDSTONE)
+                .define('D', Items.DIAMOND)
+                .pattern("SRS")
+                .pattern("RDR")
+                .pattern("SRS")
+                .unlockedBy("has_diamond", has(Items.DIAMOND))
+                .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("outpost_core"));
     }
 
     /**

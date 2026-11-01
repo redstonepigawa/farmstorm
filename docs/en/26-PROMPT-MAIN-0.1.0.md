@@ -190,7 +190,7 @@ HC-01 ~ HC-14 are in `05-PROMPT-MAIN.md` §3, HC-15 ~ HC-28 in `14-PROMPT-MAIN-0
   - Consequence of violation: changing 32 to 16 ⇒ the protection line and the gameplay cap become one knob (D-115 item 5); moving the three into config ⇒ document 24 §8.4's “explicitly not in config” is overturned; deleting any valve ⇒ breaks HC-13, which has existed since 0.0.1.
   - Source: D-115 item 5; document 24 §5.4 step 5, §8.4; HC-13 (`05-PROMPT-MAIN.md` §3).
 
-- **HC-75 · The charge bar changes one constant only, and it lands in the [44, 48) band from the bottom**
+- **HC-75 · The charge bar changes one constant only, and it lands in the [48, 52) band from the bottom**
   - Constraint: `client/WildHunterHud.java:26`'s `BAR_Y_FROM_BOTTOM` **39 → 52** (moved up 13 GUI pixels as a whole); the form `int y = screenHeight - BAR_Y_FROM_BOTTOM` is unchanged and no second, resolution-adaptive formula is introduced; bar width 20 / height 4 / gap 4 / total width 44 / the centring algorithm / the four colours / the per-cell fill order all stay as they are; `HOTBAR_WIDTH = 182` is not deleted.
   - Consequence of violation: the charge bar still sits on the health / hunger row band `[30, 39)` and the requirement is as good as undone; adding a second formula ⇒ two resolutions give two positions and document 23 §2.5's measurement convention fails; deleting `HOTBAR_WIDTH` ⇒ a change unrelated to the requirement, and document 22 §6 clause 10 breaks.
   - Source: D-103 and its supplementary item; document 22 §4.2 table A row 4, §5.1 row 1, §6 clause 10; document 23 §2.3 / §2.5 / §2.6; document 24 §8.4.
@@ -401,7 +401,7 @@ First, four that run through the whole repository: **`neoForge { }` is case-sens
 | HC-72 | the item model is 3D, the block is cube_bottom_top with six faces distinguished, no layer0 | A-23; D-107 / D-123 item 2; 24 §9.2, §9.3; RT-29 |
 | HC-73 | 0 custom network packets, no Mixin, GameRules.register is 0 | C-6, D-40, D-50; 24 §7.4, §11 #18; 22 §6 clauses 1, 4 |
 | HC-74 | the three safety valves 5 / 8 / 32 do not move, and 16 is the gameplay slot count | D-115 item 5; 24 §5.4 step 5, §8.4; HC-13 |
-| HC-75 | the charge bar 39 → 52 changes one constant and lands in [44, 48) | D-103; 22 §4.2 table A row 4, §5.1 row 1; 23 §2.3 / §2.5 / §2.6; 24 §8.4 |
+| HC-75 | the charge bar 39 → 52 changes one constant and lands in [48, 52) | D-103; 22 §4.2 table A row 4, §5.1 row 1; 23 §2.3 / §2.5 / §2.6; 24 §8.4 |
 | HC-76 | the four chives stages + the generator's dedicated branch; the Wild Apple 11 colours 126 / 256 | A-28; D-104 / D-105; 23 §3.4 / §3.5, §9.4 – §9.6; 24 §9.1, §9.3 |
 
 > Note: the 26 rows of this table correspond one-to-one to the 26 clauses of §3, and the two row counts must be equal. The citation order is “decision number first, section number added for the implementation shape”: write the D number where one can be pointed at, and add the section number of 24 / 23 when it has to land on a concrete form. An A number means one of the ten rulings of document 25 §0.4 (A-19 ~ A-28); an RT number means one of the seven risks of document 24 §10 (RT-24 ~ RT-30).

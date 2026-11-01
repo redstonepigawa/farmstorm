@@ -496,7 +496,7 @@ Phase subtotal: **9 tasks, 18.0 person-days** (S 0 / M 6 / L 3).
 
 Phase goal: finish in one go the purely “visible” items among the 9 requirements — the charge bar moved up 13 px, Friend Chives' four stages, the Wild Apple's new image, Compressed Wheat's six faces and 3D, the Outpost Core's three 32 × 32 and three models — and change the generator so that “re-running equals what is committed”.
 
-Phase exit criteria: **11 PNGs** (5 new + 6 replaced in place) and **5 JSONs** (Core 3 + Compressed Wheat 2) all in place; deleting the images and re-running `tools/gen_textures.py` produces output **byte-for-byte identical** to what is committed; after placement Compressed Wheat's top / side / bottom differ and the inventory shows a small block; the core's three faces differ from one another and none is a purple-black cell; the charge bar falls in the [44, 48) band and overlaps none of the three row bands.
+Phase exit criteria: **11 PNGs** (5 new + 6 replaced in place) and **5 JSONs** (Core 3 + Compressed Wheat 2) all in place; deleting the images and re-running `tools/gen_textures.py` produces output **byte-for-byte identical** to what is committed; after placement Compressed Wheat's top / side / bottom differ and the inventory shows a small block; the core's three faces differ from one another and none is a purple-black cell; the charge bar falls in the [48, 52) band and overlaps none of the three row bands.
 
 #### F-161 · The Charge Bar's `BAR_Y_FROM_BOTTOM` 39 → 52
 
@@ -504,7 +504,7 @@ Phase exit criteria: **11 PNGs** (5 new + 6 replaced in place) and **5 JSONs** (
 - **Depends on**: F-137
 - **Deliverables**: `client/WildHunterHud.java:26`'s constant `39` → **52** (moved up 13 GUI pixels as a whole); the form `int y = screenHeight - BAR_Y_FROM_BOTTOM` is unchanged and no second, resolution-adaptive formula is introduced; bar width 20 / bar height 4 / gap 4 / total width 44 / the centring algorithm / the four colours / the per-cell fill order all stay put; `HOTBAR_WIDTH = 182` is not deleted (document 22 §2.1 D-103, §6 clause 10; §4.2 table A row 4).
 - **Acceptance**:
-  1. In game the two charge bars' ordinate falls in the **[44, 48)** band from the bottom: it no longer overlaps any of the three row bands — the hotbar `[0, 22)`, the experience bar `[24, 29)`, health / hunger `[30, 39)` (document 22 §8 #23, document 23 §2.3 / §2.5).
+  1. In game the two charge bars' ordinate falls in the **[48, 52)** band from the bottom: it no longer overlaps any of the three row bands — the hotbar `[0, 22)`, the experience bar `[24, 29)`, health / hunger `[30, 39)` (document 22 §8 #23, document 23 §2.3 / §2.5).
   2. One frame each with the charge full and empty: the charge bar is no longer covered by the health and hunger values (the arithmetic of document 23 §2.4).
   3. `git diff client/WildHunterHud.java` contains only this one constant line; `grep -c "HOTBAR_WIDTH" client/WildHunterHud.java` is 1 (the declaration is still there, document 22 §6 clause 10).
   4. The code block of bar width, height, gap, total width, the four colours and the per-cell fill order has an empty `git diff` (the do-not-touch list of document 23 §2.6).
@@ -575,7 +575,7 @@ Phase exit criteria: **11 PNGs** (5 new + 6 replaced in place) and **5 JSONs** (
   1. With a clean working tree, re-running `tools/gen_textures.py`: `git diff --stat src/main/resources/assets` and `src/generated/resources` are both empty (the generated output equals what is committed, document 23 §3.5).
   2. The four chives stage textures' alpha is only ever 0 or 255; there is no black edge under `cutout` (row 3 of document 23 §3.7).
   3. Compressed Wheat placed → dug up → replaced three times gives the same six-face look; the core's `_top` / `_side` / `_bottom` differ from one another (RT-29).
-  4. At both 1280 × 720 and 1920 × 1080 the HUD falls in the [44, 48) band (the measurement convention of document 23 §2.5).
+  4. At both 1280 × 720 and 1920 × 1080 the HUD falls in the [48, 52) band (the measurement convention of document 23 §2.5).
   5. If any of the three fallbacks is enabled, state its trigger condition and its cost one by one (RT-29 fallbacks ①②, row 2 of document 23 §9.6).
 
 Phase subtotal: **7 tasks, 8.5 person-days** (S 2 / M 5 / L 0).
@@ -860,7 +860,7 @@ M17 ~ M21 map one-to-one onto Phase 21 ~ Phase 25. Each milestone gives two work
 
 ### M20 · Visuals and Textures (Phase 24)
 
-- **Completion criteria**: ① all **11** PNGs (5 new + 6 replaced in place) are in place and countable item by item with `jar tf`; ② the **5** JSONs are in place (Core 3 + Compressed Wheat 2; the remaining 2 come in M21); ③ deleting the images and re-running `tools/gen_textures.py` produces output **byte-for-byte identical** to what is committed; ④ after placement Compressed Wheat's top / side / bottom differ and the inventory shows a small block; ⑤ the core's three faces differ from one another, none is a purple-black cell, and the 32 × 32 does not bleed; ⑥ the charge bar falls in the [44, 48) band and overlaps none of the three row bands; ⑦ the four chives stage textures' alpha is only ever 0 or 255, with no black edge under `cutout`.
+- **Completion criteria**: ① all **11** PNGs (5 new + 6 replaced in place) are in place and countable item by item with `jar tf`; ② the **5** JSONs are in place (Core 3 + Compressed Wheat 2; the remaining 2 come in M21); ③ deleting the images and re-running `tools/gen_textures.py` produces output **byte-for-byte identical** to what is committed; ④ after placement Compressed Wheat's top / side / bottom differ and the inventory shows a small block; ⑤ the core's three faces differ from one another, none is a purple-black cell, and the 32 × 32 does not bleed; ⑥ the charge bar falls in the [48, 52) band and overlaps none of the three row bands; ⑦ the four chives stage textures' alpha is only ever 0 or 255, with no black edge under `cutout`.
 - **What is playable at the end of this milestone**: while sprinting the two charge bars no longer sit on the hearts and the drumsticks; the chives in the field are four-stage plant images rather than four magenta blocks; the Wild Apple has a new image (11 colours, 16 × 16); Compressed Puffed Wheat shows its orientation both as a small block and on all six faces of the block; the Outpost Core is a 32 × 32 runic stone with three distinguishable faces.
 
 ### M21 · Data, Language and Full Acceptance (Phase 25)

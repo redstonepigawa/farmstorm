@@ -34,7 +34,8 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 /**
- * 25 张方块战利品表（TECH §6.7 + F-74）：15 张作物 + 8 张部署方块 + 1 张压缩干草块 + 1 张转换器。
+ * 26 张方块战利品表（TECH §6.7 + F-74 + F-168）：15 张作物 + 8 张部署方块 + 1 张压缩干草块
+ * + 1 张转换器 + 1 张据点核心。
  *
  * <p>作物表复用原版作物表的结构（成熟判定 + 数量区间 + 时运修正 + 爆炸衰减），只把 item 换成
  * 改良版的作物与播种物（DESIGN §3.2.4）；数量区间逐条照抄 TECH §6.7。
@@ -119,6 +120,12 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
         // ---- 1 张压缩干草块表：掉自身（F-74；能否取出由 requiresCorrectToolForDrops + needs_diamond_tool 决定）----
         this.add(FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
                 this.createSingleItemTable(FarmstormBlocks.COMPRESSED_HAY_BLOCK.get()));
+
+        // ---- 1 张据点核心表：掉自身（F-168 / D-119 第 5 项）----
+        // 该方块**有** BlockItem（FarmstormItems.OUTPOST_CORE），因此 lootTableItem(block) 解析得回本体，
+        // 不需要走 deployedAs 的显式物品分支（对比震动豆那个无 BlockItem 的方块）。
+        this.add(FarmstormBlocks.OUTPOST_CORE.get(),
+                this.createSingleItemTable(FarmstormBlocks.OUTPOST_CORE.get()));
 
         // ---- 1 张转换器表：只掉本体（内容物由 dropContents 负责）----
         this.add(FarmstormBlocks.CONVERTER.get(), this.createSingleItemTable(FarmstormBlocks.CONVERTER.get()));
@@ -205,6 +212,7 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormBlocks.POINT_DEFENSE_FUNGUS.get(),
                 FarmstormBlocks.VIBRATION_BEAN.get(),
                 FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
+                FarmstormBlocks.OUTPOST_CORE.get(),
                 FarmstormBlocks.CONVERTER.get());
     }
 }

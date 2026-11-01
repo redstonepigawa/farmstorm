@@ -161,6 +161,19 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 
 > v0.0.3 那六份的**中文合计 4534 行 / 英文合计 4580 行**。
 
+### v0.1.0 增量文档 / v0.1.0 delta documents
+
+| 中文 | English | 行数（中/英） | 内容 |
+|---|---|---|---|
+| [`docs/zh/22-DECISIONS-0.1.0.md`](docs/zh/22-DECISIONS-0.1.0.md) | [`docs/en/22-DECISIONS-0.1.0.md`](docs/en/22-DECISIONS-0.1.0.md) | 641 / 653 | **v0.1.0 唯一真相源**：21 条决策 D-103~D-123、§4.2 的 19 条改动面、对 0.0.4 既有内容的改动登记 |
+| [`docs/zh/23-DESIGN-0.1.0.md`](docs/zh/23-DESIGN-0.1.0.md) | [`docs/en/23-DESIGN-0.1.0.md`](docs/en/23-DESIGN-0.1.0.md) | 1197 / 待补 | 设计增量：9 条需求全规格（蓄力条、朋友的韭材质、膨胀麦、瓜、生长、陷阱四项、耕地额度与据点核心、狂野苹果）、§11 十三条边界 |
+| [`docs/zh/24-TECH-0.1.0.md`](docs/zh/24-TECH-0.1.0.md) | [`docs/en/24-TECH-0.1.0.md`](docs/en/24-TECH-0.1.0.md) | 955 / 待补 | 技术增量：基线 **90 → 93**、config **155 → 166**、语言键 **299 → 315**、PNG +5 / JSON +5、RT-24~RT-30、18 条验收 |
+| [`docs/zh/25-TASKS-0.1.0.md`](docs/zh/25-TASKS-0.1.0.md) | [`docs/en/25-TASKS-0.1.0.md`](docs/en/25-TASKS-0.1.0.md) | 982 / 993 | 任务拆分与大纲：**40 个任务 F-136~F-175**、5 个 Phase（21~25）、M17~M21、10 条裁决 A-19~A-28、六张覆盖对照表 |
+| [`docs/zh/26-PROMPT-MAIN-0.1.0.md`](docs/zh/26-PROMPT-MAIN-0.1.0.md) | [`docs/en/26-PROMPT-MAIN-0.1.0.md`](docs/en/26-PROMPT-MAIN-0.1.0.md) | 407 / 416 | v0.1.0 主提示词：**HC-51~HC-76 共 26 条**、**N-51~N-74 共 24 条**、22 条已知陷阱 |
+| [`docs/zh/27-PROMPT-TASKS-0.1.0.md`](docs/zh/27-PROMPT-TASKS-0.1.0.md) | [`docs/en/27-PROMPT-TASKS-0.1.0.md`](docs/en/27-PROMPT-TASKS-0.1.0.md) | 650 / 661 | v0.1.0 分阶段任务清单：Phase 21~25 各一节（每节 6 项）、§9 自检 40/40、§0.5 速查 16 行 |
+
+> v0.1.0 那六份的**中文合计 4832 行 / 英文合计 4916 行**（英文四份的行数随最后的裁决回灌略有变动，以文件为准）。
+
 ### 实施文档 / Implementation documents
 
 | 文件 | 内容 |
@@ -176,7 +189,11 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 | 文件 | 用途 |
 |---|---|
 | [`tools/gen_textures.py`](tools/gen_textures.py) | 批量生成 91 张材质（原版贴图 + 绿色「+」叠加、转换器四面作物）。`--vanilla-assets` 必须指向 **26.3 客户端 jar** |
-| [`tools/verify_project.py`](tools/verify_project.py) | 静态验收：117 config 键 / 64 注册 ID / 语言键一致性 / 禁令扫描 |
+| [`tools/verify_project.py`](tools/verify_project.py) | 静态验收：注册对象 / config 键 / 语言键一致性 / 禁令扫描 |
+
+> ✅ **实测（0.0.4 树）：跑通。** 输出 `已核 registry 对象: 90 / 90`、`config 155`、`lang 299`、`结论：FAIL 0 项`，退出码 0。
+>
+> ⚠️ **但它有一个静默盲区**：新增注册对象时，若只往 EXPECTED 清单里加 ID 而不同步 EXPECTED_COUNTS，它会报错；两边都不动则**继续输出全绿、静默漏检**。v0.1.0 要加 3 个对象（F-136），动作顺序是「先加清单 → 再改计数 → 再加第四个 config 来源」（见 24-TECH §1.4）。 |
 | [`tools/verify_api.ps1`](tools/verify_api.ps1) | 版本与 API 签名核查：拉真实最新版本号、用 `javap` 验证 4 个不确定签名，输出可直接贴回 §10.2 的 Markdown 表 |
 | [`tools/convert_media.ps1`](tools/convert_media.ps1) | **v0.0.2 媒体管线**：把仓库外的三个源素材转成两个 mono 64 kbps OGG 与一张 18×18 效果图标 PNG。ffmpeg 按 `-Ffmpeg` → PATH → `tools/ffmpeg/bin` → `.tools/ffmpeg/bin` 顺序找；缺 ffmpeg / 缺 libvorbis / 缺源文件一律退 1 且不写任何文件；`-CheckOnly` 只校验环境，`-Force` 强制重编，否则输出比源新就跳过。不下载任何东西。⚠️ 两个 `.ogg` **不可字节复现**（Ogg 容器每次写随机 serial），验收别拿 ogg 的 md5 当判据，比时长 / 声道 / 码率 |
 | [`plan0.0.1.txt`](plan0.0.1.txt) | 作者原始设想。**只读，不作为规范依据**——已被上面七份文档取代 |
@@ -218,7 +235,22 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 
 做玩法时加 `17-DESIGN-0.0.3.md`，写代码时加 `18-TECH-0.0.3.md`，找任务时加 `19-TASKS-0.0.3.md` 或当前 Phase 那一节。**`16-DECISIONS-0.0.3.md` 要一直在场**——v0.0.3 与 v0.0.2 冲突时以它为准。
 
-> ⚠️ **Phase 16 第一件事是修 `tools/verify_project.py`**（F-100）。它现在还是 0.0.1 时代的硬编码，跑出来 `FAIL 1 项`。不先修它，后面所有计数验收都没有可信基线。
+> ✅ **Phase 16 的 `tools/verify_project.py` 已在 0.0.3/0.0.4 期间修好**：现在跑出来是 `90 / 90`、config 155、lang 299、`FAIL 0 项`、退出码 0。
+>
+> （此前这里写「它还是 0.0.1 时代的硬编码、跑出来 `FAIL 1 项`」——那是 0.0.2 时期的状态，已过时。）
+
+### v0.1.0 的投喂顺序
+
+```
+第一轮  26-PROMPT-MAIN-0.1.0.md                          （v0.1.0 全局约束，只投一次）
+第二轮  27-PROMPT-TASKS-0.1.0.md 的 §2  Phase 21 那一节     （一次只投一个 Phase）
+第三轮  27-PROMPT-TASKS-0.1.0.md 的 §3  Phase 22 那一节
+...     直到 Phase 25
+```
+
+做玩法时加 `23-DESIGN-0.1.0.md`，写代码时加 `24-TECH-0.1.0.md`，找任务时加 `25-TASKS-0.1.0.md` 或当前 Phase 那一节。**`22-DECISIONS-0.1.0.md` 要一直在场**——v0.1.0 与 0.0.4 冲突时以它为准。
+
+> ⚠️ **Phase 21 的第一件事是把 `tools/verify_project.py` 扩到新对象**（F-136）。它现在是**绿的**（90 / 155 / 299、`FAIL 0`），但它有一个**静默盲区**：往 `EXPECTED` 清单加 ID 却不同步 `EXPECTED_COUNTS` 会红；两边都不动则一直全绿、静默漏检新增的 3 个对象。固定顺序是「先加清单 → 再改计数到 93/166/315 → 再加第四个 config 来源」，中间态的红是预期行为。
 
 ### 代理该读哪几份
 
@@ -231,20 +263,20 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 
 ## 关键数字 / Key numbers
 
-| 指标 | v0.0.1（已实现） | v0.0.2（**实测**） | v0.0.3（**文档口径，未实现**） |
-|---|---|---|---|
-| 改良作物档案 | 15 种 | **19 种**（投掷 10 / 部署 6 / 食用 3；破障 4） | **22 种**（投掷 12 / 部署 7 / 食用 3；破障 4） |
-| registry 对象 | 64 个 | **77 个**（+5 items / +2 blocks / +2 entity / +2 mob_effect / +2 sound_event） | **90 个**（+4 items / +3 blocks / +2 entity / +2 mob_effect / +1 sound_event / +1 damage_type） |
-| config 键 | 117 个 | **139 个**（+22） | **158 个**（+19：16 新 + 3 改默认值） |
-| 资源文件 | 262 个（实测；169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | **305 个**（JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / `pack.mcmeta` 1） | **336 个**（+31：JSON +22 / PNG +8 / OGG +1） |
-| 语言键 | 222 × 2（中英相等） | **263 × 2**（+41） | **299 × 2**（+36） |
-| 进度 | 12 条 | **15 条**（+3） | **18 条**（+3） |
-| 转换配方 / 合成配方 | 21 / 0 | **24 / 2** | **26 / 2**（+2 转换） |
-| 幸运浆果池 | 14 种 | **16 种**（排除幸运浆果、狂野苹果、压缩膨胀麦） | **19 种**（D-97：三条新档案全部纳入，推导式不动） |
-| 任务 | 59 个，10 个 Phase | **40 个（F-60~F-99），5 个 Phase** | **36 个（F-100~F-135），5 个 Phase** |
-| 工作量 | 96.0 人日裸 / 120.1 含缓冲 | **60.5 人日裸 / 75.6 含缓冲** | **60.0 人日裸 / 75.0 含缓冲** |
-| 关键路径 | 18.5 人日 / 11 个任务 | **14.5 人日 / 9 个任务** | **18.0 人日 / 11 个任务** |
-| 技术风险 | RT-01 ~ RT-09 | **RT-01 ~ RT-16**（+RT-10 ~ RT-16） | **RT-01 ~ RT-23**（+RT-17 ~ RT-23） |
+| 指标 | v0.0.1（已实现） | v0.0.2（**实测**） | v0.0.3（已实现；列内为**当时的文档口径**） | v0.1.0（**文档口径，未实现**） |
+|---|---|---|---| |
+| 改良作物档案 | 15 种 | **19 种**（投掷 10 / 部署 6 / 食用 3；破障 4） | **22 种**（投掷 12 / 部署 7 / 食用 3；破障 4） | **22 种**（不变；本版不新增档案，但瓜！与瓜片子移除破障类） |
+| registry 对象 | 64 个 | **77 个**（+5 items / +2 blocks / +2 entity / +2 mob_effect / +2 sound_event） | **90 个**（+4 items / +3 blocks / +2 entity / +2 mob_effect / +1 sound_event / +1 damage_type） | **93 个**（+3：`outpost_core` 的 block / block_entity / item） |
+| config 键 | 117 个 | **139 个**（+22） | **158 个**（+19：16 新 + 3 改默认值） | **166 个**（+11：新增 11） |
+| 资源文件 | 262 个（实测；169 JSON + 91 PNG + 1 TOML + 1 `pack.mcmeta`） | **305 个**（JSON 197 / PNG 100 / OGG 2 / GLSL 4 / TOML 1 / `pack.mcmeta` 1） | **336 个**（+31：JSON +22 / PNG +8 / OGG +1） | **+10 个**（JSON +5 / PNG +5；另有 6 张 PNG 就地替换） |
+| 语言键 | 222 × 2（中英相等） | **263 × 2**（+41） | **299 × 2**（+36） | **315 × 2**（+16） |
+| 进度 | 12 条 | **15 条**（+3） | **18 条**（+3） | **18 条**（不变） |
+| 转换配方 / 合成配方 | 21 / 0 | **24 / 2** | **26 / 2**（+2 转换） | **26 / 3**（+1 合成：据点核心） |
+| 幸运浆果池 | 14 种 | **16 种**（排除幸运浆果、狂野苹果、压缩膨胀麦） | **19 种**（D-97：三条新档案全部纳入，推导式不动） | **19 种**（不变） |
+| 任务 | 59 个，10 个 Phase | **40 个（F-60~F-99），5 个 Phase** | **36 个（F-100~F-135），5 个 Phase** | **40 个（F-136~F-175），5 个 Phase** |
+| 工作量 | 96.0 人日裸 / 120.1 含缓冲 | **60.5 人日裸 / 75.6 含缓冲** | **60.0 人日裸 / 75.0 含缓冲** | **63.0 人日裸 / 78.75 含缓冲** |
+| 关键路径 | 18.5 人日 / 11 个任务 | **14.5 人日 / 9 个任务** | **18.0 人日 / 11 个任务** | **22.0 人日 / 11 个任务** |
+| 技术风险 | RT-01 ~ RT-09 | **RT-01 ~ RT-16**（+RT-10 ~ RT-16） | **RT-01 ~ RT-23**（+RT-17 ~ RT-23） | **RT-01 ~ RT-30**（+RT-24 ~ RT-30） |
 
 ---
 
@@ -414,6 +446,23 @@ The former "`Unknown recipe category: farmstorm:convert`" warning is **fixed** i
 
 ---
 
+### v0.1.0 at a glance (documented, not implemented)
+
+| Item | v0.1.0 (documentation) |
+|---|---|
+| Registry objects | **93** (90 + 3: `outpost_core` block / block entity / item) |
+| config keys | **166** (155 + 11 new) |
+| Language keys | **315 × 2** (299 + 16) |
+| Resource files | **+10** (JSON +5 / PNG +5); 6 more PNGs are replaced in place |
+| Advancements | **18** (unchanged) |
+| Crop profiles | **22** (unchanged, but Melon Grenade and Melon Slice Bomb lose `Demolition`) |
+| Tasks | **40** (F-136…F-175) across 5 phases (21: 7, 22: 9, 23: 9, 24: 7, 25: 8) |
+| Workload | **63.0 person-days raw / 78.75 buffered**; critical path **22.0 person-days / 11 tasks** |
+| Risk register | RT-01 … **RT-30** (+RT-24 … RT-30) |
+
+**Feed order:** `26-PROMPT-MAIN-0.1.0.md` once, then exactly one phase section from `27-PROMPT-TASKS-0.1.0.md` at a time (Phase 21 … 25). Keep `22-DECISIONS-0.1.0.md` in context — it wins over v0.0.4 on any conflict.
+
+> ⚠️ **Phase 21 starts by extending `tools/verify_project.py`** (F-136). The tool is **green** today (90 / 155 / 299, `FAIL 0`), but it has a **silent blind spot**: adding IDs to `EXPECTED` without updating `EXPECTED_COUNTS` turns it red, while touching neither keeps it green and silently blind to the 3 new objects. Fixed order: add the ID list → bump the counts to 93 / 166 / 315 → add the fourth config source. The red state in between is expected.
 ## 素材来源与非商业声明 / Asset provenance
 
 本项目**不是全部原创**：下列素材取自第三方，**版权归各自权利人**，本项目不对其主张任何权利。
@@ -428,6 +477,8 @@ The former "`Unknown recipe category: farmstorm:convert`" warning is **fixed** i
 | `textures/mob_effect/q_bounce.png`（v0.0.3） | Steam 创意工坊 `431960/3796093604/preview.jpg`（1024×1024） | 居中裁切缩放为 18×18 PNG，作「Q弹」状态图标 |
 | `textures/item/friend_chives.png`、`textures/item/chive_seeds.png`（v0.0.3） | 作者提供的两张 QQ 图片（1254×1254 RGBA） | 缩放为 16×16 PNG |
 | `textures/block/friend_chives_stage0..3.png`（v0.0.3） | **本项目自绘占位**（洋红 `#D81E8A`） | 作者明确「方块材质暂不绘制，先实现功能」，这 4 张不是第三方素材，出终稿时直接替换 |
+| `textures/block/outpost_core_a_{top,side,bottom}.png`（v0.1.0） | 作者提供的 `outpost_core_all_textures\32x32\a_runic\` 三张 **32×32**（2745 / 2534 / 2513 B） | 原样拷入，走 `cube_bottom_top` 六面区分；同目录另有 `b_industrial` / `c_obsidian` / `d_royal` 三套风格备选 |
+| `textures/item/wild_apple.png`（v0.1.0 替换） | 作者桌面的 `2797B56FEF56AF13125F333A6989632A.png`（**1294×1216** RGBA，1,113,442 B） | 缩到 **16×16** 后替换原图 |
 
 ### 使用条件（务必照此分发）
 

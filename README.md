@@ -1,6 +1,6 @@
 # 农场风云 / Farmstorm
 
-Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· **v0.0.4（当前发布版）**
+Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· v0.0.4（已发布）· **v0.1.0（已实现并通过全量验收，发布准备就绪）**
 
 > 把原版农作物改造成 PvP 道具：同一种作物可以种在地里、扔出去、架在墙上、或者吃掉。
 > Vanilla crops re-armed as PvP gadgets: plant them, throw them, mount them, or eat them.
@@ -174,6 +174,24 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 
 > v0.1.0 那六份的**中文合计 4832 行 / 英文合计 4916 行**（英文四份的行数随最后的裁决回灌略有变动，以文件为准）。
 
+### v0.1.0 实测口径（2026-11-02 交付）
+
+| 项 | 实测值 | 怎么核 |
+|---|---|---|
+| 注册对象 | **93**（items 32 / blocks 26 / block_entities 7 / entity_types 13 / mob_effects 4 / sound_events 3 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 3 / data_components 1 / menu_types 1） | 启动日志 `自检 注册对象 93 个 … → OK` 逐类求和 |
+| config 键 | **166** | `run/config/farmstorm-server.toml` 叶节点 166（5 个新分组追加在 `[vibration_bean]` 之后） |
+| 语言键 | **315 × 2**（中英键集逐字相等） | `verify_project.py` §3 段；六项复核 26 + 32 + 166 + 1 + 2 + 88 = 315 |
+| 改良作物档案 | 22（瓜！与瓜片子移除破障类：4 → 2） | 启动日志 `自检 作物 22 种：投掷型 12 / 部署型 7 / 食用型 3；破障类 2 → OK` |
+| 进度 | 18 条 | `data/farmstorm/advancement/` |
+| 资源 | PNG **113** / OGG 3 / blockstates **26** / models/block **71** / models/item **32** / loot_table **26** / recipe **29** | datagen 产物逐目录计数；`runData` 连跑两次第二次 `written: 0` |
+| 构建 | `dist/farmstorm-0.1.0+mc1.21.1.jar` **1,016,472 B** / SHA256 `06F35C54…A18A7` | `gw.cmd build` 退出码 0，jar 内 `neoforge.mods.toml` 的 `version = "0.1.0"` |
+| 静态验收 | `93 / 93`、`166`、`315`、`结论：FAIL 0 项`、exit 0 | `python -X utf8 tools/verify_project.py` |
+| 行为验收 | **15/15 PASS**（资源面、启动自检三行、3×3 合成与换角不产出、木镐 ≈22.7 s 掉 1 个、`/loot give` 一致、三个 `needs_*` 命中 0、三条红线计数 0） | `.work/p25v-evidence.md` 等五份实测证据 |
+
+> 三条红线维持：`@Mixin` **0**、`CustomPacketPayload` **0**、`GameRules.register` **0**（耕地规则走 `/farmstorm farmlandlimit`，不是 gamerule）。
+> 发布状态：**已构建 + 已进 `dist/` + 安装说明与 release 正文草稿齐备，但未打 tag、未 push、未建 GitHub Release**（按作者口径留在发布准备这一步）。
+
+
 ### 实施文档 / Implementation documents
 
 | 文件 | 内容 |
@@ -263,7 +281,7 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 
 ## 关键数字 / Key numbers
 
-| 指标 | v0.0.1（已实现） | v0.0.2（**实测**） | v0.0.3（已实现；列内为**当时的文档口径**） | v0.1.0（**文档口径，未实现**） |
+| 指标 | v0.0.1（已实现） | v0.0.2（**实测**） | v0.0.3（已实现；列内为**当时的文档口径**） | v0.1.0（**已实现，实测**） |
 |---|---|---|---| |
 | 改良作物档案 | 15 种 | **19 种**（投掷 10 / 部署 6 / 食用 3；破障 4） | **22 种**（投掷 12 / 部署 7 / 食用 3；破障 4） | **22 种**（不变；本版不新增档案，但瓜！与瓜片子移除破障类） |
 | registry 对象 | 64 个 | **77 个**（+5 items / +2 blocks / +2 entity / +2 mob_effect / +2 sound_event） | **90 个**（+4 items / +3 blocks / +2 entity / +2 mob_effect / +1 sound_event / +1 damage_type） | **93 个**（+3：`outpost_core` 的 block / block_entity / item） |

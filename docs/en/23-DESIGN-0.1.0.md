@@ -780,7 +780,7 @@ This version's largest section. The "Outpost Core" is the **single source** of q
 
 Four landing points:
 
-1. **It is not computed per head**: with a team the cap is **the sum of every member's personal quota** (plan `:38`'s own wording), so a 3-person team, each with a command value of 5, that has placed 2 cores ⇒ 30 + 32 = 62 blocks; not 62 blocks per head (D-117 items 1 and 2).
+1. **It is not computed per head**: with a team the cap is **the sum of every member's personal quota** (plan `:38`'s own wording), so a 3-person team, each with a command value of 10, that has placed 2 cores ⇒ 30 + 32 = 62 blocks; not 62 blocks per head (D-117 items 1 and 2).
 2. **The core count has a cap, so the bonus has a cap too**: at most 2 cores per person (§8.3) ⇒ a team's core count ≤ 2 × the number of members ⇒ a two-person team's bonus cap is 4 × 16 = **64** (this document's supplement: D-122's 2 per person multiplied by D-120's 16 per core). (Note: the 3-person example above with 2 cores is 32 points of bonus, which together with the 30 points of base quota makes 62.)
 3. **Accounting uses a set of coordinates, not a bare count**: when a player digs out a piece of farmland himself, a bare count has nowhere to subtract one; the coordinate set is likewise the data source for §8.6's "shovel up only your own few" (D-117 item 4).
 4. **The command value is not persisted**: it applies only to the current server process and returns to the config default on restart; no second copy of persistent data is written (D-116 item 5) — allowing the quota to be defined in two places would immediately create a two-source "who overrides whom".
@@ -793,7 +793,7 @@ Four landing points:
 | Single player, default config + 2 cores | 0 | 2 | **32** | 0 + 16 × 2 |
 | Single player, command 10 + 1 core | 10 | 1 | **26** | 10 + 16 × 1 |
 | 3-person team, default config + 3 cores | 0 each | 3 | **48** | 0 + 16 × 3 |
-| 3-person team, command 5 + 2 cores | 5 each | 2 | **62** | 3 × 5 + 16 × 2 |
+| 3-person team, command 10 + 2 cores | 10 each | 2 | **62** | 3 × 10 + 16 × 2 |
 
 ### 8.2 The tillable range
 
@@ -953,6 +953,7 @@ One inference that must be spelled out: the quota is a "cap", not a "ration". Th
 | Outline | a 1 px dark outline around the edge, with alpha taking only the two values **0 / 255** | a semi-transparent edge produces a black or grey fringe when the inventory scales it (this document's supplement) |
 | Background | fully transparent (alpha 0) | `item/generated`'s default rendering cannot have a background patch |
 | Scaling algorithm | NEAREST or LANCZOS downsampling followed by **manual correction quantised to 11 colours** | plain average downsampling produces hundreds of intermediate colours (this document's supplement) |
+| Implementation feedback (measured after F-163 landed) | the finished product is **145 / 256 opaque, 111 / 256 transparent**, 11 colours, highlight 4 + 2 = 6 px, alpha {0, 255} | the new source image yields 131 solid cells on the 16-grid plus the green "+" for a union of 145; the old image's 130 = 97 (vanilla apple) + 33 ("+") with the two disjoint, while the new silhouette sits on top of the "+" position ⇒ **126 transparent is unreachable under that composition** (sweeping thresholds 250→253 never reaches it). The fruit and the leaf are separated by a **fully transparent row**; `#542409` survives as 1 visible px. Acceptance is closed on the measured readings |
 
 ### 9.4 Palette and form
 

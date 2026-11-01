@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-r"""「农场风云 / Farmstorm」材质生成器（F-51 / TECH §6.5 的 87 张 + FIX-5 的 4 张转换器作物侧面 = 91 张，材料全部程序生成）。
+r"""「农场风云 / Farmstorm」材质生成器（F-51 / TECH §6.5 的 87 张 + FIX-5 的 4 张转换器作物侧面 = 91 张；
+V-23 追加 4 张物品图标与 2 张方块，v0.1.0 · F-164 追加压缩麦顶 / 底 2 张 —— 共 99 张，材料全部程序生成）。
 
-产出的 91 张材质（DEC D-25 的占位稿，作者审校后可替换）：
-  1. textures/item/<22 个 id>.png            —— 15 个作物 + 6 个播种物 + 转换器，16x16；
+产出的 99 张材质（DEC D-25 的占位稿，作者审校后可替换）：
+  1. textures/item/<26 个 id>.png            —— 15 个作物 + 6 个播种物 + 转换器 + V-23 的 4 个，16x16；
      15 个作物与 6 个播种物图标右下角叠绿色「+」（plan0.0.1.txt 第 8 条，区分原版与改良）；转换器图标不加；
   2. textures/block/<base>_stage{0..3}.png   —— 14 个作物 × 4 阶段 = 56 张，16x16；
      <base> 取法见 TECH §6.3：作物方块 ID 去掉末尾的 _crop / _stem / _stalk / _block / _bush；
-  3. textures/block/<id>.png                 —— 5 个部署方块 + converter_{top,side,front}
-     + converter_side_{wheat,carrot,potato,beetroot}（FIX-5：工作台侧面叠作物图标）= 12 张；
+  3. textures/block/<id>.png                 —— 5 个部署方块 + zangief_cane + compressed_hay_block
+     + converter_{top,side,front} + converter_side_{wheat,carrot,potato,beetroot}（FIX-5：工作台侧面叠作物图标）
+     + compressed_hay_block_{top,bottom}（v0.1.0 · F-164 的顶 / 底切面）= 16 张；
   4. textures/gui/converter.png              —— 176x166 容器背景（面板 + 标题/背包刻线 + 输入→预览箭头 + 槽位），
      每个槽位方框的「内容区左上角」与 ConverterMenu 的 Slot 坐标逐像素相等。
 
-0.0.3 追加的 8 张里，本脚本只出 5 张（`--additions`，与上面 91 张分开放）：`vibration_bean`
-（16x16，作者没有给它的贴图素材，只能程序绘制）+ 4 张 `friend_chives_stage0..3` 洋红 #D81E8A
-纯色占位（17 号 §4.7，**占位非终稿**）。另外 3 张凡有源图可转的一律走 tools/convert_media.ps1：
+0.0.3 追加的 8 张里，本脚本只出 5 张（`--additions`，与上面 99 张分开放）：`vibration_bean`
+（16x16，作者没有给它的贴图素材，只能程序绘制）+ 4 张 `friend_chives_stage0..3`（v0.1.0 · F-162 起按
+23 号 §3.4 的四阶段形态表绘制，不再是洋红 #D81E8A 占位）。另外 3 张凡有源图可转的一律走 tools/convert_media.ps1：
 `mob_effect/q_bounce.png`（preview.jpg）、`item/friend_chives.png` 与 `item/chive_seeds.png`
 （作者 1254x1254 原画，路径见 plan0.0.3.txt）—— 有源转码就不手绘，避免两套图源打架。
 
@@ -23,7 +25,7 @@ r"""「农场风云 / Farmstorm」材质生成器（F-51 / TECH §6.5 的 87 张
     python -X utf8 tools/gen_textures.py --vanilla-assets <jar 或解包资源根> --out src/main/resources --dry-run
     python -X utf8 tools/gen_textures.py --vanilla-assets <jar 或解包资源根> --out src/main/resources
 
-    # 0.0.3 追加里没有源图可转的 5 张（1 张程序绘制物品图标 + 4 张洋红占位方块贴图），不读原版贴图：
+    # 0.0.3 追加里没有源图可转的 5 张（1 张程序绘制物品图标 + 4 张朋友的韭阶段贴图），不读原版贴图：
     python -X utf8 tools/gen_textures.py --additions --out src/main/resources
 
     --vanilla-assets 接受两种形态：
@@ -44,13 +46,15 @@ r"""「农场风云 / Farmstorm」材质生成器（F-51 / TECH §6.5 的 87 张
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import zipfile
 from dataclasses import dataclass, field
+from functools import partial
 from io import BytesIO
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw
 
 TEXTURE_SIZE = 16
 MOD_ID = "farmstorm"
@@ -118,6 +122,51 @@ POD_HI = (0x76, 0x51, 0x27, 0xFF)
 POD_STEM = (0x3F, 0x7A, 0x33, 0xFF)
 VIB_WAVE = (0xA9, 0xB6, 0xBC, 0xFF)
 
+# --- v0.1.0 · 压缩麦三张（F-164 / 23 号 §4.6）---
+# 9 档灰阶的黄褐色板（亮 → 暗）。与「H 42° / S 0.55、L 沿用灰阶」的公式在 9 个灰阶上逐档相等，
+# 但 #4B4B4B 那一档公式会因浮点取整给出 #745C22，故这里直接用文档的实测色值当唯一事实源。
+HAY_RAMP: tuple[tuple[int, int, int], ...] = (
+    (0xDA, 0xBF, 0x80), (0xD6, 0xB7, 0x70), (0xCC, 0xA6, 0x4E), (0xBF, 0x96, 0x37), (0xAE, 0x89, 0x32),
+    (0x9D, 0x7B, 0x2D), (0x96, 0x76, 0x2C), (0x85, 0x69, 0x27), (0x74, 0x5B, 0x22),
+)
+# 现侧贴图读出来的 9 档灰阶（23 号 §4.6 表的第一列，亮 → 暗），与 HAY_RAMP 一一对应。
+HAY_GRAYS: tuple[int, ...] = (0xAD, 0xA3, 0x8D, 0x7B, 0x70, 0x65, 0x61, 0x56, 0x4B)
+HAY_TONE: dict[int, tuple[int, int, int]] = dict(zip(HAY_GRAYS, HAY_RAMP))
+# 顶面 5 档（#9D7B2D ~ #DABF80）；底面「同图案整体压暗一档」= 每个下标沿 9 档下移 3 级（#745B22 ~ #BF9637）。
+HAY_TOP_LEVELS: tuple[int, ...] = (0, 1, 2, 4, 5)
+HAY_BOTTOM_LEVELS: tuple[int, ...] = (3, 4, 5, 7, 8)
+# 底面捆绳落在中心 4x4 区域（左含右不含）。
+HAY_ROPE_BOX: tuple[int, int, int, int] = (6, 6, 10, 10)
+
+# --- v0.1.0 · 朋友们韭的四阶段（F-162 / 23 号 §3.4）---
+# 4 个绿直接沿用 power_beet 已入库的绿族，亮度升序：茎 < 叶基 < 叶中 < 叶尖。
+CHIVE_COLORS: dict[str, tuple[int, int, int, int]] = {
+    "a": (0x26, 0x63, 0x25, 0xFF),
+    "b": (0x2B, 0x70, 0x2A, 0xFF),
+    "c": (0x4A, 0x8F, 0x28, 0xFF),
+    "d": (0x55, 0xAB, 0x2D, 0xFF),
+}
+# 23 号 §3.4 的目标不透明像素数（6 / 14 / 40 / 90），画完逐张断言。
+CHIVE_OPAQUE: tuple[int, ...] = (6, 14, 40, 90)
+
+# --- v0.1.0 · 狂野苹果（F-163 / 23 号 §9.4）---
+# 作者桌面那张 1294 x 1216 RGBA / 1,113,442 B 的源图。**不进 jar**：这里只存路径，生成时读一次。
+WILD_APPLE_SOURCE = Path(r"C:\Users\DASHpig\Desktop\2797B56FEF56AF13125F333A6989632A.png")
+WILD_APPLE_SOURCE_ENV = "FARMSTORM_WILD_APPLE_SOURCE"
+# 16 网格的一格算「实心」的 alpha 覆盖率阈值：源图 alpha 只有 0 与 253 两档，
+# 250/255 ≈ 98% 等价于「这一格整格都在果实 / 叶片里」，抗锯齿边缘不会被算成实体。
+WILD_APPLE_COVERAGE = 250
+# 23 号 §9.4 的十条色阶（果实 + 梗叶）与现图各自的像素数；实际格数与 97 不等时按最大余数法缩放。
+WILD_APPLE_TONES: tuple[tuple[tuple[int, int, int], int], ...] = (
+    ((0xFF, 0x96, 0x9D), 4), ((0xFF, 0x5E, 0x69), 2), ((0xFF, 0x1C, 0x2B), 12), ((0xDD, 0x17, 0x25), 14),
+    ((0xB4, 0x13, 0x1E), 28), ((0x9C, 0x10, 0x17), 11), ((0x75, 0x28, 0x02), 17), ((0x54, 0x24, 0x09), 3),
+    ((0x7E, 0x37, 0x0E), 1), ((0x54, 0x09, 0x0E), 5),
+)
+# 这四档的像素数是 23 号 §9.4 / 25 号 F-163 验收 2 点名的读数（高光 4 + 2、分隔 3、叶脉 1），不随格数缩放。
+WILD_APPLE_PINNED = frozenset({
+    (0xFF, 0x96, 0x9D), (0xFF, 0x5E, 0x69), (0x54, 0x24, 0x09), (0x7E, 0x37, 0x0E),
+})
+
 
 @dataclass(frozen=True)
 class SourceRef:
@@ -145,7 +194,9 @@ class Spec:
     # TECH §6.5：压缩干草块必须是「原版干草块侧面的灰度版」——R=G=B 的纯灰度，
     # 不是「降低饱和度」（那会留色偏），所以走 convert("L") 再回 RGBA。
     monochrome: bool = False
-    # 0.0.3 追加：程序绘制图标取哪个画法（ITEM_DRAWERS 的键）；None 表示走原版来源解析。
+    # v0.1.0 · F-164：灰度结果再按 23 号 §4.6 的 9 档映射表换成干草黄褐（在 monochrome 之后应用）。
+    hay_tone: bool = False
+    # 0.0.3 追加：程序绘制图标取哪个画法（DRAWERS 的键）；None 表示走原版来源解析。
     drawer: str | None = None
 
 
@@ -233,6 +284,9 @@ ICONS: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
 # 转换器不是改良作物，图标不加「+」（plan0.0.1.txt 第 8 条只要求改良作物）。
 NO_PLUS_ICONS = frozenset({"converter"})
 
+# 需要走 HAY_TONE 映射表的方块贴图（v0.1.0 · F-164 的压缩麦侧面）。
+HAY_TONE_BLOCKS = frozenset({"compressed_hay_block"})
+
 # --- 14 个作物 × 4 阶段（方块 ID 去掉后缀后的 <base>）---
 STAGE_CROPS: tuple[tuple[str, str, tuple[tuple[SourceRef, ...], ...], tuple[int, int, int] | None], ...] = (
     ("puffed_wheat", "膨胀麦", stage_set("wheat_stage0", "wheat_stage3", "wheat_stage5", "wheat_stage7"), None),
@@ -281,9 +335,13 @@ BLOCK_TEXTURES: tuple[tuple[str, str, tuple[tuple[str, str], ...], bool], ...] =
     # V-23：F-65 注册了这两个方块却没建外观，导致 runData --all 从 F-65 起就抛「贴图不存在」。
     # 陷阱类部署方块在世界里不渲染几何，这张 PNG 只作破坏粒子；压缩干草块则是 cubeAll 的正式贴图。
     ("zangief_cane", "部署·桑吉尔蔗（仅作破坏粒子）", (("block", "sugar_cane"),), False),
-    # 第 4 个元素 = 是否灰度化。D-57 要求「材质 = 原版干草块侧面的灰度版」（TECH §6.5），
-    # 这里必须 True：直接拿原色 hay_block_side 出来色相不为 0，验收 3 过不了。
+    # 第 4 个元素 = 是否灰度化。取值链是「原版 hay_block_side → L 通道（9 档灰阶）→ HAY_TONE 换干草黄褐」：
+    # 先灰度这一步不能省，23 号 §4.6 的映射表就是按这 9 个灰阶写的（v0.1.0 · F-164）。
     ("compressed_hay_block", "压缩干草块", (("block", "hay_block_side"),), True),
+    # v0.1.0 · F-164：落地后顶 / 底各一张 16x16 切面，由 BLOCK_DRAWERS 画（不读原版像素，无随机数）；
+    # 候选链仍写 hay_block_side，标明三张同属一套黄褐色板（23 号 §4.6 的六面分配表）。
+    ("compressed_hay_block_top", "压缩干草块·顶面（束纹 + 描边）", (("block", "hay_block_side"),), False),
+    ("compressed_hay_block_bottom", "压缩干草块·底面（压暗一档 + 十字捆绳）", (("block", "hay_block_side"),), False),
     # 顶面兼底面：原版 crafting_table 模型的 up / down 都用 crafting_table_top，这里照抄同一个口径。
     ("converter_top", "转换器·顶面（兼底面）", (("block", "crafting_table_top"),), False),
     ("converter_side", "转换器·净工作台侧面（模型已不引用）", (("block", "crafting_table_side"),), False),
@@ -357,6 +415,7 @@ def build_specs() -> tuple[Spec, ...]:
                 zh_name=zh_name,
                 candidates=refs(*chain),
                 add_plus=item_id not in NO_PLUS_ICONS,
+                drawer=item_id if item_id in ICON_DRAWERS else None,
             )
         )
 
@@ -381,6 +440,8 @@ def build_specs() -> tuple[Spec, ...]:
                 zh_name=zh_name,
                 candidates=refs(*chain),
                 monochrome=monochrome,
+                hay_tone=name in HAY_TONE_BLOCKS,
+                drawer=name if name in BLOCK_DRAWERS else None,
             )
         )
 
@@ -523,6 +584,31 @@ def apply_tint(image: Image.Image, tint: tuple[int, int, int]) -> Image.Image:
     return Image.merge("RGBA", (red, green, blue, alpha))
 
 
+def hay_tone_from_level(level: int) -> tuple[int, int, int]:
+    """映射表之外的灰阶兜底：H 42° / S 0.55、L 沿用灰阶（23 号 §4.6 的改色规则）。"""
+    lightness = level / 255
+    chroma = (1 - abs(2 * lightness - 1)) * 0.55
+    second = chroma * (1 - abs(42 / 60 % 2 - 1))
+    offset = lightness - chroma / 2
+    return (
+        min(255, round((chroma + offset) * 255)),
+        min(255, round((second + offset) * 255)),
+        min(255, round(offset * 255)),
+    )
+
+
+def apply_hay_tone(image: Image.Image) -> Image.Image:
+    """把灰度图按 23 号 §4.6 的 9 档映射表换成干草黄褐，像素布局与 alpha 原样保留。"""
+    toned = image.convert("RGBA")
+    pixels = toned.load()
+    for y in range(toned.height):
+        for x in range(toned.width):
+            red, green, blue, alpha = pixels[x, y]
+            level = (299 * red + 587 * green + 114 * blue) // 1000
+            pixels[x, y] = HAY_TONE.get(level, hay_tone_from_level(level)) + (alpha,)
+    return toned
+
+
 def fit_bottom_center(base: Image.Image, extent: int) -> Image.Image:
     """把底图等比缩放成 extent x extent 并底边居中贴进 16x16 透明画布。"""
     canvas = Image.new("RGBA", (TEXTURE_SIZE, TEXTURE_SIZE), (0, 0, 0, 0))
@@ -629,11 +715,262 @@ def draw_vibration_bean() -> Image.Image:
     return image
 
 
+# --- v0.1.0 · F-162：朋友的韭四阶段像素表（23 号 §3.4 的形态表）---
+# '.' 透明，其余字母见 CHIVE_COLORS。四张的共同骨架是「底部中央 1 px 深色茎 + 中央一根向上抽薹的叶
+# + 左右各若干根竖向叶片」；阶段推进只加叶片高度与叶片根数，色相不动，所以远处看是「同一株长大了」。
+# 高度 4 / 8 / 12 / 16 行分别对齐 SHAPE_BY_AGE 的四级碰撞箱，不透明像素数见 CHIVE_OPAQUE。
+CHIVE_STAGE_ART: tuple[tuple[str, ...], ...] = (
+    (
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        ".......a........",
+        ".......a........",
+        "......bab.......",
+        ".......a........",
+    ),
+    (
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        ".......c........",
+        ".......c........",
+        ".......b........",
+        ".......bc.......",
+        ".......ab.......",
+        ".......a........",
+        "......ba........",
+        "......babb......",
+    ),
+    (
+        "................",
+        "................",
+        "................",
+        "................",
+        ".......d........",
+        ".......c........",
+        ".......c........",
+        ".......c........",
+        "......db........",
+        "......dbd.......",
+        ".....dcac.......",
+        ".....ccac.......",
+        ".....ccacd......",
+        "....cccacc......",
+        "....bbbabb......",
+        "....bbbabb......",
+    ),
+    (
+        "......dd........",
+        "......ddd.......",
+        "......dcd.......",
+        ".....ddcd.......",
+        ".....ddcd.......",
+        ".....ddcdd......",
+        ".....dcbcd......",
+        ".....ccbcd......",
+        "....dccacc......",
+        "....dccacc......",
+        "....dccaccd.....",
+        "...dcccaccd.....",
+        "...dcccaccd.....",
+        "...ccccaccc.....",
+        "...bbbbabbb.....",
+        "...bbbbabbb.....",
+    ),
+)
+
+
+def draw_chive_stage(index: int) -> Image.Image:
+    """按 CHIVE_STAGE_ART[index] 取色画一张 16x16 植株（纯查表，无随机数）。"""
+    art = CHIVE_STAGE_ART[index]
+    if len(art) != TEXTURE_SIZE or any(len(row) != TEXTURE_SIZE for row in art):
+        raise ValueError(f"朋友的韭阶段 {index} 的像素表不是 {TEXTURE_SIZE}x{TEXTURE_SIZE}")
+    image = Image.new("RGBA", (TEXTURE_SIZE, TEXTURE_SIZE), CLEAR)
+    opaque = 0
+    for y, row in enumerate(art):
+        for x, symbol in enumerate(row):
+            color = CHIVE_COLORS.get(symbol)
+            if color is None:
+                continue
+            image.putpixel((x, y), color)
+            opaque += 1
+    if opaque != CHIVE_OPAQUE[index]:
+        raise ValueError(f"朋友的韭阶段 {index} 的不透明像素 {opaque}，应为 {CHIVE_OPAQUE[index]}")
+    return image
+
+
+# --- v0.1.0 · F-164：压缩麦的顶 / 底两张切面 ---
+def draw_hay_cross_section(levels: tuple[int, ...]) -> Image.Image:
+    """16x16 干草捆切面：四周 1 px 描边（本面最暗一档）+ 内部每 2 行一组的横向束纹（亮档 / 暗档交替）。"""
+    ramp = [HAY_RAMP[level] for level in levels]
+    image = Image.new("RGBA", (TEXTURE_SIZE, TEXTURE_SIZE), ramp[-1] + (0xFF,))
+    for y in range(1, TEXTURE_SIZE - 1):
+        pair = (y - 1) // 2
+        bright, dark = (ramp[0], ramp[1]) if pair % 2 == 0 else (ramp[2], ramp[3])
+        color = bright if (y - 1) % 2 == 0 else dark
+        for x in range(1, TEXTURE_SIZE - 1):
+            image.putpixel((x, y), color + (0xFF,))
+    return image
+
+
+def draw_hay_top() -> Image.Image:
+    """顶面：秸秆横截面，5 档 #9D7B2D ~ #DABF80（23 号 §4.6 的六面分配表）。"""
+    return draw_hay_cross_section(HAY_TOP_LEVELS)
+
+
+def draw_hay_bottom() -> Image.Image:
+    """底面：同图案整体压暗一档 + 中心 4x4 区域 2 px 宽的十字捆绳，5 档 #745B22 ~ #BF9637。"""
+    image = draw_hay_cross_section(HAY_BOTTOM_LEVELS)
+    rope = HAY_RAMP[HAY_BOTTOM_LEVELS[-1]] + (0xFF,)
+    left, top, right, bottom = HAY_ROPE_BOX
+    center_x = (left + right) // 2
+    center_y = (top + bottom) // 2
+    for x in (center_x - 1, center_x):
+        for y in range(top, bottom):
+            image.putpixel((x, y), rope)
+    for y in (center_y - 1, center_y):
+        for x in range(left, right):
+            image.putpixel((x, y), rope)
+    return image
+
+
+# --- v0.1.0 · F-163：狂野苹果（桌面源图 → 16 网格 → 23 号 §9.4 的十条色阶）---
+def wild_apple_source() -> Path:
+    """狂野苹果源图路径；FARMSTORM_WILD_APPLE_SOURCE 可指向别处的同素材。"""
+    override = os.environ.get(WILD_APPLE_SOURCE_ENV)
+    return Path(override) if override else WILD_APPLE_SOURCE
+
+
+def luma(color: tuple[int, int, int]) -> float:
+    """ITU-R 601 相对亮度，只用来给 16 网格的格子排序。"""
+    return 0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]
+
+
+def apportion(counts: list[int], total: int) -> list[int]:
+    """最大余数法把 total 个格按比例分给各色阶（余数相同按入参顺序），合计恒等于 total。"""
+    base = sum(counts)
+    exact = [count * total / base for count in counts]
+    shares = [int(value) for value in exact]
+    order = sorted(range(len(counts)), key=lambda index: (-(exact[index] - shares[index]), index))
+    for index in order[: total - sum(shares)]:
+        shares[index] += 1
+    return shares
+
+
+def downscale_alpha_aware(image: Image.Image, size: int) -> Image.Image:
+    """按 alpha bbox 取景后做面积平均降采样。
+
+    直接缩 RGBA 会把透明背景的 (0,0,0) 一起平均进颜色（边缘发暗），所以先预乘 alpha、缩完再除回来。
+    """
+    alpha = image.getchannel("A")
+    box = alpha.point(lambda value: 255 if value >= 128 else 0).getbbox()
+    if box is not None:
+        image = image.crop(box)
+        alpha = alpha.crop(box)
+    premultiplied = Image.merge(
+        "RGB", [ImageChops.multiply(channel, alpha) for channel in image.split()[:3]]
+    ).resize((size, size), Image.Resampling.BOX)
+    alpha = alpha.resize((size, size), Image.Resampling.BOX)
+    canvas = Image.new("RGBA", (size, size), CLEAR)
+    pixels = canvas.load()
+    premultiplied_pixels = premultiplied.load()
+    alpha_pixels = alpha.load()
+    for y in range(size):
+        for x in range(size):
+            cover = alpha_pixels[x, y]
+            if cover == 0:
+                continue
+            red, green, blue = premultiplied_pixels[x, y]
+            pixels[x, y] = (
+                min(255, round(red * 255 / cover)),
+                min(255, round(green * 255 / cover)),
+                min(255, round(blue * 255 / cover)),
+                cover,
+            )
+    return canvas
+
+
+def draw_wild_apple() -> Image.Image | None:
+    """狂野苹果 16x16：桌面源图取景 → 缩到 16 网格 → 按 23 号 §9.4 的十条色阶量化（无随机数）。
+
+    先按亮度给实心格排序，再按色阶的像素数从亮到暗切片（直方图规定化）：换图不改色板，
+    四档小色阶（高光 4 + 2、分隔 3、叶脉 1）沿用文档像素数，其余六档按本图实际格数等比放大。
+    源图缺失时返回 None，由 compose() 退回候选链并在 stderr 留警告。
+    """
+    path = wild_apple_source()
+    if not path.is_file():
+        print(f"[警告] 狂野苹果源图不存在：{path}（退回原版 item/apple）", file=sys.stderr)
+        return None
+    with Image.open(path) as raw:
+        small = downscale_alpha_aware(raw.convert("RGBA"), TEXTURE_SIZE)
+
+    cells = [
+        (x, y)
+        for y in range(TEXTURE_SIZE)
+        for x in range(TEXTURE_SIZE)
+        if small.getpixel((x, y))[3] >= WILD_APPLE_COVERAGE
+    ]
+    cells.sort(key=lambda cell: (-luma(small.getpixel(cell)[:3]), cell[1], cell[0]))
+
+    tones = sorted(WILD_APPLE_TONES, key=lambda tone: -luma(tone[0]))
+    pinned = [(color, count) for color, count in tones if color in WILD_APPLE_PINNED]
+    scaled = [(color, count) for color, count in tones if color not in WILD_APPLE_PINNED]
+    budget = len(cells) - sum(count for _, count in pinned)
+    shares = apportion([count for _, count in scaled], budget)
+    target = dict(pinned)
+    target.update({color: share for (color, _), share in zip(scaled, shares)})
+
+    image = Image.new("RGBA", (TEXTURE_SIZE, TEXTURE_SIZE), CLEAR)
+    offset = 0
+    for color, _count in tones:
+        for _ in range(target[color]):
+            image.putpixel(cells[offset], color + (0xFF,))
+            offset += 1
+    if offset != len(cells):
+        raise ValueError(f"狂野苹果的色阶像素数 {offset} 与实心格 {len(cells)} 不等")
+    return image
+
+
 ITEM_DRAWERS = {
     "vibration_bean": draw_vibration_bean,
 }
 
-# 0.0.3 的 4 张方块贴图：洋红占位，非终稿（17 号 §4.7 / A-16）。
+# F-162：四张阶段贴图按 CHIVE_STAGE_ART 画，不再落 make_placeholder()（23 号 §3.5）。
+STAGE_DRAWERS = {
+    f"friend_chives_stage{index}": partial(draw_chive_stage, index)
+    for index in range(len(CHIVE_STAGE_ART))
+}
+
+# F-164：压缩麦顶 / 底两张切面。
+BLOCK_DRAWERS = {
+    "compressed_hay_block_top": draw_hay_top,
+    "compressed_hay_block_bottom": draw_hay_bottom,
+}
+
+# F-163：要读作者源图的物品图标；源图缺失时 compose() 退回候选链。
+ICON_DRAWERS = {
+    "wild_apple": draw_wild_apple,
+}
+
+DRAWERS = {**ITEM_DRAWERS, **STAGE_DRAWERS, **BLOCK_DRAWERS, **ICON_DRAWERS}
+
+# 0.0.3 追加的 4 张朋友的韭阶段贴图：v0.1.0 起由 STAGE_DRAWERS 按阶段绘制（F-162）；
+# PLACEHOLDER_COLOR / make_placeholder() 仍留给其它「源材质缺失」的项（23 号 §3.5）。
 ADDITION_PLACEHOLDER_STAGES = 4
 
 
@@ -661,25 +998,28 @@ def build_additions_specs() -> tuple[Spec, ...]:
             Spec(
                 rel_path=f"textures/block/friend_chives_stage{index}.png",
                 kind=KIND_BLOCK,
-                zh_name=f"朋友的韭 阶段 {index}（洋红 #D81E8A 占位，非终稿）",
+                zh_name=f"朋友的韭 阶段 {index}（按 23 号 §3.4 绘制）",
+                drawer=f"friend_chives_stage{index}",
             )
         )
     return tuple(specs)
 
 
 def compose(spec: Spec, resolved: Resolved, marker: Image.Image) -> Image.Image:
-    """按目标类型合成最终图（图标叠「+」/ 阶段缩放 / 方块原样 / GUI 程序绘制）。"""
-    if spec.drawer is not None:
-        return ITEM_DRAWERS[spec.drawer]()
+    """按目标类型合成最终图（图标叠「+」/ 阶段缩放 / 方块原样 / GUI 程序绘制 / 专用画法）。"""
     if spec.kind == KIND_GUI:
         return draw_gui_background()
 
-    base = resolved.image if resolved.image is not None else make_placeholder()
+    base = DRAWERS[spec.drawer]() if spec.drawer is not None else resolved.image
+    if base is None:
+        base = make_placeholder()
     if spec.tint is not None:
         base = apply_tint(base, spec.tint)
     if spec.monochrome:
         # TECH §6.5 指定写法：L 通道取亮度再回 RGBA ⇒ R=G=B（色相 0），尺寸与 alpha 不变。
         base = base.convert("RGBA").convert("L").convert("RGBA")
+    if spec.hay_tone:
+        base = apply_hay_tone(base)
     if spec.kind == KIND_STAGE:
         return fit_bottom_center(base, spec.fit)
     if spec.add_plus:
@@ -719,6 +1059,10 @@ def print_listing(specs: tuple[Spec, ...]) -> None:
             chain = f"{chain} [tint]"
         if spec.monochrome:
             chain = f"{chain} [gray]"
+        if spec.hay_tone:
+            chain = f"{chain} [干草黄褐]"
+        if spec.drawer is not None:
+            chain = f"{chain} [专用画法]"
         print(f"{spec.kind:<6} {spec.rel_path:<46} {chain:<40} {spec.zh_name}")
 
 
@@ -728,8 +1072,10 @@ def build_parser() -> argparse.ArgumentParser:
         prog="gen_textures.py",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=(
-            "生成「农场风云 / Farmstorm」的 91 张占位材质（TECH §6.5 的 87 张 + FIX-5 的 4 张转换器作物侧面）：\n"
-            "22 张物品图标 + 56 张作物阶段 + 12 张方块（含转换器顶面与四个作物侧面）+ 1 张 176x166 GUI。\n"
+            "生成「农场风云 / Farmstorm」的 99 张材质（TECH §6.5 的 87 张 + FIX-5 的 4 张转换器作物侧面\n"
+            "+ V-23 的 4 张物品图标与 2 张方块 + v0.1.0 · F-164 的压缩麦顶 / 底 2 张）：\n"
+            "26 张物品图标 + 56 张作物阶段 + 16 张方块（含转换器顶面与四个作物侧面、压缩麦顶 / 底切面）\n"
+            "+ 1 张 176x166 GUI。\n"
             "原版贴图缺失时按候选链回退，最终回退为纯色占位色块，不中断整批生成。"
         ),
         epilog=(
@@ -765,13 +1111,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--additions",
         action="store_true",
-        help="只生成 0.0.3 追加里无源可转的 5 张（1 张程序绘制物品图标 + 4 张洋红占位），不读原版贴图；只需 --out",
+        help="只生成 0.0.3 追加里无源可转的 5 张（1 张程序绘制物品图标 + 4 张朋友的韭阶段贴图），不读原版贴图；只需 --out",
     )
     parser.add_argument(
         "--list",
         dest="list_items",
         action="store_true",
-        help="打印内置目标表（97 条：26 item + 56 stage + 14 block + 1 gui）后退出",
+        help="打印内置目标表（99 条：26 item + 56 stage + 16 block + 1 gui）后退出",
     )
     return parser
 
@@ -792,8 +1138,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
-def print_buckets(report: Report) -> None:
-    """按「原版命中 / 退回占位 / 找不到」三类打印清单（GUI 背景单列，程序绘制）。"""
+def print_buckets(report: Report, specs: tuple[Spec, ...]) -> None:
+    """按「原版命中 / 退回占位 / 找不到」三类打印清单（GUI 背景与专用画法单列）。"""
     for status in (STATUS_VANILLA, STATUS_SUBSTITUTE, STATUS_MISSING):
         entries = report.buckets[status]
         print(f"\n{status}：{len(entries)} 张")
@@ -802,14 +1148,17 @@ def print_buckets(report: Report) -> None:
                 print(f"  {rel_path:<48} <- {used}")
             else:
                 print(f"  {rel_path:<48} <- {used}（主源 {primary} 缺失）")
-    print("\n程序绘制（无原版来源）：%d 张 —— textures/gui/converter.png" % report.procedural)
+    print(f"\n程序绘制 / 源图重采样：{report.procedural} 张")
+    for spec in specs:
+        if spec.kind == KIND_GUI or spec.drawer is not None:
+            print(f"  {spec.rel_path:<48} {spec.zh_name}")
 
 
 def print_additions_summary(report: Report) -> None:
     """--additions 的小结：程序绘制几张 + 占位几张（不涉及原版贴图，故不分三类）。"""
-    print(f"\n程序绘制物品图标：{report.procedural} 张")
+    print(f"\n程序绘制贴图：{report.procedural} 张")
     placeholders = report.buckets[STATUS_MISSING]
-    print(f"洋红 #D81E8A 占位方块贴图：{len(placeholders)} 张（占位，非终稿）")
+    print(f"纯色占位贴图：{len(placeholders)} 张")
     for rel_path, _used, _primary in placeholders:
         print(f"  {rel_path:<48} 纯色占位")
 
@@ -870,7 +1219,7 @@ def main(argv: list[str] | None = None) -> int:
     if additions:
         print_additions_summary(report)
     else:
-        print_buckets(report)
+        print_buckets(report, specs)
     if args.dry_run:
         print(
             f"\n[dry-run] 共 {len(specs)} 条：将写入 {report.planned} 个，"

@@ -25,7 +25,10 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 让中英各自用自己的分隔符（「、」/ 「, 」）。这条沿革保留在 v0.0.1 的口径里（218 - 3 + 6 + 1 = 222）。
  *
  * <p>v0.1.0 的 F-139 再加 **11** 条 {@code farmstorm.configuration.*}（12 行 config 里第 10 行只改既有键的默认值），
- * 两份语言文件到 **310** 键、config 到 166；余下 5 条（{@code block} / {@code item} / 指令反馈两条 / 死亡消息一条）由 F-169 补齐到 315。
+ * 两份语言文件到 310 键、config 到 166；F-160 再加 **1** 条指令反馈 {@code command.farmstorm.farmlandlimit.set}
+ * （TECH §7.3），到 **311** 键；F-157 再加 **2** 条动作栏提示（{@code message.farmstorm.farmland.no_core}
+ * / {@code message.farmstorm.farmland.quota_full}，24 号 §6.3 的第 2、3 步），到 **313** 键；
+ * 余下 2 条（{@code block} / {@code item} 各 1）由 F-169 补齐到 315（299 + 16，TECH §9.4 的增量列）。
  *
  * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
  * 155 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
@@ -392,6 +395,13 @@ public final class ModLangProvider extends LanguageProvider {
                 "Radial launch speed of the melon slices (blocks/tick)");
         config(entries, "compressed.replaceOnlyAirAndFluid", "落地方块只替换空气与流体",
                 "Landing block replaces only air and fluids");
+        // ---- v0.1.0 的指令反馈（F-160 / TECH §7.3）：1 键，回显新额度 + 「本进程内有效、重启回 config 默认」，不带玩家名 ----
+        plain(entries, "command.farmstorm.farmlandlimit.set",
+                "耕地额度已设为 %s（本进程内有效，重启回 config 默认）",
+                "Farmland quota set to %s (effective in this process only; a restart falls back to the config default)");
+        // ---- v0.1.0 的 2 条动作栏提示（F-157 / 24 号 §6.3 的第 2、3 步）----
+        plain(entries, "message.farmstorm.farmland.no_core", "附近没有己方据点核心", "No allied outpost core nearby");
+        plain(entries, "message.farmstorm.farmland.quota_full", "耕地额度已满：%s/%s", "Farmland quota full: %s/%s");
         return List.copyOf(entries);
     }
 

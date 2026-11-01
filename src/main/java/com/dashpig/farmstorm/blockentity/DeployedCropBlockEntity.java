@@ -8,6 +8,7 @@ import com.dashpig.farmstorm.behavior.impl.FangTrapCactusTrap;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
+import com.dashpig.farmstorm.trap.TrapFifoIndex;
 import com.dashpig.farmstorm.util.DeployedOwnership;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -273,6 +274,9 @@ public class DeployedCropBlockEntity extends BlockEntity {
             Map<UUID, DeployCounter> ledger = ledgerOf(server);
             DeployCounter counter = ledger.get(placer.getUUID());
             ledger.put(placer.getUUID(), new DeployCounter(counter == null ? 1 : counter.count() + 1, now));
+            // F-149（D-115）：陷阱名额的反向索引在这里加项，与限流账本的上加同进同出（§5.4 第 4 步）。
+            TrapFifoIndex.of(server).record(server, placer.getUUID(), this.getBlockPos(), this.placedGameTime,
+                    this.kind);
             this.behavior().onDeployed(this);                             // 行为层的部署钩子只在服务端触发（HC-03）
         }
         this.setChanged();
@@ -333,6 +337,7 @@ public class DeployedCropBlockEntity extends BlockEntity {
     @Override
     public void setRemoved() {
         super.setRemoved();
+        this.releaseTrapSlot();
         if (this.ledgerReleased || this.ownerUuid == null || !(this.level instanceof ServerLevel server)) {
             return;
         }
@@ -343,6 +348,34 @@ public class DeployedCropBlockEntity extends BlockEntity {
             return;
         }
         ledger.put(this.ownerUuid, new DeployCounter(Math.max(0, counter.count() - 1), server.getGameTime()));
+    }
+
+    /**
+     * F-149（D-115）：方块的移除是账目的减项，与限流账本的下减同进同出（§5.4 第 4 步）。
+     *
+     * <p>{@code setRemoved} 不只在方块被移除时调：区块卸载与停服（{@code ServerLevel#unload →
+     * LevelChunk#clearAllBlockEntities}）也会调，那时方块还在原地、只是区块不 tick 了。所以这里**只在一个前提下**
+     * 摘账目——能拿到本区块、且能读到「该坐标已经不再是本地块」；拿不到区块就当「无法证明方块没了」，一律不动。
+     * 错判的方向决定代价：条目留错了有 {@code TrapFifoIndex} 的惰性校验兜底，删错了就是数据丢失
+     * （停服时那一轮落盘会把索引写成空表，重启后 FIFO 直接失效）。
+     *
+     * <p>区块用 {@code ServerChunkCache#getChunkNow} 取：它只查已加载的区块，不触发加载。
+     * 方块读 {@code LevelChunk#getBlockState}，不用 {@code BlockEntity#getBlockState()}（后者会缓存旧状态），
+     * 也不用 {@code Level#getBlockState}（区块不在时会触发加载）。
+     */
+    private void releaseTrapSlot() {
+        if (this.ownerUuid == null || !(this.level instanceof ServerLevel server)) {
+            return;
+        }
+        BlockPos pos = this.getBlockPos();
+        LevelChunk chunk = server.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null) {
+            return;                                                       // 区块不在内存：无法判定，账目留着
+        }
+        if (chunk.getBlockState(pos).getBlock() instanceof DeployedCropBlock block && block.kind() == this.kind) {
+            return;                                                       // 方块还在：这是卸载 / 停服，不是移除
+        }
+        TrapFifoIndex.of(server).remove(server, this.ownerUuid, pos);
     }
 
     public void markDetached() {

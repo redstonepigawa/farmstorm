@@ -1,7 +1,11 @@
 package com.dashpig.farmstorm.event;
 
 import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.command.FarmstormCommands;
 import com.dashpig.farmstorm.explosion.ExplosionQueue;
+import com.dashpig.farmstorm.farmland.FarmlandGuard;
+import com.dashpig.farmstorm.farmland.FarmlandLedger;
+import com.dashpig.farmstorm.trap.TrapImmunity;
 import com.dashpig.farmstorm.util.FarmstormTags;
 import com.dashpig.farmstorm.util.TempEnchantHandler;
 import java.util.List;
@@ -9,18 +13,24 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.util.TriState;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
  * game 总线事件（TECH §2 / §4.10 / F-15 ~ F-17）。
- * 只做四件事：玩家心跳与临时附魔自愈、登录 / 登出的创造模式对账、爆炸批处理、爆炸免疫拦截。
+ * 只做七件事：玩家心跳与临时附魔自愈、登录 / 登出的创造模式对账、爆炸批处理、爆炸免疫拦截、
+ * {@code /farmstorm} 指令树的注册（F-160）、锄地拦截（F-157）、耕地踩踏保护（F-158）。
  * 不注册任何方块实体 tick（F-15 ③），也不在客户端进入任何判定路径（HC-03）。
  */
 public final class FarmstormGameEvents {
@@ -49,6 +59,17 @@ public final class FarmstormGameEvents {
         gameBus.addListener(FarmstormGameEvents::onPlayerLoggedOut);
         gameBus.addListener(FarmstormGameEvents::onExplosionDetonate);
         gameBus.addListener(FarmstormGameEvents::onLevelTickPost);
+        gameBus.addListener(FarmstormGameEvents::onRegisterCommands);
+        gameBus.addListener(FarmstormGameEvents::onRightClickBlock);
+        gameBus.addListener(FarmstormGameEvents::onFarmlandTrample);
+    }
+
+    /**
+     * {@code /farmstorm farmlandlimit <value>} 指令树（F-160 / TECH §7.1）。
+     * Brigadier 指令树是运行期注册，不进任何 registry（TECH §2.3）；指令只在服务端注册。
+     */
+    private static void onRegisterCommands(RegisterCommandsEvent event) {
+        FarmstormCommands.register(event.getDispatcher());
     }
 
     /** 每 20 tick：临时附魔自愈（光环到期撤销也走这条）+ 可开关的心跳日志。 */
@@ -82,6 +103,7 @@ public final class FarmstormGameEvents {
         }
         Farmstorm.LOGGER.info("玩家登出：{}（{}）", player.getGameProfile().getName(), player.getUUID());
         restoreCreativeMode(player);
+        TrapImmunity.clear(player.getUUID());             // D-112 第 4 条：重连后陷阱免疫清零
     }
 
     /**
@@ -157,5 +179,56 @@ public final class FarmstormGameEvents {
     /** 当前心跳日志开关状态。 */
     public static boolean heartbeatLogging() {
         return heartbeatLogging;
+    }
+
+    /**
+     * 锄地拦截（F-157 / 24 号 §6.3）：顺序固定「先范围、后额度」，两种拒绝各发一条动作栏提示。
+     *
+     * <p>取消点选在 {@code RightClickBlock}：服务端在 {@code ServerPlayerGameMode#useItemOn} 抛本事件，
+     * 取消后该方法立刻返回，早于 {@code ItemStack#useOn}——改方块与 {@code hurtAndBreak} 都在那之后，
+     * 所以「取消之后既不产生耕地也不扣耐久」由调用顺序保证，不靠猜（反编译路径见证据 F-23B1 第 3 条）。
+     *
+     * <p>只有服务端判定（红线第 3 条）。客户端保留原版预测：服务端 {@code Level#playSound(Player, ...)}
+     * 把发声音的玩家本人排除在外，客户端若也不预测，成功锄地时锄头就没有音效。
+     */
+    private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getLevel() instanceof ServerLevel level) || !(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        BlockPos pos = event.getPos();
+        if (!FarmlandGuard.isTillAction(level, pos, event.getItemStack())) {
+            return;
+        }
+        FarmlandLedger ledger = FarmlandLedger.of(level);
+        FarmlandGuard.Verdict verdict = FarmlandGuard.check(level, player, pos);
+        if (verdict == FarmlandGuard.Verdict.ALLOW) {
+            // 同一刻记账：紧接着的下一次锄地读到的 used 已含这一块（TECH §6.3 第 4 步）
+            ledger.add(level, player, pos);
+            return;
+        }
+        event.setCanceled(true);
+        // 1.21 用 TriState 取代了原先的 Event.Result：DENY 对应 TriState.FALSE（24 号 §6.3 的待验证 ⑥）
+        event.setUseBlock(TriState.FALSE);
+        player.displayClientMessage(verdict == FarmlandGuard.Verdict.NO_CORE
+                ? Component.translatable(FarmlandGuard.MESSAGE_NO_CORE)
+                : Component.translatable(FarmlandGuard.MESSAGE_QUOTA_FULL,
+                        ledger.used(level, player), ledger.capacity(level, player)),
+                true);
+    }
+
+    /**
+     * 耕地踩踏保护（F-158 / D-120 第 3 项）：取消即不产生泥土。
+     *
+     * <p>这条事件可取消：{@code BlockEvent.FarmlandTrampleEvent} 实现 {@code ICancellableEvent}，
+     * 由 {@code CommonHooks#onFarmlandTrample} 在 {@code FarmBlock#fallOn} 的 {@code !level.isClientSide}
+     * 分支里抛出；取消后该处返回 false，{@code turnToDirt} 不再执行。因此不必走 TECH §6.4 的
+     * 「40 刻对账 + 恢复」兜底，也没有「踩坏的那一瞬闪一帧泥土」的代价。
+     *
+     * <p>失水退化不在这条链上（{@code FarmBlock#randomTick} 直接调 {@code turnToDirt}），范围内的耕地照常退化。
+     */
+    private static void onFarmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
+        if (event.getLevel() instanceof ServerLevel level && FarmlandGuard.protectsFromTrample(level, event.getPos())) {
+            event.setCanceled(true);
+        }
     }
 }

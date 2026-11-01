@@ -297,7 +297,7 @@
 - `24` §1 的四个待验证项已标在待办上：④（`RegisterCommandsEvent` 与 Brigadier 写法）、⑤（`SavedData` / `DimensionDataStorage#computeIfAbsent` 的工厂签名）、⑥（`RightClickBlock` 的取消语义是否足以「不产生耕地、不扣耐久」）、⑦（是否提供可取消的耕地踩踏事件）。四项都要求先写最小用例。
 - 零基础这件事已知：`FARMLAND` / `FarmlandBlock` / `turnToDirt` / `HoeItem` / `Tillable` / `BlockEvent` 在 `src/` 下 **0 命中**（RT-28），本阶段是全项目唯一「从零开一条链路」的部分。
 - 红线前提已确认：`grep -rn "GameRules.register" src/main/java` 为 0；`GameRule` 的唯一读点仍是 `explosion/FarmstormExplosion.java:109` 的 `RULE_MOBGRIEFING`；`CustomPacketPayload` 与 `@Mixin` 仍为 0。
-- 五个额度算例已抄在手边：单人默认 **0**、单人 2 个核心 **32**、单人指令 10 + 1 个核心 **26**、3 人队 3 个核心 **48**、3 人队指令 5 + 2 个核心 **62**（`23` §8.1）。
+- 五个额度算例已抄在手边：单人默认 **0**、单人 2 个核心 **32**、单人指令 10 + 1 个核心 **26**、3 人队 3 个核心 **48**、3 人队指令 10 + 2 个核心 **62**（`23` §8.1）。
 - 几何量已确认：核心区块 `(cx, cz)` 与目标区块 `(tx, tz)` 满足 `max(|tx − cx|, |tz − cz|) ≤ 1`；边界粒子是 48 × 48 格地面矩形的四条边、每 4 格一点、单圈 **48** 点、每 **40** 刻一轮。
 
 ### 4.2 本阶段目标

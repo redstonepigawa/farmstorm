@@ -4,6 +4,7 @@ import com.dashpig.farmstorm.behavior.DeployedKind;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.explosion.BlastRule;
+import com.dashpig.farmstorm.trap.TrapFifoIndex;
 import com.dashpig.farmstorm.util.CropProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -178,6 +179,11 @@ public class DeployedCropBlock extends BaseEntityBlock {
         // F-25 放置限流：拒绝发生在这里，因此物品既不消耗也不产生掉落。
         if (!DeployedCropBlockEntity.canDeploy(level, pos, ctx.getPlayer())) {
             return null;
+        }
+        // F-149（D-115）：陷阱名额满时先挤掉队首，再放行——挤出必须排在写入新方块之前，
+        // 而 getStateForPlacement 是唯一一处「判定早于扣物品」的位置（F-25 的注释同上）。
+        if (level instanceof ServerLevel server) {
+            TrapFifoIndex.makeRoom(server, ctx.getPlayer(), this.kind);
         }
         Direction facing = face == AttachFace.WALL ? clicked : Direction.NORTH;
         return this.defaultBlockState().setValue(FACE, face).setValue(FACING, facing).setValue(FLOATING, false);

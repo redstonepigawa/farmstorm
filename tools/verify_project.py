@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-r"""Farmstorm v0.1.0 静态验收器。
+r"""Farmstorm v0.1.1 静态验收器。
 
 期望值全部从上游文档现算，不手抄：
   - config 键集  <- docs/zh/01-DESIGN.md §3.8（117）+ docs/zh/12-TECH-0.0.2.md §8.1（22）
                    + docs/zh/18-TECH-0.0.3.md §8.1（v0.0.3 的 19 行，F-104）
-                   + docs/zh/24-TECH-0.1.0.md §8.1（v0.1.0 的 12 行，F-142），并与
-                   run/config/farmstorm-server.toml 逐键比对。两份 TECH 各含「改既有默认值」的行
-                   （v0.0.3 是 fang_trap_cactus 的三个键、v0.1.0 是 melon_grenade.horizontalJitter），
-                   键名与前面的清单重名，按集合去重后是 166 个键
+                   + docs/zh/24-TECH-0.1.0.md §8.1（v0.1.0 的 12 行，F-142）
+                   + docs/zh/30-TECH-0.1.1.md §4.1（v0.1.1 的 58 组 / 166 键，F-177），并与
+                   run/config/farmstorm-server.toml 逐键比对。18 / 24 / 30 号各含「改既有默认值」的行
+                   （v0.0.3 是 fang_trap_cactus 的三个键、v0.1.0 是 melon_grenade.horizontalJitter、
+                   v0.1.1 是 pumpkin_turret 的三行），键名与前面的清单重名，按集合去重后是
+                   167 个键，再扣掉本版删掉的 1 个键（`REMOVED_KEYS`，D-139）是 166 个键
   - 93 个注册 ID  <- docs/zh/24-TECH-0.1.0.md §2.1 的 v0.1.0 列逐类小计（12 类，相加 93）
 
 用法：python -X utf8 tools/verify_project.py [--root <仓库根>]
@@ -129,6 +131,66 @@ def expected_config_keys_v010(tech4: Path) -> tuple[list[str], list[str]]:
     return [k for _, k in fresh], [k for _, k in changed]
 
 
+# 本版从期望集里剔除的键（30 号 §2.3 的删键登记 / D-139：整组删 farmland）。
+# 只许在 main() 的并集表达式旁边扣一次——散成两处，下一个删键的人就会漏扣一处。
+REMOVED_KEYS = {"farmland.limitPerPlayer"}
+
+
+def expected_config_keys_v011(tech5: Path) -> tuple[list[str], int]:
+    """30-TECH §4.1 的 58 行数据表 →（`<组>.<键>` 列表，组数）。
+
+    表列是「序号 | 组 | 键数 | 键（逐键点名）| 标记」：组取第 2 列（嵌套组形如
+    `blast_carrot.nausea`），键取第 4 列反引号内的全部键名，拼成 `<组>.<键>`。行内的
+    「（**改** 1 → 3）」这类注解写在反引号外，由反引号解析天然跳过，不需要额外分支。
+    §4.1 里另有两张表（被删的那一组、新增键的三个属性）没有「序号」列，因此不构成数据行。
+
+    解析失败一律带（文件名 + 表行号）抛出：静默跳过会让期望集悄悄缩小，比报错更糟。
+    """
+    text = read(tech5)
+    head = re.search(r"^### 4\.1\b.*$", text, re.MULTILINE)
+    if not head:
+        seen = [f"第 {text[: m.start()].count(chr(10)) + 1} 行 {m.group(0)[:24]}"
+                for m in re.finditer(r"^### 4\.[^\n]*", text, re.MULTILINE)]
+        raise ValueError(f"{tech5.name}：找不到「### 4.1」的表格标题"
+                         f"（全文 {len(text.splitlines())} 行；现有的 4.x 标题：{seen or '无'}，表格格式变了？）")
+    base_line = text[:head.start()].count("\n") + 1
+    tail = re.search(r"^### 4\.2\b", text[head.start():], re.MULTILINE)
+    if not tail:
+        raise ValueError(f"{tech5.name}:{base_line}：§4.1 之后找不到「### 4.2」，无法界定表格范围")
+    rows: list[tuple[int, str, list[str]]] = []
+    for offset, line in enumerate(text[head.start():head.start() + tail.start()].splitlines()):
+        if not re.match(r"^\|\s*\d+\s*\|", line):
+            continue
+        lineno = base_line + offset
+        cols = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cols) != 5:
+            raise ValueError(f"{tech5.name}:{lineno}：§4.1 的数据行应 5 列（序号/组/键数/键/标记），"
+                             f"实际 {len(cols)} 列：{line.strip()[:70]}")
+        group = re.fullmatch(r"`([a-z][a-z0-9_]*(?:\.[a-z0-9_]+)*)`", cols[1])
+        if not group:
+            raise ValueError(f"{tech5.name}:{lineno}：§4.1 的「组」列应是单个反引号内的小写路径"
+                             f"（形如 `blast_carrot.nausea`），实际是 {cols[1]!r}")
+        keys = re.findall(r"`([A-Za-z0-9_]+)`", cols[3])
+        declared = cols[2].strip("*").strip()
+        if not declared.isdigit() or int(declared) != len(keys):
+            raise ValueError(f"{tech5.name}:{lineno}：§4.1「{group.group(1)}」的键数列是 {cols[2]!r}，"
+                             f"但「键」列只解析出 {len(keys)} 个反引号键名：{keys}")
+        rows.append((lineno, group.group(1), keys))
+    pairs = [f"{g}.{k}" for _, g, ks in rows for k in ks]
+    if len(rows) != 58:
+        raise ValueError(f"{tech5.name}:{base_line}：§4.1 从第 {base_line} 行起只解析出 {len(rows)} 个组"
+                         f"（前几个组行号 {[n for n, _, _ in rows][:6]}），文档口径是 58 组")
+    if len(pairs) != 166:
+        raise ValueError(f"{tech5.name}:{base_line}：§4.1 从第 {base_line} 行起的 {len(rows)} 组合计"
+                         f"{len(pairs)} 个键，文档口径是 166 键")
+    dup = sorted({k for k in pairs if pairs.count(k) > 1})
+    if dup:
+        where = [f"第 {n} 行（{g}）" for n, g, ks in rows if any(f"{g}.{k}" in dup for k in ks)]
+        raise ValueError(f"{tech5.name}:{base_line}：§4.1 解析出 {len(dup)} 个重复键名 {dup[:5]}"
+                         f"（相关行 {where[:5]}），组 + 键两列拼出的键集必须两两不同")
+    return pairs, len(rows)
+
+
 def toml_keys(text: str) -> set[str]:
     out: set[str] = set()
     section = ""
@@ -223,6 +285,7 @@ def main() -> int:
     tech = read(root / "docs/zh/12-TECH-0.0.2.md")
     tech3 = read(root / "docs/zh/18-TECH-0.0.3.md")
     tech4 = root / "docs/zh/24-TECH-0.1.0.md"
+    tech5 = root / "docs/zh/30-TECH-0.1.1.md"
     base = expected_config_keys(design)
     added = expected_config_keys_v002(tech)
     added3 = expected_config_keys_v003(tech3)
@@ -236,18 +299,29 @@ def main() -> int:
     except (ValueError, OSError) as exc:
         fail(f"24-TECH §8.1 解析失败，期望键集无法现算：{exc}")
         added4 = None
-    if added4 is None:
+    try:
+        added5, groups5 = expected_config_keys_v011(tech5)
+    except (ValueError, OSError) as exc:
+        fail(f"30-TECH §4.1 解析失败，期望键集无法现算：{exc}")
+        added5 = None
+    if added4 is None or added5 is None:
         exp_ok, exp = False, set()
     else:
         overlap = set(added3) & (set(base) | set(added))
         overlap4 = set(added4) & (set(base) | set(added) | set(added3))
-        exp_ok, exp = True, set(base) | set(added) | set(added3) | set(added4)
+        overlap5 = set(added5) & (set(base) | set(added) | set(added3) | set(added4))
+        union = set(base) | set(added) | set(added3) | set(added4) | set(added5)
+        # 已删键在并集旁边扣一次（REMOVED_KEYS 的唯一用处），不散落到解析函数里
+        exp_ok, exp = True, union - REMOVED_KEYS
+        print(f"  30-TECH §4.1：{groups5} 组 / {len(added5)} 键"
+              f"（v0.1.1 的 58 行数据表现算，其中 {len(overlap5)} 个键名已在前四份清单里）")
+        print(f"  剔除已删键 {len(REMOVED_KEYS)} 个：{'、'.join(sorted(REMOVED_KEYS))}")
         print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}"
               f" + 18-TECH §8.1 {len(added3)} 行"
-              f" + 24-TECH §8.1 {len(added4) + len(changed4)} 行（新 {len(added4)} + 改 {len(changed4)}）；"
-              f"其中 {len(overlap) + len(overlap4)} 行是改既有默认值、键名已在前几份清单里，"
-              f"按并集去重后 {len(exp)} = {len(base) + len(added)} + {len(added3) - len(overlap)}"
-              f" + {len(added4) - len(overlap4)}）")
+              f" + 24-TECH §8.1 {len(added4) + len(changed4)} 行（新 {len(added4)} + 改 {len(changed4)}）"
+              f" + 30-TECH §4.1 {len(added5)} 键；其中 24 / 18 号另有 {len(overlap) + len(overlap4)} 行是"
+              f"改既有默认值、§4.1 另有 {len(overlap5)} 个键名与前面的清单重名；"
+              f"按并集去重后 {len(union)}，再扣掉 {len(REMOVED_KEYS)} 个已删键 = {len(exp)}）")
     toml = root / "run/config/farmstorm-server.toml"
     if not exp_ok:
         print("  生成 toml 键数: 跳过（期望集没算出来，见上面的 [FAIL]）")

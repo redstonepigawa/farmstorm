@@ -2,7 +2,7 @@
 chcp 65001 >nul
 cd /d "%~dp0"
 echo ============================================
-echo   Farmstorm v0.0.1  -  启动专用服务器
+echo   Farmstorm v0.1.1  -  启动专用服务器
 echo ============================================
 echo.
 echo 进服后输入中文看不到？看 run\logs\latest.log。

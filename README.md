@@ -1,6 +1,6 @@
 # 农场风云 / Farmstorm
 
-Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· v0.0.4（已发布）· **v0.1.0（已实现并通过全量验收，发布准备就绪）**
+Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· v0.0.4（已发布）· **v0.1.0（当前发布版）**
 
 > 把原版农作物改造成 PvP 道具：同一种作物可以种在地里、扔出去、架在墙上、或者吃掉。
 > Vanilla crops re-armed as PvP gadgets: plant them, throw them, mount them, or eat them.

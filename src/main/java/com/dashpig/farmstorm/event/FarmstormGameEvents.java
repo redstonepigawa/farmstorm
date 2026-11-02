@@ -1,10 +1,10 @@
 package com.dashpig.farmstorm.event;
 
 import com.dashpig.farmstorm.Farmstorm;
-import com.dashpig.farmstorm.command.FarmstormCommands;
 import com.dashpig.farmstorm.explosion.ExplosionQueue;
 import com.dashpig.farmstorm.farmland.FarmlandGuard;
 import com.dashpig.farmstorm.farmland.FarmlandLedger;
+import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.trap.TrapImmunity;
 import com.dashpig.farmstorm.util.FarmstormTags;
 import com.dashpig.farmstorm.util.TempEnchantHandler;
@@ -14,23 +14,26 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.util.TriState;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * game 总线事件（TECH §2 / §4.10 / F-15 ~ F-17）。
  * 只做七件事：玩家心跳与临时附魔自愈、登录 / 登出的创造模式对账、爆炸批处理、爆炸免疫拦截、
- * {@code /farmstorm} 指令树的注册（F-160）、锄地拦截（F-157）、耕地踩踏保护（F-158）。
+ * 一次性启动闸（F-190 补建 / F-198 补票）、锄地拦截与写绑定（F-157 / F-194）、耕地踩踏保护（F-158）。
+ * 服务端 {@code /farmstorm} 指令树已在 F-197 整棵删除（D-140）；客户端 {@code /farmstorm hud} 是另一条注册，不在这里。
  * 不注册任何方块实体 tick（F-15 ③），也不在客户端进入任何判定路径（HC-03）。
  */
 public final class FarmstormGameEvents {
@@ -50,6 +53,9 @@ public final class FarmstormGameEvents {
      */
     private static final Map<UUID, GameType> CREATIVE_RESTORE = new ConcurrentHashMap<>();
 
+    /** F-190 / F-198 的一次性启动闸：补建与补票只在每个服务端实例的首个 tick 跑一次。 */
+    private static boolean startupDone;
+
     private FarmstormGameEvents() {}
 
     /** 由 {@code Farmstorm} 构造器在 mod 总线上注册到 {@code NeoForge.EVENT_BUS}。 */
@@ -59,17 +65,10 @@ public final class FarmstormGameEvents {
         gameBus.addListener(FarmstormGameEvents::onPlayerLoggedOut);
         gameBus.addListener(FarmstormGameEvents::onExplosionDetonate);
         gameBus.addListener(FarmstormGameEvents::onLevelTickPost);
-        gameBus.addListener(FarmstormGameEvents::onRegisterCommands);
+        gameBus.addListener(FarmstormGameEvents::onServerTickPost);
+        gameBus.addListener(FarmstormGameEvents::onServerStopping);
         gameBus.addListener(FarmstormGameEvents::onRightClickBlock);
         gameBus.addListener(FarmstormGameEvents::onFarmlandTrample);
-    }
-
-    /**
-     * {@code /farmstorm farmlandlimit <value>} 指令树（F-160 / TECH §7.1）。
-     * Brigadier 指令树是运行期注册，不进任何 registry（TECH §2.3）；指令只在服务端注册。
-     */
-    private static void onRegisterCommands(RegisterCommandsEvent event) {
-        FarmstormCommands.register(event.getDispatcher());
     }
 
     /** 每 20 tick：临时附魔自愈（光环到期撤销也走这条）+ 可开关的心跳日志。 */
@@ -132,6 +131,29 @@ public final class FarmstormGameEvents {
         if (event.getLevel() instanceof ServerLevel level) {
             ExplosionQueue.drain(level);
         }
+    }
+
+    /**
+     * 一次性启动闸（F-190 补建 + F-198 补票）：放在首个 {@code ServerTickEvent.Post} 而不是构造器里，
+     * 因为构造器阶段 {@link MinecraftServer} 还没就绪。
+     *
+     * <p>顺序照 F-198 要点 3：**先补票、后补绑定**——补建要用候选核的覆盖范围与空位，
+     * 先把票补上能让核所在的区块在补建那一刻已经处于 entity-ticking（与「先有核、后有田」的正常时序一致）。
+     */
+    private static void onServerTickPost(ServerTickEvent.Post event) {
+        if (startupDone) {
+            return;
+        }
+        startupDone = true;
+        MinecraftServer server = event.getServer();
+        CoreChunkTickets.restoreAll(server);
+        FarmlandLedger.get(server).backfill(server);
+    }
+
+    /** 停服：票不落盘，显式释放一遍；闸复位，让同一个 JVM 里换存档 / 重开服时补建照常再跑一次。 */
+    private static void onServerStopping(ServerStoppingEvent event) {
+        CoreChunkTickets.releaseAll(event.getServer());
+        startupDone = false;
     }
 
     /**
@@ -200,16 +222,17 @@ public final class FarmstormGameEvents {
             return;
         }
         FarmlandLedger ledger = FarmlandLedger.of(level);
-        FarmlandGuard.Verdict verdict = FarmlandGuard.check(level, player, pos);
-        if (verdict == FarmlandGuard.Verdict.ALLOW) {
-            // 同一刻记账：紧接着的下一次锄地读到的 used 已含这一块（TECH §6.3 第 4 步）
-            ledger.add(level, player, pos);
+        FarmlandGuard.Decision decision = FarmlandGuard.check(level, player, pos);
+        if (decision.verdict() == FarmlandGuard.Verdict.ALLOW && decision.core() != null) {
+            // F-194：同一 tick 内写绑定 + 记账 + 放耕地——紧接着的下一次锄地读到的 used 已含这一块，
+            // 而 /save-all 立刻就能在 NBT 里看到这条（30 号 §7 #16）。
+            ledger.bind(player.getUUID(), decision.core(), pos);
             return;
         }
         event.setCanceled(true);
         // 1.21 用 TriState 取代了原先的 Event.Result：DENY 对应 TriState.FALSE（24 号 §6.3 的待验证 ⑥）
         event.setUseBlock(TriState.FALSE);
-        player.displayClientMessage(verdict == FarmlandGuard.Verdict.NO_CORE
+        player.displayClientMessage(decision.verdict() == FarmlandGuard.Verdict.NO_CORE
                 ? Component.translatable(FarmlandGuard.MESSAGE_NO_CORE)
                 : Component.translatable(FarmlandGuard.MESSAGE_QUOTA_FULL,
                         ledger.used(level, player), ledger.capacity(level, player)),

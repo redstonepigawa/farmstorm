@@ -224,8 +224,6 @@ public final class FarmstormConfig {
     public static ModConfigSpec.IntValue trapDustIntervalTicks;
     public static ModConfigSpec.IntValue trapMaxTrapsPerPlayer;
 
-    public static ModConfigSpec.IntValue farmlandLimitPerPlayer;
-
     public static ModConfigSpec.IntValue outpostCoreFarmlandBonus;
     public static ModConfigSpec.IntValue outpostCoreMaxPerPlayer;
     public static ModConfigSpec.IntValue outpostCoreBoundaryParticleIntervalTicks;
@@ -906,12 +904,7 @@ public final class FarmstormConfig {
                 .defineInRange("maxTrapsPerPlayer", 16, 1, 128);
         b.pop();
 
-        b.push("farmland");
-        farmlandLimitPerPlayer = b.comment("耕地额度的服务端默认值，0 = 开局谁也耕不了地；范围 0 ~ 4096")
-                .translation(tr("farmland.limitPerPlayer"))
-                .defineInRange("limitPerPlayer", 0, 0, 4096);
-        b.pop();
-
+        // F-192 / D-139 / A-42：farmland 整组已删除（额度口径改为 farmlandBonus × 己方核数，不再有 base 项）。
         b.push("outpost_core");
         outpostCoreFarmlandBonus = b.comment("每个据点核心增加的耕地上限；范围 0 ~ 1024。"
                 + "本键同时是每核容量与队伍额度基数（额度 = 本键 × 己方核数，RT-33）")

@@ -1,17 +1,20 @@
 package com.dashpig.farmstorm.blockentity;
 
+import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import com.dashpig.farmstorm.config.FarmstormConfig;
+import com.dashpig.farmstorm.farmland.FarmlandGuard;
 import com.dashpig.farmstorm.farmland.FarmlandLedger;
+import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.outpost.OutpostCoreIndex;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.util.DeployedOwnership;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -61,6 +64,9 @@ public class OutpostCoreBlockEntity extends BlockEntity {
     /** 贴地而不画在核心高度：核心方块 y + 0.1（23 号 §8.7 的高度行）。 */
     private static final double RING_Y_OFFSET = 0.1;
 
+    /** tick 证据的日志节流：每 30 轮一条（interval = 40 刻 ⇒ 约 60 秒一条）。 */
+    private static final int TICK_LOG_ROUNDS = 30;
+
     /** 两档衰减（23 号 §8.7）：矩形内的玩家每轮满点；矩形外扩 16 格的余量带每 4 轮 1 次；再远不发。 */
     private static final double RING_MARGIN = 16.0;
     private static final int RING_MARGIN_DECIMATION = 4;
@@ -97,7 +103,10 @@ public class OutpostCoreBlockEntity extends BlockEntity {
         this.ownerName = placer.getGameProfile().getName();
         this.placedGameTime = placer.level().getGameTime();
         if (this.level instanceof ServerLevel server) {
-            OutpostCoreIndex.of(server).record(server, placer, this.getBlockPos());
+            // F-189 / A-39：同一个变量、同一个方法、同一个 tick ⇒ 方块实体与索引里的比较键不可能漂移。
+            OutpostCoreIndex.of(server).record(server, placer, this.getBlockPos(), this.placedGameTime);
+            // F-198：核所在的那 1 个区块上一张自有票，区块卸载后方块实体照样 tick（A-43 的 tick 面）。
+            CoreChunkTickets.request(server, this.getBlockPos());
         }
         this.setChanged();
     }
@@ -166,6 +175,8 @@ public class OutpostCoreBlockEntity extends BlockEntity {
     public void release() {
         if (this.level instanceof ServerLevel server && this.ownerUuid != null) {
             OutpostCoreIndex.of(server).remove(server, this.ownerUuid, this.getBlockPos());
+            // F-198：票在这里释放（onRemove 与 settleOnRemoval 末尾共用这一处，幂等）。
+            CoreChunkTickets.release(server, this.getBlockPos());
         }
     }
 
@@ -189,6 +200,11 @@ public class OutpostCoreBlockEntity extends BlockEntity {
             return;
         }
         core.emitBoundaryRing(server, pos, now, interval);
+        // F-198 的可观测面：每 30 轮（interval = 40 刻 ⇒ 1200 刻 ≈ 60 秒）一条，证明「无玩家靠近时方块实体仍在 tick」。
+        long round = Math.floorDiv(now + Math.floorMod(pos.hashCode(), interval), interval);
+        if (Math.floorMod(round, TICK_LOG_ROUNDS) == 0) {
+            Farmstorm.LOGGER.info("核心 tick 轮次 {}：{}（间隔 {} 刻，区块票 farmstorm_core）", round, pos, interval);
+        }
     }
 
     /**
@@ -309,8 +325,12 @@ public class OutpostCoreBlockEntity extends BlockEntity {
      * 错判方向的代价不对称：条目留错了有 {@link FarmlandLedger} 的惰性校验兜底，删错了 / 铲错了是数据丢失
      * （与 {@code DeployedCropBlockEntity:366-379} 同一取舍）。
      *
-     * <p>顺序照 24 号 §6.5 的顺序行：先把「要转哪些坐标」算完（{@link #doomedFarmland}），再动世界，
-     * 避免边遍历边改账本。转完从索引摘掉这一条，{@code +16} 当场失效（D-122 补充）。
+     * <p><b>F-196 / D-136：先迁移、三支降级。</b>只处理**本核名下**的绑定（{@code bindingsOf(dead)}），
+     * 不再按「范围内己方账上的耕地」全扫——那正是 bug 1（拆 A 把 B 的田也铲了）的症状。
+     * 三个出口：① 改绑到接替核；② {@code setBlock(DIRT)} + 摘绑定（迁不动、区块在内存、方块还是耕地）；
+     * ③ **只摘绑定、世界不动**（迁不动且区块未加载——A-35：降级为「失去保护」，不是「变泥土」）。
+     * 先把三份集合算完再动世界，避免边遍历边改账本；**不为清算加载区块**（全程 {@code getChunkNow}）。
+     * 不通知耕地主、不掉落、不给补偿（D-136 补充）。转完从索引摘掉这一条，{@code +16} 当场失效。
      */
     private void settleOnRemoval() {
         if (!(this.level instanceof ServerLevel server) || this.ownerUuid == null) {
@@ -324,65 +344,49 @@ public class OutpostCoreBlockEntity extends BlockEntity {
         if (chunk.getBlockState(corePos).getBlock() instanceof OutpostCoreBlock) {
             return;                                       // 方块还在原地：这是区块卸载 / 停服，不是移除
         }
-        UUID ownerUuid = this.ownerUuid;
         FarmlandLedger ledger = FarmlandLedger.of(server);
-        List<BlockPos> doomed = doomedFarmland(server, ledger, corePos, ownerUuid);
-        for (BlockPos pos : doomed) {
+        FarmlandLedger.CoreKey dead = new FarmlandLedger.CoreKey(server.dimension().location(), corePos);
+        List<FarmlandLedger.Binding> mine = ledger.bindingsOf(dead);
+        mine.sort(Comparator.comparing(FarmlandLedger.Binding::pos));   // 不依赖 byCore 的迭代顺序
+        Map<BlockPos, FarmlandLedger.CoreKey> rebind = new LinkedHashMap<>();
+        List<BlockPos> toDirt = new ArrayList<>();
+        List<BlockPos> unbindOnly = new ArrayList<>();
+        Map<FarmlandLedger.CoreKey, Integer> pending = new HashMap<>();
+        for (FarmlandLedger.Binding binding : mine) {
+            // 候选：覆盖该耕地 ∧ 与**耕地主**同盟 ∧ 仍有空位（含本次已规划出去的名额），且不是正在被拆的这个核
+            FarmlandLedger.CoreKey target = FarmlandGuard.selectCore(server,
+                    FarmlandLedger.ownerKey(server, binding.owner()), binding.pos(), dead, pending);
+            if (target != null) {
+                rebind.put(binding.pos(), target);
+                pending.merge(target, 1, Integer::sum);
+                continue;
+            }
+            LevelChunk farmlandChunk = server.getChunkSource()
+                    .getChunkNow(binding.pos().getX() >> 4, binding.pos().getZ() >> 4);
+            if (farmlandChunk == null) {
+                unbindOnly.add(binding.pos());             // A-35：迁不动 + 区块未加载 ⇒ 只摘绑定，世界不动
+                Farmstorm.LOGGER.info("迁移失败且区块未加载：只摘绑定 {}", binding.pos());
+            } else if (!farmlandChunk.getBlockState(binding.pos()).is(Blocks.FARMLAND)) {
+                unbindOnly.add(binding.pos());             // B-21：那一格早已不是耕地 ⇒ 摘绑定，不动世界
+                Farmstorm.LOGGER.info("迁移失败且地块已不是耕地：只摘绑定 {}", binding.pos());
+            } else {
+                toDirt.add(binding.pos());                 // 迁不动 + 看得见 ⇒ 变泥土（D-136）
+            }
+        }
+        // 先算完集合，再动世界（沿用 24 号 §6.5 的既有理由：避免边遍历边改账本）
+        for (Map.Entry<BlockPos, FarmlandLedger.CoreKey> entry : rebind.entrySet()) {
+            ledger.migrate(entry.getKey(), entry.getValue());
+        }
+        for (BlockPos pos : toDirt) {
             server.setBlock(pos, Blocks.DIRT.defaultBlockState(), Block.UPDATE_ALL);
             ledger.remove(pos);
+        }
+        for (BlockPos pos : unbindOnly) {
+            ledger.remove(pos);                            // 只摘账，不碰方块
         }
         this.release();
     }
 
-    /**
-     * 先算完「要转哪些坐标」：只遍历账本里**己方**名下的坐标，不做全范围扫描（D-120 补充项——
-     * 扫描会把范围内但不在账上的耕地，也就是别人开垦的那几块，一起铲掉）。
-     *
-     * <p>「己方」的两半（D-120 第 5 项：放置者本人 + 队友）分两路查，因为两半在离线时不一样：
-     * <ul>
-     *   <li><b>归属者本人</b>：按 UUID 查账本（{@code ownedBy(ServerLevel, UUID)}），**离线也查得到** ——
-     *       敌人趁他不在线来拆核，他自己名下那几块田照样得转泥土；</li>
-     *   <li><b>队友</b>：必须在线。队伍关系在判定的那一刻由 {@code TeamResolver} 实时解析（C-9），离线成员
-     *       解析不出队伍，这是本机制的必然边界：队友不在线时，他名下那几块田这一轮保持耕地。</li>
-     * </ul>
-     * 两路结果用 {@link LinkedHashSet} 收拢：同一块田被两个人各记过一次也只铲一次。
-     *
-     * <p>三个条件同时成立才收进结果集（24 号 §6.5 的判定行）：
-     * ① 仍在该核心的 3 × 3 内；② 方块仍是 {@code minecraft:farmland}；③ 账本归属者是核心归属者本人或其队友。
-     */
-    private List<BlockPos> doomedFarmland(ServerLevel server, FarmlandLedger ledger, BlockPos corePos, UUID ownerUuid) {
-        Set<BlockPos> doomed = new LinkedHashSet<>();
-        collectFarmland(server, ledger.ownedBy(server, ownerUuid), corePos, doomed);
-        for (ServerPlayer candidate : server.players()) {
-            if (candidate.getUUID().equals(ownerUuid)) {
-                continue;                                 // 本人已按 UUID 查过，不必再来一遍
-            }
-            if (!DeployedOwnership.isAlly(server, ownerUuid, this.ownerName, candidate)) {
-                continue;                                 // ③ 只认队友；离线队友解析不出队伍（见方法注释）
-            }
-            collectFarmland(server, ledger.ownedBy(server, candidate), corePos, doomed);
-        }
-        return new ArrayList<>(doomed);
-    }
-
-    /** 两路账共用的筛选：① 在核心 3 × 3 内、② 方块仍是 farmland（区块不在内存则不动它）。 */
-    private static void collectFarmland(ServerLevel server, List<BlockPos> positions, BlockPos corePos, Set<BlockPos> doomed) {
-        for (BlockPos pos : positions) {
-            if (!inRange(corePos, pos)) {
-                continue;
-            }
-            if (!isFarmlandLoaded(server, pos)) {
-                continue;
-            }
-            doomed.add(pos);
-        }
-    }
-
-    /** ② 的取值：只读**已在内存里**的区块，不触发加载（理由见 {@link #settleOnRemoval()}）。 */
-    private static boolean isFarmlandLoaded(ServerLevel server, BlockPos pos) {
-        LevelChunk chunk = server.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-        return chunk != null && chunk.getBlockState(pos).is(Blocks.FARMLAND);
-    }
 
     /**
      * 方块实体被移除：先过一次性闸，再由 {@link #settleOnRemoval()} 自己判「真移除 / 卸载」。

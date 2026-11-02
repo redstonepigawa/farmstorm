@@ -10,9 +10,9 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 语言文件（TECH §7）：zh_cn 与 en_us 各 **299** 键（v0.0.3 口径）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
- * 不存在「两份键各自维护」的可能。**条目构成（v0.1.0 实测，改表时必须同步本段）**：
- * 32 item + 26 block + 4 effect + 3 subtitles + 167 config + 36 advancement + 6 death
- * + 16 tooltip + 13 entity + 8 gui + 1 container + 1 itemGroup + 1 command + 2 message = **316**。
+ * 不存在「两份键各自维护」的可能。**条目构成（v0.1.1 / P29 实测，改表时必须同步本段）**：
+ * 32 item + 26 block + 4 effect + 3 subtitles + 166 config + 36 advancement + 6 death
+ * + 16 tooltip + 13 entity + 8 gui + 1 container + 1 itemGroup + 2 message = **314**。
  *
  * <p>沿革：v0.0.1 是 222 键（22/20/9/1/1/8/16/4/24/117），v0.0.2 收到 263，
  * v0.0.3 收到 299（其中 16 条 `farmstorm.configuration.*` 由 F-132 的 runData 落地、
@@ -25,12 +25,13 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 让中英各自用自己的分隔符（「、」/ 「, 」）。这条沿革保留在 v0.0.1 的口径里（218 - 3 + 6 + 1 = 222）。
  *
  * <p>v0.1.0 的 F-139 再加 **11** 条 {@code farmstorm.configuration.*}（12 行 config 里第 10 行只改既有键的默认值），
- * 两份语言文件到 310 键、config 到 166；F-160 再加 **1** 条指令反馈 {@code command.farmstorm.farmlandlimit.set}
- * （TECH §7.3），到 **311** 键；F-157 再加 **2** 条动作栏提示（{@code message.farmstorm.farmland.no_core}
+ * 到 **311** 键（TECH §7.3）；F-157 再加 **2** 条动作栏提示（{@code message.farmstorm.farmland.no_core}
  * / {@code message.farmstorm.farmland.quota_full}，24 号 §6.3 的第 2、3 步），到 **313** 键；
  * F-169 再加 **2** 条（{@code block.farmstorm.outpost_core} / {@code item.farmstorm.outpost_core}），
  * 到 **315** 键（299 + 16，TECH §9.4 的增量列，中英键集逐字相同）。
  * v0.1.1 的 F-182 再加 **1** 条（{@code pumpkin_turret.bulletSpeed}，29 号 D-129），到 **316** 键。
+ * v0.1.1 的 F-192 / F-197 再 **−2**：{@code farmstorm.configuration.farmland.limitPerPlayer} 随
+ * {@code farmland} 整组删除、指令反馈键随整棵服务端指令树删除，到 **314** 键。
  *
  * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
  * 155 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
@@ -392,8 +393,6 @@ public final class ModLangProvider extends LanguageProvider {
                 "Ticks between trap dust bursts (100 ticks = 5 s)");
         config(entries, "trap.maxTrapsPerPlayer", "每玩家陷阱名额（第 N+1 个挤掉最早的一个）",
                 "Traps allowed per player (the next one evicts the oldest)");
-        config(entries, "farmland.limitPerPlayer", "耕地额度的服务端默认值（0 = 开局谁也耕不了地）",
-                "Server-side default farmland quota (0 = nobody can till at first)");
         config(entries, "outpost_core.farmlandBonus", "每个据点核心增加的耕地上限", "Farmland quota added per outpost core");
         config(entries, "outpost_core.maxPerPlayer", "每玩家可放置的据点核心数", "Outpost cores each player may place");
         config(entries, "outpost_core.boundaryParticleIntervalTicks", "边界粒子刷新间隔（刻，40 刻 = 2 秒）",
@@ -402,10 +401,6 @@ public final class ModLangProvider extends LanguageProvider {
                 "Radial launch speed of the melon slices (blocks/tick)");
         config(entries, "compressed.replaceOnlyAirAndFluid", "落地方块只替换空气与流体",
                 "Landing block replaces only air and fluids");
-        // ---- v0.1.0 的指令反馈（F-160 / TECH §7.3）：1 键，回显新额度 + 「本进程内有效、重启回 config 默认」，不带玩家名 ----
-        plain(entries, "command.farmstorm.farmlandlimit.set",
-                "耕地额度已设为 %s（本进程内有效，重启回 config 默认）",
-                "Farmland quota set to %s (effective in this process only; a restart falls back to the config default)");
         // ---- v0.1.0 的 2 条动作栏提示（F-157 / 24 号 §6.3 的第 2、3 步）----
         plain(entries, "message.farmstorm.farmland.no_core", "附近没有己方据点核心", "No allied outpost core nearby");
         plain(entries, "message.farmstorm.farmland.quota_full", "耕地额度已满：%s/%s", "Farmland quota full: %s/%s");

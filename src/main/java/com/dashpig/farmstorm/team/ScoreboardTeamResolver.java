@@ -24,9 +24,21 @@ public final class ScoreboardTeamResolver implements TeamResolver {
         return team == null ? Optional.empty() : Optional.of(team.getName());
     }
 
+    /** 纯委托（F-187）：唯一实现是下面的 Owner × Owner 重载。 */
     @Override
     public boolean isAlly(ServerLevel level, Owner owner, Player target) {
-        if (owner.uuid().equals(target.getUUID())) {
+        return isAlly(level, owner, new Owner(target.getUUID(), target.getScoreboardName()));
+    }
+
+    /**
+     * 己方判定的唯一实现（F-187 / D-138）：两侧都只吃 UUID + 名字，因此 {@code target} 离线也判得出。
+     *
+     * <p>逻辑与原 Player 版逐条等价——原版用 {@code Entity#getTeam()}，它的实现就是
+     * {@code scoreboard.getPlayersTeam(getScoreboardName())}，与 {@link #teamName} 同一个查询。
+     */
+    @Override
+    public boolean isAlly(ServerLevel level, Owner owner, Owner target) {
+        if (owner.uuid().equals(target.uuid())) {
             return true;                                  // 部署者本人永远免疫自家陷阱
         }
         Optional<String> ownerTeamName = teamName(level, owner);
@@ -35,7 +47,7 @@ public final class ScoreboardTeamResolver implements TeamResolver {
             // 只在服主显式改成 public 时成立，默认为 self（其余玩家全部敌对）。
             return FALLBACK_PUBLIC.equals(FarmstormConfig.untamedFallback());
         }
-        PlayerTeam targetTeam = target.getTeam();          // 1.21：Entity#getTeam()
-        return targetTeam != null && ownerTeamName.get().equals(targetTeam.getName());
+        Optional<String> targetTeamName = teamName(level, target);
+        return targetTeamName.isPresent() && ownerTeamName.get().equals(targetTeamName.get());
     }
 }

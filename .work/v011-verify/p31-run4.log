@@ -1,0 +1,88 @@
+[03Nov2026 02:34:19.671] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.213, --fml.neoFormVersion, 20240808.144430]
+[03Nov2026 02:34:19.674] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Oracle Corporation OpenJDK 64-Bit Server VM 21.0.2+13-58
+[03Nov2026 02:34:19.675] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.2 by Oracle Corporation; OS Windows 11 arch amd64 version 10.0
+[03Nov2026 02:34:19.756] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[03Nov2026 02:34:19.788] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/D:/project_farm/.tools/gradle-home/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[03Nov2026 02:34:20.042] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[03Nov2026 02:34:20.043] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Farmstorm 0.1.1 (farmstorm)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.213 (neoforge)
+[03Nov2026 02:34:20.696] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, .]
+[03Nov2026 02:34:21.291] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[03Nov2026 02:34:21.325] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_Processor, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[03Nov2026 02:34:21.345] [main/WARN] [oshi.util.platform.windows.WmiQueryHandler/]: COM exception querying Win32_PhysicalMemory, which might not be on your system. Will not attempt to query it again. Error was -2147217405: (HRESULT: 80041003)
+[03Nov2026 02:34:21.741] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.0).
+[03Nov2026 02:34:25.940] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[03Nov2026 02:34:25.942] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[03Nov2026 02:34:25.944] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[03Nov2026 02:34:25.945] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[03Nov2026 02:34:25.946] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[03Nov2026 02:34:25.994] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.213, for MC 1.21.1
+[03Nov2026 02:34:26.043] [modloading-worker-0/INFO] [farmstorm/]: 自检 chebyshev(3,1,3)=3.0（期望 3）→ OK
+[03Nov2026 02:34:26.044] [modloading-worker-0/INFO] [farmstorm/]: 自检 euclidean(3,4,0)=5.0（期望 5.0）→ OK
+[03Nov2026 02:34:26.044] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果权重和=1000（期望 1000，即 config 层百分比和 100）→ OK
+[03Nov2026 02:34:26.045] [modloading-worker-0/INFO] [farmstorm/]: 自检 作物 22 种：投掷型 12 / 部署型 7 / 食用型 3；破障类 2 → OK
+[03Nov2026 02:34:26.045] [modloading-worker-0/INFO] [farmstorm/]: 自检 幸运浆果池 19 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ OK
+[03Nov2026 02:34:26.046] [modloading-worker-0/INFO] [farmstorm/]: 自检 注册对象 93 个：items 32 / blocks 26 / block_entities 7 / entity_types 13 / mob_effects 4 / sound_events 3 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 3 / data_components 1 / menu_types 1 → OK
+[03Nov2026 02:34:26.046] [modloading-worker-0/INFO] [farmstorm/]: Farmstorm loading
+[03Nov2026 02:34:26.247] [modloading-sync-worker/INFO] [farmstorm/]: 自检 网络包注册 farmstorm:core_list（版本 1，S2C 只读，MAX_CORES 64）→ OK
+[03Nov2026 02:34:26.293] [main/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[03Nov2026 02:34:26.403] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/assets/.mcassetsroot' uses unexpected schema
+[03Nov2026 02:34:26.403] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/D:/project_farm/build/moddev/artifacts/neoforge-21.1.213.jar%23125!/data/.mcassetsroot' uses unexpected schema
+[03Nov2026 02:34:27.245] [main/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1319 recipes
+[03Nov2026 02:34:27.370] [main/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1417 advancements
+[03Nov2026 02:34:27.372] [main/INFO] [farmstorm/]: Converter recipe cache invalidated (generation 1)
+[03Nov2026 02:34:28.218] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting minecraft server version 1.21.1
+[03Nov2026 02:34:28.219] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Loading properties
+[03Nov2026 02:34:28.219] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Default game type: SURVIVAL
+[03Nov2026 02:34:28.219] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[03Nov2026 02:34:28.259] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting Minecraft server on *:25565
+[03Nov2026 02:34:28.298] [Server thread/INFO] [net.minecraft.server.network.ServerConnectionListener/]: Using default channel type
+[03Nov2026 02:34:28.346] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[03Nov2026 02:34:28.346] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: The server will make no attempt to authenticate usernames. Beware.
+[03Nov2026 02:34:28.347] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[03Nov2026 02:34:28.347] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: To change this, set "online-mode" to "true" in the server.properties file.
+[03Nov2026 02:34:28.373] [Server thread/WARN] [net.neoforged.fml.config.ConfigTracker/CONFIG]: Configuration file D:\project_farm\run-p31\config\farmstorm-server.toml is not correct. Correcting
+[03Nov2026 02:34:28.390] [Server thread/INFO] [farmstorm/]: bake() 派生快照：molotov.fireChance=85.0%（余下 15.0% 归岩浆块）；wild_hunter 加成 移速 30.0% / 攻速 30.0% / 攻击 40.0%；爆炸抗性阈值 6.0 / 6.0；无队伍降级 self
+[03Nov2026 02:34:28.413] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Preparing level "world"
+[03Nov2026 02:34:33.348] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[03Nov2026 02:34:33.614] [worldgen/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[03Nov2026 02:34:33.739] [Server thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 390 ms
+[03Nov2026 02:34:33.739] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (5.375s)! For help, type "help"
+[03Nov2026 02:34:33.739] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting remote control listener
+[03Nov2026 02:34:33.741] [Server thread/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Listener started
+[03Nov2026 02:34:33.741] [Server thread/INFO] [net.minecraft.server.rcon.thread.RconThread/]: RCON running on 0.0.0.0:25575
+[03Nov2026 02:34:33.766] [Server thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
+[03Nov2026 02:34:33.771] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[03Nov2026 02:34:33.773] [Server thread/INFO] [farmstorm/]: 自检 部署行为 BLAST_CARROT → BlastCarrotTrap
+[03Nov2026 02:34:33.773] [Server thread/INFO] [farmstorm/]: 自检 部署行为 FANG_TRAP_CACTUS → FangTrapCactusTrap
+[03Nov2026 02:34:33.773] [Server thread/INFO] [farmstorm/]: 自检 部署行为 PUMPKIN_TURRET → PumpkinTurret
+[03Nov2026 02:34:33.773] [Server thread/INFO] [farmstorm/]: 自检 部署行为 AWAKENED_TORCHFLOWER → TorchflowerAura
+[03Nov2026 02:34:33.773] [Server thread/INFO] [farmstorm/]: 自检 部署行为 AWAKENED_PITCHER_PLANT → PitcherPlantAura
+[03Nov2026 02:34:33.774] [Server thread/INFO] [farmstorm/]: 自检 部署行为 ZANGIEF_CANE → ZangiefCaneTrap
+[03Nov2026 02:34:33.774] [Server thread/INFO] [farmstorm/]: 自检 部署行为 POINT_DEFENSE_FUNGUS → PointDefenseFungusBehavior
+[03Nov2026 02:34:33.774] [Server thread/INFO] [farmstorm/]: 自检 部署行为 VIBRATION_BEAN → VibrationBeanTrap
+[03Nov2026 02:34:33.815] [Server thread/INFO] [farmstorm/]: 核心区块票补票：0 张（farmstorm_core，distance=1，来源 OutpostCoreIndex）
+[03Nov2026 02:34:33.820] [Server thread/INFO] [farmstorm/]: 耕地补建：绑定 0 块 / 保持未绑定 4 块（老档共 4 块，按 BlockPos 全序）
+[03Nov2026 02:34:33.821] [Server thread/INFO] [farmstorm/]: 耕地绑定指纹 384b76a690205bf7（16 条）
+[03Nov2026 02:34:33.821] [Server thread/INFO] [farmstorm/]: 反查集合 16 条
+[03Nov2026 02:34:33.821] [Server thread/INFO] [farmstorm/]: 核心比较键指纹 e3b0c44298fc1c14（0 条）
+[03Nov2026 02:34:34.143] [RCON Listener #1/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Client /127.0.0.1 started
+[03Nov2026 02:34:34.151] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Rcon: Stopping the server]
+[03Nov2026 02:34:34.153] [RCON Client /127.0.0.1 #2/INFO] [net.minecraft.server.rcon.thread.RconClient/]: Thread RCON Client /127.0.0.1 shutting down
+[03Nov2026 02:34:34.177] [Server thread/INFO] [farmstorm/]: 核心区块票停服释放：0 张（farmstorm_core，distance=1）
+[03Nov2026 02:34:34.177] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[03Nov2026 02:34:34.178] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[03Nov2026 02:34:34.178] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[03Nov2026 02:34:34.198] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[03Nov2026 02:34:34.214] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[03Nov2026 02:34:34.218] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[03Nov2026 02:34:34.227] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[03Nov2026 02:34:34.227] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[03Nov2026 02:34:34.227] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[03Nov2026 02:34:34.227] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved
+[03Nov2026 02:34:34.247] [Server thread/INFO] [net.minecraft.server.rcon.thread.GenericThread/]: Thread RCON Listener stopped

@@ -1,0 +1,3 @@
+/op ALICE
+/give ALICE farmstorm:outpost_core 4
+/give ALICE minecraft:iron_hoe 1

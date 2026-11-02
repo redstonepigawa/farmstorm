@@ -52,8 +52,9 @@
 | 源图 | `C:\Users\DASHpig\Downloads\wild_apple_64x64.png` —— **6,946 B / 64×64**，在位 |
 | 入库图现状 | `src\main\resources\assets\farmstorm\textures\item\wild_apple.png` = **571 B / 16×16**（带 33 px 的 `#3FA34D` 绿十字） |
 | 生成器锚点（实测，行号可能与文档略有偏移） | `:59 TEXTURE_SIZE=16`、`:154 WILD_APPLE_SOURCE`（现指桌面 `2797B56F...png`）、`:155` 环境变量名、`:180 add_plus`、`:275 NO_PLUS_ICONS`、`:407 add_plus=`、`:546 build_marker`、`:612 compose_icon`、`:843 wild_apple_source`、`:849 wild_apple_grid`、`:890/895 draw_wild_apple`、`:974-975`、`:982 expected_size`、`:1127 marker`、`:1141`、`:1152` |
-| lang 现状 | 两份各 **315** 键（`src/generated/resources/assets/farmstorm/lang/{zh_cn,en_us}.json`），键集相等 |
+| lang 现状（P26 复核） | 两份各 **315** 键（`src/generated/resources/assets/farmstorm/lang/{zh_cn,en_us}.json`），键集相等 |
 | lang 生成方式 | `datagen/ModLangProvider.java` 里的 `.translation(key, zh, en)`，跑 `.tools\gw.cmd runData -PfsRunDir=run-p27` 重生成 |
+| **实测更正（P26 复核）** | 主 toml 的 `[pumpkin_turret]` 段现在是 **4 键**（`targetRadius` / `projectileDamage` / `knockbackLevel` / `fireIntervalTicks`）——文档与本文早先写的「3 键」是错的（30 号 §4.1 第 15 行本就写「4 → 5」）。本 Phase 之后应为 **5 键** |
 | 起服验配置（推荐做法） | 复制 `run/eula.txt` 与 `run/server.properties` 到独立目录 `run-p27`（`server.properties` 已带 `enable-rcon=true` / `rcon.port=25575` / `rcon.password=fsverify`），然后 `FS_RUN_LOCK=run-p27 cmd /c ""<repo>\.tools\gw.cmd" runServer -PfsRunDir=run-p27" > .work\p27-server.log 2>&1`，看到 `Done (...)` 后 RCON 发 `stop`。**禁止在 `run/` 目录里起服**（不要动主 `run/config`） |
 | 注册面 | 93（本 Phase 不许变） |
 

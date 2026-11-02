@@ -1,0 +1,2 @@
+/setblock 250 98 250 minecraft:dirt
+/execute if block 250 98 250 minecraft:dirt

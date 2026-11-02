@@ -1,0 +1,9 @@
+/op ALICE
+/gamerule doDaylightCycle false
+/time set day
+/fill 194 69 194 206 69 206 minecraft:stone
+/fill 194 70 194 206 75 206 minecraft:air
+/fill 198 70 199 203 70 204 minecraft:dirt
+/setblock 200 70 202 minecraft:air
+/tp ALICE 200 70 200
+/list

@@ -1,0 +1,10 @@
+/gamemode creative ALICE
+/tp ALICE 200 100 200
+!sleep 1500
+/fill 194 98 194 206 98 206 minecraft:stone
+/fill 197 98 197 203 98 203 minecraft:dirt
+/fill 194 99 194 206 103 206 minecraft:air
+/tp ALICE 200 99 200
+!sleep 800
+/execute if block 200 98 200 minecraft:dirt
+/execute if block 200 99 202 minecraft:air

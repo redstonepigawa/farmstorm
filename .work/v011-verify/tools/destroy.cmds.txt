@@ -1,0 +1,10 @@
+/setblock 200 98 201 minecraft:stone
+/setblock 197 99 195 minecraft:air
+!sleep 1200
+/setblock 200 99 202 minecraft:air
+!sleep 1500
+/execute if block 200 98 201 minecraft:stone
+/execute if block 197 98 197 minecraft:dirt
+/execute if block 203 98 198 minecraft:dirt
+/execute if entity @e[type=minecraft:item]
+/save-all flush

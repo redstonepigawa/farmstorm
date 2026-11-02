@@ -1,6 +1,6 @@
 # 农场风云 / Farmstorm
 
-Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· v0.0.4（已发布）· **v0.1.0（当前发布版）**
+Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· v0.0.4（已发布）· v0.1.0（已发布）· **v0.1.1（当前文档版）**
 
 > 把原版农作物改造成 PvP 道具：同一种作物可以种在地里、扔出去、架在墙上、或者吃掉。
 > Vanilla crops re-armed as PvP gadgets: plant them, throw them, mount them, or eat them.
@@ -174,6 +174,44 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 
 > v0.1.0 那六份的**中文合计 4832 行 / 英文合计 4916 行**（英文四份的行数随最后的裁决回灌略有变动，以文件为准）。
 
+### v0.1.1 增量文档 / v0.1.1 delta documents
+
+| 中文 | English | 行数（中/英） | 内容 |
+|---|---|---|---|
+| [`docs/zh/28-DECISIONS-0.1.1.md`](docs/zh/28-DECISIONS-0.1.1.md) | [`docs/en/28-DECISIONS-0.1.1.md`](docs/en/28-DECISIONS-0.1.1.md) | 564 / 564 | **v0.1.1 唯一真相源**：24 条决策 D-124~D-147、§3 对 0.1.0 的增/改/**删**三表（9 / 15 / 8）、§4 红线口径变更、§6 九条墓碑、§8 十五条裁决回灌台账 |
+| [`docs/zh/29-DESIGN-0.1.1.md`](docs/zh/29-DESIGN-0.1.1.md) | [`docs/en/29-DESIGN-0.1.1.md`](docs/en/29-DESIGN-0.1.1.md) | 1025 / 1030 | 设计增量：10 条需求项 R1~R10（plan 5 条原文按**验收面**拆开）、**39 条边界 B-01~B-39**、46 行数值表、4 张时序表、附录 A 差异登记 |
+| [`docs/zh/30-TECH-0.1.1.md`](docs/zh/30-TECH-0.1.1.md) | [`docs/en/30-TECH-0.1.1.md`](docs/en/30-TECH-0.1.1.md) | 1363 / 1378 | 技术增量：注册面仍 **93**、**动作面 47 行**、config **166 键 / 58 组** + client 3 键、语言键 **323 × 2**、**38 条验收**、**8 条待验证 API**、RT-31~RT-41 |
+| [`docs/zh/31-TASKS-0.1.1.md`](docs/zh/31-TASKS-0.1.1.md) | [`docs/en/31-TASKS-0.1.1.md`](docs/en/31-TASKS-0.1.1.md) | 1324 / 1322 | 任务拆分：**37 个任务 F-176~F-212**、**6 个 Phase 26~31**、M22~M27、**27 条裁决 A-30~A-56**、**七张覆盖表**、**65.5 人日裸 / 81.875 含缓冲** |
+| [`docs/zh/32-PROMPT-MAIN-0.1.1.md`](docs/zh/32-PROMPT-MAIN-0.1.1.md) | [`docs/en/32-PROMPT-MAIN-0.1.1.md`](docs/en/32-PROMPT-MAIN-0.1.1.md) | 378 / 378 | v0.1.1 主提示词：**HC-77~HC-96 共 20 条**、**N-75~N-92 共 18 条**、事实卡 19 行、陷阱章、与被取代的 0.1.0 HC 对照表 |
+| [`docs/zh/33-PROMPT-TASKS-0.1.1.md`](docs/zh/33-PROMPT-TASKS-0.1.1.md) | [`docs/en/33-PROMPT-TASKS-0.1.1.md`](docs/en/33-PROMPT-TASKS-0.1.1.md) | 580 / 580 | v0.1.1 分阶段任务清单：Phase 26~31 各一节（每节固定六小节）、**50 条可观察出口判据**、**54 条翻车点**、§8 跨 Phase 注意事项 |
+
+> v0.1.1 那六份的**中文合计 5234 行 / 英文合计 5252 行**。
+
+> ⚠️ **红线口径在本版变更（本节是全仓唯一现行口径）**
+> v0.0.1 ~ v0.1.0 的两条红线是「**0 自定义网络包**」+「无 Mixin」。**v0.1.1 起，「0 自定义网络包」整体废除**——本版恰好新增 1 个 S2C 只读包，但**不设数量上限**；红线只剩「**无 Mixin**」一条。
+> 这**不是**「放宽为 1 个」、**不是**「本版例外」。`docs/zh/22`~`27`、`00-DECISIONS.md` 的 C-6、`10-DECISIONS-0.0.2.md` 的 D-50 里关于网络包的说法**均已作废**，以 `28-DECISIONS-0.1.1.md` §4 为准（墓碑见其 §6）。
+
+### v0.1.1 关键数字（相对 v0.1.0）
+
+> 上方那张四列历史表冻结不动（它记的是当时各版口径）；v0.1.1 的变化单列于此，避免把 17 行宽表再加一列时改错列。
+
+| 指标 | v0.1.0 | **v0.1.1** | 变化 |
+|---|---|---|---|
+| registry 对象 | 93 | **93** | **+0**（网络包 payload / `KeyMapping` / CLIENT config 都不进 `BuiltInRegistries`） |
+| config 键（server） | 166 键 / 59 组 | **166 键 / 58 组** | 删 `farmland.limitPerPlayer` 整组、增 `pumpkin_turret.bulletSpeed` ⇒ `166 − 1 + 1 = 166`，**总数持平但组成变了** |
+| config 键（client） | 0 | **3**（`hud.enabled` / `hud.x` / `hud.y`） | 首次注册 `ModConfig.Type.CLIENT`，落 `run/config/farmstorm-client.toml`，**不计入 166** |
+| 语言键 | 315 × 2 | **323 × 2** | 删 2 增 10（`315 − 2 + 1 + 3 + 1 + 2 + 3 = 323`） |
+| 裁决 | A-19 ~ A-28（10 条） | **A-30 ~ A-59（30 条）** | 其中 A-44 **作废**、A-47 有 **rev.2** |
+| 决策 | D-103 ~ D-123（21 条） | **D-124 ~ D-147（24 条）** | |
+| 任务 / Phase | 40 个 / 5 个 | **37 个 / 6 个** | F-176~F-212、Phase 26~31 |
+| 工作量 | 63.0 裸 / 78.75 含缓冲 | **65.5 裸 / 81.875 含缓冲** | +2.5 裸 |
+| 关键路径 | 22.0 人日 / 11 个任务 | **15.0 人日 / 6 个任务** | 较上版缩短 |
+| 技术风险 | RT-24 ~ RT-30 | **RT-31 ~ RT-41（11 条）** | |
+| 存档格式变更 | 0 处 | **2 处** | ① `farmstorm_farmland.dat` 升 v2（绑定表）；② `farmstorm_outpost_core.dat` 的 `Entry` 加 `gameTime` |
+| 自定义网络包 | 0 | **1**（`farmstorm:core_list`，S2C 只读） | 全项目第一个 |
+| 客户端构件 | 0 键位 / 0 CLIENT config | **2 个 `KeyMapping` + 1 组 CLIENT config + 1 条客户端指令** | 全项目第一批 |
+| 资源 | — | PNG **就地替换 1 张**（`wild_apple.png` 16×16 → **64×64**），新增 0 | `sounds.json` **不动** |
+
 ### v0.1.0 实测口径（2026-11-02 交付）
 
 | 项 | 实测值 | 怎么核 |
@@ -191,6 +229,28 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 > 三条红线维持：`@Mixin` **0**、`CustomPacketPayload` **0**、`GameRules.register` **0**（耕地规则走 `/farmstorm farmlandlimit`，不是 gamerule）。
 > 发布状态：**已构建 + 已进 `dist/` + 安装说明与 release 正文草稿齐备，但未打 tag、未 push、未建 GitHub Release**（按作者口径留在发布准备这一步）。
 
+### v0.1.1 升级须知（从 0.1.0 升级必读）
+
+| 项 | 行为 | 证据 |
+|---|---|---|
+| 旧 `farmstorm-server.toml` 里 `pumpkin_turret` 的**两个默认值不生效** | 保留旧 toml 直接升级时 `fireIntervalTicks` 仍是 **60**、`projectileDamage` 仍是 **1**。配置系统只补不删、代码不做迁移（HC-96），旧文件里残留的 `[farmland]` 段也不会被删（残留不算失败，但已无任何代码读它） | 实测：把 0.1.0 的 toml 放进 `run-p31/config/` 起服后读回 `fireIntervalTicks = 60` / `projectileDamage = 1`（`.work/v011-verify/p31-run4.log`） |
+| 新键 `pumpkin_turret.bulletSpeed` **自动补** | 同一次启动自动写出 `bulletSpeed = 0.45` | 同上 |
+| `/farmstorm farmlandlimit` **已删** | 服务端 `/farmstorm` 整棵指令树随 D-140 删除；只剩客户端 `/farmstorm hud <on\|off\|reset>` | 实测：控制台 `/farmstorm`、`/farmstorm farmlandlimit 5` 均返回 `Unknown or incomplete command` |
+| 老档**首次启动会补建** | 0.1.0 的 `farmstorm_farmland.dat`（只有 `owners`）读成 `orphans`，按 `BlockPos` 全序（y → z → x）补绑；容量 `outpost_core.farmlandBonus`（默认 16）是硬顶，补不上的**保持耕地、不受保护**，不铲地 | 实测：20 块老田 + 1 核 ⇒ 日志「耕地补建：绑定 16 块 / 保持未绑定 4 块（老档共 20 块，按 BlockPos 全序）」，同一份 fixture 连跑两次完全相同 |
+| 想用新默认值 | 删掉 `config/farmstorm-server.toml` 重新起服即可（重生成 **166 键 / 58 组**，`[pumpkin_turret]` 5 键为 15 / 3 / 1 / 40 / 0.45） | `.work/v011-verify/p31-run1.log` |
+
+### v0.1.1 实测口径（发布件）
+
+| 项 | 实测值 | 怎么核 |
+|---|---|---|
+| 构建 | `gw.cmd build` 退出码 **0**（`BUILD SUCCESSFUL`） | `.work/v011-verify/p31-build.log` |
+| 发布件（主） | `dist/farmstorm-0.1.1+mc1.21.1.jar` **1,063,181 B** / SHA256 `B20E2EA305AE2F19…F3CF746F2A5` | `Get-FileHash` |
+| 发布件（源码） | `dist/farmstorm-0.1.1+mc1.21.1-sources.jar` **978,402 B** / SHA256 `0E9A03AC20945CB8…675886BDECD` | 同上 |
+| `dist` 与 `build/libs` 一致 | 两支同名文件字节数 + SHA256 **完全相同**；`build/libs` 只剩 0.1.1 的两支 | `.work/v011-verify/F-207-jar.txt` |
+| jar 内版本 | `META-INF/neoforge.mods.toml`：`modId = "farmstorm"`、`version = "0.1.1"` | 解包读原文 |
+| 静态验收 | `93 / 93`、`166`、`323`、`结论：FAIL 0 项`、exit **0** | `python -X utf8 tools/verify_project.py` |
+| 资源 | PNG **113**（就地替换 1 张：`wild_apple.png` 16×16 → **64×64 / 6,946 B**、SHA256 `0edf673a…1d05cb7f9`）、新增 PNG **0**、新增 JSON **0**、OGG 3 未动 | `0.1.0` 与 `0.1.1` 两支 jar 的条目 diff：新增 18 条全是 `.class` / 目录；移除 2 条（`command/` 与 `FarmstormCommands.class`） |
+| 红线 | `@Mixin` / `mixins.json` **0**、`CustomPacketPayload` 恰 **1** 个文件（`network/CoreListPayload.java`）、`GameRules.register` **0** | 三条 `grep` |
 
 ### 实施文档 / Implementation documents
 
@@ -268,7 +328,21 @@ v0.0.4 只改 Q弹 与朋友的韭命中音，**没有新增玩法**，也没有
 
 做玩法时加 `23-DESIGN-0.1.0.md`，写代码时加 `24-TECH-0.1.0.md`，找任务时加 `25-TASKS-0.1.0.md` 或当前 Phase 那一节。**`22-DECISIONS-0.1.0.md` 要一直在场**——v0.1.0 与 0.0.4 冲突时以它为准。
 
-> ⚠️ **Phase 21 的第一件事是把 `tools/verify_project.py` 扩到新对象**（F-136）。它现在是**绿的**（90 / 155 / 299、`FAIL 0`），但它有一个**静默盲区**：往 `EXPECTED` 清单加 ID 却不同步 `EXPECTED_COUNTS` 会红；两边都不动则一直全绿、静默漏检新增的 3 个对象。固定顺序是「先加清单 → 再改计数到 93/166/315 → 再加第四个 config 来源」，中间态的红是预期行为。
+> ⚠️ **Phase 26 的第一件事是把 `tools/verify_project.py` 扩到新对象**（F-136）。它现在是**绿的**（90 / 155 / 299、`FAIL 0`），但它有一个**静默盲区**：往 `EXPECTED` 清单加 ID 却不同步 `EXPECTED_COUNTS` 会红；两边都不动则一直全绿、静默漏检新增的 3 个对象。固定顺序是「先加清单 → 再改计数到 93/166/315 → 再加第四个 config 来源」，中间态的红是预期行为。
+
+### v0.1.1 的投喂顺序
+
+```
+第一轮  32-PROMPT-MAIN-0.1.1.md                              （全局约束，只投一次）
+第二轮  33-PROMPT-TASKS-0.1.1.md 的 §1  Phase 26 那一节        （一次只投一个 Phase）
+第三轮  33-PROMPT-TASKS-0.1.1.md 的 §2  Phase 27 那一节
+...     直到 §6  Phase 31
+最后    33-PROMPT-TASKS-0.1.1.md 的 §7 收尾提示词              （整版收口与最终证据）
+```
+
+做玩法时加 `29-DESIGN-0.1.1.md`，写代码时加 `30-TECH-0.1.1.md`，找任务时加 `31-TASKS-0.1.1.md` 或当前 Phase 那一节。**`28-DECISIONS-0.1.1.md` 要一直在场**——v0.1.1 与 0.1.0 冲突时以它为准，红线口径也以它 §4 为准。
+
+> ⚠️ **v0.1.1 有一条独有的时序陷阱（A-40）**：`tools/verify_project.py` 的 config 期望集是从 **四份旧文档**现算的（`01-DESIGN` + `12-TECH-0.0.2` + `18-TECH-0.0.3` + `24-TECH-0.1.0`）。本版删 1 键增 1 键后，这个期望集必然对不上——**在 F-177 按 30 号 §4.1 改完它之前，它的「FAIL 0」不是通过判据**。中间态窗口是 F-177 ~ F-192，窗口内只允许存在两条键级差异（缺 `bulletSpeed`、多 `farmland.limitPerPlayer`），F-192 收口后才可引用工具结论。详见 `30-TECH-0.1.1.md` §7 #38。
 
 ### 代理该读哪几份
 
@@ -496,7 +570,8 @@ The former "`Unknown recipe category: farmstorm:convert`" warning is **fixed** i
 | `textures/item/friend_chives.png`、`textures/item/chive_seeds.png`（v0.0.3） | 作者提供的两张 QQ 图片（1254×1254 RGBA） | 缩放为 16×16 PNG |
 | `textures/block/friend_chives_stage0..3.png`（v0.0.3） | **本项目自绘占位**（洋红 `#D81E8A`） | 作者明确「方块材质暂不绘制，先实现功能」，这 4 张不是第三方素材，出终稿时直接替换 |
 | `textures/block/outpost_core_a_{top,side,bottom}.png`（v0.1.0） | 作者提供的 `outpost_core_all_textures\32x32\a_runic\` 三张 **32×32**（2745 / 2534 / 2513 B） | 原样拷入，走 `cube_bottom_top` 六面区分；同目录另有 `b_industrial` / `c_obsidian` / `d_royal` 三套风格备选 |
-| `textures/item/wild_apple.png`（v0.1.0 替换） | 作者桌面的 `2797B56FEF56AF13125F333A6989632A.png`（**1294×1216** RGBA，1,113,442 B） | 缩到 **16×16** 后替换原图 |
+| `textures/item/wild_apple.png`（v0.1.0 替换） | 作者桌面的 `2797B56FEF56AF13125F333A6989632A.png`（**1294×1216** RGBA，1,113,442 B） | 缩到 **16×16** 后替换原图（**已被 v0.1.1 取代，见下一行**） |
+| `textures/item/wild_apple.png`（**v0.1.1 替换**） | 作者提供的 `Downloads\wild_apple_64x64.png`（**64×64**、6,946 B、1813 个去重 RGB、1471 个全透明像素） | **原图直用**，不再缩到 16×16、不再走 16 网格众数取色、**不再叠右下角绿色「+」**；「+」号规则自 v0.1.1 起**全局作废**（本版只重生成这一张，其余 24 张留到下版批量）。坐标式方块/物品模型按 `item/generated` 渲染，显示面积仍是 16×16，高出的细节会被平均——这是 RT-37 已登记的已知观感 |
 
 ### 使用条件（务必照此分发）
 

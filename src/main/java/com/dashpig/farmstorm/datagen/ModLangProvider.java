@@ -11,7 +11,7 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
  * 不存在「两份键各自维护」的可能。**条目构成（v0.1.1 / P30 实测，改表时必须同步本段）**：
- * 32 item + 26 block + 4 effect + 3 subtitles + **169** config + 36 advancement + 6 death
+ * 32 item + 26 block + 4 effect + 3 subtitles + **169** config（= 166 server + 3 client）+ 36 advancement + 6 death
  * + 16 tooltip + 13 entity + 9 gui + 1 container + 1 itemGroup + 2 message + 2 key + 3 command
  * = **323**。（P29 时是 314：同表但 config 166 / gui 8、无 key / command 两组。）
  *
@@ -40,8 +40,9 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * {@code farmland} 整组删除、指令反馈键随整棵服务端指令树删除，到 **314** 键。
  *
  * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
- * 155 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
- * 该 TOML 由 {@code FarmstormConfig} 的真实 spec 写出，可做机械比对。
+ * 166 个 server config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
+ * 另 3 个 client 键落在 {@code run/config/farmstorm-client.toml}；
+ * 两份 TOML 分别由 {@code FarmstormConfig} 与 {@code FarmstormClientConfig} 的真实 spec 写出，可做机械比对。
  */
 public final class ModLangProvider extends LanguageProvider {
     /** 一条语言条目：键 + 中文 + 英文（中文与英文永远同键）。 */

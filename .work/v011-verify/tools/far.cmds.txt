@@ -1,0 +1,6 @@
+/tp ALICE 250 100 250
+!sleep 1500
+/fill 248 98 248 252 98 252 minecraft:stone
+/fill 248 99 248 252 102 252 minecraft:air
+/tp ALICE 250 99 250
+/give ALICE farmstorm:outpost_core 2

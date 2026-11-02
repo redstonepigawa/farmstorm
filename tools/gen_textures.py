@@ -54,7 +54,7 @@ from functools import partial
 from io import BytesIO
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageDraw
 
 TEXTURE_SIZE = 16
 MOD_ID = "farmstorm"
@@ -149,23 +149,13 @@ CHIVE_COLORS: dict[str, tuple[int, int, int, int]] = {
 # 23 号 §3.4 的目标不透明像素数（6 / 14 / 40 / 90），画完逐张断言。
 CHIVE_OPAQUE: tuple[int, ...] = (6, 14, 40, 90)
 
-# --- v0.1.0 · 狂野苹果（F-163 / 23 号 §9.4）---
+# --- v0.1.0 · 狂野苹果（F-163）---
 # 作者桌面那张 1294 x 1216 RGBA / 1,113,442 B 的源图。**不进 jar**：这里只存路径，生成时读一次。
 WILD_APPLE_SOURCE = Path(r"C:\Users\DASHpig\Desktop\2797B56FEF56AF13125F333A6989632A.png")
 WILD_APPLE_SOURCE_ENV = "FARMSTORM_WILD_APPLE_SOURCE"
-# 16 网格的一格算「实心」的 alpha 覆盖率阈值：源图 alpha 只有 0 与 253 两档，
-# 250/255 ≈ 98% 等价于「这一格整格都在果实 / 叶片里」，抗锯齿边缘不会被算成实体。
+# 16 网格的一格算「实心」的 alpha 覆盖率阈值：源图 alpha 只有 0 与 253 两档，250/255 ≈ 98% 等价于
+# 「这一格整格都在果实 / 叶片里」；抗锯齿边缘与导出残留的 alpha=1 噪点都不会被当成实体。
 WILD_APPLE_COVERAGE = 250
-# 23 号 §9.4 的十条色阶（果实 + 梗叶）与现图各自的像素数；实际格数与 97 不等时按最大余数法缩放。
-WILD_APPLE_TONES: tuple[tuple[tuple[int, int, int], int], ...] = (
-    ((0xFF, 0x96, 0x9D), 4), ((0xFF, 0x5E, 0x69), 2), ((0xFF, 0x1C, 0x2B), 12), ((0xDD, 0x17, 0x25), 14),
-    ((0xB4, 0x13, 0x1E), 28), ((0x9C, 0x10, 0x17), 11), ((0x75, 0x28, 0x02), 17), ((0x54, 0x24, 0x09), 3),
-    ((0x7E, 0x37, 0x0E), 1), ((0x54, 0x09, 0x0E), 5),
-)
-# 这四档的像素数是 23 号 §9.4 / 25 号 F-163 验收 2 点名的读数（高光 4 + 2、分隔 3、叶脉 1），不随格数缩放。
-WILD_APPLE_PINNED = frozenset({
-    (0xFF, 0x96, 0x9D), (0xFF, 0x5E, 0x69), (0x54, 0x24, 0x09), (0x7E, 0x37, 0x0E),
-})
 
 
 @dataclass(frozen=True)
@@ -856,94 +846,53 @@ def wild_apple_source() -> Path:
     return Path(override) if override else WILD_APPLE_SOURCE
 
 
-def luma(color: tuple[int, int, int]) -> float:
-    """ITU-R 601 相对亮度，只用来给 16 网格的格子排序。"""
-    return 0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]
+def wild_apple_grid(image: Image.Image, size: int) -> Image.Image:
+    """按 alpha bbox 取景，把源图切成 size x size 格，每格取「出现次数最多的源像素颜色」。
 
-
-def apportion(counts: list[int], total: int) -> list[int]:
-    """最大余数法把 total 个格按比例分给各色阶（余数相同按入参顺序），合计恒等于 total。"""
-    base = sum(counts)
-    exact = [count * total / base for count in counts]
-    shares = [int(value) for value in exact]
-    order = sorted(range(len(counts)), key=lambda index: (-(exact[index] - shares[index]), index))
-    for index in order[: total - sum(shares)]:
-        shares[index] += 1
-    return shares
-
-
-def downscale_alpha_aware(image: Image.Image, size: int) -> Image.Image:
-    """按 alpha bbox 取景后做面积平均降采样。
-
-    直接缩 RGBA 会把透明背景的 (0,0,0) 一起平均进颜色（边缘发暗），所以先预乘 alpha、缩完再除回来。
+    取众数而不是面积平均：源图是平涂像素画，平均会把红裂纹与炭黑底色混成一团糊，
+    众数能保住色块与硬边。格内覆盖率低于 WILD_APPLE_COVERAGE 的位置留透明；同票按色值升序取。
     """
     alpha = image.getchannel("A")
     box = alpha.point(lambda value: 255 if value >= 128 else 0).getbbox()
-    if box is not None:
-        image = image.crop(box)
-        alpha = alpha.crop(box)
-    premultiplied = Image.merge(
-        "RGB", [ImageChops.multiply(channel, alpha) for channel in image.split()[:3]]
-    ).resize((size, size), Image.Resampling.BOX)
-    alpha = alpha.resize((size, size), Image.Resampling.BOX)
+    crop = image.crop(box) if box is not None else image
+    source = crop.load()
+    width, height = crop.size
     canvas = Image.new("RGBA", (size, size), CLEAR)
-    pixels = canvas.load()
-    premultiplied_pixels = premultiplied.load()
-    alpha_pixels = alpha.load()
-    for y in range(size):
-        for x in range(size):
-            cover = alpha_pixels[x, y]
-            if cover == 0:
+    target = canvas.load()
+    for row in range(size):
+        top, bottom = row * height // size, (row + 1) * height // size
+        for column in range(size):
+            left, right = column * width // size, (column + 1) * width // size
+            area = (right - left) * (bottom - top)
+            covered = 0
+            tally: dict[tuple[int, int, int], int] = {}
+            for y in range(top, bottom):
+                for x in range(left, right):
+                    red, green, blue, cover = source[x, y]
+                    if cover < 128:
+                        continue
+                    covered += 1
+                    key = (red, green, blue)
+                    tally[key] = tally.get(key, 0) + 1
+            if area == 0 or covered * 255 < WILD_APPLE_COVERAGE * area:
                 continue
-            red, green, blue = premultiplied_pixels[x, y]
-            pixels[x, y] = (
-                min(255, round(red * 255 / cover)),
-                min(255, round(green * 255 / cover)),
-                min(255, round(blue * 255 / cover)),
-                cover,
-            )
+            color = min(tally.items(), key=lambda item: (-item[1], item[0]))[0]
+            target[column, row] = color + (0xFF,)
     return canvas
 
 
 def draw_wild_apple() -> Image.Image | None:
-    """狂野苹果 16x16：桌面源图取景 → 缩到 16 网格 → 按 23 号 §9.4 的十条色阶量化（无随机数）。
+    """狂野苹果 16x16：桌面源图按 alpha bbox 取景 → 16 网格取众数色 → alpha 收成 0 / 255（无随机数）。
 
-    先按亮度给实心格排序，再按色阶的像素数从亮到暗切片（直方图规定化）：换图不改色板，
-    四档小色阶（高光 4 + 2、分隔 3、叶脉 1）沿用文档像素数，其余六档按本图实际格数等比放大。
-    源图缺失时返回 None，由 compose() 退回候选链并在 stderr 留警告。
+    这张图标就是要「源图本身的样子」，所以不做调色板量化、也不做插值平均：颜色全是源图里真实存在的
+    像素值（硬 alpha 是为了避免物品栏缩放出黑边）。源图缺失时返回 None，由 compose() 退回候选链。
     """
     path = wild_apple_source()
     if not path.is_file():
         print(f"[警告] 狂野苹果源图不存在：{path}（退回原版 item/apple）", file=sys.stderr)
         return None
     with Image.open(path) as raw:
-        small = downscale_alpha_aware(raw.convert("RGBA"), TEXTURE_SIZE)
-
-    cells = [
-        (x, y)
-        for y in range(TEXTURE_SIZE)
-        for x in range(TEXTURE_SIZE)
-        if small.getpixel((x, y))[3] >= WILD_APPLE_COVERAGE
-    ]
-    cells.sort(key=lambda cell: (-luma(small.getpixel(cell)[:3]), cell[1], cell[0]))
-
-    tones = sorted(WILD_APPLE_TONES, key=lambda tone: -luma(tone[0]))
-    pinned = [(color, count) for color, count in tones if color in WILD_APPLE_PINNED]
-    scaled = [(color, count) for color, count in tones if color not in WILD_APPLE_PINNED]
-    budget = len(cells) - sum(count for _, count in pinned)
-    shares = apportion([count for _, count in scaled], budget)
-    target = dict(pinned)
-    target.update({color: share for (color, _), share in zip(scaled, shares)})
-
-    image = Image.new("RGBA", (TEXTURE_SIZE, TEXTURE_SIZE), CLEAR)
-    offset = 0
-    for color, _count in tones:
-        for _ in range(target[color]):
-            image.putpixel(cells[offset], color + (0xFF,))
-            offset += 1
-    if offset != len(cells):
-        raise ValueError(f"狂野苹果的色阶像素数 {offset} 与实心格 {len(cells)} 不等")
-    return image
+        return wild_apple_grid(raw.convert("RGBA"), TEXTURE_SIZE)
 
 
 ITEM_DRAWERS = {

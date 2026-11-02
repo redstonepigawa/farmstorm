@@ -1,7 +1,9 @@
 package com.dashpig.farmstorm;
 
+import com.dashpig.farmstorm.config.FarmstormClientConfig;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.event.FarmstormGameEvents;
+import com.dashpig.farmstorm.network.FarmstormNetwork;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.registry.FarmstormBlocks;
 import com.dashpig.farmstorm.registry.FarmstormCreativeTabs;
@@ -54,6 +56,13 @@ public final class Farmstorm {
         FarmstormSounds.REGISTER.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, FarmstormConfig.SPEC);
+        // F-201：CLIENT 3 键单独一份 config/farmstorm-client.toml。**不进** FarmstormConfig——
+        // 并进去会让 server toml 从 166 变 169（30 号 §5.5 第 4 条）。本类只依赖 ModConfigSpec，服务端也加载得动。
+        container.registerConfig(ModConfig.Type.CLIENT, FarmstormClientConfig.SPEC);
+        modBus.addListener(FarmstormClientConfig::onLoading);
+
+        // F-199：全项目第一个自定义包，注册在 mod 总线（RegisterPayloadHandlersEvent 是 IModBusEvent）。
+        modBus.addListener(FarmstormNetwork::onRegisterPayloads);
 
         // 配置加载 / 重载后重建派生缓存（幸运浆果千分比表、爆炸阈值快照）。
         modBus.addListener(FarmstormConfig::onLoading);

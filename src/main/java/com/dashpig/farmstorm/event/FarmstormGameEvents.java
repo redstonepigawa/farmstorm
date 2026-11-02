@@ -4,6 +4,7 @@ import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.explosion.ExplosionQueue;
 import com.dashpig.farmstorm.farmland.FarmlandGuard;
 import com.dashpig.farmstorm.farmland.FarmlandLedger;
+import com.dashpig.farmstorm.network.CoreListBroadcaster;
 import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.trap.TrapImmunity;
 import com.dashpig.farmstorm.util.FarmstormTags;
@@ -63,6 +64,10 @@ public final class FarmstormGameEvents {
         gameBus.addListener(FarmstormGameEvents::onPlayerTick);
         gameBus.addListener(FarmstormGameEvents::onPlayerLoggedIn);
         gameBus.addListener(FarmstormGameEvents::onPlayerLoggedOut);
+        // F-200 / 30 号 §2.1.4 的第 7、8 条：换维度与重生各请求一次（列表内容不变，发它是为了覆盖
+        // 「客户端在世界切换时丢过一次」的极小窗口，成本 1 包）。
+        gameBus.addListener(FarmstormGameEvents::onPlayerChangedDimension);
+        gameBus.addListener(FarmstormGameEvents::onPlayerRespawn);
         gameBus.addListener(FarmstormGameEvents::onExplosionDetonate);
         gameBus.addListener(FarmstormGameEvents::onLevelTickPost);
         gameBus.addListener(FarmstormGameEvents::onServerTickPost);
@@ -93,6 +98,9 @@ public final class FarmstormGameEvents {
         }
         Farmstorm.LOGGER.info("玩家登录：{}（{}）", player.getGameProfile().getName(), player.getUUID());
         restoreCreativeMode(player);
+        // F-200 / 30 号 §2.1.4 的第 1、2、3 条：登录 / 重连 / 首次加入共用这一条路径（服务端不区分三者）。
+        // 列表为空也请求一次（total=0），让客户端把「没核」与「没收到包」区分开；客户端此时尚未就绪由第 10 条的对账兜底。
+        CoreListBroadcaster.request(player);
     }
 
     /** 下线即还原（D-18 / RT-05 ②）：不给「强退保留创造模式」留窗口。 */
@@ -103,6 +111,21 @@ public final class FarmstormGameEvents {
         Farmstorm.LOGGER.info("玩家登出：{}（{}）", player.getGameProfile().getName(), player.getUUID());
         restoreCreativeMode(player);
         TrapImmunity.clear(player.getUUID());             // D-112 第 4 条：重连后陷阱免疫清零
+        CoreListBroadcaster.onLogout(player.getUUID());   // F-200：清 lastSentTick / pending / fingerprint 三条记录
+    }
+
+    /** F-200 / 30 号 §2.1.4 第 7 条：换维度请求一次。 */
+    private static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            CoreListBroadcaster.request(player);
+        }
+    }
+
+    /** F-200 / 30 号 §2.1.4 第 8 条：重生请求一次。 */
+    private static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            CoreListBroadcaster.request(player);
+        }
     }
 
     /**
@@ -141,13 +164,15 @@ public final class FarmstormGameEvents {
      * 先把票补上能让核所在的区块在补建那一刻已经处于 entity-ticking（与「先有核、后有田」的正常时序一致）。
      */
     private static void onServerTickPost(ServerTickEvent.Post event) {
-        if (startupDone) {
-            return;
-        }
-        startupDone = true;
         MinecraftServer server = event.getServer();
-        CoreChunkTickets.restoreAll(server);
-        FarmlandLedger.get(server).backfill(server);
+        if (!startupDone) {
+            startupDone = true;
+            CoreChunkTickets.restoreAll(server);
+            FarmlandLedger.get(server).backfill(server);
+        }
+        // F-200 / 30 号 §2.1.4 第 10 条：去抖 flush + 每 100 刻的指纹对账。**每刻都要走**，
+        // 不能再让它挂在启动闸后面（闸只跑一次，那样包永远发不出去）。
+        CoreListBroadcaster.tick(server);
     }
 
     /** 停服：票不落盘，显式释放一遍；闸复位，让同一个 JVM 里换存档 / 重开服时补建照常再跑一次。 */

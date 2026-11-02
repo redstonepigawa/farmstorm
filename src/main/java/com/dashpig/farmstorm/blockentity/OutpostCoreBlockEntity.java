@@ -5,6 +5,7 @@ import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.farmland.FarmlandGuard;
 import com.dashpig.farmstorm.farmland.FarmlandLedger;
+import com.dashpig.farmstorm.network.CoreListBroadcaster;
 import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.outpost.OutpostCoreIndex;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
@@ -107,6 +108,8 @@ public class OutpostCoreBlockEntity extends BlockEntity {
             OutpostCoreIndex.of(server).record(server, placer, this.getBlockPos(), this.placedGameTime);
             // F-198：核所在的那 1 个区块上一张自有票，区块卸载后方块实体照样 tick（A-43 的 tick 面）。
             CoreChunkTickets.request(server, this.getBlockPos());
+            // F-200 / 30 号 §2.1.4 第 4 条（放置核）：收件人集合由每人自己的组装结果决定，所以统一请求。
+            CoreListBroadcaster.requestAll(server.getServer());
         }
         this.setChanged();
     }
@@ -177,6 +180,9 @@ public class OutpostCoreBlockEntity extends BlockEntity {
             OutpostCoreIndex.of(server).remove(server, this.ownerUuid, this.getBlockPos());
             // F-198：票在这里释放（onRemove 与 settleOnRemoval 末尾共用这一处，幂等）。
             CoreChunkTickets.release(server, this.getBlockPos());
+            // F-200 / 30 号 §2.1.4 第 5、6 条（摧毁核 / 迁移完成）：迁移在 settleOnRemoval 里已改完绑定，
+            // 且它末尾一定会走到本方法，所以一次请求覆盖两条时机；10 刻去抖把重复请求合并成一次发送。
+            CoreListBroadcaster.requestAll(server.getServer());
         }
     }
 

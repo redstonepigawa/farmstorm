@@ -2,17 +2,22 @@ package com.dashpig.farmstorm.client;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.client.render.TurretBulletRenderer;
+import com.dashpig.farmstorm.config.FarmstormClientConfig;
 import com.dashpig.farmstorm.registry.FarmstormEntityTypes;
 import com.dashpig.farmstorm.registry.FarmstormMenus;
 import java.util.List;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterRecipeBookCategoriesEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
@@ -78,6 +83,49 @@ public final class FarmstormClient {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         WildHunterClientHooks.onClientTick();
+        // F-202：两个 KeyMapping 的消费点，与狂野猎人的客户端逐刻驱动共用这一个 ClientTickEvent.Post。
+        // while 而不是 if：一 tick 内连按两次要两次都生效（consumeClick 是队列语义）。
+        while (FarmstormKeys.TOGGLE.consumeClick()) {
+            toggleCoreHud();
+        }
+        while (FarmstormKeys.DRAG.consumeClick()) {
+            Minecraft.getInstance().setScreen(new CoreHudDragScreen());
+        }
+        // 30 号 §8 ⑧ 的退路：LoggingOut 在部分路径下可能不触发，这里用「不在世界里」再兜一次。
+        if (Minecraft.getInstance().level == null) {
+            ClientCoreList.clear();
+        }
+    }
+
+    /**
+     * 按 H 开关浮窗（F-202）：写 {@code hud.enabled} 并存盘，动作栏回显。
+     * 回显复用 {@code /farmstorm hud on|off} 的两条反馈键，**不额外占语言键**（本版语言键正好 323）。
+     */
+    private static void toggleCoreHud() {
+        boolean enabled = !FarmstormClientConfig.hudEnabled.get();
+        FarmstormClientConfig.saveHudState(enabled,
+                FarmstormClientConfig.hudX.get(), FarmstormClientConfig.hudY.get());
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player != null) {
+            minecraft.player.displayClientMessage(Component.translatable(enabled
+                    ? CoreHudClientCommands.FEEDBACK_ON
+                    : CoreHudClientCommands.FEEDBACK_OFF), true);
+        }
+    }
+
+    /** F-205：客户端指令 {@code /farmstorm hud <on|off|reset>} 的注册（game 总线、仅客户端）。 */
+    @SubscribeEvent
+    public static void onRegisterClientCommands(RegisterClientCommandsEvent event) {
+        CoreHudClientCommands.register(event.getDispatcher());
+    }
+
+    /**
+     * F-200 / 30 号 §7 #29：退出服务器时清空快照，否则换服后会看到上一个服务器的核
+     * （本版唯一会跨会话残留的客户端状态）。
+     */
+    @SubscribeEvent
+    public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        ClientCoreList.clear();
     }
 
     /**

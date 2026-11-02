@@ -954,10 +954,22 @@ public final class FarmstormConfig {
     }
 
     public static void onLoading(ModConfigEvent.Loading event) {
+        if (event.getConfig().getSpec() != SPEC) {
+            return;             // 见 onReloading 的注
+        }
         bake();
     }
 
+    /**
+     * F-201 之后本模组有**两份** config：SERVER（本类）与 CLIENT（{@code FarmstormClientConfig}）。
+     * {@code ModConfigEvent} 是「每份 config 各发一次」，且 CLIENT 那份可能先到——此时 {@code SPEC} 还没 bake，
+     * {@link #bake()} 里的 {@code get()} 会抛 IllegalStateException 并让客户端进入 broken mod state（实测踩过）。
+     * 因此两条钩子都只认自己这份 spec；服务端行为与此前完全一致（服务端只加载 SERVER）。
+     */
     public static void onReloading(ModConfigEvent.Reloading event) {
+        if (event.getConfig().getSpec() != SPEC) {
+            return;
+        }
         bake();
     }
 

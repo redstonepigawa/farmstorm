@@ -10,9 +10,15 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 语言文件（TECH §7）：zh_cn 与 en_us 各 **299** 键（v0.0.3 口径）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
- * 不存在「两份键各自维护」的可能。**条目构成（v0.1.1 / P29 实测，改表时必须同步本段）**：
- * 32 item + 26 block + 4 effect + 3 subtitles + 166 config + 36 advancement + 6 death
- * + 16 tooltip + 13 entity + 8 gui + 1 container + 1 itemGroup + 2 message = **314**。
+ * 不存在「两份键各自维护」的可能。**条目构成（v0.1.1 / P30 实测，改表时必须同步本段）**：
+ * 32 item + 26 block + 4 effect + 3 subtitles + **169** config + 36 advancement + 6 death
+ * + 16 tooltip + 13 entity + 9 gui + 1 container + 1 itemGroup + 2 message + 2 key + 3 command
+ * = **323**。（P29 时是 314：同表但 config 166 / gui 8、无 key / command 两组。）
+ *
+ * <p>v0.1.1 的 Phase 30 加的正是那 **9** 条：3 条 {@code farmstorm.configuration.hud.*}（CLIENT config）、
+ * 2 条 {@code key.farmstorm.core_hud.*}（键位描述）、1 条 {@code gui.farmstorm.core_hud.self}（「自己」标识）、
+ * 3 条 {@code command.farmstorm.hud.*}（客户端指令反馈）。
+ * **{@code +N} 溢出行的文本不在这里**——它是 {@code "+" + (total - 8)} 的纯数字拼接（30 号 §5.5 第 6 条）。
  *
  * <p>沿革：v0.0.1 是 222 键（22/20/9/1/1/8/16/4/24/117），v0.0.2 收到 263，
  * v0.0.3 收到 299（其中 16 条 `farmstorm.configuration.*` 由 F-132 的 runData 落地、
@@ -404,6 +410,16 @@ public final class ModLangProvider extends LanguageProvider {
         // ---- v0.1.0 的 2 条动作栏提示（F-157 / 24 号 §6.3 的第 2、3 步）----
         plain(entries, "message.farmstorm.farmland.no_core", "附近没有己方据点核心", "No allied outpost core nearby");
         plain(entries, "message.farmstorm.farmland.quota_full", "耕地额度已满：%s/%s", "Farmland quota full: %s/%s");
+        // ---- v0.1.1 的 9 条新键（Phase 30）：3 条 CLIENT config + 2 条键位 + 1 条「自己」+ 3 条指令反馈 ----
+        config(entries, "hud.enabled", "浮窗开关", "Core HUD enabled");
+        config(entries, "hud.x", "浮窗左上角 x（GUI 像素）", "Core HUD top-left x (GUI pixels)");
+        config(entries, "hud.y", "浮窗左上角 y（GUI 像素）", "Core HUD top-left y (GUI pixels)");
+        plain(entries, "key.farmstorm.core_hud.toggle", "开关核心浮窗", "Toggle core HUD");
+        plain(entries, "key.farmstorm.core_hud.drag", "拖动核心浮窗位置", "Move core HUD");
+        plain(entries, "gui.farmstorm.core_hud.self", "自己", "You");
+        plain(entries, "command.farmstorm.hud.on", "核心浮窗已开启", "Core HUD enabled");
+        plain(entries, "command.farmstorm.hud.off", "核心浮窗已关闭", "Core HUD disabled");
+        plain(entries, "command.farmstorm.hud.reset", "核心浮窗位置已复位", "Core HUD position reset");
         return List.copyOf(entries);
     }
 

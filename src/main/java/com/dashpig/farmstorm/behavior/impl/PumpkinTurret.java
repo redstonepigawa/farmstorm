@@ -72,7 +72,7 @@ public final class PumpkinTurret implements TurretBehavior {
                 : new TurretBullet(FarmstormEntityTypes.TURRET_BULLET.get(), owner, level);
         bullet.moveTo(spawn.x, spawn.y, spawn.z, 0.0F, 0.0F);
         bullet.setTarget(target);
-        bullet.setDeltaMovement(direction.scale(TurretBullet.SPEED));
+        bullet.setDeltaMovement(direction.scale(FarmstormConfig.pumpkinTurretBulletSpeed.get()));
         level.addFreshEntity(bullet);
     }
 

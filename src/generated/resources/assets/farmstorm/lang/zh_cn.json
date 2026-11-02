@@ -202,6 +202,7 @@
   "farmstorm.configuration.power_beet.strength.level": "力量等级（1 = I 级）",
   "farmstorm.configuration.puffed_wheat.dryEdge": "干态替换立方体边长",
   "farmstorm.configuration.puffed_wheat.wetEdge": "遇水扩容后的立方体边长",
+  "farmstorm.configuration.pumpkin_turret.bulletSpeed": "导弹速度（格/刻）",
   "farmstorm.configuration.pumpkin_turret.fireIntervalTicks": "开火间隔（tick）",
   "farmstorm.configuration.pumpkin_turret.knockbackLevel": "命中时施加的击退等级",
   "farmstorm.configuration.pumpkin_turret.projectileDamage": "导弹命中造成的虚空伤害点数",

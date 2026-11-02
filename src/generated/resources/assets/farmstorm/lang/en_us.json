@@ -202,6 +202,7 @@
   "farmstorm.configuration.power_beet.strength.level": "Strength level (1 = level I)",
   "farmstorm.configuration.puffed_wheat.dryEdge": "Replacement cube edge length when dry",
   "farmstorm.configuration.puffed_wheat.wetEdge": "Replacement cube edge length when wet",
+  "farmstorm.configuration.pumpkin_turret.bulletSpeed": "Missile speed (blocks per tick)",
   "farmstorm.configuration.pumpkin_turret.fireIntervalTicks": "Fire interval (ticks)",
   "farmstorm.configuration.pumpkin_turret.knockbackLevel": "Knockback level applied on hit",
   "farmstorm.configuration.pumpkin_turret.projectileDamage": "Void damage dealt by each missile hit",

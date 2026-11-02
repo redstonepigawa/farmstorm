@@ -4,7 +4,8 @@ V-23 追加 4 张物品图标与 2 张方块，v0.1.0 · F-164 追加压缩麦�
 
 产出的 99 张材质（DEC D-25 的占位稿，作者审校后可替换）：
   1. textures/item/<26 个 id>.png            —— 15 个作物 + 6 个播种物 + 转换器 + V-23 的 4 个，16x16；
-     15 个作物与 6 个播种物图标右下角叠绿色「+」（plan0.0.1.txt 第 8 条，区分原版与改良）；转换器图标不加；
+     v0.1.1 · D-125：plan0.0.1.txt 第 8 条「右下角叠绿色 +」这条规则全局作废，生成器不再叠任何角标；
+     唯一例外是狂野苹果（v0.1.1 · D-126：源图 64x64 原样直通，不再进 16 网格取色）；
   2. textures/block/<base>_stage{0..3}.png   —— 14 个作物 × 4 阶段 = 56 张，16x16；
      <base> 取法见 TECH §6.3：作物方块 ID 去掉末尾的 _crop / _stem / _stalk / _block / _bush；
   3. textures/block/<id>.png                 —— 5 个部署方块 + zangief_cane + compressed_hay_block
@@ -47,6 +48,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import sys
 import zipfile
 from dataclasses import dataclass, field
@@ -59,11 +61,6 @@ from PIL import Image, ImageDraw
 TEXTURE_SIZE = 16
 MOD_ID = "farmstorm"
 ASSETS_DIR = "assets"
-
-PLUS_SIZE = 7
-PLUS_ARM = 3
-PLUS_MARGIN = 0
-PLUS_COLOR = (0x3F, 0xA3, 0x4D, 0xFF)
 
 PLACEHOLDER_COLOR = (0xD8, 0x1E, 0x8A, 0xFF)
 
@@ -149,13 +146,10 @@ CHIVE_COLORS: dict[str, tuple[int, int, int, int]] = {
 # 23 号 §3.4 的目标不透明像素数（6 / 14 / 40 / 90），画完逐张断言。
 CHIVE_OPAQUE: tuple[int, ...] = (6, 14, 40, 90)
 
-# --- v0.1.0 · 狂野苹果（F-163）---
-# 作者桌面那张 1294 x 1216 RGBA / 1,113,442 B 的源图。**不进 jar**：这里只存路径，生成时读一次。
-WILD_APPLE_SOURCE = Path(r"C:\Users\DASHpig\Desktop\2797B56FEF56AF13125F333A6989632A.png")
+# --- 狂野苹果（v0.1.0 · F-163；v0.1.1 · D-126 改为 64x64 源图原样直通）---
+# 作者给的 64x64 RGBA / 6,946 B 源图。**不进 jar**：这里只存路径，生成时读一次。
+WILD_APPLE_SOURCE = Path(r"C:\Users\DASHpig\Downloads\wild_apple_64x64.png")
 WILD_APPLE_SOURCE_ENV = "FARMSTORM_WILD_APPLE_SOURCE"
-# 16 网格的一格算「实心」的 alpha 覆盖率阈值：源图 alpha 只有 0 与 253 两档，250/255 ≈ 98% 等价于
-# 「这一格整格都在果实 / 叶片里」；抗锯齿边缘与导出残留的 alpha=1 噪点都不会被当成实体。
-WILD_APPLE_COVERAGE = 250
 
 
 @dataclass(frozen=True)
@@ -177,7 +171,6 @@ class Spec:
     kind: str
     zh_name: str
     candidates: tuple[SourceRef, ...] = ()
-    add_plus: bool = False
     fit: int = TEXTURE_SIZE
     tint: tuple[int, int, int] | None = None
     overlay: SourceRef | None = None
@@ -270,9 +263,6 @@ ICONS: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
     ("wild_apple", "狂野苹果", (("item", "apple"),)),
     ("compressed_puffed_wheat", "压缩膨胀麦", (("block", "hay_block_side"),)),
 )
-
-# 转换器不是改良作物，图标不加「+」（plan0.0.1.txt 第 8 条只要求改良作物）。
-NO_PLUS_ICONS = frozenset({"converter"})
 
 # 需要走 HAY_TONE 映射表的方块贴图（v0.1.0 · F-164 的压缩麦侧面）。
 HAY_TONE_BLOCKS = frozenset({"compressed_hay_block"})
@@ -404,7 +394,6 @@ def build_specs() -> tuple[Spec, ...]:
                 kind=KIND_ICON,
                 zh_name=zh_name,
                 candidates=refs(*chain),
-                add_plus=item_id not in NO_PLUS_ICONS,
                 drawer=item_id if item_id in ICON_DRAWERS else None,
             )
         )
@@ -543,23 +532,6 @@ class NullSource:
         return Resolved(None, STATUS_MISSING, "纯色占位色块", "-")
 
 
-def build_marker(size: int = PLUS_SIZE, arm: int = PLUS_ARM) -> Image.Image:
-    """渲染 size x size 的绿色「+」标记：居中的实心十字，臂宽 arm。
-
-    不描 1px 描边——7x7 十字若做完整八邻域描边会被撑成实心方块，物品栏里读不出「+」；
-    也不缩到 1px 臂——那样在 16x16 图标里太淡。7x7 + 3px 臂是能一眼看出「+」的最简解。
-    """
-    if size < arm + 2 or arm < 1:
-        raise ValueError(f"十字标记参数非法：size={size} arm={arm}")
-    start = (size - arm) // 2
-    marker = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    for y in range(size):
-        for x in range(size):
-            if start <= x < start + arm or start <= y < start + arm:
-                marker.putpixel((x, y), PLUS_COLOR)
-    return marker
-
-
 def make_placeholder() -> Image.Image:
     """源材质缺失时使用的纯色占位图。"""
     return Image.new("RGBA", (TEXTURE_SIZE, TEXTURE_SIZE), PLACEHOLDER_COLOR)
@@ -606,20 +578,6 @@ def fit_bottom_center(base: Image.Image, extent: int) -> Image.Image:
     if scaled.size != (extent, extent):
         scaled = scaled.resize((extent, extent), Image.Resampling.NEAREST)
     canvas.alpha_composite(scaled, ((TEXTURE_SIZE - extent) // 2, TEXTURE_SIZE - extent))
-    return canvas
-
-
-def compose_icon(base: Image.Image, marker: Image.Image) -> Image.Image:
-    """把标记叠到底图右下角，返回 16x16 RGBA 物品图标。"""
-    left = TEXTURE_SIZE - marker.width - PLUS_MARGIN
-    top = TEXTURE_SIZE - marker.height - PLUS_MARGIN
-    if left < 0 or top < 0:
-        raise ValueError(f"标记 {marker.size} 无法放进 {TEXTURE_SIZE}x{TEXTURE_SIZE} 画布")
-
-    canvas = base.convert("RGBA")
-    if canvas.size != (TEXTURE_SIZE, TEXTURE_SIZE):
-        canvas = canvas.resize((TEXTURE_SIZE, TEXTURE_SIZE), Image.Resampling.NEAREST)
-    canvas.alpha_composite(marker, (left, top))
     return canvas
 
 
@@ -839,60 +797,34 @@ def draw_hay_bottom() -> Image.Image:
     return image
 
 
-# --- v0.1.0 · F-163：狂野苹果（桌面源图 → 16 网格 → 23 号 §9.4 的十条色阶）---
+# --- 狂野苹果：v0.1.0 · F-163 走 16 网格取色，v0.1.1 · D-126 改为源图原样直通 ---
 def wild_apple_source() -> Path:
     """狂野苹果源图路径；FARMSTORM_WILD_APPLE_SOURCE 可指向别处的同素材。"""
     override = os.environ.get(WILD_APPLE_SOURCE_ENV)
     return Path(override) if override else WILD_APPLE_SOURCE
 
 
-def wild_apple_grid(image: Image.Image, size: int) -> Image.Image:
-    """按 alpha bbox 取景，把源图切成 size x size 格，每格取「出现次数最多的源像素颜色」。
-
-    取众数而不是面积平均：源图是平涂像素画，平均会把红裂纹与炭黑底色混成一团糊，
-    众数能保住色块与硬边。格内覆盖率低于 WILD_APPLE_COVERAGE 的位置留透明；同票按色值升序取。
-    """
-    alpha = image.getchannel("A")
-    box = alpha.point(lambda value: 255 if value >= 128 else 0).getbbox()
-    crop = image.crop(box) if box is not None else image
-    source = crop.load()
-    width, height = crop.size
-    canvas = Image.new("RGBA", (size, size), CLEAR)
-    target = canvas.load()
-    for row in range(size):
-        top, bottom = row * height // size, (row + 1) * height // size
-        for column in range(size):
-            left, right = column * width // size, (column + 1) * width // size
-            area = (right - left) * (bottom - top)
-            covered = 0
-            tally: dict[tuple[int, int, int], int] = {}
-            for y in range(top, bottom):
-                for x in range(left, right):
-                    red, green, blue, cover = source[x, y]
-                    if cover < 128:
-                        continue
-                    covered += 1
-                    key = (red, green, blue)
-                    tally[key] = tally.get(key, 0) + 1
-            if area == 0 or covered * 255 < WILD_APPLE_COVERAGE * area:
-                continue
-            color = min(tally.items(), key=lambda item: (-item[1], item[0]))[0]
-            target[column, row] = color + (0xFF,)
-    return canvas
+def wild_apple_source_size() -> tuple[int, int] | None:
+    """源图的实际尺寸；源图缺失时返回 None（此时由 compose() 退回候选链的 16x16 产物）。"""
+    path = wild_apple_source()
+    if not path.is_file():
+        return None
+    with Image.open(path) as raw:
+        return raw.size
 
 
 def draw_wild_apple() -> Image.Image | None:
-    """狂野苹果 16x16：桌面源图按 alpha bbox 取景 → 16 网格取众数色 → alpha 收成 0 / 255（无随机数）。
+    """狂野苹果：源图原样直通（D-126）——不降采样、不进 16 网格取色、不量化、不动 alpha。
 
-    这张图标就是要「源图本身的样子」，所以不做调色板量化、也不做插值平均：颜色全是源图里真实存在的
-    像素值（硬 alpha 是为了避免物品栏缩放出黑边）。源图缺失时返回 None，由 compose() 退回候选链。
+    这张图标就是要「源图本身的样子」，所以解出来就是产物；写盘那一步由 RAW_COPY_SOURCES
+    走原字节拷贝（Pillow 的 save() 必然重编码，字节会变）。源图缺失时返回 None，由 compose() 退回候选链。
     """
     path = wild_apple_source()
     if not path.is_file():
         print(f"[警告] 狂野苹果源图不存在：{path}（退回原版 item/apple）", file=sys.stderr)
         return None
     with Image.open(path) as raw:
-        return wild_apple_grid(raw.convert("RGBA"), TEXTURE_SIZE)
+        return raw.convert("RGBA")
 
 
 ITEM_DRAWERS = {
@@ -917,6 +849,12 @@ ICON_DRAWERS = {
 }
 
 DRAWERS = {**ITEM_DRAWERS, **STAGE_DRAWERS, **BLOCK_DRAWERS, **ICON_DRAWERS}
+
+# F-179 · D-126：这一类目标的验收口径是「与源图逐字节相同」，而 Pillow 的 save() 必然重编码
+# （同一张 64x64 RGBA 会被写成 7,172 B），所以写盘时走原字节拷贝；值是「取源图路径」的函数。
+RAW_COPY_SOURCES = {
+    "wild_apple": wild_apple_source,
+}
 
 # 0.0.3 追加的 4 张朋友的韭阶段贴图：v0.1.0 起由 STAGE_DRAWERS 按阶段绘制（F-162）；
 # PLACEHOLDER_COLOR / make_placeholder() 仍留给其它「源材质缺失」的项（23 号 §3.5）。
@@ -954,8 +892,8 @@ def build_additions_specs() -> tuple[Spec, ...]:
     return tuple(specs)
 
 
-def compose(spec: Spec, resolved: Resolved, marker: Image.Image) -> Image.Image:
-    """按目标类型合成最终图（图标叠「+」/ 阶段缩放 / 方块原样 / GUI 程序绘制 / 专用画法）。"""
+def compose(spec: Spec, resolved: Resolved) -> Image.Image:
+    """按目标类型合成最终图（阶段缩放 / 方块原样 / GUI 程序绘制 / 专用画法）。"""
     if spec.kind == KIND_GUI:
         return draw_gui_background()
 
@@ -971,16 +909,26 @@ def compose(spec: Spec, resolved: Resolved, marker: Image.Image) -> Image.Image:
         base = apply_hay_tone(base)
     if spec.kind == KIND_STAGE:
         return fit_bottom_center(base, spec.fit)
-    if spec.add_plus:
-        return compose_icon(base, marker)
     canvas = base.convert("RGBA")
-    if canvas.size != (TEXTURE_SIZE, TEXTURE_SIZE):
-        canvas = canvas.resize((TEXTURE_SIZE, TEXTURE_SIZE), Image.Resampling.NEAREST)
+    size = expected_size(spec)
+    if canvas.size != size:
+        canvas = canvas.resize(size, Image.Resampling.NEAREST)
     return canvas
 
 
 def expected_size(spec: Spec) -> tuple[int, int]:
-    return GUI_SIZE if spec.kind == KIND_GUI else (TEXTURE_SIZE, TEXTURE_SIZE)
+    """该目标的期望尺寸（v0.1.1 · A-32：断言保留，只放开期望值）。
+
+    GUI 是 176x166；走原字节直通的那张取源图实际尺寸（源图缺失则退回 16x16，与候选链产物一致）；
+    其余一律 16x16。
+    """
+    if spec.kind == KIND_GUI:
+        return GUI_SIZE
+    if spec.drawer in RAW_COPY_SOURCES:
+        size = wild_apple_source_size()
+        if size is not None:
+            return size
+    return (TEXTURE_SIZE, TEXTURE_SIZE)
 
 
 def output_path(out_dir: Path, spec: Spec) -> Path:
@@ -1124,7 +1072,6 @@ def main(argv: list[str] | None = None) -> int:
 
     warnings: list[str] = []
     source = NullSource() if additions else AssetSource(args.vanilla_assets, warnings)
-    marker = build_marker()
     report = Report()
 
     try:
@@ -1138,23 +1085,26 @@ def main(argv: list[str] | None = None) -> int:
                     action = "程序绘制"
                 else:
                     action = "纯色占位色块" if resolved.image is None else f"取自 {resolved.used}"
-                if spec.add_plus:
-                    action += " + 绿色「+」"
                 if spec.tint is not None:
                     action += " + 染色"
                 if spec.monochrome:
                     action += " + 灰度化"
-                print(f"[dry-run] {spec.rel_path:<46} => {target}（{action}）")
+                size = expected_size(spec)
+                print(f"[dry-run] {spec.rel_path:<46} => {target}（{action}，期望 {size[0]}x{size[1]}）")
                 report.planned += 1
                 continue
 
-            image = compose(spec, resolved, marker)
+            image = compose(spec, resolved)
             size = expected_size(spec)
             if image.size != size:
                 raise SystemExit(f"尺寸断言失败：{target} 生成 {image.size}，要求 {size}")
             target.parent.mkdir(parents=True, exist_ok=True)
             try:
-                image.save(target)
+                source_path = RAW_COPY_SOURCES.get(spec.drawer)
+                if source_path is not None:
+                    shutil.copyfile(source_path(), target)
+                else:
+                    image.save(target)
             except OSError as exc:
                 raise SystemExit(f"写入失败：{target}：{exc}") from exc
             report.written += 1

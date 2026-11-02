@@ -76,7 +76,7 @@ public final class FarmstormBlocks {
                     .mapColor(MapColor.COLOR_BROWN)
                     .strength(30.0F, 6.0F)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.GRASS));
+                    .sound(SoundType.STONE));
 
     // ---- 1 个据点核心（D-119：硬度 30 / 抗爆 1200 / 任意镐可挖 / 不可推动；F-138 只落注册面，行为在 Phase 23）----
     public static final DeferredBlock<OutpostCoreBlock> OUTPOST_CORE = REGISTER.registerBlock("outpost_core",
@@ -86,7 +86,8 @@ public final class FarmstormBlocks {
                     .strength(30.0F, 1200.0F)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.STONE)
-                    .pushReaction(PushReaction.BLOCK));
+                    .pushReaction(PushReaction.BLOCK)
+                    .lightLevel(state -> 15));
 
     private FarmstormBlocks() {}
 

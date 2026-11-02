@@ -11,8 +11,8 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
  * 不存在「两份键各自维护」的可能。**条目构成（v0.1.0 实测，改表时必须同步本段）**：
- * 32 item + 26 block + 4 effect + 3 subtitles + 166 config + 36 advancement + 6 death
- * + 16 tooltip + 13 entity + 8 gui + 1 container + 1 itemGroup + 1 command + 2 message = **315**。
+ * 32 item + 26 block + 4 effect + 3 subtitles + 167 config + 36 advancement + 6 death
+ * + 16 tooltip + 13 entity + 8 gui + 1 container + 1 itemGroup + 1 command + 2 message = **316**。
  *
  * <p>沿革：v0.0.1 是 222 键（22/20/9/1/1/8/16/4/24/117），v0.0.2 收到 263，
  * v0.0.3 收到 299（其中 16 条 `farmstorm.configuration.*` 由 F-132 的 runData 落地、
@@ -30,6 +30,7 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * / {@code message.farmstorm.farmland.quota_full}，24 号 §6.3 的第 2、3 步），到 **313** 键；
  * F-169 再加 **2** 条（{@code block.farmstorm.outpost_core} / {@code item.farmstorm.outpost_core}），
  * 到 **315** 键（299 + 16，TECH §9.4 的增量列，中英键集逐字相同）。
+ * v0.1.1 的 F-182 再加 **1** 条（{@code pumpkin_turret.bulletSpeed}，29 号 D-129），到 **316** 键。
  *
  * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
  * 155 个 config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
@@ -253,6 +254,7 @@ public final class ModLangProvider extends LanguageProvider {
         config(entries, "pumpkin_turret.projectileDamage", "导弹命中造成的虚空伤害点数", "Void damage dealt by each missile hit");
         config(entries, "pumpkin_turret.knockbackLevel", "命中时施加的击退等级", "Knockback level applied on hit");
         config(entries, "pumpkin_turret.fireIntervalTicks", "开火间隔（tick）", "Fire interval (ticks)");
+        config(entries, "pumpkin_turret.bulletSpeed", "导弹速度（格/刻）", "Missile speed (blocks per tick)");
         config(entries, "awakened_torchflower.auraRadius", "光环欧氏半径", "Aura Euclidean radius");
         config(entries, "awakened_torchflower.refreshTicks", "光环刷新间隔（tick）", "Aura refresh interval (ticks)");
         config(entries, "awakened_torchflower.fireAspectLevel", "手持剑时授予的火焰附加等级", "Fire Aspect level granted to held swords");

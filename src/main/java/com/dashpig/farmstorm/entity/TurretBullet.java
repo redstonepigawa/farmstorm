@@ -24,8 +24,8 @@ import net.minecraft.world.phys.Vec3;
  * 追踪只在服务端做（HC-03），客户端靠实体同步位置。
  */
 public class TurretBullet extends ThrowableItemProjectile {
-    /** 飞行速度：§3.8 未登记的实现细节常量（不是玩法可调数值）。 */
-    public static final double SPEED = 0.6;
+    /** D-129 / TECH §2.6.2：命中判定的最小步长。小于它就认为「已到目标中心」，直接结算，不再指望 move() 的扫掠。 */
+    private static final double MIN_STEP = 0.05;
 
     private static final String TAG_TARGET = "Target";
 
@@ -39,6 +39,9 @@ public class TurretBullet extends ThrowableItemProjectile {
      */
     @Nullable
     private Vec3 launchOrigin;
+
+    /** D-129：结算体可能被「贴脸直判」与 move() 的碰撞回调各走一次，用这个闸挡住第二次。 */
+    private boolean hitResolved;
 
     public TurretBullet(EntityType<? extends TurretBullet> type, Level level) {
         super(type, level);
@@ -86,22 +89,55 @@ public class TurretBullet extends ThrowableItemProjectile {
         super.tick();
     }
 
-    /** 每 tick 朝目标重算速度：命中判定交给原版 move 流程，本类不自己做射线检测。 */
+    /**
+     * 每 tick 朝目标重算速度（D-129 / TECH §2.6.2）：正常距离仍交给原版 move 的扫掠做命中判定，本类不做射线检测；
+     * 只有「一个步长以内」这一档特殊处理，用来消掉贴脸时每刻掉头造成的绕圈 / 抖动。
+     */
     private void steerTowards(Entity aim) {
+        double step = FarmstormConfig.pumpkinTurretBulletSpeed.get();
         Vec3 delta = aim.getBoundingBox().getCenter().subtract(this.position());
-        if (delta.lengthSqr() < 1.0E-4) {
+        double dist = delta.length();
+        if (dist <= MIN_STEP) {
+            // 位移已接近 0：move() 的扫掠体退化成一点，命中与否不可依赖，直接判中。
+            this.resolveHit(aim);
             return;
         }
-        this.setDeltaMovement(delta.normalize().scale(SPEED));
+        if (dist <= step) {
+            // 一步走完剩余距离：位移正好等于 dist，不越过、不掉头。
+            this.setDeltaMovement(delta);
+            return;
+        }
+        this.setDeltaMovement(delta.normalize().scale(step));
     }
 
     @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
+        if (!(this.level() instanceof ServerLevel)) {
+            return;
+        }
+        // 撞到实体与贴脸直判共用同一条结算体；discard() 之后 move() 仍可能再回调一次，由 hitResolved 挡住。
+        this.resolveHit(result.getEntity());
+    }
+
+    /** 结算入口（D-129）：同一发只走一次 applyHit，然后消失。 */
+    private void resolveHit(Entity hit) {
+        if (this.hitResolved) {
+            return;
+        }
+        this.hitResolved = true;
+        this.applyHit(hit);
+        this.discard();
+    }
+
+    /**
+     * 命中结算体（TECH §2.6.2：从原 onHitEntity 原样搬家——伤害类型 {@code farmstorm:void_bolt}、
+     * 进度 {@code turret_hit}、击退算式一个字符不改；{@code discard()} 移到 {@link #resolveHit(Entity)}）。
+     */
+    private void applyHit(Entity hit) {
         if (!(this.level() instanceof ServerLevel server)) {
             return;
         }
-        Entity hit = result.getEntity();
         Entity owner = this.getOwner();
         hit.hurt(FarmstormDamageTypes.voidBolt(server, owner), FarmstormConfig.pumpkinTurretProjectileDamage.get());
         if (hit instanceof ServerPlayer serverPlayer) {
@@ -115,7 +151,6 @@ public class TurretBullet extends ThrowableItemProjectile {
                 living.knockback(FarmstormConfig.pumpkinTurretKnockbackLevel.get(), -direction.x, -direction.z);
             }
         }
-        this.discard();
     }
 
     /** 撞方块即消失，不炸方块（TECH §4.7）。 */

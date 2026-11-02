@@ -69,6 +69,7 @@ public final class FarmstormConfig {
     public static ModConfigSpec.IntValue pumpkinTurretProjectileDamage;
     public static ModConfigSpec.IntValue pumpkinTurretKnockbackLevel;
     public static ModConfigSpec.IntValue pumpkinTurretFireIntervalTicks;
+    public static ModConfigSpec.DoubleValue pumpkinTurretBulletSpeed;
 
     public static ModConfigSpec.DoubleValue torchflowerAuraRadius;
     public static ModConfigSpec.IntValue torchflowerRefreshTicks;
@@ -424,13 +425,17 @@ public final class FarmstormConfig {
                 .defineInRange("targetRadius", 15, 0, 64);
         pumpkinTurretProjectileDamage = b.comment("导弹命中造成的虚空伤害点数")
                 .translation(tr("pumpkin_turret.projectileDamage"))
-                .defineInRange("projectileDamage", 1, 0, 100);
+                .defineInRange("projectileDamage", 3, 0, 100);
         pumpkinTurretKnockbackLevel = b.comment("命中时施加的击退等级")
                 .translation(tr("pumpkin_turret.knockbackLevel"))
                 .defineInRange("knockbackLevel", 1, 0, 10);
-        pumpkinTurretFireIntervalTicks = b.comment("D-28：开火间隔（60 刻 = 3 秒）")
+        pumpkinTurretFireIntervalTicks = b.comment("D-28：开火间隔（40 刻 = 2 秒）")
                 .translation(tr("pumpkin_turret.fireIntervalTicks"))
-                .defineInRange("fireIntervalTicks", 60, 1, 72000);
+                .defineInRange("fireIntervalTicks", 40, 1, 72000);
+        // D-129：原硬编码常量 0.6 已删，出膛初速与每刻步长同读本键；范围 0.0 ~ 4.0（与 melon_grenade.submunitionSpeed 同档）。
+        pumpkinTurretBulletSpeed = b.comment("导弹速度（格/刻），0.45 = 每秒 9 格；范围 0.0 ~ 4.0")
+                .translation(tr("pumpkin_turret.bulletSpeed"))
+                .defineInRange("bulletSpeed", 0.45, 0.0, 4.0);
         b.pop();
 
         b.push("awakened_torchflower");
@@ -908,7 +913,8 @@ public final class FarmstormConfig {
         b.pop();
 
         b.push("outpost_core");
-        outpostCoreFarmlandBonus = b.comment("每个据点核心增加的耕地上限；范围 0 ~ 1024")
+        outpostCoreFarmlandBonus = b.comment("每个据点核心增加的耕地上限；范围 0 ~ 1024。"
+                + "本键同时是每核容量与队伍额度基数（额度 = 本键 × 己方核数，RT-33）")
                 .translation(tr("outpost_core.farmlandBonus"))
                 .defineInRange("farmlandBonus", 16, 0, 1024);
         outpostCoreMaxPerPlayer = b.comment("每玩家可放置的核心数；范围 1 ~ 64")

@@ -75,14 +75,15 @@ public class ConverterBlock extends BaseEntityBlock {
                 Component.translatable("container.farmstorm.converter"));
     }
 
+    /**
+     * 裁定 #19 / D-170：v0.2.0 起转换器「暂时移除功能，只作为装饰方块」——右键无反应、不开界面。
+     * 用 PASS 而不是 FAIL / SUCCESS / CONSUME：后三者会吞掉右键、挡住手上物品对该格的使用（36 号 §2.9）。
+     * 方块 / 方块实体 / 菜单链 / 29 条配方 / 创造栏条目全部保留，将来恢复时只需把方法体写回来。
+     */
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hit) {
-        if (level.isClientSide) {
-            return InteractionResult.SUCCESS;               // 打开界面由服务端驱动（HC-03）
-        }
-        player.openMenu(state.getMenuProvider(level, pos));
-        return InteractionResult.CONSUME;
+        return InteractionResult.PASS;
     }
 
     /** 拆方块不吞物品（TECH §8.3）；被活塞推动时内容物随方块实体一起走，不落地复制。 */

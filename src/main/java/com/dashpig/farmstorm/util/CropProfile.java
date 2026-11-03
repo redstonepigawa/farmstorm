@@ -142,11 +142,12 @@ public record CropProfile(
             MOLOTOV, ZANGIEF_CANE, WILD_APPLE, COMPRESSED_PUFFED_WHEAT,
             FRIEND_CHIVES, POINT_DEFENSE_FUNGUS, VIBRATION_BEAN);
 
-    /** D-55 + D-56 + D-97：22 条里排除 lucky_berry、wild_apple、compressed_puffed_wheat → 19 条。 */
+    /**
+     * D-156 + A-63：浆果只滚**普通档**——池由 {@code tier()} 推导，恰好等于 {@link CropTier#COMMON} 的全集。
+     * 这里是池的**唯一**来源：不写第二份手写 id 清单，否则改一条 tier 后池不跟（RT-49 / 陷阱 29）。
+     */
     public static final List<CropProfile> LUCKY_BERRY_POOL = ALL.stream()
-            .filter(profile -> profile != LUCKY_BERRY)
-            .filter(profile -> profile != WILD_APPLE)
-            .filter(profile -> profile != COMPRESSED_PUFFED_WHEAT)
+            .filter(profile -> profile.tier() == CropTier.COMMON)
             .toList();
 
     private static final Map<ResourceLocation, CropProfile> BY_ID = ALL.stream()

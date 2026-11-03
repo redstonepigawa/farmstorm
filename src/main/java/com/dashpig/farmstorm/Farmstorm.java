@@ -131,12 +131,13 @@ public final class Farmstorm {
         LOGGER.info("自检 作物品质 普通 {} / 稀有 {} / 史诗 {} → {}",
                 common, rare, epic, tierOk ? "OK" : "FAIL");
 
-        // D-55 + D-56 + D-97：池从「ALL 减幸运浆果」的自动推导改成显式排除三件，22 - 3 = 19（TECH §11 #2）。
+        // D-156 + A-63：池由 tier() 推导（只普通档），断言值与池的构造**同一次提交**改（RT-50）——
+        // 前半条数条数（= 普通档全集），后半条保留「不含三条」的另半条（D-156 原文要求保留，见 36 号 §8 #35）。
         int poolSize = CropProfile.LUCKY_BERRY_POOL.size();
-        boolean poolOk = poolSize == 19 && CropProfile.LUCKY_BERRY_POOL.stream().noneMatch(profile ->
+        boolean poolOk = poolSize == 11 && CropProfile.LUCKY_BERRY_POOL.stream().noneMatch(profile ->
                 profile == CropProfile.LUCKY_BERRY || profile == CropProfile.WILD_APPLE
                         || profile == CropProfile.COMPRESSED_PUFFED_WHEAT);
-        LOGGER.info("自检 幸运浆果池 {} 种（排除 lucky_berry / wild_apple / compressed_puffed_wheat）→ {}",
+        LOGGER.info("自检 幸运浆果池 {} 种（按 tier() 只留 COMMON，不含 lucky_berry / wild_apple / compressed_puffed_wheat）→ {}",
                 poolSize, poolOk ? "OK" : "FAIL");
     }
 

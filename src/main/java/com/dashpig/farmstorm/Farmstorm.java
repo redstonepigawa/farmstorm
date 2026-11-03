@@ -18,6 +18,7 @@ import com.dashpig.farmstorm.registry.FarmstormSounds;
 import com.dashpig.farmstorm.team.ScoreboardTeamResolver;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.dashpig.farmstorm.util.CropProfile;
+import com.dashpig.farmstorm.util.CropTier;
 import com.dashpig.farmstorm.util.DistanceMetrics;
 import java.util.List;
 import net.minecraft.resources.ResourceKey;
@@ -113,6 +114,22 @@ public final class Farmstorm {
                 && throwable == 12 && deployable == 7 && edible == 3 && demolition == 2;
         LOGGER.info("自检 作物 {} 种：投掷型 {} / 部署型 {} / 食用型 {}；破障类 {} → {}",
                 CropProfile.ALL.size(), throwable, deployable, edible, demolition, taxonomyOk ? "OK" : "FAIL");
+
+        // D-149：三档 11 / 7 / 4 —— 交易（D-157）、培养器准入（D-162）、幸运浆果池（D-156）三处都读同一个
+        // tier()，错一条就三处一起错（RT-49）。这三个数只在这里断言；下游一律 filter，不写第二份字面清单（A-63）。
+        int common = 0;
+        int rare = 0;
+        int epic = 0;
+        for (CropProfile profile : CropProfile.ALL) {
+            switch (profile.tier()) {
+                case COMMON -> common++;
+                case RARE -> rare++;
+                case EPIC -> epic++;
+            }
+        }
+        boolean tierOk = common == 11 && rare == 7 && epic == 4;
+        LOGGER.info("自检 作物品质 普通 {} / 稀有 {} / 史诗 {} → {}",
+                common, rare, epic, tierOk ? "OK" : "FAIL");
 
         // D-55 + D-56 + D-97：池从「ALL 减幸运浆果」的自动推导改成显式排除三件，22 - 3 = 19（TECH §11 #2）。
         int poolSize = CropProfile.LUCKY_BERRY_POOL.size();

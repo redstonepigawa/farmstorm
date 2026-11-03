@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · 当前版本 **v0.1.1**
+Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · 当前发布 **v0.1.1**（**v0.2.0 只有文档，代码未实现**）
 
 [下载](https://github.com/redstonepigawa/farmstorm/releases) · [文档索引](#文档) · [构建方法](#构建与调试)
 
@@ -173,9 +173,28 @@ python -X utf8 tools/verify_project.py     # 四个段落，缺一段就是有�
 
 长期有效的基础文档：[`00-DECISIONS`](docs/zh/00-DECISIONS.md)（v0.0.1 的 41 条决策）、[`01-DESIGN`](docs/zh/01-DESIGN.md)、[`02-TECH-SPEC`](docs/zh/02-TECH-SPEC.md)、[`07-PUBLISH`](docs/zh/07-PUBLISH.md)（发布步骤与提交 / 排除清单）、[`08-DEV-GUIDE`](docs/zh/08-DEV-GUIDE.md)（开发者手册）、[`09-IMPL-VS-PLAN`](docs/zh/09-IMPL-VS-PLAN.md)（12 组实现与原计划的差异）。
 
+### 下一版文档（v0.2.0，代码未实现）
+
+v0.2.0 的六份文档已写完并冻结，**代码尚未开始**。想实现它的人从这里进：
+
+| 文件 | 内容 |
+|---|---|
+| [`docs/zh/34-DECISIONS-0.2.0.md`](docs/zh/34-DECISIONS-0.2.0.md) | **唯一真相源**：25 条决策 D-148~D-172、19 条作者裁定、对 0.1.1 的增 / 改 / **删**三表 |
+| [`docs/zh/35-DESIGN-0.2.0.md`](docs/zh/35-DESIGN-0.2.0.md) | 设计增量：11 条需求 R1~R11、40 条边界 B-01~B-40、数值表 58 行 |
+| [`docs/zh/36-TECH-0.2.0.md`](docs/zh/36-TECH-0.2.0.md) | 技术增量：注册面 **97**、动作面 46 行、config 全表、36 条验收、13 条待验证 API、RT-42~RT-50 |
+| [`docs/zh/37-TASKS-0.2.0.md`](docs/zh/37-TASKS-0.2.0.md) | 任务拆分：34 个任务 F-213~F-246、8 个 Phase 32~39、六张覆盖对照表、A-62~A-69 |
+| [`docs/zh/38-PROMPT-MAIN-0.2.0.md`](docs/zh/38-PROMPT-MAIN-0.2.0.md) | 实现方主提示词：硬约束 HC-97~HC-120、禁止行为 N-93~N-114、31 条陷阱 |
+| [`docs/zh/39-PROMPT-TASKS-0.2.0.md`](docs/zh/39-PROMPT-TASKS-0.2.0.md) | 分阶段任务清单：Phase 32~39 各一节，66 条出口判据 |
+
+投喂顺序：**先投 38 号一次**，之后每个 Phase 开工时只投 39 号对应的那一节。
+
+这一版与 0.1.1 的根本差别：**第一次推翻上一版的核心机制**——耕地绑定制整体退役（只注释调用点，`FarmlandLedger` / `FarmlandGuard` 两个类保留但不调用、`farmstorm_farmland.dat` 不读不写不删）。取而代之的是「核心 ↔ 农作物培养器」的绑定，核心本身变成 54 格容器。
+
+目标值（实现后 `数字快照` 才会有这些数）：注册对象 **97**、server config **175 键 / 60 组**、语言键 **337 × 2**、网络包 **2 个**、新增 PNG **5 张** + mcmeta **2 个**。
+
 ### 历史文档（已冻结，只作对照）
 
-`10`~`27` 号（v0.0.2 / v0.0.3 / v0.1.0 各六份）与 `03`~`06` 号（v0.0.1 期）**不再修改**。它们记的是当时的口径，与现行版本冲突时一律以 28 号为准。
+`10`~`27` 号（v0.0.2 / v0.0.3 / v0.1.0 各六份）与 `03`~`06` 号（v0.0.1 期）**不再修改**。`28`~`33` 号（v0.1.1）同样已冻结，它们记的是**当前发布版**的口径。与现行口径冲突时一律以 **34 号**为准。
 
 > ⚠️ 其中关于「0 个自定义网络包」的说法**已全部作废**（见下面的红线一节），不要照旧文档实现。
 
@@ -190,6 +209,7 @@ python -X utf8 tools/verify_project.py     # 四个段落，缺一段就是有�
 
 | 版本 | 日期 | 一句话 |
 |---|---|---|
+| v0.2.0 | —（**文档阶段**，代码未实现） | 品质分级（普通 / 稀有 / 史诗）、作物不再能种在耕地上、农民三级绿宝石交易、农作物培养器、据点核心改容器（54 格 + 16 个培养器名额）、**耕地绑定制整体退役**、转换器停用 |
 | v0.1.1 | 2026-11-03 | 浮窗（自己 + 队友全部核心，含跨维度）、耕地-核心绑定制、狂野苹果 64×64、man瓜 数值与贴脸收敛、朋友的韭持续场 |
 | v0.1.0 | 2026-11-02 | 作物生长重做（20~45 秒）、陷阱四项、据点核心与耕地额度、蓄力条上移 |
 | v0.0.4 | 2026-10-31 | Q弹 音效截断、效果对观察者同步、只锁移动、强制第三人称 |
@@ -237,6 +257,7 @@ python -X utf8 tools/verify_project.py     # 四个段落，缺一段就是有�
 | `textures/block/friend_chives_stage0..3.png` | **本项目自绘占位**（洋红 `#D81E8A`） | 不是第三方素材，出终稿时替换 |
 | `textures/block/outpost_core_a_{top,side,bottom}.png` | 作者提供的 `outpost_core_all_textures/32x32/a_runic/` 三张 32×32 | 原样拷入，走 `cube_bottom_top` |
 | `textures/item/wild_apple.png`（v0.1.1） | 作者提供的 `wild_apple_64x64.png`（64×64 / 6,946 B） | 原图直用，不缩放、不取色、不叠「+」 |
+| `textures/block/cultivator_a_{top,side,bottom}.png` + 两个 `.mcmeta`（v0.2.0，未实现） | 作者提供的 `cultivator_a_animation_pack`（32×512 纵向 16 帧 + 32×32 底面，`frametime 2`） | 原样拷入；**另需 2 张静态首帧**（`editable_frames/side_00` / `top_00`）用于空闲态——mcmeta 动画是贴图级，代码无法暂停它 |
 
 ### 使用条件（务必照此分发）
 
@@ -269,12 +290,14 @@ A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets — pl
 
 **Current release: v0.1.1** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`).
 
+A **v0.2.0 document set is written and frozen but not implemented**: crop tiers (Common / Rare / Epic), crops no longer plantable on farmland, three villager trade tiers, a Crop Cultivator block, and the Outpost Core becoming a 54-slot container with 16 cultivator bindings. That plan **retires the farmland-binding system** of v0.1.1 wholesale. Target numbers: 97 registry objects / 175 server config keys / 337 language keys / 2 network packets.
+
 - **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.1.1+mc1.21.1.jar` into `mods/`. The `-sources.jar` is for IDEs, not for `mods/`.
 - **22 crop profiles** across three usage types (throwable 12 / deployable 7 / edible 3), converted through the Crop Converter block. Team allegiance resolves through the vanilla scoreboard.
 - **Build** (never call `gradle` directly): `cmd /c ""D:\project_farm\.tools\gw.cmd" build`. Other tasks: `runClient`, `runServer`, `runData`.
 - **Static check**: `python -X utf8 tools/verify_project.py` — expected output ends with `结论：FAIL 0 项` and exit code 0.
 - **Hard constraint**: no Mixin (unchanged since v0.0.1). The former "zero custom network packets" rule is **abolished as of v0.1.1**; this version happens to add one read-only S2C packet (`farmstorm:core_list`) with no cap on the count.
 - **Known limitations**: see the tables above (the Chinese section is authoritative). Highlights: the HUD requires this mod on the client; farmland ledger entries carry no dimension; core destruction always degrades farmland to dirt (rebind or till, never "leave alone"); 64×64 item textures still render at 16 GUI px.
-- **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds the translations. v0.1.1 spec lives in `docs/zh/28`–`33`.
+- **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds the translations. The v0.1.1 spec lives in `docs/zh/28`–`33`; the **v0.2.0 spec — documents only, not implemented — lives in `docs/zh/34`–`39`**.
 
 Asset provenance and the non-commercial distribution terms are in the section above — **keep that section verbatim when redistributing or publishing a release**.

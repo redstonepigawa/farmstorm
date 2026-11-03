@@ -191,7 +191,7 @@ Phase goal: finish the seven "visible" and "tangible" items in one pass — one 
   1. `grep -c "add_plus\|NO_PLUS_ICONS\|build_marker\|compose_icon" tools/gen_textures.py` = **0**.
   2. `python -X utf8 tools/gen_textures.py --dry-run` exits with code 0, plans **26** items, and no longer prints "绿色「+」".
   3. Delete the committed `wild_apple.png` and run the generator once: the produced image is **16×16** with **no** green cross at the bottom-right corner — the 33 px of `#3FA34D` disappears from the pixel statistics (this is D-125's mechanism-level acceptance; the 64×64 passthrough is in F-179).
-  4. The sha256 of the other **24** PNGs is identical to the pre-commit value image by image (this version does not re-run them; `25 − 1 = 24` from D-125's supplementary item).
+  4. The sha256 of the other **24** PNGs is identical to the pre-commit value image by image (**this section does not re-run those 24**; the committed bytes are the reference; re-running is not a release action, A-61; `25 − 1 = 24` from D-125's supplementary item).
   5. `git status` shows only `tools/gen_textures.py` and the regenerated `wild_apple.png` changed.
 - **Rollback impact**: a revert puts the overlay mechanism back, and the next re-run sticks the `+` onto every image; F-179's passthrough branch does not depend on this task (it changes only the one `wild_apple` path), so a revert does not invalidate F-179.
 
@@ -209,7 +209,7 @@ Phase goal: finish the seven "visible" and "tangible" items in one pass — one 
 - **Acceptance**:
   1. `textures/item/wild_apple.png` is **64×64**, **6,946 B**, and its sha256 equals the source image's.
   2. Delete the committed image and run `python -X utf8 tools/gen_textures.py`: the output is 64×64, byte-for-byte identical to the source image, and reports no "size assertion failed" (`expected_size()` and `:1153` have been relaxed together per A-32).
-  3. Two consecutive runs produce the same sha256; the sha256 of the other 24 PNGs does not change.
+  3. Two consecutive runs produce the same sha256; the sha256 of the other 24 PNGs is taken from the **committed bytes** and does not change (**this section does not re-run those 24**; re-running is not a release action, A-61).
   4. `grep -c "wild_apple_grid" tools/gen_textures.py` = **0**; in the dry-run the expected sizes of `wild_apple` and of some GUI spec print on two different lines.
   5. In the in-game inventory the Wild Apple still takes 1 slot and is not a broken image (the display area is still 16×16 GUI px, independent of the texture resolution, RT-37).
 - **Rollback impact**: a revert puts the image back to 16×16 and withdraws both the passthrough and the relaxed assertion; it affects neither F-178's mechanism deletion nor any other task.
@@ -511,19 +511,19 @@ Phase goal: this version's largest structural replacement — turn "in range mea
 
 #### F-196 · Core destroyed: migrate first, three downgrade branches (L · 3.0)
 
-- **Goal**: `settleOnRemoval` handles only the farmland under this core's own name, migrating it to a successor core first; if it cannot migrate and the chunk is in memory → turn it into dirt; if it cannot migrate and the chunk is not loaded → unbind only, leaving the world untouched (D-136 / A-35).
+- **Goal**: `settleOnRemoval` handles only the farmland under this core's own name, migrating it to a successor core first; if it cannot migrate → it turns into dirt — **two levels: rebind / turn to dirt** (narrowed by A-60); "cannot migrate and the chunk is not loaded → unbind only" degrades to a **defensive branch**, unreachable in normal operation (D-136 / A-35 / A-60).
 - **Files touched**: `blockentity/OutpostCoreBlockEntity.java:315-335`, `:353-366`, `:369-379`.
 - **Implementation notes**:
   1. Keep the "really removed / unloaded" criterion at `:316-326` **unchanged by a single character**; take this core's own set from `bindingsOf(dead)`.
   2. Candidates: cover that farmland ∧ allied with **the farmland's owner** ∧ still has a free slot; among several candidates go by `distSqr` → the three-level key (the same one as tilling).
-  3. Three exits: rebind (`migrate`), `setBlock(DIRT, UPDATE_ALL)` + unbind, and unbind only.
+  3. Two exits plus one defensive branch: rebind (`migrate`) and `setBlock(DIRT, UPDATE_ALL)` + unbind; "unbind only" is the defensive branch (A-60: the ticket always covers the same 3×3, so it is unreachable in normal operation).
   4. **Compute the whole set first, then touch the world** (following the existing reason at `:312-313`, to avoid modifying the ledger while iterating it); **no chunk is loaded for the settlement** (no `getChunk`).
   5. The farmland's owner is not notified, nothing is dropped and no compensation is given (D-136's supplementary item).
 - **Depends on**: F-188, F-189, F-195
 - **Acceptance**:
   1. A successful migration (document 30 §7 #20): A has 3 fields under his name and B covers 2 of them; after destroying A those 2 fields' `bindings.corePos` become B and the 3rd becomes `minecraft:dirt`; B's total is ≤ **16**.
   2. Cannot migrate + the chunk is loaded (#21): A has 1 field under his name, no successor core around, and someone is standing at the field's edge; after destroying A the field becomes dirt and **there is no drop**.
-  3. Cannot migrate + the chunk is not loaded (#22 / A-35): first walk 200 blocks away to unload the chunk, then destroy the core with `/execute in <dim> run setblock <core coords> air` — the field is still `minecraft:farmland` (not one block of the world has moved), the `bindings` entry is removed, and the log shows "迁移失败且区块未加载：只摘绑定".
+  3. Walk 200 blocks away and destroy the core with `/execute in <dim> run setblock <core coords> air` (#22 / A-60) → that field turns into `minecraft:dirt` (the same as up close) with no drops; the `bindings` entry is removed; the log does **not** show "迁移失败且区块未加载：只摘绑定" (that string is at `OutpostCoreBlockEntity.java:374`, does not appear in normal operation, confirmed by code review).
   4. The two downgrades (document 29 B-19 / B-20): a successor core exists but is full → dirt; a successor core covers it but is not allied with the farmland's owner → dirt.
   5. The plot is no longer farmland (B-21): skip it, unbind, and do not touch the world (if the position now holds stone, the stone does not change).
   6. Only this core's own name is handled: another core's fields (`bindings.corePos` pointing at B) **do not move at all** after A is destroyed (bug 1's symptom does not reproduce).
@@ -757,7 +757,7 @@ Phase goal: close in one pass the language-key ledger, the release artifact and 
 - **Depends on**: F-177, F-179, F-180, F-181, F-182, F-183, F-184, F-185, F-186, F-192, F-196, F-198, F-199, F-200, F-203
 - **Acceptance**:
   1. #20 – #38 each have a measured reading; **0** failing.
-  2. #22's log shows "迁移失败且区块未加载：只摘绑定", and that cell is still `minecraft:farmland`.
+  2. #22 turns into `minecraft:dirt` (the same as up close) with no drops, and the log does **not** show "迁移失败且区块未加载：只摘绑定"; that string exists at `OutpostCoreBlockEntity.java:374` and does not appear in normal operation, confirmed by code review.
   3. #30's two rounds (200 / 100) both hold; #32's unload-and-return leaves no residue.
   4. #33's F3 `Light` = **15**; #34's three readings (≈2000 ms / **3** points / ≈ **33** ticks).
   5. #36's `chunks.dat` holds no core coordinate; #37's `@Mixin` **0** hits, `CustomPacketPayload` exactly **1** file, and the tool `93 / 93`; #38's tool output `结论：FAIL 0 项`, exit code 0, config section **166**.
@@ -808,7 +808,7 @@ Phase goal: close in one pass the language-key ledger, the release artifact and 
 - **Depends on**: F-178, F-179, F-180, F-181, F-182, F-184, F-185, F-186, F-188, F-190, F-196
 - **Acceptance** (**19 items = B-21 ~ B-39 one-to-one**):
   1. **B-21** the plot is no longer farmland when the core is destroyed: `/setblock stone` on that cell and then destroy the core → it is skipped, unbound, and the stone does not change.
-  2. **B-22** core destroyed + the chunk not loaded: walk 200 blocks away and destroy the core with `/execute in` → it is still `farmland`, only the binding is removed, and the log has one line "迁移失败且区块未加载".
+  2. **B-22** the chunk boundary when a core is destroyed (A-60): walk 200 blocks away and destroy the core with `/execute in` → the field turns into `dirt` (the same as up close) with no drops; "unbind only" is an unreachable defensive branch, and the log string at `OutpostCoreBlockEntity.java:374` is confirmed by code review to exist and does not appear in normal operation.
   3. **B-23** a core is already full during the backfill: that land stays `farmland`, unbound, and **can be trampled** (control: the one bound in the same batch cannot be trampled).
   4. **B-24** a legacy save over capacity: 20 old fields + 1 core (capacity 16) → 16 are protected and 4 are not (trampling each as the control), **0** turn into dirt.
   5. **B-25** recovery after a failed backfill: if the next startup still has no free slot it is still unprotected; after digging it up and tilling once it regains protection (verify each of the two paths once).
@@ -825,7 +825,7 @@ Phase goal: close in one pass the language-key ledger, the release artifact and 
   16. **B-36** the five sound types: breaking / placing / stepping / mining / falling, one positive-negative control each (human listening + `/playsound` control; recordings saved to `.work/v011-verify/B-36-<type>.mp4`).
   17. **B-37** lighting and mob spawning: F3 `Light = 15`, there is light within 15 blocks; in the centre of the light **0** mobs in 100 seconds and ≥ 1 beyond 15 blocks.
   18. **B-38** the other 24 still carry the "+": the sha256 list of the 24 PNGs + 3 sampled visually confirmed to still have the green cross at the bottom-right corner (screenshots `.work/v011-verify/B-38-*.png`).
-  19. **B-39** re-running the generator: after deleting the image and re-running, the output is still **64×64**, byte-for-byte identical to the source image, and the other 24 PNGs' sha256 is unchanged.
+  19. **B-39** the generator and the release artifact (A-61): **this section does not re-run the generator** (not a release action); the committed `wild_apple.png` is **64×64 / 6,946 B with the source image's sha256**, and the other 24 are identical to the pre-commit ones image by image (by the bytes in git); a re-run strips the green cross off those 24, which is D-125's **expected outcome** and is not counted as a failure.
 - **Rollback impact**: no code change, no rollback surface.
 
 #### F-212 · The full summary and the upstream-consistency signature (L · 3.0)
@@ -956,7 +956,7 @@ This section collects in three parts: the **12 rows in the table** reproduce A-3
 | **A-32** | `gen_textures.py`'s **size assertion and `expected_size()` are relaxed together**, otherwise the 64×64 passthrough output hits `SystemExit` | **F-179** | document 28 §3.2 row 14 + §3.3 row 8 | ledger: **back-filled** ｜ review by this draft: back-filled |
 | **A-33** | The wording of Friend Chives' "200": **both the field length and the application base take `friend_chives.effectTicks`**, and the amount applied = `effectTicks − x` | **F-185** (only one source, `fieldLength`, is left in the code) | document 28 D-131 | ledger: **back-filled** ｜ review by this draft: back-filled |
 | **A-34** | The overlay's "8 lines" means **8 core lines**, `+N` **adds 1 more line**, so the maximum is **9 lines** (panel height 83 px → 93 px) | **F-203** | item 4 of document 28 D-143's conclusion | ledger: **back-filled** ｜ review by this draft: back-filled |
-| **A-35** | When a core is destroyed and "no successor is found + the chunk the farmland is in is not loaded" → **unbind only, the world does not move** | **F-196** (the third of the three branches) | document 28 D-136 supplementary item | ledger: **back-filled** ｜ review by this draft: back-filled |
+| **A-35** | When a core is destroyed and "no successor is found + the chunk the farmland is in is not loaded" → **unbind only, the world does not move** | **F-196** (two exits plus one defensive branch) | document 28 D-136 supplementary item | ledger: **back-filled** ｜ review by this draft: back-filled; **narrowed by A-60: the third branch degrades to a defensive branch** (the ticket always covers the same 3×3 ⇒ unreachable in normal operation, so core removal is really two levels) |
 | **A-36** | The legacy backfill's traversal order was **originally** set to the record order of `FarmlandLedger.byOwner` (`LinkedHashSet`, `FarmlandLedger.java:51`); **that wording has been superseded by A-47** (A-44 is void, see below) | **F-190** (changed to A-47's total-order sort), **F-188** (the v2 on-disk form attaches no semantics to the order any more) | document 28 D-137 supplementary item | ledger: **back-filled** ｜ review by this draft: back-filled; **the order part has been covered by A-47** |
 | **A-37** | **An acceptance assertion may not say "the call-site count = 1"**; once the binding regime introduces "unbind", the write entries are no longer unique | **this file §0.1's three hard conventions** (all 37 tasks follow them) | document 31's acceptance chapter + document 30 §7 | ledger: **to be back-filled (closed when document 31 is drafted)** ｜ review by this draft: **this draft is the closing point**, landed in §0.1; the table header discipline ① of document 30 §7 is already written to the same wording |
 | **A-38** | The on-disk file of forced loading is **`world/data/chunks.dat`** (not `level.dat`); `setChunkForced()` and `TicketController#forceChunk` **both write it ⇒ both are rejected** | **F-198** (a bare `TicketType` + `addRegionTicket` only) | document 28 D-145 + fact card §2 #24 + document 30 §2.5 | ledger: **back-filled in 28 / 30 pending** ｜ review by this draft: document 30 §2.5.1-2, §3 row 39 and §7 #36 are already written, **back-filled** |

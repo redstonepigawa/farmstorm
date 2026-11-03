@@ -470,7 +470,7 @@ settleOnRemoval()   // OutpostCoreBlockEntity:315-335，改后
       else if (区块已在内存 && 方块仍是 farmland):
           toDirt.add(b.pos)                                  // 迁不动 + 看得见 ⇒ 变泥土（D-136）
       else:
-          unbindOnly.add(b.pos)                              // ★ A-35：迁不动 + 区块未加载
+          unbindOnly.add(b.pos)                              // 防御分支：票缺失 / 异常时才可能；正常不可达（A-60）
                                                              //   ⇒ 只摘绑定、世界不动（不 setBlock、不加载区块）
   // 先算完，再动世界（沿用 :312-313 的既有理由：避免边遍历边改账本）
   for ((pos, core) in rebind): ledger.migrate(pos, core)     // 改绑 + 同步 byCore
@@ -912,7 +912,7 @@ public class FriendChivesProjectile extends ThrownCropEntity {
 | 1 | 改 | `gradle.properties:11` | `mod_version=0.1.0` | `0.1.1` | D-124 | — |
 | 2 | 改 | `检查环境.cmd:14`、`一键构建.cmd:10-12` | `farmstorm-0.0.1+mc1.21.1.jar`（及 `-sources.jar`） | `farmstorm-0.1.1+mc1.21.1.jar` / `-sources.jar` | D-147 | RT-38 |
 | 3 | 改 | `assets/farmstorm/textures/item/wild_apple.png` | 16×16 / 571 B / 88 色 | **64×64 原图原样**（源图 6,946 B） | D-126 | RT-37 |
-| 4 | 改 | `tools/gen_textures.py` 叠「+」机制（`:274-275`、`:407`、`:546-560`、`:612-623`、`:974-975`） | 25 张带「+」 | 机制删除（本版只重生成 `wild_apple` 1 张） | D-125 | RT-37 |
+| 4 | 改 | `tools/gen_textures.py` 叠「+」机制（`:274-275`、`:407`、`:546-560`、`:612-623`、`:974-975`） | 25 张带「+」 | 机制删除（本版只重生成 `wild_apple` 1 张）；重跑会把其余 24 张的绿十字一并剥掉，属预期（A-61） | D-125 / **A-61** | RT-37 |
 | 5 | 改 | `tools/gen_textures.py:154`、`:849-881`、`:884-895` | 桌面旧图 + `wild_apple_grid()` 的 16 网格众数取色 | 直读 64×64 源图、原样输出（`wild_apple` 走直通分支） | D-126 | RT-37 |
 | 6 | **改** | **`tools/gen_textures.py:982-983`（`expected_size()` 恒返回 16×16）与 `:1151-1154`（`image.size != expected_size(spec)` → `SystemExit`）** | 尺寸断言只接受 16×16 | **两处一起放开**：`expected_size()` 对 `wild_apple` 返回源图实际尺寸，`:1153` 的断言随之成立 | D-126 / **A-32** | RT-37 |
 | 7 | 改 | `registry/FarmstormBlocks.java:79` | `SoundType.GRASS` | `SoundType.STONE`（**5 类声音一起变**：破坏 / 放置 / 踩踏 / 挖掘 / 落地） | D-130 / **A-31** | — |
@@ -935,7 +935,7 @@ public class FriendChivesProjectile extends ThrownCropEntity {
 | 24 | 改 | `farmland/FarmlandGuard.java:69-75` | 三态里只有范围 + 额度 | 加「选核 + 单核空位」，`QUOTA_FULL` 语义细化 | D-135 | RT-33 |
 | 25 | 改 | `farmland/FarmlandGuard.java:92-107` | `inOwnRange` 遍历在线玩家 | 改绑定表 / 索引查（离线安全） | D-138 | — |
 | 26 | 改 | `farmland/FarmlandGuard.java:120-134` | `protectsFromTrample` 遍历在线玩家 | 改「有绑定即受保护」 | D-138 | — |
-| 27 | 改 | `blockentity/OutpostCoreBlockEntity.java:315-335` | 直接清算 | 先迁移；**迁移失败分两支：区块已加载 → 变泥土；区块未加载 → 只摘绑定、世界不动**；先算后写 | D-136 / **A-35** | RT-32 |
+| 27 | 改 | `blockentity/OutpostCoreBlockEntity.java:315-335` | 直接清算 | 先迁移；**迁移失败分两级（改绑 / 变泥土）；「未加载」支为防御分支、正常运行不可达（A-60）**；先算后写 | D-136 / **A-35** / **A-60** | RT-32 |
 | 28 | 改 | `blockentity/OutpostCoreBlockEntity.java:353-379` | 两路在线遍历 + 3×3 | 只处理本核名下（`bindingsOf`） | D-136 | — |
 | 29 | 改 | `blockentity/OutpostCoreBlockEntity.java:95-103` | `setOwner` 只写归属 + 索引 | 追加：申请 ticket、请求广播 | D-145 / D-142 | RT-39 |
 | 30 | 改 | `blockentity/OutpostCoreBlockEntity.java:166-170` | `release` 只摘索引 | 追加：释放 ticket、请求广播 | D-145 / D-142 | RT-39 |
@@ -1163,7 +1163,7 @@ itemGroup.farmstorm         1
 - **触发条件**：`load` 没判 `dataVersion`；`orphans` 落盘丢了；迁移的候选判据少了「有空位」；边遍历边改账本。
 - **影响面**：**世界方块**（唯一会动世界的一条：迁移失败分支的 `setBlock(DIRT)`）+ 玩家已开垦的田。
 - **缓释**：v1 全部读成 `orphans`（不猜绑定）；补建整段无 `setBlock`；迁移先算完再动世界（沿用 `:312-313` 的既有理由）；`orphans` 落盘让补建幂等。
-- **验证**：#16（v2 落盘字段）、#18（老档补建、补不上的不变泥土、两次启动 N/M 相同）、#19（迁移成功）、#20（迁移失败且区块已加载 → 变泥土）、#21（A-35：迁移失败且区块未加载 → 只摘绑定、世界不动）。
+- **验证**：#16（v2 落盘字段）、#18（老档补建、补不上的不变泥土、两次启动 N/M 相同）、#19（迁移成功）、#20（迁移失败且区块已加载 → 变泥土）、#21（A-60：迁移成功 / 变泥土两级；「未加载 → 只摘绑定」为防御分支、运行期不可达，以代码审阅确认）。
 
 ### RT-33 · 一键两义：`outpost_core.farmlandBonus` 同时是容量与额度基数
 
@@ -1268,7 +1268,7 @@ itemGroup.farmstorm         1
 | 19 | 用 0.1.0 的 `farmstorm_farmland.dat`（只有 `owners` 段、无 `dataVersion`）启动：日志「耕地补建：绑定 N 块 / 保持未绑定 M 块」；**同一份存档连跑两次，N 与 M 完全相同**（A-47：按 `BlockPos#compareTo` 单级全序处理，与 `HashMap` 迭代顺序无关）；**补不上的那些方块仍是 `minecraft:farmland`**（逐个 `execute if block` 验证，0 个变泥土） | `latest.log` + `/execute if block … minecraft:farmland` | D-137、A-47、§2.2.8、RT-32 |
 | 20 | 核 A 名下 3 块田、核 B 覆盖其中 2 块：拆 A 后，那 2 块的 `bindings.corePos` 变成 B、第 3 块变 `minecraft:dirt`；B 名下总数 ≤ 16 | 存档 NBT + 游戏内方块 | D-136、§2.2.9、RT-32 |
 | 21 | 核 A 名下 1 块田、周围无接替核、**该区块在内存里**（人就站在田边）：拆 A 后该田变 `minecraft:dirt`，且**没有**掉落物 | 游戏内方块 | D-136、§2.2.9、RT-32 |
-| 22 | 核 A 名下 1 块田、周围无接替核、**该区块未加载**（先走远 200 格让区块卸载，再用 `/execute in <dim> run setblock <核坐标> air` 拆核）：该田**仍是 `minecraft:farmland`**（世界一个方块都没动），`bindings` 里那条被摘除；日志里出现「迁移失败且区块未加载：只摘绑定」（A-35） | 游戏内方块 + 存档 NBT + `latest.log` | D-136、A-35、§2.2.9、RT-32 |
+| 22 | 核 A 名下 1 块田、周围无接替核：先走远 200 格、再用 `/execute in <dim> run setblock <核坐标> air` 拆核 —— 该田**变 `minecraft:dirt`**（与站在田边拆一致）、**没有掉落物**；`bindings` 里那条被摘除；日志**不出现**「迁移失败且区块未加载：只摘绑定」（A-60；该支不打日志，以方块读数为准）。「迁移失败且区块未加载：只摘绑定」串位于 `OutpostCoreBlockEntity.java:374`，**正常运行不出现**，以代码审阅确认 | 游戏内方块 + 存档 NBT + `latest.log` | D-136、A-60、§2.2.9、RT-32 |
 | 23 | `textures/item/wild_apple.png` 是 **64×64**（`identify` 或 PIL 读尺寸）；重跑 `python -X utf8 tools/gen_textures.py` 之后**仍是 64×64**、不报「尺寸断言失败」（`expected_size()` 与 `:1153` 已按 A-32 放开）；物品栏里显示不破图 | PNG 文件 + 生成器输出 + 游戏内物品栏 | D-126、A-32、RT-37 |
 | 24 | 压缩干草块**破坏**：音色与 `/playsound minecraft:block.stone.break block @s` 一致，与 `minecraft:block.grass.break` 明显不同 | 游戏内（正 / 负对照各播一次） | D-130、A-31、§3 第 7 行 |
 | 25 | 压缩干草块**放置**：音色与 `/playsound minecraft:block.stone.place block @s` 一致，与 `minecraft:block.grass.place` 不同 | 同上 | D-130、A-31 |

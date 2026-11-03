@@ -1,6 +1,6 @@
 # 农场风云 / Farmstorm
 
-Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· v0.0.4（已发布）· v0.1.0（已发布）· **v0.1.1（当前文档版）**
+Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm` · v0.0.1（已发布）· v0.0.2（已发布）· v0.0.3（已发布）· v0.0.4（已发布）· v0.1.0（已发布）· **v0.1.1（已发布）**
 
 > 把原版农作物改造成 PvP 道具：同一种作物可以种在地里、扔出去、架在墙上、或者吃掉。
 > Vanilla crops re-armed as PvP gadgets: plant them, throw them, mount them, or eat them.
@@ -88,14 +88,14 @@ cmd /c ""D:\project_farm\.tools\gw.cmd" runClient    :: 起客户端
 ### 玩家怎么装（不需要懂构建）
 
 1. 用 PCL / HMCL 建一个 **Minecraft 1.21.1 + NeoForge 21.1.x** 的版本（本机实测用 21.1.265 亦可）。
-2. 打开该版本的 `mods` 文件夹（没有就新建），把 `farmstorm-<版本>+mc1.21.1.jar` 放进去。当前发布件见 `dist/`（**`0.0.2` 是当前发布版**，`0.0.1` 保留作对照；同目录的 `安装说明.txt` 已更新到 0.0.2，含「v0.0.2 有什么」与完整已知限制）。
+2. 打开该版本的 `mods` 文件夹（没有就新建），把 `farmstorm-<版本>+mc1.21.1.jar` 放进去。当前发布件见 [Releases](https://github.com/redstonepigawa/farmstorm/releases)（**`v0.1.1` 是最新版**，`0.0.1`~`0.1.0` 保留作对照；同目录的 `安装说明.txt` 已更新到 0.1.1，含「本版改了什么」「从 v0.1.0 升级必看」与完整已知限制）。
 3. 启动游戏。创造模式物品栏最后会多一个「农场风云」标签页，22 个物品都在里面。
 
 jar 从 Releases 页下载；已知限制与版本要求见 [`.work/PLAN.md`](.work/PLAN.md) 与 Release 说明。
 
 ### 发布到 GitHub
 
-仓库没有安装 git、也没有 GitHub 凭据，因此整理成「可直接 push」的状态，步骤见 [`docs/zh/07-PUBLISH.md`](docs/zh/07-PUBLISH.md)（含提交/排除清单、Release 附件做法、以及本机构建环境的特殊适配）。
+已发布到 GitHub Releases（仓库 `redstonepigawa/farmstorm`，当前 `v0.1.1`）。发版步骤、提交/排除清单与 Release 附件做法见 [`docs/zh/07-PUBLISH.md`](docs/zh/07-PUBLISH.md)（另含本机构建环境的特殊适配）。
 
 ---
 

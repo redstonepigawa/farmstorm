@@ -191,6 +191,11 @@ public final class ModLangProvider extends LanguageProvider {
         plain(entries, "tooltip.farmstorm.category.construction", "建造类", "Construction");
         plain(entries, "tooltip.farmstorm.category.damage", "伤害类", "Damage");
         plain(entries, "tooltip.farmstorm.category_separator", "、", ", ");
+        // ---- 品质三档 + 1 条行格式（D-150 / D-151）；键名体例照 CropCategory.translationKey() ----
+        plain(entries, "tooltip.farmstorm.tier.common", "普通", "Common");
+        plain(entries, "tooltip.farmstorm.tier.rare", "稀有", "Rare");
+        plain(entries, "tooltip.farmstorm.tier.epic", "史诗", "Epic");
+        plain(entries, "tooltip.farmstorm.tier", "品质：%s", "Tier: %s");
         plain(entries, "death.attack.farmstorm.void_bolt", "%1$s 被虚空撕碎", "%1$s was torn apart by the void");
         plain(entries, "death.attack.farmstorm.void_bolt.player", "%1$s 被 %2$s 的 man瓜 击落", "%1$s was shot down by %2$s's Pumpkin Turret");
         plain(entries, "death.attack.farmstorm.crop_blast", "%1$s 被作物炸飞了", "%1$s was blown up by a crop");

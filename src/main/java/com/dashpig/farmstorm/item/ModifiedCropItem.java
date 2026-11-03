@@ -32,6 +32,8 @@ public class ModifiedCropItem extends Item {
      * 在公共代码里读客户端语言会在专用服务端加载客户端类。
      */
     private static final String CATEGORY_SEPARATOR_KEY = "tooltip.farmstorm.category_separator";
+    /** 品质行的行格式键；三档的档名由 {@code CropTier#translationKey()} 给出（3 + 1 = 4 条新键）。 */
+    private static final String TIER_KEY = "tooltip.farmstorm.tier";
 
     private final CropProfile profile;
 
@@ -57,6 +59,17 @@ public class ModifiedCropItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tips, TooltipFlag flag) {
         appendCropTooltip(this.profile, tips);
+    }
+
+    /**
+     * 名色（D-151）：档色套在**物品名这个 {@link Component}** 上，所以铁砧改名、告示牌、聊天栏、
+     * 容器预览里的同名物品全部同色——不需要在任何 GUI 里二次绘制。
+     * 走 {@link Item#getName} 而不是 tooltip，因为 {@code ItemStack#getHoverName()} 在没有
+     * {@code CUSTOM_NAME} / {@code ITEM_NAME} 组件时就是调它。覆盖 15 个物品（投掷 12 + 食用 3）。
+     */
+    @Override
+    public Component getName(ItemStack stack) {
+        return this.profile.tier().nameStyle(super.getName(stack));
     }
 
     /**
@@ -124,5 +137,9 @@ public class ModifiedCropItem extends Item {
             first = false;
         }
         tips.add(line.withStyle(ChatFormatting.GRAY));
+        // D-151：品质行**另起一行**，不与上面的类别行合并（类别 ≠ 品质，是两套语义）。
+        // 外壳 GRAY 与类别行同色、档名子组件带自己的颜色，不抢视觉。29 个物品共用这一处实现。
+        tips.add(Component.translatable(TIER_KEY,
+                Component.translatable(profile.tier().translationKey())).withStyle(ChatFormatting.GRAY));
     }
 }

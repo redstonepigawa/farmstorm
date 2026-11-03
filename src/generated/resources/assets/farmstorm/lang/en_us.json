@@ -320,6 +320,10 @@
   "tooltip.farmstorm.floating": "Floating",
   "tooltip.farmstorm.team": "Team: %s",
   "tooltip.farmstorm.temporary_enchant": "Temporary enchantment (expires in %s s)",
+  "tooltip.farmstorm.tier": "Tier: %s",
+  "tooltip.farmstorm.tier.common": "Common",
+  "tooltip.farmstorm.tier.epic": "Epic",
+  "tooltip.farmstorm.tier.rare": "Rare",
   "tooltip.farmstorm.trap_armed": "Armed",
   "tooltip.farmstorm.turret_range": "Targeting range: %s blocks (Chebyshev)"
 }

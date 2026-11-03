@@ -320,6 +320,10 @@
   "tooltip.farmstorm.floating": "悬空",
   "tooltip.farmstorm.team": "队伍：%s",
   "tooltip.farmstorm.temporary_enchant": "临时附魔（%s 秒后消失）",
+  "tooltip.farmstorm.tier": "品质：%s",
+  "tooltip.farmstorm.tier.common": "普通",
+  "tooltip.farmstorm.tier.epic": "史诗",
+  "tooltip.farmstorm.tier.rare": "稀有",
   "tooltip.farmstorm.trap_armed": "已布置",
   "tooltip.farmstorm.turret_range": "索敌范围：%s 格（切比雪夫）"
 }

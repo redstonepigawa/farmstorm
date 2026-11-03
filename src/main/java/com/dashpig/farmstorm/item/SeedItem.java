@@ -29,4 +29,13 @@ public class SeedItem extends ItemNameBlockItem {
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tips, TooltipFlag flag) {
         ModifiedCropItem.appendCropTooltip(this.profile, tips);
     }
+
+    /**
+     * 名色（D-151）：种子**没有自己的品质来源**，一律跟随父作物（DEC §4.2）。
+     * 本类另立一支（{@code extends ItemNameBlockItem}），只改父类会漏掉这 7 个播种物。
+     */
+    @Override
+    public Component getName(ItemStack stack) {
+        return this.profile.tier().nameStyle(super.getName(stack));
+    }
 }

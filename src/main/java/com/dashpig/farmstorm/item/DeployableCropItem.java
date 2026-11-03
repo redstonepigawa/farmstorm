@@ -33,6 +33,15 @@ public class DeployableCropItem extends net.minecraft.world.item.BlockItem {
         ModifiedCropItem.appendCropTooltip(this.profile, tips);
     }
 
+    /**
+     * 名色（D-151）：本类**不继承** {@link ModifiedCropItem}，所以必须单独覆写——
+     * 只改父类会漏掉这 7 个部署型物品。覆盖 7 个（部署方块有 8 个，但 vibration_bean 的物品是投掷型）。
+     */
+    @Override
+    public Component getName(ItemStack stack) {
+        return this.profile.tier().nameStyle(super.getName(stack));
+    }
+
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
         InteractionResult planted = ModifiedCropItem.plantCrop(this.profile, ctx);

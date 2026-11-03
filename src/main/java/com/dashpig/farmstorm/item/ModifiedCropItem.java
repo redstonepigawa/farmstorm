@@ -111,12 +111,17 @@ public class ModifiedCropItem extends Item {
         return InteractionResult.CONSUME;
     }
 
+    /**
+     * 裁定 #4 / D-152 ①：v0.2.0 起本模组作物不可种植——判据恒 {@code false}，{@code plantCrop} 一律回 PASS。
+     * 注意这只堵「自定义播种」这一条；7 个独立种子走的是 {@code SeedItem#useOn}，另一条（陷阱 23 / RT-48）。
+     */
     private static boolean isPlantableSoil(UseOnContext ctx, BlockState soil) {
-        if (!(soil.getBlock() instanceof FarmBlock)) {
-            return false;
-        }
+        // 原判据（「是 FarmBlock 才允许」）留成注释备查，不删（36 号 §2.2 路径①）：
+        // if (!(soil.getBlock() instanceof FarmBlock)) {
+        //     return false;
+        // }
         // FarmBlock 的湿润状态只影响生长速度，不影响能否播种，因此这里不再额外判断。
-        return true;
+        return false;
     }
 
     /**

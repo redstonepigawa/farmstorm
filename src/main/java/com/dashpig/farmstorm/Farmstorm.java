@@ -1,10 +1,12 @@
 package com.dashpig.farmstorm;
 
+import com.dashpig.farmstorm.combat.MobAiSuspension;
 import com.dashpig.farmstorm.config.FarmstormClientConfig;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.event.FarmstormGameEvents;
 import com.dashpig.farmstorm.event.VillagerTradeEvents;
 import com.dashpig.farmstorm.network.FarmstormNetwork;
+import com.dashpig.farmstorm.registry.FarmstormAttachments;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.registry.FarmstormBlocks;
 import com.dashpig.farmstorm.registry.FarmstormCreativeTabs;
@@ -56,6 +58,9 @@ public final class Farmstorm {
         // 2 个 mob_effects 与 2 个 sound_events（F-64 / TECH §2.2 #10~#13）：D-50 的相位通道与 D-66/D-76 的音频。
         FarmstormMobEffects.REGISTER.register(modBus);
         FarmstormSounds.REGISTER.register(modBus);
+        // 口径外的第 13 类（F-252 / 裁定 #17 / A-73）：实体附件类型 1 个 farmstorm:ai_suspend，
+        // 注在 NeoForgeRegistries.Keys.ATTACHMENT_TYPES，**不计入 97**；logRegistrySelfCheck 的 12 类断言一字不动。
+        FarmstormAttachments.REGISTER.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, FarmstormConfig.SPEC);
         // F-201：CLIENT 3 键单独一份 config/farmstorm-client.toml。**不进** FarmstormConfig——
@@ -75,6 +80,8 @@ public final class Farmstorm {
         // F-223：农民交易三项。事件在数据包重载（TagsUpdatedEvent）里对每个职业各抛一次，
         // 与上面同一条 game 总线；只处理 VillagerProfession.FARMER。
         VillagerTradeEvents.register(NeoForge.EVENT_BUS);
+        // F-253：AI 挂起的每刻对账（EventPriority.HIGHEST，先于 mount 挂载的 NORMAL）、载入结算、停服结算。
+        MobAiSuspension.register(NeoForge.EVENT_BUS);
 
         logSelfCheck();
         logRegistrySelfCheck();

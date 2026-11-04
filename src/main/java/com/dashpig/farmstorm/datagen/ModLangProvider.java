@@ -411,6 +411,9 @@ public final class ModLangProvider extends LanguageProvider {
                 "Ticks between trap dust bursts (100 ticks = 5 s)");
         config(entries, "trap.maxTrapsPerPlayer", "每玩家陷阱名额（第 N+1 个挤掉最早的一个）",
                 "Traps allowed per player (the next one evicts the oldest)");
+        // ---- v0.2.1 的第 1 条 trap 键（F-258 / D-183 / 42 号 §4.3）：键与翻译在同一个任务里写完，本任务同时开窗 ----
+        config(entries, "trap.damageMultiplier", "陷阱对敌对生物的伤害倍率（1.0 = 不改；只作用于 blast_carrot 与 zangief_cane）",
+                "Damage multiplier of traps against hostile mobs (1.0 = unchanged; blast_carrot and zangief_cane only)");
         config(entries, "outpost_core.maxPerPlayer", "每玩家可放置的据点核心数", "Outpost cores each player may place");
         // ---- v0.2.0 的 6 条 trade 键（F-222 / D-159；与 FarmstormConfig 的 trade 组 6 键 1:1）----
         config(entries, "trade.common.min", "普通档交易价格下界（绿宝石，1 ~ 64）", "Common tier trade price lower bound (emeralds, 1-64)");

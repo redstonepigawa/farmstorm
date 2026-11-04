@@ -240,6 +240,7 @@
   "farmstorm.configuration.trade.epic.min": "史诗档交易价格下界（绿宝石，1 ~ 64）",
   "farmstorm.configuration.trade.rare.max": "稀有档交易价格上界（绿宝石，1 ~ 64）",
   "farmstorm.configuration.trade.rare.min": "稀有档交易价格下界（绿宝石，1 ~ 64）",
+  "farmstorm.configuration.trap.damageMultiplier": "陷阱对敌对生物的伤害倍率（1.0 = 不改；只作用于 blast_carrot 与 zangief_cane）",
   "farmstorm.configuration.trap.dustIntervalTicks": "陷阱 dust 粒子的间隔（刻，100 刻 = 5 秒）",
   "farmstorm.configuration.trap.immunityTicks": "触发后陷阱大类免疫的刻数（100 刻 = 5 秒）",
   "farmstorm.configuration.trap.maxTrapsPerPlayer": "每玩家陷阱名额（第 N+1 个挤掉最早的一个）",

@@ -223,6 +223,8 @@ public final class FarmstormConfig {
     public static ModConfigSpec.IntValue trapImmunityTicks;
     public static ModConfigSpec.IntValue trapDustIntervalTicks;
     public static ModConfigSpec.IntValue trapMaxTrapsPerPlayer;
+    /** D-183 / F-258：陷阱对敌对生物的伤害倍率（默认 3.0，值域 1.0 ~ 10.0）；只作用于 blast_carrot 与 zangief_cane。 */
+    public static ModConfigSpec.DoubleValue trapDamageMultiplier;
 
     // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
     // 本字段的声明**保留**：FarmlandGuard / FarmlandLedger 两处 .get() 仍在，删声明等于改这两个类（A-62）。
@@ -924,6 +926,9 @@ public final class FarmstormConfig {
         trapMaxTrapsPerPlayer = b.comment("每玩家陷阱名额，第 17 个挤掉最早的一个；范围 1 ~ 128")
                 .translation(tr("trap.maxTrapsPerPlayer"))
                 .defineInRange("maxTrapsPerPlayer", 16, 1, 128);
+        trapDamageMultiplier = b.comment("陷阱对敌对生物的伤害倍率（1.0 = 不改；只作用于 blast_carrot 与 zangief_cane）；范围 1.0 ~ 10.0")
+                .translation(tr("trap.damageMultiplier"))
+                .defineInRange("damageMultiplier", 3.0, 1.0, 10.0);
         b.pop();
 
         // F-192 / D-139 / A-42：farmland 整组已删除（额度口径改为 farmlandBonus × 己方核数，不再有 base 项）。

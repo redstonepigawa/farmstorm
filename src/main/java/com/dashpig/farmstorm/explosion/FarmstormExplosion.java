@@ -1,6 +1,8 @@
 package com.dashpig.farmstorm.explosion;
 
+import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.util.FarmstormAdvancements;
+import com.dashpig.farmstorm.util.Hostility;
 import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +60,17 @@ public class FarmstormExplosion extends Explosion {
     private final BlastRule rule;
     private final float damageCap;
     private final DamageSource damageSource;
+    /** F-259：这条爆炸是否由陷阱自己结算（只有 {@code blast_carrot} 传 {@code true}）。 */
+    private final boolean trapSourced;
+
+    /**
+     * 非陷阱链路（6 处投掷物 / 幸运浆果）走这条：等价于 {@code trapSourced = false}，
+     * 实参表停在 {@code damageCap}（42 号 §2.5.2 的「6 处非陷阱零改动」）。
+     */
+    public FarmstormExplosion(ServerLevel level, @Nullable Entity sourceEntity, DamageSource damageSource,
+                              double x, double y, double z, float radius, BlastRule rule, float damageCap) {
+        this(level, sourceEntity, damageSource, x, y, z, radius, rule, damageCap, false);
+    }
 
     /**
      * @param level        服务端维度（客户端没有构造入口，§8.4）
@@ -65,9 +78,11 @@ public class FarmstormExplosion extends Explosion {
      * @param damageSource 带 owner 的伤害来源（D-39：{@code farmstorm:crop_blast}）
      * @param rule         方块破坏策略
      * @param damageCap    每实体伤害上限；&lt;= 0 表示纯破坏型，跳过伤害段
+     * @param trapSourced  是否陷阱自己的那一次爆炸（F-259 / A-72）：{@code true} 且目标敌对时才乘倍率
      */
     public FarmstormExplosion(ServerLevel level, @Nullable Entity sourceEntity, DamageSource damageSource,
-                              double x, double y, double z, float radius, BlastRule rule, float damageCap) {
+                              double x, double y, double z, float radius, BlastRule rule, float damageCap,
+                              boolean trapSourced) {
         super(level, sourceEntity, damageSource, new RuleDamageCalculator(rule),
                 x, y, z, radius, false, Explosion.BlockInteraction.DESTROY,
                 ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, SoundEvents.GENERIC_EXPLODE);
@@ -75,6 +90,7 @@ public class FarmstormExplosion extends Explosion {
         this.rule = rule;
         this.damageCap = damageCap;
         this.damageSource = damageSource;
+        this.trapSourced = trapSourced;
     }
 
     /**
@@ -176,7 +192,13 @@ public class FarmstormExplosion extends Explosion {
             }
             double impact = (1.0 - distance / reach) * seen;
             double raw = (impact * impact + impact) / 2.0 * 7.0 * reach + 1.0;
-            entity.hurt(this.damageSource, (float) Math.min(raw, this.damageCap));
+            float dealt = (float) Math.min(raw, this.damageCap);
+            // F-259 乘点①（42 号 §2.5.3）：乘的是**封顶后的最终伤害**，不是 damageCap——raw < cap 时乘 cap 完全无效。
+            // 只有陷阱链路（blast_carrot）且目标敌对时才乘；6 处非陷阱爆炸走 8 参重载 ⇒ trapSourced = false ⇒ 不进这一段。
+            if (this.trapSourced && Hostility.isHostile(entity)) {
+                dealt *= FarmstormConfig.trapDamageMultiplier.get().floatValue();
+            }
+            entity.hurt(this.damageSource, dealt);
         }
     }
 

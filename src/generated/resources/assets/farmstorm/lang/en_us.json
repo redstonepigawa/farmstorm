@@ -240,6 +240,7 @@
   "farmstorm.configuration.trade.epic.min": "Epic tier trade price lower bound (emeralds, 1-64)",
   "farmstorm.configuration.trade.rare.max": "Rare tier trade price upper bound (emeralds, 1-64)",
   "farmstorm.configuration.trade.rare.min": "Rare tier trade price lower bound (emeralds, 1-64)",
+  "farmstorm.configuration.trap.damageMultiplier": "Damage multiplier of traps against hostile mobs (1.0 = unchanged; blast_carrot and zangief_cane only)",
   "farmstorm.configuration.trap.dustIntervalTicks": "Ticks between trap dust bursts (100 ticks = 5 s)",
   "farmstorm.configuration.trap.immunityTicks": "Ticks of trap-category immunity after a trigger (100 ticks = 5 s)",
   "farmstorm.configuration.trap.maxTrapsPerPlayer": "Traps allowed per player (the next one evicts the oldest)",

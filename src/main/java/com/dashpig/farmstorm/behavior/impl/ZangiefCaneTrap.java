@@ -9,6 +9,7 @@ import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.registry.FarmstormDamageTypes;
 import com.dashpig.farmstorm.registry.FarmstormSounds;
 import com.dashpig.farmstorm.util.FarmstormAdvancements;
+import com.dashpig.farmstorm.util.Hostility;
 import java.util.Locale;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -109,6 +110,11 @@ public final class ZangiefCaneTrap implements TrapBehavior {
     private static void monsterBranch(ServerLevel level, BlockPos pos, Vec3 center, LivingEntity target,
                                       @Nullable ServerPlayer deployer, double distance) {
         double amount = FarmstormConfig.zangiefCaneSlamDamage.get();
+        // F-260 乘点②（42 号 §2.5.3）：在 source == null 与 amount > 0 两个判定**之前**乘，slamDamage 配 0 时乘完仍是 0；
+        // 下面 INFO 打的就是这个乘后值（格式串不改）。玩家分支不进倍率面（相位链的落地结算在 ZangiefPiledriverController）。
+        if (Hostility.isHostile(target)) {
+            amount *= FarmstormConfig.trapDamageMultiplier.get();
+        }
         DamageSource source = FarmstormDamageTypes.zangiefSlam(level, deployer);
         if (source == null) {
             Farmstorm.LOGGER.warn(String.format(Locale.ROOT,

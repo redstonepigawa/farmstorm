@@ -83,7 +83,7 @@ public final class BlastCarrotTrap implements TrapBehavior {
         be.consume();
         FarmstormExplosion explosion = new FarmstormExplosion(level, owner, FarmstormDamageTypes.cropBlast(level, owner),
                 center.x, center.y, center.z, power,
-                BlastRule.forCrop(CropProfile.BLAST_CARROT, BlastRule.VANILLA), damageCap);
+                BlastRule.forCrop(CropProfile.BLAST_CARROT, BlastRule.VANILLA), damageCap, true);
         ExplosionQueue.submit(level, explosion);
         // TECH §4.6：爆炸范围半径 = power × 2（默认 2 × 2 = 4 格），范围内的所有玩家都吃反胃。
         applyNausea(level, center, power * 2.0);

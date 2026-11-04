@@ -10,10 +10,10 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 语言文件（TECH §7）：zh_cn 与 en_us 各 **299** 键（v0.0.3 口径）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
- * 不存在「两份键各自维护」的可能。**条目构成（v0.1.1 / P30 实测，改表时必须同步本段）**：
- * 32 item + 26 block + 4 effect + 3 subtitles + **169** config（= 166 server + 3 client）+ 36 advancement + 6 death
- * + 16 tooltip + 13 entity + 9 gui + 1 container + 1 itemGroup + 2 message + 2 key + 3 command
- * = **323**。（P29 时是 314：同表但 config 166 / gui 8、无 key / command 两组。）
+ * 不存在「两份键各自维护」的可能。**条目构成（v0.2.0 / P39 实测，改表时必须同步本段）**：
+ * 33 item + 27 block + 4 effect + 3 subtitles + **178** config（= 175 server + 3 client）+ 36 advancement + 6 death
+ * + 20 tooltip + 13 entity + 9 gui + 2 container + 1 itemGroup + 0 message + 2 key + 3 command
+ * = **337**。（P29 时是 314：同表但 config 166 / gui 8、无 key / command 两组。）
  *
  * <p>v0.1.1 的 Phase 30 加的正是那 **9** 条：3 条 {@code farmstorm.configuration.hud.*}（CLIENT config）、
  * 2 条 {@code key.farmstorm.core_hud.*}（键位描述）、1 条 {@code gui.farmstorm.core_hud.self}（「自己」标识）、

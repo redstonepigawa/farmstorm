@@ -4,6 +4,7 @@ import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.behavior.DeployedKind;
 import com.dashpig.farmstorm.behavior.TrapBehavior;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
+import com.dashpig.farmstorm.combat.MobAiSuspension;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.registry.FarmstormMobEffects;
 import com.dashpig.farmstorm.util.FarmstormAdvancements;
@@ -16,6 +17,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.phys.Vec3;
 
@@ -30,6 +32,13 @@ public final class VibrationBeanTrap implements TrapBehavior {
     /** 爆炸音的音源与音高：文档只给了「音源 BLOCKS、音高 0.9」，音量取原版默认的 1.0（TECH §3.6 ②）。 */
     private static final float EXPLODE_VOLUME = 1.0F;
     private static final float EXPLODE_PITCH = 0.9F;
+
+    /**
+     * 范围内非玩家生物被删 AI 的刻数 = 80（4 秒）。**是常量不是 config 键**（裁定 #5 / D-180：写成键会把
+     * 175 变 177）。与 {@code vibration_bean.confusionTicks} 同值不同义——后者是**玩家混乱**的时长，
+     * 不得合并、不得把「改混乱时长」当「改 AI 时长」。
+     */
+    private static final int AI_SUSPEND_TICKS = 80;
 
     @Override
     public DeployedKind kind() {
@@ -89,11 +98,30 @@ public final class VibrationBeanTrap implements TrapBehavior {
                 applied++;
             }
         }
+        // F-254（42 号 §2.3.6）：触发那一刻的一次性快照——球内**所有非玩家生物**删 AI 80 刻，
+        // 按进入前的原值记录（裁定 #4 / #5 / #8）。Mob 已排除玩家，因此不写冗余的 instanceof Player 分支；
+        // 半径沿用触发端与混乱端同一个键、同一个严格小于；陷阱在下面被 consume，之后进来的生物不会被补删。
+        long until = level.getGameTime() + AI_SUSPEND_TICKS;
+        int mobsInRange = 0;
+        int suspended = 0;
+        for (Mob mob : level.getEntitiesOfClass(Mob.class, TrapBehavior.searchBox(be.getBlockPos(), radius))) {
+            if (!mob.isAlive() || center.distanceTo(mob.position()) >= radius) {
+                continue;
+            }
+            mobsInRange++;
+            if (MobAiSuspension.suspend(mob, MobAiSuspension.SRC_VIBRATION_BEAN, until)) {
+                suspended++;
+            }
+        }
         BlockPos pos = be.getBlockPos();
         level.playSound(null, pos, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, EXPLODE_VOLUME, EXPLODE_PITCH);
         Farmstorm.LOGGER.info(String.format(Locale.ROOT,
                 "震动豆 触发 @ %s 由 %s：球内玩家 %d 施加成功 %d（半径 %.2f 格，%d 刻，amplifier 0），爆炸音一次",
                 pos.toShortString(), target.getName().getString(), inRange, applied, radius, ticks));
+        Farmstorm.LOGGER.info(String.format(Locale.ROOT,
+                "震动豆 删 AI @ %s：本轮生物 %d 删 AI %d（%d 刻，来源位 %d）",
+                pos.toShortString(), mobsInRange, suspended, AI_SUSPEND_TICKS,
+                MobAiSuspension.SRC_VIBRATION_BEAN));
         be.consume();
         // D-63 的扩充 / DESIGN §10.1 #18 + §10.2 第 3 条：只认「结算完成」（施混乱 + 静默移除都执行完），
         // 不认「谁踩的」——结算一完成就按效果端的口径给球内每个玩家各授一次（己方玩家同样推进，D-101）。

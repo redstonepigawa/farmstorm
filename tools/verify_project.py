@@ -5,12 +5,15 @@ r"""Farmstorm v0.1.1 静态验收器。
   - config 键集  <- docs/zh/01-DESIGN.md §3.8（117）+ docs/zh/12-TECH-0.0.2.md §8.1（22）
                    + docs/zh/18-TECH-0.0.3.md §8.1（v0.0.3 的 19 行，F-104）
                    + docs/zh/24-TECH-0.1.0.md §8.1（v0.1.0 的 12 行，F-142）
-                   + docs/zh/30-TECH-0.1.1.md §4.1（v0.1.1 的 58 组 / 166 键，F-177），并与
+                   + docs/zh/30-TECH-0.1.1.md §4.1（v0.1.1 的 58 组 / 166 键，F-177）
+                   + docs/zh/36-TECH-0.2.0.md §4.1.1（v0.2.0 的 11 行：增 10 / 删 1，F-243），并与
                    run/config/farmstorm-server.toml 逐键比对。18 / 24 / 30 号各含「改既有默认值」的行
                    （v0.0.3 是 fang_trap_cactus 的三个键、v0.1.0 是 melon_grenade.horizontalJitter、
                    v0.1.1 是 pumpkin_turret 的三行），键名与前面的清单重名，按集合去重后是
-                   167 个键，再扣掉本版删掉的 1 个键（`REMOVED_KEYS`，D-139）是 166 个键
-  - 93 个注册 ID  <- docs/zh/24-TECH-0.1.0.md §2.1 的 v0.1.0 列逐类小计（12 类，相加 93）
+                   167 个键；再加 36 号 §4.1.1 的 10 个增键、扣掉两个删键（`REMOVED_KEYS` 的
+                   farmland.limitPerPlayer 与 §4.1.1 第 1 行的 outpost_core.farmlandBonus）= 175 个键
+  - 97 个注册 ID  <- docs/zh/36-TECH-0.2.0.md §1.2 的 v0.2.0 列逐类小计（12 类，相加 97；
+                   基线 93 见 24-TECH-0.1.0.md §2.1，本版 +4）
 
 用法：python -X utf8 tools/verify_project.py [--root <仓库根>]
 """
@@ -131,6 +134,51 @@ def expected_config_keys_v010(tech4: Path) -> tuple[list[str], list[str]]:
     return [k for _, k in fresh], [k for _, k in changed]
 
 
+def expected_config_keys_v012(tech6: Path) -> tuple[list[str], list[str]]:
+    """36-TECH §4.1.1 的 11 行 →（增键列表，删键列表）。
+
+    表列是「序号 | 完整键路径 | 类型 | 默认 | 值域 | 动作 | 决策号」：键取第 2 列反引号内的
+    `<组>.<键>`，动作取第 6 列的「增」/「删」。增删**从文档读**，不在本文件里抄第二份清单
+    （抄一份答案会让「读文档现算」退化成「对答案」，A-66 的原始缺陷原地复活）。
+
+    解析失败一律带（文件名 + 表行号）抛出：静默跳过会让期望集悄悄停在 166，比报错更糟。
+    """
+    text = read(tech6)
+    head = re.search(r"^#### 4\.1\.1\b.*$", text, re.MULTILINE)
+    if not head:
+        raise ValueError(f"{tech6.name}：找不到「#### 4.1.1」的表格标题（表格格式变了？）")
+    base_line = text[:head.start()].count("\n") + 1
+    tail = re.search(r"^#### 4\.1\.2\b", text[head.start():], re.MULTILINE)
+    if not tail:
+        raise ValueError(f"{tech6.name}:{base_line}：§4.1.1 之后找不到「#### 4.1.2」，无法界定表格范围")
+    added: list[tuple[int, str]] = []
+    removed: list[tuple[int, str]] = []
+    for offset, line in enumerate(text[head.start():head.start() + tail.start()].splitlines()):
+        row = re.match(r"^\|\s*\d+\s*\|\s*`([A-Za-z0-9_]+\.[A-Za-z0-9_.]+)`\s*\|", line)
+        if not row:
+            continue
+        lineno = base_line + offset
+        cols = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cols) != 7:
+            raise ValueError(f"{tech6.name}:{lineno}：§4.1.1 的表行应 7 列"
+                             f"（序号/键路径/类型/默认/值域/动作/决策号），实际 {len(cols)} 列：{line.strip()[:70]}")
+        act = cols[5].strip("*").strip()
+        if act.startswith("增"):
+            added.append((lineno, row.group(1)))
+        elif act.startswith("删"):
+            removed.append((lineno, row.group(1)))
+        else:
+            raise ValueError(f"{tech6.name}:{lineno}：§4.1.1 第 6 列既不是「增」也不是「删」：{cols[5]!r}")
+    if len(added) + len(removed) != 11:
+        raise ValueError(f"{tech6.name}:{base_line}：§4.1.1 从第 {base_line} 行起只解析出"
+                         f"{len(added) + len(removed)} 行（增 {len(added)} / 删 {len(removed)}，"
+                         f"行号 {[n for n, _ in added + removed]}），文档口径是 11 行")
+    if len(added) != 10 or len(removed) != 1:
+        raise ValueError(f"{tech6.name}:{base_line}：§4.1.1 应是「增 10 / 删 1」，实际"
+                         f"「增 {len(added)} / 删 {len(removed)}」")
+    return [k for _, k in added], [k for _, k in removed]
+
+
 # 本版从期望集里剔除的键（30 号 §2.3 的删键登记 / D-139：整组删 farmland）。
 # 只许在 main() 的并集表达式旁边扣一次——散成两处，下一个删键的人就会漏扣一处。
 REMOVED_KEYS = {"farmland.limitPerPlayer"}
@@ -207,6 +255,20 @@ def toml_keys(text: str) -> set[str]:
     return out
 
 
+def doc_key_variants(k: str) -> list[str]:
+    """文档的「完整键路径」→ 落盘可能出现的拼法（第一个永远原样）。
+
+    落盘键名由 `b.push(组)` + `defineInRange(键)` 两段决定，所以文档写
+    `trade.common.min` 的键，落盘是 `[trade]` 段的 `commonMin`。这里只做
+    **组名之后的点去掉**（`a.b.c` → `a.bC`，首段原样、其余段首字母大写）这一条通用形状归一，组名不动、
+    不引入任何逐键白名单——白名单会让工具从「读文档现算」退化回「对答案」。
+    """
+    parts = k.split(".")
+    if len(parts) < 3:
+        return [k]
+    return [k, parts[0] + "." + parts[1] + "".join(p[:1].upper() + p[1:] for p in parts[2:])]
+
+
 CROP_IDS = [
     "puffed_wheat", "blast_carrot", "ubi_server", "toxic_ubi_server", "power_beet",
     "melon_slice_bomb", "melon_grenade", "pumpkin_turret", "awakened_torchflower",
@@ -223,6 +285,7 @@ EXPECTED = {
         "pumpkin_turret_seeds", "awakened_torchflower_seeds",
         "awakened_pitcher_plant_pod", "converter", "compressed_hay_block",
         "chive_seeds", "outpost_core",  # v0.1.0 的 BlockItem（24-TECH §1.4 G1）
+        "cultivator",  # v0.2.0 的培养器方块物品（36-TECH §1.2）
     ],
     "blocks": [
         "puffed_wheat_crop", "blast_carrot_crop", "ubi_server_crop", "toxic_ubi_server_crop",
@@ -234,11 +297,13 @@ EXPECTED = {
         "fang_trap_cactus", "converter", "zangief_cane", "compressed_hay_block",
         "friend_chives_crop", "point_defense_fungus", "vibration_bean",
         "outpost_core",  # v0.1.0 的据点核心方块（24-TECH §1.4 G1）
+        "cultivator",  # v0.2.0 的培养器方块（36-TECH §1.2）
     ],
     "block_entity_type": [
         "blast_carrot", "pumpkin_turret", "awakened_torchflower",
         "awakened_pitcher_plant", "fang_trap_cactus", "converter",
         "outpost_core",  # v0.1.0 新建的 BlockEntityType（24-TECH §2.2 注 1）
+        "cultivator",  # v0.2.0 的培养器 BlockEntityType（36-TECH §1.2）
     ],
     "entity_type": [
         "puffed_wheat", "ubi_server", "toxic_ubi_server", "melon_slice_bomb", "melon_grenade",
@@ -252,14 +317,15 @@ EXPECTED = {
     "creative_mode_tab": ["main"],
     "damage_type": ["void_bolt", "crop_blast", "zangief_slam"],
     "data_component_type": ["temporary_enchantments"],
-    "menu_type": ["converter"],
+    "menu_type": ["converter", "outpost_core"],  # v0.2.0 的核心存储菜单（36-TECH §1.2）
 }
 
-# 24-TECH-0.1.0 §2.1 的 v0.1.0 列：12 类逐类小计，相加 93。ID 清单少一个、多一个都在这里露出来。
+# 36-TECH-0.2.0 §1.2 的 v0.2.0 列：12 类逐类小计，相加 97（基线 93 + 本版 4）。
+# ID 清单少一个、多一个都在这里露出来。
 EXPECTED_COUNTS = {
-    "items": 32,
-    "blocks": 26,
-    "block_entity_type": 7,
+    "items": 33,
+    "blocks": 27,
+    "block_entity_type": 8,
     "entity_type": 13,
     "mob_effect": 4,
     "sound_event": 3,
@@ -268,7 +334,7 @@ EXPECTED_COUNTS = {
     "creative_mode_tab": 1,
     "damage_type": 3,
     "data_component_type": 1,
-    "menu_type": 1,
+    "menu_type": 2,
 }
 
 
@@ -286,6 +352,7 @@ def main() -> int:
     tech3 = read(root / "docs/zh/18-TECH-0.0.3.md")
     tech4 = root / "docs/zh/24-TECH-0.1.0.md"
     tech5 = root / "docs/zh/30-TECH-0.1.1.md"
+    tech6 = root / "docs/zh/36-TECH-0.2.0.md"
     base = expected_config_keys(design)
     added = expected_config_keys_v002(tech)
     added3 = expected_config_keys_v003(tech3)
@@ -304,31 +371,52 @@ def main() -> int:
     except (ValueError, OSError) as exc:
         fail(f"30-TECH §4.1 解析失败，期望键集无法现算：{exc}")
         added5 = None
-    if added4 is None or added5 is None:
+    try:
+        added6, removed6 = expected_config_keys_v012(tech6)
+    except (ValueError, OSError) as exc:
+        fail(f"36-TECH §4.1.1 解析失败，期望键集无法现算：{exc}")
+        added6 = None
+    if added4 is None or added5 is None or added6 is None:
         exp_ok, exp = False, set()
     else:
+        before6 = set(base) | set(added) | set(added3) | set(added4) | set(added5)
         overlap = set(added3) & (set(base) | set(added))
         overlap4 = set(added4) & (set(base) | set(added) | set(added3))
         overlap5 = set(added5) & (set(base) | set(added) | set(added3) | set(added4))
-        union = set(base) | set(added) | set(added3) | set(added4) | set(added5)
-        # 已删键在并集旁边扣一次（REMOVED_KEYS 的唯一用处），不散落到解析函数里
-        exp_ok, exp = True, union - REMOVED_KEYS
+        overlap6 = set(added6) & before6
+        union = before6 | set(added6)
+        # 已删键在并集旁边扣一次（REMOVED_KEYS 的唯一用处），不散落到解析函数里；
+        # v0.2.0 的第 2 个删键由 36-TECH §4.1.1 现算（removed6），不写死在这里。
+        gone = REMOVED_KEYS | set(removed6)
+        exp_ok, exp = True, union - gone
         print(f"  30-TECH §4.1：{groups5} 组 / {len(added5)} 键"
               f"（v0.1.1 的 58 行数据表现算，其中 {len(overlap5)} 个键名已在前四份清单里）")
-        print(f"  剔除已删键 {len(REMOVED_KEYS)} 个：{'、'.join(sorted(REMOVED_KEYS))}")
+        print(f"  36-TECH §4.1.1：{len(added6) + len(removed6)} 行（增 {len(added6)} / 删 {len(removed6)}；"
+              f"v0.2.0 的 11 行数据表现算，其中 {len(overlap6)} 个键名与前面的清单重名）")
+        print(f"  剔除已删键 {len(gone)} 个：{'、'.join(sorted(gone))}")
         print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}"
               f" + 18-TECH §8.1 {len(added3)} 行"
               f" + 24-TECH §8.1 {len(added4) + len(changed4)} 行（新 {len(added4)} + 改 {len(changed4)}）"
-              f" + 30-TECH §4.1 {len(added5)} 键；其中 24 / 18 号另有 {len(overlap) + len(overlap4)} 行是"
-              f"改既有默认值、§4.1 另有 {len(overlap5)} 个键名与前面的清单重名；"
-              f"按并集去重后 {len(union)}，再扣掉 {len(REMOVED_KEYS)} 个已删键 = {len(exp)}）")
+              f" + 30-TECH §4.1 {len(added5)} 键 + 36-TECH §4.1.1 {len(added6)} 键；其中 24 / 18 号另有"
+              f" {len(overlap) + len(overlap4)} 行是改既有默认值、§4.1 另有 {len(overlap5)} 个键名与"
+              f"前面的清单重名；按并集去重后 {len(union)}，再扣掉 {len(gone)} 个已删键 = {len(exp)}）")
     toml = root / "run/config/farmstorm-server.toml"
     if not exp_ok:
         print("  生成 toml 键数: 跳过（期望集没算出来，见上面的 [FAIL]）")
     elif toml.exists():
         got = toml_keys(read(toml))
         print(f"  生成 toml 键数: {len(got)}")
-        missing, extra = sorted(exp - got), sorted(got - exp)
+        # 文档的「完整键路径」是逻辑路径，落盘键名另由 b.push(组) + defineInRange(键) 决定：
+        # 36 号 §4.1.1 写 trade.common.min，落盘是 [trade] 段的 commonMin（同 6 个键）。
+        # 归一后才匹配上的键单独 WARN 登记，不静默吞掉；其它键仍逐字比对。
+        spelled = {k: doc_key_variants(k) for k in exp}
+        accepted = {v for vs in spelled.values() for v in vs}
+        only_variant = sorted(k for k in exp if k not in got and any(v in got for v in spelled[k]))
+        missing = sorted(k for k in exp if not any(v in got for v in spelled[k]))
+        extra = sorted(k for k in got if k not in accepted)
+        if only_variant:
+            warn(f"{len(only_variant)} 个键在文档里是逻辑路径、落盘是组内拼写（形状归一后才对上，已登记为文档-源码偏差）: "
+                 f"{[k + ' -> ' + spelled[k][-1] for k in only_variant[:6]]}")
         if missing or extra:
             config_java = root / "src/main/java/com/dashpig/farmstorm/config/FarmstormConfig.java"
             # 判据是源码里有没有键字面量；mtime 只进提示文字，不参与判定
@@ -359,7 +447,7 @@ def main() -> int:
     else:
         warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
 
-    print("== 2. 93 个注册 ID 逐字核对（全源码树） ==")
+    print("== 2. 97 个注册 ID 逐字核对（全源码树） ==")
     total = 0
     for group, ids in EXPECTED.items():
         missed = [i for i in ids if f'"{i}"' not in all_java]
@@ -369,9 +457,9 @@ def main() -> int:
             ok(f"{group}: {len(ids)} 个 ID 齐全")
         expected = EXPECTED_COUNTS[group]
         if len(ids) != expected:
-            fail(f"{group}: 清单 {len(ids)} 个 ID，但 24-TECH §2.1 的 v0.1.0 列是 {expected} 个")
+            fail(f"{group}: 清单 {len(ids)} 个 ID，但 36-TECH §1.2 的 v0.2.0 列是 {expected} 个")
         total += len(ids)
-    print(f"  已核 registry 对象: {total} / 93")
+    print(f"  已核 registry 对象: {total} / 97")
 
     print("== 3. 语言文件键集一致 ==")
     gen = root / "src/generated/resources"

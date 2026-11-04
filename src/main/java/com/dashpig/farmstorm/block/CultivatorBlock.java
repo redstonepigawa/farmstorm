@@ -78,9 +78,9 @@ public class CultivatorBlock extends BaseEntityBlock {
      * 先把核侧写成功，再写培养器侧（两侧不一致时按未绑定处理，顺序反过来就会留下「核说没绑、
      * 培养器说绑了」的假象）。
      *
-     * <p><b>没有可用核时方块照样放下</b>，但永久处于未绑定态、不可使用，且**不自动认领**
-     * ——事后在旁边补一个核也不会绑上（D-165 补充 / 35 号 §12 B-12、B-13）。刻意的：
-     * 补绑会让「我放的时候有没有核」这件事失去意义。
+     * <p><b>没有可用核时方块照样放下</b>，此刻处于未绑定态、不可使用；但**不再永久如此**——核每
+     * 100 刻会扫一遍 3 × 3 已加载区块，把「没人要」的培养器补进自己的名额（F-250 / D-176、D-177）。
+     * 补绑只补未绑定的、不夺已绑的，也不改变「放下时有没有核」这件事的判定。
      */
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {

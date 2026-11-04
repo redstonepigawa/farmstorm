@@ -10,6 +10,7 @@ import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.outpost.OutpostCoreIndex;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.team.TeamResolver;
+import com.dashpig.farmstorm.util.AreaBlockEntities;
 import com.dashpig.farmstorm.util.DeployedOwnership;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -89,6 +90,12 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
 
     /** tick 证据的日志节流：每 30 轮一条（interval = 40 刻 ⇒ 约 60 秒一条）。 */
     private static final int TICK_LOG_ROUNDS = 30;
+
+    /**
+     * 补绑周期（F-249 / D-176）：100 刻一轮。**编译期常量、不是 config 键**（D-185：本版 config 只 +1），
+     * 因此不存在「配成 0」的可能，补绑的相位门也就不需要边界粒子门那条非零守卫。
+     */
+    private static final int REBIND_INTERVAL_TICKS = 100;
 
     /** 两档衰减（23 号 §8.7）：矩形内的玩家每轮满点；矩形外扩 16 格的余量带每 4 轮 1 次；再远不发。 */
     private static final double RING_MARGIN = 16.0;
@@ -498,21 +505,96 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
     }
 
     /**
+     * 补绑的相位门（F-249 / D-176 / 42 号 §2.1.1）：<b>与边界粒子门各自独立</b>。
+     *
+     * <p>模数是编译期常量 {@link #REBIND_INTERVAL_TICKS}（100 刻），不读 config —— 正因为常量取不到 0，
+     * 这里**不设**边界粒子门那条「非零才继续」的守卫：两套门的守卫不能互借。
+     * {@code floorMod(pos.hashCode(), 100)} 落在 0 ~ 99，同一片区域里的多个核各占一个 tick，不会同刻一起扫。
+     */
+    private static boolean rebindDue(BlockPos pos, long now) {
+        return Math.floorMod(now + Math.floorMod(pos.hashCode(), REBIND_INTERVAL_TICKS),
+                REBIND_INTERVAL_TICKS) == 0;
+    }
+
+    /**
+     * 周期补绑（F-249 / D-177 / 42 号 §2.1.3）：把 3 × 3 已加载区块里「没人要」的培养器补进自己的名额。
+     *
+     * <p>五条写入边界，缺一条就会造出第二个主、或白跑一遍枚举：
+     * <ol>
+     *   <li>无主核不补（裁定 #13）：{@code /setblock} 出来的核没有归属者，判据放在方法第一行；
+     *   <li>容量只读 {@link #cultivatorCount()}：返回副本的那条读取路径会先做惰性清理并可能
+     *       {@code setChanged}，与补绑交错会让「本轮已绑」重复或漏计；
+     *   <li>满则停：整轮入口与绑定循环里各判一次，每绑一个重读，不白跑剩下的候选；
+     *   <li>只加不摘：两侧不一致的候选一律**跳过**，不调核侧的解绑方法做兜底（那会造出第二个主）；
+     *   <li>先写核侧 {@link #addCultivator}，成功后才写培养器的 {@code Core} 缓存。
+     * </ol>
+     *
+     * <p>候选先排序再绑（裁定 #14）：距离升序 → x → y → z。区块映射的迭代序不稳定，不排序的话同一存档
+     * 两次运行可能绑到不同的一批；培养器没有「放置时刻」字段，坐标三元组已足以定序。
+     *
+     * <p>不额外调广播：{@link #addCultivator} 里已经 {@code setChanged} + 同步 + 一次请求。
+     */
+    private void rebindNearby(ServerLevel server) {
+        if (this.ownerUuid == null) {
+            return;                                       // 裁定 #13：/setblock 出来的核没有归属者
+        }
+        int cap = FarmstormConfig.outpostCoreCultivatorCapacity.get();
+        if (cultivatorCount() >= cap) {
+            return;                                       // 满员：这一轮连枚举都不做
+        }
+        int added = 0;
+        List<CultivatorBlockEntity> candidates =
+                AreaBlockEntities.collect(server, this.getBlockPos(), RANGE_CHUNKS, CultivatorBlockEntity.class);
+        candidates.sort(Comparator
+                .comparingDouble((CultivatorBlockEntity candidate) -> candidate.getBlockPos().distSqr(this.getBlockPos()))
+                .thenComparingInt(candidate -> candidate.getBlockPos().getX())
+                .thenComparingInt(candidate -> candidate.getBlockPos().getY())
+                .thenComparingInt(candidate -> candidate.getBlockPos().getZ()));
+        for (CultivatorBlockEntity candidate : candidates) {
+            if (cultivatorCount() >= cap) {
+                break;                                    // 每绑一个重读：满即停
+            }
+            if (candidate.corePos() != null) {
+                continue;                                 // 已绑（含指向别的核）⇒ 跳过，不夺
+            }
+            if (hasCultivator(candidate.getBlockPos())) {
+                continue;                                 // 核侧已有这一条 ⇒ 跳过（两侧不一致只跳过，不摘）
+            }
+            if (addCultivator(candidate.getBlockPos())) {
+                candidate.setCore(this.getBlockPos());    // 先核侧、后培养器侧
+                added++;
+            }
+        }
+        if (added > 0) {
+            Farmstorm.LOGGER.info("补绑：核 {} 本轮新增 {} 条（累计 {}/{}，周期 {} 刻）",
+                    this.getBlockPos(), added, cultivatorCount(), cap, REBIND_INTERVAL_TICKS);
+        }
+    }
+
+    /**
      * 服务端每刻的入口（{@code OutpostCoreBlock#getTicker} 注册）。
      *
      * <p>相位算式与陷阱 dust 同一形态（{@code TrapBehavior.java:89}）：
      * {@code floorMod(now + floorMod(pos.hashCode(), interval), interval) == 0} ⇒ 同一区块里的多个核心
      * 按坐标自行错峰，不会每 40 刻在同一 tick 一起发包（F-155 / D-121 第 3 条）。
+     *
+     * <p>四件事的顺序（F-250 / 42 号 §2.1.1）：早退 → **补绑（自己的门）** → 边界粒子门 → 粒子 +
+     * 每 {@link #TICK_LOG_ROUNDS} 轮一条日志。两道门各自独立，之间没有 {@code return} 交叠。
      */
     public static void serverTick(Level level, BlockPos pos, BlockState state, OutpostCoreBlockEntity core) {
         if (!(level instanceof ServerLevel server)) {
             return;
         }
+        long now = server.getGameTime();
+        // 补绑自带一套相位门（F-250 / D-176）：独立 if、放在边界粒子门**之前**、不 return。
+        // 接在粒子门之后会被筛成 LCM(40, 100) = 200 刻，并随 boundaryParticleIntervalTicks 漂移。
+        if (rebindDue(pos, now)) {
+            core.rebindNearby(server);
+        }
         int interval = FarmstormConfig.outpostCoreBoundaryParticleIntervalTicks.get();
         if (interval <= 0) {
             return;                                       // 防 floorMod 除零；config 范围 20~1200 取不到 0
         }
-        long now = server.getGameTime();
         if (Math.floorMod(now + Math.floorMod(pos.hashCode(), interval), interval) != 0) {
             return;
         }

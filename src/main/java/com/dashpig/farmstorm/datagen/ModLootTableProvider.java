@@ -34,8 +34,8 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 /**
- * 26 张方块战利品表（TECH §6.7 + F-74 + F-168）：15 张作物 + 8 张部署方块 + 1 张压缩干草块
- * + 1 张转换器 + 1 张据点核心。
+ * 27 张方块战利品表（TECH §6.7 + F-74 + F-168 + F-225）：15 张作物 + 8 张部署方块 + 1 张压缩干草块
+ * + 1 张转换器 + 1 张据点核心 + 1 张农作物培养器。
  *
  * <p>作物表复用原版作物表的结构（成熟判定 + 数量区间 + 时运修正 + 爆炸衰减），只把 item 换成
  * 改良版的作物与播种物（DESIGN §3.2.4）；数量区间逐条照抄 TECH §6.7。
@@ -129,6 +129,9 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
 
         // ---- 1 张转换器表：只掉本体（内容物由 dropContents 负责）----
         this.add(FarmstormBlocks.CONVERTER.get(), this.createSingleItemTable(FarmstormBlocks.CONVERTER.get()));
+
+        // ---- 1 张农作物培养器表：掉自身（F-225 / D-160；槽里的那一个由 CultivatorBlock#onRemove 负责，F-237）----
+        this.add(FarmstormBlocks.CULTIVATOR.get(), this.createSingleItemTable(FarmstormBlocks.CULTIVATOR.get()));
     }
 
     /**
@@ -213,6 +216,7 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormBlocks.VIBRATION_BEAN.get(),
                 FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
                 FarmstormBlocks.OUTPOST_CORE.get(),
-                FarmstormBlocks.CONVERTER.get());
+                FarmstormBlocks.CONVERTER.get(),
+                FarmstormBlocks.CULTIVATOR.get());
     }
 }

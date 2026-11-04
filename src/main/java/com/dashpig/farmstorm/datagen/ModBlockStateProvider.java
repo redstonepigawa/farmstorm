@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.datagen;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.block.ConverterBlock;
+import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.block.FarmstormCropBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
@@ -75,6 +76,8 @@ public final class ModBlockStateProvider extends BlockStateProvider {
                 converterStates(block);
             } else if (block instanceof OutpostCoreBlock) {
                 outpostCoreStates(block);
+            } else if (block instanceof CultivatorBlock) {
+                cultivatorStates(block);
             } else if ("compressed_hay_block".equals(registryPath(block))) {
                 compressedHayStates(block);
             } else {
@@ -191,6 +194,30 @@ public final class ModBlockStateProvider extends BlockStateProvider {
                 .texture("side", modLoc("block/" + name + "_side"))
                 .texture("bottom", modLoc("block/" + name + "_bottom"));
         simpleBlock(block, model);
+    }
+
+    /**
+     * 农作物培养器（F-225 / D-161 / 36 号 §2.5.5）：**两态**——{@code working=false} 引用静态首帧
+     * （{@code _a_top_still} / {@code _a_side_still} / {@code _a_bottom}），{@code working=true} 引用 16 帧帧条
+     * （{@code _a_top} / {@code _a_side} / {@code _a_bottom}），两张块模型父模型都是 {@code cube_bottom_top}。
+     *
+     * <p><b>不能用现成的 {@code simpleBlock(block, model)}</b>：它生成的是 {@code "": {...}} 单态，
+     * 两态的方块会有一个 variant 找不到模型（36 号 §5 的连带改动 2）。动画的「空闲静态」靠双贴图 + blockstate 属性，
+     * 不靠代码暂停（D-161 / 陷阱 27）。
+     */
+    private void cultivatorStates(Block block) {
+        String name = registryPath(block);
+        BlockModelBuilder idle = models().withExistingParent(name, mcLoc("block/cube_bottom_top"))
+                .texture("top", modLoc("block/" + name + "_a_top_still"))
+                .texture("side", modLoc("block/" + name + "_a_side_still"))
+                .texture("bottom", modLoc("block/" + name + "_a_bottom"));
+        BlockModelBuilder working = models().withExistingParent(name + "_working", mcLoc("block/cube_bottom_top"))
+                .texture("top", modLoc("block/" + name + "_a_top"))
+                .texture("side", modLoc("block/" + name + "_a_side"))
+                .texture("bottom", modLoc("block/" + name + "_a_bottom"));
+        getVariantBuilder(block)
+                .partialState().with(CultivatorBlock.WORKING, false).modelForState().modelFile(idle).addModel()
+                .partialState().with(CultivatorBlock.WORKING, true).modelForState().modelFile(working).addModel();
     }
 
     /**

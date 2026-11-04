@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.datagen;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.block.ConverterBlock;
+import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +54,15 @@ public final class ModItemModelProvider extends ItemModelProvider {
         }
     }
 
-    /** 物品模型以自家方块模型为父的方块物品：转换器（FIX-5）与据点核心（D-123 第 2 项，不写 layer0）。 */
+    /**
+     * 物品模型以自家方块模型为父的方块物品：转换器（FIX-5）、据点核心（D-123 第 2 项）与农作物培养器
+     * （F-225 / D-160，不写 layer0）。
+     *
+     * <p>漏掉一个方块类 ⇒ 该物品落到 {@code basicItem}，去找一张<b>不存在</b>的 {@code textures/item/<id>.png}，
+     * 游戏里是紫黑格（36 号 §5、§10 第 10 条）。本版 {@code textures/item} 不新增任何文件。
+     */
     private static boolean usesBlockModel(Block block) {
-        return block instanceof ConverterBlock || block instanceof OutpostCoreBlock;
+        return block instanceof ConverterBlock || block instanceof OutpostCoreBlock || block instanceof CultivatorBlock;
     }
 
     private static String registryPath(Item item) {

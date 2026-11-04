@@ -3,6 +3,7 @@ package com.dashpig.farmstorm.registry;
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.behavior.DeployedKind;
 import com.dashpig.farmstorm.blockentity.ConverterBlockEntity;
+import com.dashpig.farmstorm.blockentity.CultivatorBlockEntity;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
 import com.dashpig.farmstorm.blockentity.OutpostCoreBlockEntity;
 import net.minecraft.core.registries.Registries;
@@ -11,7 +12,8 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 7 个 BlockEntityType（TECH §3.3）：v0.0.4 的 6 个 + v0.1.0 的 1 个据点核心（D-119）。
+ * 8 个 BlockEntityType（TECH §3.3）：v0.0.4 的 6 个 + v0.1.0 的 1 个据点核心（D-119）
+ * + v0.2.0 的 1 个农作物培养器（D-160）。
  * 部署物的 5 个类型都用同一个 DeployedCropBlockEntity 类，靠 BlockEntityType 区分（RT-04）。
  * v0.0.3 的两个新部署方块挂进既有 type 的合法方块集合，type 总数当时仍是 6（§2.2 注 3）。
  */
@@ -49,6 +51,11 @@ public final class FarmstormBlockEntities {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OutpostCoreBlockEntity>> OUTPOST_CORE =
             REGISTER.register("outpost_core", () -> BlockEntityType.Builder
                     .of(OutpostCoreBlockEntity::new, FarmstormBlocks.OUTPOST_CORE.get()).build(null));
+
+    /** v0.2.0 的第 8 个 type（F-224 / D-160）：单方块例，与 converter 同形；培养器不实现 Container。 */
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CultivatorBlockEntity>> CULTIVATOR =
+            REGISTER.register("cultivator", () -> BlockEntityType.Builder
+                    .of(CultivatorBlockEntity::new, FarmstormBlocks.CULTIVATOR.get()).build(null));
 
     private FarmstormBlockEntities() {}
 

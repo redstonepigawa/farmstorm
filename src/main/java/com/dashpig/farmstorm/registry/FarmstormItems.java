@@ -23,7 +23,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 32 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心）：22 个作物 + 7 个独立播种物 + 3 个方块物品（转换器 / 压缩干草块 / 据点核心）。
+ * 33 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器）：
+ * 22 个作物 + 7 个独立播种物 + 4 个方块物品（转换器 / 压缩干草块 / 据点核心 / 农作物培养器）。
  * 堆叠数按 D-16 分两档，实际数值来自 stack.*（§4.11.5）。
  */
 public final class FarmstormItems {
@@ -116,6 +117,10 @@ public final class FarmstormItems {
     public static final DeferredItem<BlockItem> OUTPOST_CORE = REGISTER.registerItem("outpost_core",
             properties -> new BlockItem(FarmstormBlocks.OUTPOST_CORE.get(), properties), otherProperties());
 
+    /** v0.2.0 的第 4 个方块物品（F-224 / D-160）：本版没有培养器配方，创造栏与 /give 是仅有的两个入口（A-64）。 */
+    public static final DeferredItem<BlockItem> CULTIVATOR = REGISTER.registerItem("cultivator",
+            properties -> new BlockItem(FarmstormBlocks.CULTIVATOR.get(), properties), otherProperties());
+
     private FarmstormItems() {}
 
     /** 创造标签页内容：作物 → 播种物 → 工具方块（TECH §3.6）。 */
@@ -125,6 +130,8 @@ public final class FarmstormItems {
         items.add(CONVERTER);
         items.add(COMPRESSED_HAY_BLOCK);
         items.add(OUTPOST_CORE);
+        // A-64：本版没有培养器配方，不进口袋就等于「谁都拿不到」。
+        items.add(CULTIVATOR);
         return items;
     }
 

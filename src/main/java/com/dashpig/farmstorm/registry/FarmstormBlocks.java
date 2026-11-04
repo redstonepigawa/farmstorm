@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.block.ConverterBlock;
+import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.block.FarmstormCropBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
@@ -16,7 +17,8 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 26 个方块（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心）：15 个作物 + 8 个部署 + 1 个转换器 + 1 个压缩干草块 + 1 个据点核心。
+ * 27 个方块（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器）：
+ * 15 个作物 + 8 个部署 + 1 个转换器 + 1 个压缩干草块 + 1 个据点核心 + 1 个农作物培养器。
  * 作物方块共用一个类且不注册 BlockItem（D-34 / T-01）。
  */
 public final class FarmstormBlocks {
@@ -88,6 +90,16 @@ public final class FarmstormBlocks {
                     .sound(SoundType.STONE)
                     .pushReaction(PushReaction.BLOCK)
                     .lightLevel(state -> 15));
+
+    // ---- 1 个农作物培养器（F-224 / D-160）：属性逐项照原版铁砧七行，培养器无菜单 ----
+    public static final DeferredBlock<CultivatorBlock> CULTIVATOR = REGISTER.registerBlock("cultivator",
+            CultivatorBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(5.0F, 1200.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.ANVIL)
+                    .pushReaction(PushReaction.BLOCK));
 
     private FarmstormBlocks() {}
 

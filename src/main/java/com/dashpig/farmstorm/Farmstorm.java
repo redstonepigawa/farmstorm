@@ -3,6 +3,7 @@ package com.dashpig.farmstorm;
 import com.dashpig.farmstorm.config.FarmstormClientConfig;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.event.FarmstormGameEvents;
+import com.dashpig.farmstorm.event.VillagerTradeEvents;
 import com.dashpig.farmstorm.network.FarmstormNetwork;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.registry.FarmstormBlocks;
@@ -71,6 +72,9 @@ public final class Farmstorm {
 
         // game 总线：玩家 tick / 登录登出 / 爆炸拦截 / 爆炸批处理（F-15 ~ F-17）。
         FarmstormGameEvents.register(NeoForge.EVENT_BUS);
+        // F-223：农民交易三项。事件在数据包重载（TagsUpdatedEvent）里对每个职业各抛一次，
+        // 与上面同一条 game 总线；只处理 VillagerProfession.FARMER。
+        VillagerTradeEvents.register(NeoForge.EVENT_BUS);
 
         logSelfCheck();
         logRegistrySelfCheck();

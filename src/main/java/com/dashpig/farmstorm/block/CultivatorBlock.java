@@ -6,7 +6,10 @@ import com.dashpig.farmstorm.team.TeamResolver;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * 农作物培养器方块（D-160 / D-161）。
@@ -95,6 +99,51 @@ public class CultivatorBlock extends BaseEntityBlock {
         if (core.addCultivator(pos)) {
             cultivator.setCore(core.getBlockPos());
         }
+    }
+
+    /**
+     * 放入动作（F-235 / 36 号 §2.5.3）：没有菜单（D-160），右键直接把手上那**一个**放进槽里。
+     *
+     * <p>顺序与四道闸：客户端先 {@code SUCCESS}（照 {@code ConverterBlock} 的 HC-03 取舍，
+     * 「右键无反应」的定义是行为面无反应，不是动画面无反应）→ 服务端把范围 / 绑定 / 手持档 / 空槽
+     * **合并成一次判定**，任一不过就 {@code PASS}（不消耗、不提示、不报错）→ 通过则 {@code split(1)} + {@code CONSUME}。
+     *
+     * <p>空手右键**不取出**（35 号 §12 B-11）：要取回只能拆方块（F-237 掉内部那一个）。
+     */
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
+                                               BlockHitResult hit) {
+        if (level.isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+        if (!(level.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator)) {
+            return InteractionResult.PASS;
+        }
+        ItemStack heldStack = player.getMainHandItem();
+        if (!cultivator.canInsert(heldStack)) {
+            return InteractionResult.PASS;
+        }
+        cultivator.insert(heldStack.split(1));
+        return InteractionResult.CONSUME;
+    }
+
+    /**
+     * 破坏掉落（F-237 / 36 号 §2.5.6）：四条件后掉**内部那一个培养物**。
+     *
+     * <p>四条件与 {@code ConverterBlock#onRemove} 逐字同形：真移除（{@code !state.is(newState.getBlock())}）
+     * ∧ 非活塞推动（{@code !movedByPiston}）。第一条同时挡住「{@code working} 属性变化触发的那次 onRemove」
+     * ——属性变化时新旧 state 属于同一个方块，{@code state.is(newState.getBlock())} 为真。
+     *
+     * <p>用 {@link Containers#dropContents(Level, BlockPos, NonNullList)} 重载而不是 {@code Container} 那个：
+     * 本方块实体**不实现** {@code Container}（36 号 §2.5.2）。方块本体由战利品表掉，两处不重叠。
+     */
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (!state.is(newState.getBlock()) && !movedByPiston
+                && level.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator) {
+            Containers.dropContents(level, pos, cultivator.releaseHeld());
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     /** 服务端 ticker（与 {@code OutpostCoreBlock} 逐字同形）；客户端永不 tick（HC-03）。 */

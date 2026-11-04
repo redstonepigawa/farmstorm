@@ -51,6 +51,8 @@ public final class FarmstormClient {
     @SubscribeEvent
     public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         event.register(FarmstormMenus.CONVERTER.get(), ConverterScreen::new);
+        // F-227 / D-166：54 格存储界面。漏掉这一行 ⇒ 打开界面时崩或黑屏（36 号 §2.6.3）。
+        event.register(FarmstormMenus.OUTPOST_CORE.get(), OutpostCoreScreen::new);
     }
 
     /**

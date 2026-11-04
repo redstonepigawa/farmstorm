@@ -105,6 +105,8 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "vibration_bean", "震动豆", "Vibration Bean");
         // ---- v0.1.0 的 1 个新物品（F-169 / 24-TECH §9.4）：据点核心的 BlockItem 名 ----
         item(entries, "outpost_core", "据点核心", "Outpost Core");
+        // ---- v0.2.0 的 1 个新物品（F-224 / D-160 / 36 号 §4.3.2 #1）----
+        item(entries, "cultivator", "农作物培养器", "Cultivator");
         // ---- 20 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
         block(entries, "puffed_wheat_crop", "膨胀麦", "Puffed Wheat");
         block(entries, "blast_carrot_crop", "胡罗贝", "Blast Carrot");
@@ -135,6 +137,8 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "vibration_bean", "震动豆", "Vibration Bean");
         // ---- v0.1.0 的 1 个新方块（F-169 / 24-TECH §9.4）：据点核心的方块名 ----
         block(entries, "outpost_core", "据点核心", "Outpost Core");
+        // ---- v0.2.0 的 1 个新方块（F-224 / D-160 / 36 号 §4.3.2 #2）：方块名与物品名各 1 条，不共用 ----
+        block(entries, "cultivator", "农作物培养器", "Cultivator");
         // ---- 13 个实体类型（TECH §3.4）----
         entity(entries, "puffed_wheat", "膨胀麦", "Puffed Wheat");
         entity(entries, "ubi_server", "育碧服务器", "Ubi Server");
@@ -166,6 +170,8 @@ public final class ModLangProvider extends LanguageProvider {
         // ---- 固定键：创造标签页 / GUI / 提示 / 死亡信息（TECH §7.2 逐条）----
         plain(entries, "itemGroup.farmstorm.main", "农场风云", "Farmstorm");
         plain(entries, "container.farmstorm.converter", "农产品转换器", "Converter");
+        // ---- v0.2.0 的 1 条新 container 键（F-227 / D-166 / 36 号 §4.3.2 #3）----
+        plain(entries, "container.farmstorm.outpost_core", "据点核心", "Outpost Core");
         plain(entries, "gui.farmstorm.converter.convert", "转换", "Convert");
         plain(entries, "gui.farmstorm.converter.xp_cost", "消耗经验：%s", "Experience cost: %s");
         plain(entries, "gui.farmstorm.converter.no_recipe", "无法转换", "Cannot convert");
@@ -415,6 +421,8 @@ public final class ModLangProvider extends LanguageProvider {
         config(entries, "trade.epic.max", "史诗档交易价格上界（绿宝石，1 ~ 64）", "Epic tier trade price upper bound (emeralds, 1-64)");
         config(entries, "outpost_core.boundaryParticleIntervalTicks", "边界粒子刷新间隔（刻，40 刻 = 2 秒）",
                 "Boundary particle interval in ticks (40 ticks = 2 s)");
+        // ---- v0.2.0 的第 1 条 core 存储键（F-226 / D-166 / 36 号 §4.3.2 #10）----
+        config(entries, "outpost_core.storageSlots", "核心存储的格子数", "Storage slots per core");
         config(entries, "melon_grenade.submunitionSpeed", "瓜片子的径向初速（格/刻）",
                 "Radial launch speed of the melon slices (blocks/tick)");
         config(entries, "compressed.replaceOnlyAirAndFluid", "落地方块只替换空气与流体",

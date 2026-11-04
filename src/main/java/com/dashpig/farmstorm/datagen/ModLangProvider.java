@@ -426,6 +426,10 @@ public final class ModLangProvider extends LanguageProvider {
         // ---- v0.2.0 的第 1 条 core 绑定键（F-231 / D-165）：16 是名额、54 是格子数（裁定 #8）----
         config(entries, "outpost_core.cultivatorCapacity", "一个核心最多绑定的培养器数量",
                 "Cultivators bound per core");
+        // ---- v0.2.0 的 2 条 cultivator 键（F-234 / D-163 / 36 号 §4.3.2 #8~#9）----
+        config(entries, "cultivator.cycleTicks", "培养周期（刻，600 刻 = 30 秒）",
+                "Cultivation cycle in ticks (600 ticks = 30 s)");
+        config(entries, "cultivator.yield", "单次产出数量（作物与种子各这么多）", "Items per cycle");
         config(entries, "melon_grenade.submunitionSpeed", "瓜片子的径向初速（格/刻）",
                 "Radial launch speed of the melon slices (blocks/tick)");
         config(entries, "compressed.replaceOnlyAirAndFluid", "落地方块只替换空气与流体",

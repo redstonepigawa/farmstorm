@@ -132,6 +132,8 @@
   "farmstorm.configuration.converter.netherStarForwardCost": "Nether stars consumed per forward conversion",
   "farmstorm.configuration.converter.netherStarOnReverse": "Whether reverse conversions consume a nether star too",
   "farmstorm.configuration.converter.xpCost": "Experience points spent per conversion",
+  "farmstorm.configuration.cultivator.cycleTicks": "Cultivation cycle in ticks (600 ticks = 30 s)",
+  "farmstorm.configuration.cultivator.yield": "Items per cycle",
   "farmstorm.configuration.deploy.dropOnSupportLost": "Drop the item when the support block is lost",
   "farmstorm.configuration.deploy.supportMustBeFullOpaque": "Require a full opaque support block",
   "farmstorm.configuration.deploy.turretMiningTicks": "Turret hard-mining duration (ticks)",

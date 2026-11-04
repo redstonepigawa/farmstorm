@@ -236,6 +236,12 @@ public final class FarmstormConfig {
     /** D-165 / F-231：一个核心最多绑定的培养器数量（默认 16）。**这是名额，不是格子数**（裁定 #8）。 */
     public static ModConfigSpec.IntValue outpostCoreCultivatorCapacity;
 
+    // D-163 / F-234：培养器的**顶层组**（与 outpost_core 同级，不是嵌套组）。
+    /** 培养周期（刻），默认 600 = 30 秒 × 20 刻/秒。 */
+    public static ModConfigSpec.IntValue cultivatorCycleTicks;
+    /** 单次产出数量（作物与种子各这么多），默认 2。 */
+    public static ModConfigSpec.IntValue cultivatorYield;
+
     // D-159：农民交易三档绿宝石价格区间（顶层组 trade 的 6 键）。
     public static ModConfigSpec.IntValue tradeCommonMin;
     public static ModConfigSpec.IntValue tradeCommonMax;
@@ -943,6 +949,17 @@ public final class FarmstormConfig {
         outpostCoreCultivatorCapacity = b.comment("一个核心最多绑定的培养器数量；范围 1 ~ 64（与 storageSlots 的 54 无关）")
                 .translation(tr("outpost_core.cultivatorCapacity"))
                 .defineInRange("cultivatorCapacity", 16, 1, 64);
+        b.pop();
+
+        // F-234 / D-163 / 36 号 §4.1.1 #4~#5：培养器顶层组（与 outpost_core 同级，不是嵌套组）。
+        // 「2 个种子」这一半**不另设键**（D-163 / 35 号 §6.3 纪律 2），它跟着产出规则走；多设一个键就变 176。
+        b.push("cultivator");
+        cultivatorCycleTicks = b.comment("培养周期（刻），600 刻 = 30 秒；范围 20 ~ 72000")
+                .translation(tr("cultivator.cycleTicks"))
+                .defineInRange("cycleTicks", 600, 20, 72000);
+        cultivatorYield = b.comment("单次产出数量（作物与种子各这么多）；范围 1 ~ 64")
+                .translation(tr("cultivator.yield"))
+                .defineInRange("yield", 2, 1, 64);
         b.pop();
 
         // D-159：农民交易三档价格区间。**顶层组**（与 outpost_core 同级，不是嵌套组）。

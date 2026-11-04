@@ -132,6 +132,8 @@
   "farmstorm.configuration.converter.netherStarForwardCost": "正向转换额外消耗的下界之星个数",
   "farmstorm.configuration.converter.netherStarOnReverse": "反向转换是否也消耗下界之星",
   "farmstorm.configuration.converter.xpCost": "每次转换扣除的经验点数",
+  "farmstorm.configuration.cultivator.cycleTicks": "培养周期（刻，600 刻 = 30 秒）",
+  "farmstorm.configuration.cultivator.yield": "单次产出数量（作物与种子各这么多）",
   "farmstorm.configuration.deploy.dropOnSupportLost": "依附方块消失且不悬空时是否掉落本体",
   "farmstorm.configuration.deploy.supportMustBeFullOpaque": "是否强制依附方块为完整不透明方块",
   "farmstorm.configuration.deploy.turretMiningTicks": "炮台硬挖时长（tick）",

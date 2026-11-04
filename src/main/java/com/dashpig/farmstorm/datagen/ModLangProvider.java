@@ -31,8 +31,8 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * 让中英各自用自己的分隔符（「、」/ 「, 」）。这条沿革保留在 v0.0.1 的口径里（218 - 3 + 6 + 1 = 222）。
  *
  * <p>v0.1.0 的 F-139 再加 **11** 条 {@code farmstorm.configuration.*}（12 行 config 里第 10 行只改既有键的默认值），
- * 到 **311** 键（TECH §7.3）；F-157 再加 **2** 条动作栏提示（{@code message.farmstorm.farmland.no_core}
- * / {@code message.farmstorm.farmland.quota_full}，24 号 §6.3 的第 2、3 步），到 **313** 键；
+ * 到 **311** 键（TECH §7.3）；F-157 再加 **2** 条动作栏提示（耕地相关的两条，
+ * 24 号 §6.3 的第 2、3 步），到 **313** 键；
  * F-169 再加 **2** 条（{@code block.farmstorm.outpost_core} / {@code item.farmstorm.outpost_core}），
  * 到 **315** 键（299 + 16，TECH §9.4 的增量列，中英键集逐字相同）。
  * v0.1.1 的 F-182 再加 **1** 条（{@code pumpkin_turret.bulletSpeed}，29 号 D-129），到 **316** 键。
@@ -405,17 +405,20 @@ public final class ModLangProvider extends LanguageProvider {
                 "Ticks between trap dust bursts (100 ticks = 5 s)");
         config(entries, "trap.maxTrapsPerPlayer", "每玩家陷阱名额（第 N+1 个挤掉最早的一个）",
                 "Traps allowed per player (the next one evicts the oldest)");
-        config(entries, "outpost_core.farmlandBonus", "每个据点核心增加的耕地上限", "Farmland quota added per outpost core");
         config(entries, "outpost_core.maxPerPlayer", "每玩家可放置的据点核心数", "Outpost cores each player may place");
+        // ---- v0.2.0 的 6 条 trade 键（F-222 / D-159；与 FarmstormConfig 的 trade 组 6 键 1:1）----
+        config(entries, "trade.common.min", "普通档交易价格下界（绿宝石，1 ~ 64）", "Common tier trade price lower bound (emeralds, 1-64)");
+        config(entries, "trade.common.max", "普通档交易价格上界（绿宝石，1 ~ 64）", "Common tier trade price upper bound (emeralds, 1-64)");
+        config(entries, "trade.rare.min", "稀有档交易价格下界（绿宝石，1 ~ 64）", "Rare tier trade price lower bound (emeralds, 1-64)");
+        config(entries, "trade.rare.max", "稀有档交易价格上界（绿宝石，1 ~ 64）", "Rare tier trade price upper bound (emeralds, 1-64)");
+        config(entries, "trade.epic.min", "史诗档交易价格下界（绿宝石，1 ~ 64）", "Epic tier trade price lower bound (emeralds, 1-64)");
+        config(entries, "trade.epic.max", "史诗档交易价格上界（绿宝石，1 ~ 64）", "Epic tier trade price upper bound (emeralds, 1-64)");
         config(entries, "outpost_core.boundaryParticleIntervalTicks", "边界粒子刷新间隔（刻，40 刻 = 2 秒）",
                 "Boundary particle interval in ticks (40 ticks = 2 s)");
         config(entries, "melon_grenade.submunitionSpeed", "瓜片子的径向初速（格/刻）",
                 "Radial launch speed of the melon slices (blocks/tick)");
         config(entries, "compressed.replaceOnlyAirAndFluid", "落地方块只替换空气与流体",
                 "Landing block replaces only air and fluids");
-        // ---- v0.1.0 的 2 条动作栏提示（F-157 / 24 号 §6.3 的第 2、3 步）----
-        plain(entries, "message.farmstorm.farmland.no_core", "附近没有己方据点核心", "No allied outpost core nearby");
-        plain(entries, "message.farmstorm.farmland.quota_full", "耕地额度已满：%s/%s", "Farmland quota full: %s/%s");
         // ---- v0.1.1 的 9 条新键（Phase 30）：3 条 CLIENT config + 2 条键位 + 1 条「自己」+ 3 条指令反馈 ----
         config(entries, "hud.enabled", "浮窗开关", "Core HUD enabled");
         config(entries, "hud.x", "浮窗左上角 x（GUI 像素）", "Core HUD top-left x (GUI pixels)");

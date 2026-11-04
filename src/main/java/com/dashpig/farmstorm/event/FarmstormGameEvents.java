@@ -72,8 +72,10 @@ public final class FarmstormGameEvents {
         gameBus.addListener(FarmstormGameEvents::onLevelTickPost);
         gameBus.addListener(FarmstormGameEvents::onServerTickPost);
         gameBus.addListener(FarmstormGameEvents::onServerStopping);
-        gameBus.addListener(FarmstormGameEvents::onRightClickBlock);
-        gameBus.addListener(FarmstormGameEvents::onFarmlandTrample);
+        // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
+        // gameBus.addListener(FarmstormGameEvents::onRightClickBlock);
+        // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
+        // gameBus.addListener(FarmstormGameEvents::onFarmlandTrample);
     }
 
     /** 每 20 tick：临时附魔自愈（光环到期撤销也走这条）+ 可开关的心跳日志。 */
@@ -168,7 +170,8 @@ public final class FarmstormGameEvents {
         if (!startupDone) {
             startupDone = true;
             CoreChunkTickets.restoreAll(server);
-            FarmlandLedger.get(server).backfill(server);
+            // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
+            // FarmlandLedger.get(server).backfill(server);
         }
         // F-200 / 30 号 §2.1.4 第 10 条：去抖 flush + 每 100 刻的指纹对账。**每刻都要走**，
         // 不能再让它挂在启动闸后面（闸只跑一次，那样包永远发不出去）。
@@ -238,31 +241,32 @@ public final class FarmstormGameEvents {
      * <p>只有服务端判定（红线第 3 条）。客户端保留原版预测：服务端 {@code Level#playSound(Player, ...)}
      * 把发声音的玩家本人排除在外，客户端若也不预测，成功锄地时锄头就没有音效。
      */
-    private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (!(event.getLevel() instanceof ServerLevel level) || !(event.getEntity() instanceof ServerPlayer player)) {
-            return;
-        }
-        BlockPos pos = event.getPos();
-        if (!FarmlandGuard.isTillAction(level, pos, event.getItemStack())) {
-            return;
-        }
-        FarmlandLedger ledger = FarmlandLedger.of(level);
-        FarmlandGuard.Decision decision = FarmlandGuard.check(level, player, pos);
-        if (decision.verdict() == FarmlandGuard.Verdict.ALLOW && decision.core() != null) {
-            // F-194：同一 tick 内写绑定 + 记账 + 放耕地——紧接着的下一次锄地读到的 used 已含这一块，
-            // 而 /save-all 立刻就能在 NBT 里看到这条（30 号 §7 #16）。
-            ledger.bind(player.getUUID(), decision.core(), pos);
-            return;
-        }
-        event.setCanceled(true);
-        // 1.21 用 TriState 取代了原先的 Event.Result：DENY 对应 TriState.FALSE（24 号 §6.3 的待验证 ⑥）
-        event.setUseBlock(TriState.FALSE);
-        player.displayClientMessage(decision.verdict() == FarmlandGuard.Verdict.NO_CORE
-                ? Component.translatable(FarmlandGuard.MESSAGE_NO_CORE)
-                : Component.translatable(FarmlandGuard.MESSAGE_QUOTA_FULL,
-                        ledger.used(level, player), ledger.capacity(level, player)),
-                true);
-    }
+    // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
+    // private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        // if (!(event.getLevel() instanceof ServerLevel level) || !(event.getEntity() instanceof ServerPlayer player)) {
+            // return;
+        // }
+        // BlockPos pos = event.getPos();
+        // if (!FarmlandGuard.isTillAction(level, pos, event.getItemStack())) {
+            // return;
+        // }
+        // FarmlandLedger ledger = FarmlandLedger.of(level);
+        // FarmlandGuard.Decision decision = FarmlandGuard.check(level, player, pos);
+        // if (decision.verdict() == FarmlandGuard.Verdict.ALLOW && decision.core() != null) {
+            // // F-194：同一 tick 内写绑定 + 记账 + 放耕地——紧接着的下一次锄地读到的 used 已含这一块，
+            // // 而 /save-all 立刻就能在 NBT 里看到这条（30 号 §7 #16）。
+            // ledger.bind(player.getUUID(), decision.core(), pos);
+            // return;
+        // }
+        // event.setCanceled(true);
+        // // 1.21 用 TriState 取代了原先的 Event.Result：DENY 对应 TriState.FALSE（24 号 §6.3 的待验证 ⑥）
+        // event.setUseBlock(TriState.FALSE);
+        // player.displayClientMessage(decision.verdict() == FarmlandGuard.Verdict.NO_CORE
+                // ? Component.translatable(FarmlandGuard.MESSAGE_NO_CORE)
+                // : Component.translatable(FarmlandGuard.MESSAGE_QUOTA_FULL,
+                        // ledger.used(level, player), ledger.capacity(level, player)),
+                // true);
+    // }
 
     /**
      * 耕地踩踏保护（F-158 / D-120 第 3 项）：取消即不产生泥土。
@@ -274,9 +278,10 @@ public final class FarmstormGameEvents {
      *
      * <p>失水退化不在这条链上（{@code FarmBlock#randomTick} 直接调 {@code turnToDirt}），范围内的耕地照常退化。
      */
-    private static void onFarmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
-        if (event.getLevel() instanceof ServerLevel level && FarmlandGuard.protectsFromTrample(level, event.getPos())) {
-            event.setCanceled(true);
-        }
-    }
+    // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
+    // private static void onFarmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
+        // if (event.getLevel() instanceof ServerLevel level && FarmlandGuard.protectsFromTrample(level, event.getPos())) {
+            // event.setCanceled(true);
+        // }
+    // }
 }

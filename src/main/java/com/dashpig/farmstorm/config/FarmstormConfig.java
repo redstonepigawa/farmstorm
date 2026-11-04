@@ -224,9 +224,21 @@ public final class FarmstormConfig {
     public static ModConfigSpec.IntValue trapDustIntervalTicks;
     public static ModConfigSpec.IntValue trapMaxTrapsPerPlayer;
 
+    // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
+    // 本字段的声明**保留**：FarmlandGuard / FarmlandLedger 两处 .get() 仍在，删声明等于改这两个类（A-62）。
+    // 注意：:909-912 的 .defineInRange 已注释 ⇒ 本字段运行期恒为 null；
+    // 恢复监听器（:75/:76）前必须先恢复定义，否则 FarmlandGuard.java:75 抛 NPE。
     public static ModConfigSpec.IntValue outpostCoreFarmlandBonus;
     public static ModConfigSpec.IntValue outpostCoreMaxPerPlayer;
     public static ModConfigSpec.IntValue outpostCoreBoundaryParticleIntervalTicks;
+
+    // D-159：农民交易三档绿宝石价格区间（顶层组 trade 的 6 键）。
+    public static ModConfigSpec.IntValue tradeCommonMin;
+    public static ModConfigSpec.IntValue tradeCommonMax;
+    public static ModConfigSpec.IntValue tradeRareMin;
+    public static ModConfigSpec.IntValue tradeRareMax;
+    public static ModConfigSpec.IntValue tradeEpicMin;
+    public static ModConfigSpec.IntValue tradeEpicMax;
 
     public static ModConfigSpec.BooleanValue compressedReplaceOnlyAirAndFluid;
 
@@ -906,16 +918,41 @@ public final class FarmstormConfig {
 
         // F-192 / D-139 / A-42：farmland 整组已删除（额度口径改为 farmlandBonus × 己方核数，不再有 base 项）。
         b.push("outpost_core");
-        outpostCoreFarmlandBonus = b.comment("每个据点核心增加的耕地上限；范围 0 ~ 1024。"
-                + "本键同时是每核容量与队伍额度基数（额度 = 本键 × 己方核数，RT-33）")
-                .translation(tr("outpost_core.farmlandBonus"))
-                .defineInRange("farmlandBonus", 16, 0, 1024);
+        // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
+        // outpostCoreFarmlandBonus = b.comment("每个据点核心增加的耕地上限；范围 0 ~ 1024。"
+                // + "本键同时是每核容量与队伍额度基数（额度 = 本键 × 己方核数，RT-33）")
+                // .translation(tr("outpost_core.farmlandBonus"))
+                // .defineInRange("farmlandBonus", 16, 0, 1024);
         outpostCoreMaxPerPlayer = b.comment("每玩家可放置的核心数；范围 1 ~ 64")
                 .translation(tr("outpost_core.maxPerPlayer"))
                 .defineInRange("maxPerPlayer", 2, 1, 64);
         outpostCoreBoundaryParticleIntervalTicks = b.comment("边界粒子刷新间隔（刻），40 刻 = 2 秒；范围 20 ~ 1200")
                 .translation(tr("outpost_core.boundaryParticleIntervalTicks"))
                 .defineInRange("boundaryParticleIntervalTicks", 40, 20, 1200);
+        b.pop();
+
+        // D-159：农民交易三档价格区间。**顶层组**（与 outpost_core 同级，不是嵌套组）。
+        // 键名扁平、不写 "common.min"，是因为 ModConfigSpec.Builder.split（DOT_SPLITTER）会把带 '.' 的
+        // 路径拆成嵌套段：那样落盘会多出 [trade.common] / [trade.rare] / [trade.epic] 三段，段数变 62 而不是 59。
+        b.push("trade");
+        tradeCommonMin = b.comment("普通档交易价格下界（绿宝石）；范围 1 ~ 64")
+                .translation(tr("trade.common.min"))
+                .defineInRange("commonMin", 2, 1, 64);
+        tradeCommonMax = b.comment("普通档交易价格上界（绿宝石）；范围 1 ~ 64。写反时运行期自动交换，不抛异常")
+                .translation(tr("trade.common.max"))
+                .defineInRange("commonMax", 5, 1, 64);
+        tradeRareMin = b.comment("稀有档交易价格下界（绿宝石）；范围 1 ~ 64")
+                .translation(tr("trade.rare.min"))
+                .defineInRange("rareMin", 10, 1, 64);
+        tradeRareMax = b.comment("稀有档交易价格上界（绿宝石）；范围 1 ~ 64。写反时运行期自动交换，不抛异常")
+                .translation(tr("trade.rare.max"))
+                .defineInRange("rareMax", 32, 1, 64);
+        tradeEpicMin = b.comment("史诗档交易价格下界（绿宝石）；范围 1 ~ 64")
+                .translation(tr("trade.epic.min"))
+                .defineInRange("epicMin", 40, 1, 64);
+        tradeEpicMax = b.comment("史诗档交易价格上界（绿宝石）；范围 1 ~ 64。写反时运行期自动交换，不抛异常")
+                .translation(tr("trade.epic.max"))
+                .defineInRange("epicMax", 64, 1, 64);
         b.pop();
 
         b.push("compressed");

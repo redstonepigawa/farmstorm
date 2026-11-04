@@ -21,12 +21,19 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -45,7 +52,13 @@ import org.joml.Vector3f;
  * <p>归属只存 UUID 与名字、**不留队伍快照**（C-9）：换队后己方判定立刻变化，因为
  * {@link DeployedOwnership#isAlly} 在判定的那一刻才去解析归属者的当前队伍。
  */
-public class OutpostCoreBlockEntity extends BlockEntity {
+public class OutpostCoreBlockEntity extends BlockEntity implements Container {
+    /**
+     * 54 格 = 6 行 × 9 列 = 双箱 27 × 2（D-166）。
+     * <b>54 是格子数、16 是培养器名额</b>（裁定 #8）：后者在 F-231 才建，本类的 {@code cultivators} 留到那时。
+     */
+    public static final int SLOT_COUNT = 54;
+
     /** NBT 键名（与部署方块同形，不加前缀）：{@code ownerUuid} / {@code ownerName} 走 {@link DeployedOwnership}。 */
     private static final String TAG_PLACED_GAME_TIME = "placedGameTime";
 
@@ -79,6 +92,9 @@ public class OutpostCoreBlockEntity extends BlockEntity {
      */
     private static final Map<UUID, Long> LAST_RING_TICK = new HashMap<>();
 
+    /** 54 格存储（D-166）：{@code NonNullList} 固定长度，缺 {@code Items} 键时保持 54 个空槽。 */
+    private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
+
     @Nullable
     private UUID ownerUuid;
     @Nullable
@@ -93,6 +109,130 @@ public class OutpostCoreBlockEntity extends BlockEntity {
 
     public OutpostCoreBlockEntity(BlockPos pos, BlockState state) {
         super(FarmstormBlockEntities.OUTPOST_CORE.get(), pos, state);
+    }
+
+    // ---- 整批插入（D-164 补充 / 36 号 §2.6.1 的三条纪律：先算后写、按整批判、成功后 setChanged + 同 tick 刷新）----
+
+    /** 只读模拟：这一批能不能整批放下。不写 {@link #items}、不 {@code setChanged}。 */
+    public boolean canAccept(List<ItemStack> batch) {
+        return this.simulateAccept(batch) != null;
+    }
+
+    /**
+     * 整批真插入：模拟不通过就一个都不写（否则会出现半批落地），通过才整体替换并刷新。
+     *
+     * <p>刷新用 {@code sendBlockUpdated} 而不是把物品塞进 {@link #getUpdateTag}：绑定面的变化要同步，
+     * 54 格物品由原版菜单槽位逐格下发（36 号 §2.6.1）。
+     */
+    public boolean acceptAll(List<ItemStack> batch) {
+        List<ItemStack> result = this.simulateAccept(batch);
+        if (result == null) {
+            return false;
+        }
+        for (int i = 0; i < result.size(); i++) {
+            this.items.set(i, result.get(i));
+        }
+        this.setChanged();
+        if (this.level != null && !this.level.isClientSide) {
+            BlockState state = this.getBlockState();
+            this.level.sendBlockUpdated(this.getBlockPos(), state, state, Block.UPDATE_CLIENTS);
+        }
+        return true;
+    }
+
+    /**
+     * 在副本上模拟「先合并到同物品未满的槽、再占空槽」；任何一件放不完就返回 {@code null}（整批失败）。
+     * 只在服务端调用（{@code CultivatorBlockEntity} 的结算，F-236）。
+     */
+    @Nullable
+    private List<ItemStack> simulateAccept(List<ItemStack> batch) {
+        List<ItemStack> simulated = new ArrayList<>(SLOT_COUNT);
+        for (ItemStack stack : this.items) {
+            simulated.add(stack.copy());
+        }
+        for (ItemStack incoming : batch) {
+            if (incoming.isEmpty()) {
+                continue;
+            }
+            int max = Math.min(this.getMaxStackSize(incoming), incoming.getMaxStackSize());
+            int remaining = incoming.getCount();
+            for (int i = 0; i < simulated.size() && remaining > 0; i++) {
+                ItemStack slot = simulated.get(i);
+                if (!slot.isEmpty() && ItemStack.isSameItemSameComponents(slot, incoming) && slot.getCount() < max) {
+                    int moved = Math.min(max - slot.getCount(), remaining);
+                    slot.grow(moved);
+                    remaining -= moved;
+                }
+            }
+            for (int i = 0; i < simulated.size() && remaining > 0; i++) {
+                if (simulated.get(i).isEmpty()) {
+                    ItemStack placed = incoming.copyWithCount(Math.min(max, remaining));
+                    simulated.set(i, placed);
+                    remaining -= placed.getCount();
+                }
+            }
+            if (remaining > 0) {
+                return null;
+            }
+        }
+        return simulated;
+    }
+
+    // ---- Container 契约（D-166 / 36 号 §2.6.1 的逐方法形态，照 ConverterBlockEntity）----
+
+    @Override
+    public int getContainerSize() {
+        return SLOT_COUNT;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        for (ItemStack stack : this.items) {
+            if (!stack.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ItemStack getItem(int slot) {
+        return this.items.get(slot);
+    }
+
+    @Override
+    public ItemStack removeItem(int slot, int amount) {
+        ItemStack taken = ContainerHelper.removeItem(this.items, slot, amount);
+        if (!taken.isEmpty()) {
+            this.setChanged();
+        }
+        return taken;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int slot) {
+        return ContainerHelper.takeItem(this.items, slot);
+    }
+
+    @Override
+    public void setItem(int slot, ItemStack stack) {
+        if (stack.getCount() > this.getMaxStackSize()) {
+            stack.setCount(this.getMaxStackSize());
+        }
+        this.items.set(slot, stack);
+        this.setChanged();
+    }
+
+    @Override
+    public void clearContent() {
+        this.items.clear();
+        this.setChanged();
+    }
+
+    /** 原版语义的触及范围（{@code Container.stillValidBlockEntity}，默认距离 4.0）；裁定 #17 的 B 闸。 */
+    @Override
+    public boolean stillValid(Player player) {
+        return Container.stillValidBlockEntity(this, player);
     }
 
     /**
@@ -408,11 +548,32 @@ public class OutpostCoreBlockEntity extends BlockEntity {
         this.settleOnRemoval();
     }
 
+    /**
+     * 客户端同步面（RT-44 的正面回答，36 号 §2.6.1）：<b>只写 owner 三键</b>——
+     * 不写 {@code Items}（54 个 ItemStack 全量进这里会让每次区块下发多出几 KB，收益是 0：
+     * 界面打开时由原版菜单槽位逐格同步），也不写 {@code Cultivators}（由连线的包下发，F-239）。
+     */
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        DeployedOwnership.write(tag, this.ownerUuid, this.ownerName);
+        tag.putLong(TAG_PLACED_GAME_TIME, this.placedGameTime);
+        return tag;
+    }
+
+    /** 绑定变化时由 {@code sendBlockUpdated} 触发；体量与 0.1.1 持平（见 {@link #getUpdateTag}）。 */
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         DeployedOwnership.write(tag, this.ownerUuid, this.ownerName);
         tag.putLong(TAG_PLACED_GAME_TIME, this.placedGameTime);
+        // D-166 / RT-44：存档面只增 Items 一块；键名走 ContainerHelper.TAG_ITEMS（"Items"）。
+        ContainerHelper.saveAllItems(tag, this.items, registries);
     }
 
     @Override
@@ -421,5 +582,8 @@ public class OutpostCoreBlockEntity extends BlockEntity {
         this.ownerUuid = DeployedOwnership.readUuid(tag);
         this.ownerName = DeployedOwnership.readName(tag);
         this.placedGameTime = tag.getLong(TAG_PLACED_GAME_TIME);
+        // 老档兼容读（36 号 §2.6.2）：缺 Items 键时 loadAllItems 一次都不 set ⇒ this.items 保持 54 个空槽，
+        // 不报错、不清档；老档里多出来的键（Bindings / ByCore 之类）不读、不删，原样留在 CompoundTag 里。
+        ContainerHelper.loadAllItems(tag, this.items, registries);
     }
 }

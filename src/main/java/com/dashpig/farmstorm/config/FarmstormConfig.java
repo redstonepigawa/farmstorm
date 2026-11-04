@@ -231,6 +231,8 @@ public final class FarmstormConfig {
     public static ModConfigSpec.IntValue outpostCoreFarmlandBonus;
     public static ModConfigSpec.IntValue outpostCoreMaxPerPlayer;
     public static ModConfigSpec.IntValue outpostCoreBoundaryParticleIntervalTicks;
+    /** D-166：核心存储的格子数（54 = 6 × 9 双箱）。**与培养器名额 16 不是一个数**（裁定 #8）。 */
+    public static ModConfigSpec.IntValue outpostCoreStorageSlots;
 
     // D-159：农民交易三档绿宝石价格区间（顶层组 trade 的 6 键）。
     public static ModConfigSpec.IntValue tradeCommonMin;
@@ -929,6 +931,11 @@ public final class FarmstormConfig {
         outpostCoreBoundaryParticleIntervalTicks = b.comment("边界粒子刷新间隔（刻），40 刻 = 2 秒；范围 20 ~ 1200")
                 .translation(tr("outpost_core.boundaryParticleIntervalTicks"))
                 .defineInRange("boundaryParticleIntervalTicks", 40, 20, 1200);
+        // D-166 / 36 号 §4.1.1 第 3 行：值域钉死 54 ~ 54 —— 54 同时是界面版式（6 × 9）与 getContainerSize() 的返回值，
+        // 让它变成别的值等于让版式与格数两张皮。min == max 的退化区间是否被接受，见 F-226 的实测记录。
+        outpostCoreStorageSlots = b.comment("核心存储的格子数；范围 54 ~ 54（钉死，改它会与界面版式脱节）")
+                .translation(tr("outpost_core.storageSlots"))
+                .defineInRange("storageSlots", 54, 54, 54);
         b.pop();
 
         // D-159：农民交易三档价格区间。**顶层组**（与 outpost_core 同级，不是嵌套组）。

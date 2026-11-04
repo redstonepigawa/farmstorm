@@ -191,6 +191,7 @@
   "farmstorm.configuration.molotov.fireChance": "每个候选方块被点火的概率（%）",
   "farmstorm.configuration.molotov.triggerExplosionPower": "落点触发爆炸的威力（0 = 只当触发器）",
   "farmstorm.configuration.outpost_core.boundaryParticleIntervalTicks": "边界粒子刷新间隔（刻，40 刻 = 2 秒）",
+  "farmstorm.configuration.outpost_core.cultivatorCapacity": "一个核心最多绑定的培养器数量",
   "farmstorm.configuration.outpost_core.maxPerPlayer": "每玩家可放置的据点核心数",
   "farmstorm.configuration.outpost_core.storageSlots": "核心存储的格子数",
   "farmstorm.configuration.point_defense_fungus.interceptParticles": "拦截图效的粒子数",

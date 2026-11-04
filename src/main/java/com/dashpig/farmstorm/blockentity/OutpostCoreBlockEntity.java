@@ -1,19 +1,18 @@
 package com.dashpig.farmstorm.blockentity;
 
 import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import com.dashpig.farmstorm.config.FarmstormConfig;
-import com.dashpig.farmstorm.farmland.FarmlandGuard;
-import com.dashpig.farmstorm.farmland.FarmlandLedger;
 import com.dashpig.farmstorm.network.CoreListBroadcaster;
 import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.outpost.OutpostCoreIndex;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
+import com.dashpig.farmstorm.team.TeamResolver;
 import com.dashpig.farmstorm.util.DeployedOwnership;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,10 +22,14 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,7 +39,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -61,6 +63,12 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
 
     /** NBT 键名（与部署方块同形，不加前缀）：{@code ownerUuid} / {@code ownerName} 走 {@link DeployedOwnership}。 */
     private static final String TAG_PLACED_GAME_TIME = "placedGameTime";
+
+    /**
+     * 核侧绑定列表的 NBT 键（F-231 / 36 号 §2.6.1）：{@code ListTag &lt; LongTag &gt;}，每条是
+     * {@link BlockPos#asLong()}。**首字母大写**，与 {@code Items} 同一体例。
+     */
+    private static final String TAG_CULTIVATORS = "Cultivators";
 
     /** 3 × 3 区块 = 所在区块 + 周围 8 区块（D-120 第 2 项，与 D-118、D-121 同一组数字）。 */
     private static final int RANGE_CHUNKS = 1;
@@ -94,6 +102,14 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
 
     /** 54 格存储（D-166）：{@code NonNullList} 固定长度，缺 {@code Items} 键时保持 54 个空槽。 */
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
+
+    /**
+     * 核侧 16 条绑定列表（F-231 / D-165）：<b>唯一真相</b>在这里，容量读
+     * {@code outpost_core.cultivatorCapacity}（默认 16）。培养器侧 NBT 里的 {@code Core} 只是引用缓存。
+     *
+     * <p><b>16 是名额、54 是格子数</b>（裁定 #8）：两者不同义，不与 {@link #items} 混用。
+     */
+    private final List<BlockPos> cultivators = new ArrayList<>();
 
     @Nullable
     private UUID ownerUuid;
@@ -233,6 +249,148 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
     @Override
     public boolean stillValid(Player player) {
         return Container.stillValidBlockEntity(this, player);
+    }
+
+    // ---- 选核（F-232 放置绑定 / F-233 迁移改绑共用同一份实现）----
+
+    /**
+     * 选核：<b>先过滤（覆盖 ∧ 己方 ∧ 未满）再取最近</b>，序为 {@code distSqr} → {@code placedGameTime} →
+     * 核坐标字典序（D-165 的四判据 + 两级平手键）。
+     *
+     * <p><b>顺序不能反</b>：先取最近再判空位会把「最近的满了、别处还有空位」误判成「没有可绑的核」，
+     * 与「一核 16 个」的容量语义自相矛盾（35 号 §8.2 算例 1 / 算例 3）。
+     *
+     * <p><b>不为找核加载区块</b>：候选来自 {@link OutpostCoreIndex} 的只读视图；要读容量就得拿到方块实体，
+     * 因此先用 {@code ServerChunkCache#getChunkNow} 确认区块在内存，再从**这个 {@link LevelChunk}** 上取
+     * 方块实体 —— {@code Level#getBlockEntity} 会走 {@code getChunkAt}、可能触发加载，这里不碰它。
+     * 区块不在内存 ⇒ 该候选本轮跳过（它的容量读不到，绑上去就是猜）。
+     *
+     * <p>「己方」只有一条链路：{@code TeamResolver} 的 Owner × Owner 重载（红线第 4 条 / D-138）。
+     * 放置时 {@code self} 是放下的玩家，迁移时是被拆核的归属者 —— 两种场景同一个判定，不写第二份队伍比较。
+     *
+     * @param self    己方判定的参照者
+     * @param exclude 要排除的核坐标（迁移时是正在被拆的这个核；放置时传 {@code null}）
+     */
+    @Nullable
+    public static OutpostCoreBlockEntity selectCore(ServerLevel level, BlockPos pos, TeamResolver.Owner self,
+                                                    @Nullable BlockPos exclude) {
+        OutpostCoreIndex index = OutpostCoreIndex.of(level);
+        MinecraftServer server = level.getServer();
+        ResourceLocation dimension = level.dimension().location();
+        List<OutpostCoreBlockEntity> candidates = new ArrayList<>();
+        for (UUID owner : index.owners()) {
+            if (!Farmstorm.TEAMS.isAlly(level, new TeamResolver.Owner(owner, index.ownerName(owner)), self)) {
+                continue;                             // 判据 2：己方
+            }
+            for (OutpostCoreIndex.Entry entry : index.entriesOf(server, owner)) {
+                if (!entry.dimension().equals(dimension)) {
+                    continue;                         // 跨维度不成立（候选集只含同维度的核）
+                }
+                if (entry.pos().equals(exclude)) {
+                    continue;                         // 正在被拆 / 已被排除的核
+                }
+                if (!inRange(entry.pos(), pos)) {
+                    continue;                         // 判据 1：覆盖（3 × 3 区块，RANGE_CHUNKS = 1）
+                }
+                LevelChunk chunk = level.getChunkSource()
+                        .getChunkNow(entry.pos().getX() >> 4, entry.pos().getZ() >> 4);
+                if (chunk == null) {
+                    continue;                         // 不加载区块
+                }
+                if (!(chunk.getBlockEntity(entry.pos()) instanceof OutpostCoreBlockEntity core)) {
+                    continue;                         // 索引里的条目已过期（方块没了）
+                }
+                if (core.isCultivatorListFull()) {
+                    continue;                         // 判据 3：未满
+                }
+                candidates.add(core);
+            }
+        }
+        candidates.sort(Comparator
+                .comparingDouble((OutpostCoreBlockEntity core) -> core.getBlockPos().distSqr(pos))
+                .thenComparingLong(OutpostCoreBlockEntity::placedGameTime)
+                .thenComparingInt(core -> core.getBlockPos().getX())
+                .thenComparingInt(core -> core.getBlockPos().getY())
+                .thenComparingInt(core -> core.getBlockPos().getZ()));
+        return candidates.isEmpty() ? null : candidates.get(0);
+    }
+
+    // ---- 核侧 16 条绑定列表（F-231 / D-165 / 裁定 #8）：唯一真相，培养器侧的 Core 只是引用缓存 ----
+
+    /**
+     * 绑定列表（**返回副本**，调用方可以边遍历边改自己的集合）。
+     *
+     * <p>只在这条低频路径上做一次惰性清理（36 号 §2.7 末段）：把「该格已不是培养器」的条目摘掉。
+     * 区块用 {@code ServerChunkCache#getChunkNow} 取（只查已加载、不触发加载）；**取不到就保留该条**
+     * ——读不到不等于方块没了。运行期每刻的可用性判定不做这个校验（每刻 × 16 条 × 核数，代价不成比例）。
+     */
+    public List<BlockPos> cultivators() {
+        this.pruneCultivators();
+        return List.copyOf(this.cultivators);
+    }
+
+    /** 已绑条数（不触发惰性清理：给候选过滤用，选核时每刻要问很多次）。 */
+    public int cultivatorCount() {
+        return this.cultivators.size();
+    }
+
+    public boolean hasCultivator(BlockPos pos) {
+        return this.cultivators.contains(pos);
+    }
+
+    /** 满员判定：容量读 {@code outpost_core.cultivatorCapacity}（默认 16）。<b>不是 54</b>（裁定 #8）。 */
+    public boolean isCultivatorListFull() {
+        return this.cultivators.size() >= FarmstormConfig.outpostCoreCultivatorCapacity.get();
+    }
+
+    /**
+     * 加一条绑定（放置绑定 / 迁移改绑的唯一入口）：已绑或满员返回 {@code false}，**不挤掉已绑的**
+     * （35 号 §8.2 算例 2）。成功时 {@code setChanged()} + 同 tick 刷新，与 {@link #acceptAll} 同一纪律。
+     */
+    public boolean addCultivator(BlockPos pos) {
+        if (this.hasCultivator(pos) || this.isCultivatorListFull()) {
+            return false;
+        }
+        this.cultivators.add(pos);
+        this.setChanged();
+        this.syncBindings();
+        return true;
+    }
+
+    public boolean removeCultivator(BlockPos pos) {
+        if (!this.cultivators.remove(pos)) {
+            return false;
+        }
+        this.setChanged();
+        this.syncBindings();
+        return true;
+    }
+
+    /** 惰性清理（只在 {@link #cultivators()} 里调）：区块取不到 ⇒ 保留，读不到不等于方块没了。 */
+    private void pruneCultivators() {
+        if (this.cultivators.isEmpty() || !(this.level instanceof ServerLevel server)) {
+            return;
+        }
+        boolean removed = this.cultivators.removeIf(pos -> {
+            LevelChunk chunk = server.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+            return chunk != null && !(chunk.getBlockState(pos).getBlock() instanceof CultivatorBlock);
+        });
+        if (removed) {
+            this.setChanged();
+        }
+    }
+
+    /**
+     * 绑定变化的同步时点（36 号 §2.6.1）：放置 / 改绑 / 增删各调一次。
+     * {@link #getUpdateTag} 不写 {@code Cultivators}（连线由 F-239 的包下发），这里只负责让客户端知道
+     * 「这一格变了」，所以走 {@code sendBlockUpdated} 而不是把列表塞进同步面。
+     */
+    private void syncBindings() {
+        if (this.level == null || this.level.isClientSide) {
+            return;
+        }
+        BlockState state = this.getBlockState();
+        this.level.sendBlockUpdated(this.getBlockPos(), state, state, Block.UPDATE_CLIENTS);
     }
 
     /**
@@ -450,14 +608,14 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
     }
 
     /**
-     * 拆核清算（F-159 / D-120 第 4 项 / 24 号 §6.5）：该核心 3 × 3 内、己方账上的耕地转泥土。
+     * 拆核迁移（F-233 / D-168 / 36 号 §2.7 的七步）：把这个核绑定的培养器逐个交给接替核。
      *
      * <p><b>怎么区分「方块真被移除」与「区块卸载 / 停服」</b>（本轮最容易出事的一处）：
      * <ul>
      *   <li><b>真移除</b>：{@code LevelChunk#setBlockState} 先把新状态写进 section，再在
      *       {@code LevelChunk.java:274} 调 {@code onRemove}，然后走
      *       {@code removeBlockEntity}（{@code LevelChunk.java:276} / {@code :439-447}）→ {@code setRemoved}。
-     *       所以清算跑起来时，该坐标的方块状态**已经是新的**了。</li>
+     *       所以迁移跑起来时，该坐标的方块状态**已经是新的**了。</li>
      *   <li><b>区块卸载 / 停服</b>：{@code ServerLevel#unload}（{@code ServerLevel.java:953-955}）→
      *       {@code LevelChunk#clearAllBlockEntities}（{@code LevelChunk.java:616-619}）→
      *       {@code onChunkUnloaded} → {@code setRemoved}，**方块状态一个字节都没动**。</li>
@@ -467,16 +625,32 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
      * 不在内存，那个判据会把整本账读成「方块都没了」。区块用 {@code ServerChunkCache#getChunkNow} 取
      * （{@code ServerChunkCache.java:171-173}：只查已加载区块、不触发加载），方块读
      * {@code LevelChunk#getBlockState}（{@code LevelChunk.java:178}：纯 section 读，不触发加载、
-     * 也不读方块实体的旧状态缓存）；取不到区块就按「无法证明方块没了」处理，一律不动账、不动世界。
-     * 错判方向的代价不对称：条目留错了有 {@link FarmlandLedger} 的惰性校验兜底，删错了 / 铲错了是数据丢失
-     * （与 {@code DeployedCropBlockEntity:366-379} 同一取舍）。
+     * 也不读方块实体的旧状态缓存）；取不到区块就按「无法证明方块没了」处理，一字节都不动。
      *
-     * <p><b>F-196 / D-136：先迁移、三支降级。</b>只处理**本核名下**的绑定（{@code bindingsOf(dead)}），
-     * 不再按「范围内己方账上的耕地」全扫——那正是 bug 1（拆 A 把 B 的田也铲了）的症状。
-     * 三个出口：① 改绑到接替核；② {@code setBlock(DIRT)} + 摘绑定（迁不动、区块在内存、方块还是耕地）；
-     * ③ **只摘绑定、世界不动**（迁不动且区块未加载——A-35：降级为「失去保护」，不是「变泥土」）。
-     * 先把三份集合算完再动世界，避免边遍历边改账本；**不为清算加载区块**（全程 {@code getChunkNow}）。
-     * 不通知耕地主、不掉落、不给补偿（D-136 补充）。转完从索引摘掉这一条，{@code +16} 当场失效。
+     * <p><b>三出口</b>（D-168 / RT-43）：
+     * <ol>
+     *   <li><b>① 改绑</b>：找到「覆盖该培养器 ∧ 己方 ∧ 未满」的接替核（最近优先，平手键同 D-165）⇒
+     *       写新核的 {@code Cultivators} + 重塑培养器的 {@code Core} 缓存。世界不动。</li>
+     *   <li><b>② 留原地、标记未绑定</b>：一个都没有，且区块在内存、该格仍是培养器 ⇒ 清 {@code Core} 键
+     *       （{@code Held} / {@code Progress} 原样保留）⇒ 它从此不可使用。<b>不变泥土、不掉落</b>。</li>
+     *   <li><b>③ 防御性跳过</b>：一个都没有，且区块取不到 **或** 该格已不是培养器 ⇒ 什么都不写，
+     *       培养器 NBT 原值保留（不猜测、不删绑定）。</li>
+     * </ol>
+     *
+     * <p><b>三条负面清单</b>（36 号 §2.7，写在这里是因为它们各自对应一次真实事故）：
+     * <ol>
+     *   <li><b>方法体内没有 {@code setBlock}</b>：0.1.1 的「迁不动 ⇒ 变泥土」随整段改写消失。
+     *       培养器是独立方块，「无法使用」不等于「被拆掉」（D-168 补充）。</li>
+     *   <li><b>不为迁移加载区块</b>：全程 {@code getChunkNow}。被绑的培养器必在核的 3 × 3 内，而
+     *       {@code CoreChunkTickets} 的票在 {@link #release()} 里才放，{@code release()} 是最后一行
+     *       ⇒ 迁移期间这些区块在内存；万一取不到就走出口③。</li>
+     *   <li><b>物品不在这里掉</b>：54 格走 {@code OutpostCoreBlock#onRemove} 的
+     *       {@code Containers.dropContents}。这里只清 {@code Cultivators}，{@code items} 一个都不动
+     *       ——两条钩子分工（D-167 补充）。</li>
+     * </ol>
+     *
+     * <p>{@code addCultivator} 返回 {@code false}（理论上不可达：候选已过滤「未满」，且同线程内立即写入）
+     * 时按「没有接替核」处理，走出口②/③，不留下指向死核的假绑定。
      */
     private void settleOnRemoval() {
         if (!(this.level instanceof ServerLevel server) || this.ownerUuid == null) {
@@ -490,47 +664,39 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         if (chunk.getBlockState(corePos).getBlock() instanceof OutpostCoreBlock) {
             return;                                       // 方块还在原地：这是区块卸载 / 停服，不是移除
         }
-        FarmlandLedger ledger = FarmlandLedger.of(server);
-        FarmlandLedger.CoreKey dead = new FarmlandLedger.CoreKey(server.dimension().location(), corePos);
-        List<FarmlandLedger.Binding> mine = ledger.bindingsOf(dead);
-        mine.sort(Comparator.comparing(FarmlandLedger.Binding::pos));   // 不依赖 byCore 的迭代顺序
-        Map<BlockPos, FarmlandLedger.CoreKey> rebind = new LinkedHashMap<>();
-        List<BlockPos> toDirt = new ArrayList<>();
-        List<BlockPos> unbindOnly = new ArrayList<>();
-        Map<FarmlandLedger.CoreKey, Integer> pending = new HashMap<>();
-        for (FarmlandLedger.Binding binding : mine) {
-            // 候选：覆盖该耕地 ∧ 与**耕地主**同盟 ∧ 仍有空位（含本次已规划出去的名额），且不是正在被拆的这个核
-            FarmlandLedger.CoreKey target = FarmlandGuard.selectCore(server,
-                    FarmlandLedger.ownerKey(server, binding.owner()), binding.pos(), dead, pending);
-            if (target != null) {
-                rebind.put(binding.pos(), target);
-                pending.merge(target, 1, Integer::sum);
+        // 步骤 4：**先复制一份再遍历** —— 本方法会改 this.cultivators，边遍历边改会跳过或重复处理同一项。
+        List<BlockPos> bound = this.cultivators();
+        TeamResolver.Owner self = new TeamResolver.Owner(this.ownerUuid, this.ownerName);
+        for (BlockPos pos : bound) {
+            // 出口①：接替核 = 覆盖 ∧ 己方（相对本核归属者）∧ 未满，最近优先；本次已写走的名额自然包含在内
+            OutpostCoreBlockEntity next = selectCore(server, pos, self, corePos);
+            if (next != null && next.addCultivator(pos)) {
+                LevelChunk nextChunk = server.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+                if (nextChunk != null
+                        && nextChunk.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator) {
+                    cultivator.setCore(next.getBlockPos());        // 两侧都写：核侧已写，这里写培养器侧缓存
+                }
                 continue;
             }
-            LevelChunk farmlandChunk = server.getChunkSource()
-                    .getChunkNow(binding.pos().getX() >> 4, binding.pos().getZ() >> 4);
-            if (farmlandChunk == null) {
-                unbindOnly.add(binding.pos());             // A-35：迁不动 + 区块未加载 ⇒ 只摘绑定，世界不动
-                Farmstorm.LOGGER.info("迁移失败且区块未加载：只摘绑定 {}", binding.pos());
-            } else if (!farmlandChunk.getBlockState(binding.pos()).is(Blocks.FARMLAND)) {
-                unbindOnly.add(binding.pos());             // B-21：那一格早已不是耕地 ⇒ 摘绑定，不动世界
-                Farmstorm.LOGGER.info("迁移失败且地块已不是耕地：只摘绑定 {}", binding.pos());
-            } else {
-                toDirt.add(binding.pos());                 // 迁不动 + 看得见 ⇒ 变泥土（D-136）
+            // 以下都是「没有可用的接替核」：先看培养器那一格读不读得到、还是不是培养器（都不动世界）
+            LevelChunk cultivatorChunk = server.getChunkSource()
+                    .getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+            if (cultivatorChunk == null) {
+                Farmstorm.LOGGER.info("迁移失败且区块未加载：保留 NBT 原值 {}", pos);   // 出口③
+                continue;
+            }
+            if (!(cultivatorChunk.getBlockState(pos).getBlock() instanceof CultivatorBlock)) {
+                Farmstorm.LOGGER.info("迁移失败且该格已不是培养器：保留 NBT 原值 {}", pos);  // 出口③
+                continue;
+            }
+            if (cultivatorChunk.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator) {
+                cultivator.clearCore();                    // 出口②：留原地、清 Core、内容保留、不可使用
+                Farmstorm.LOGGER.info("迁移失败：培养器留原地并标为未绑定 {}", pos);
             }
         }
-        // 先算完集合，再动世界（沿用 24 号 §6.5 的既有理由：避免边遍历边改账本）
-        for (Map.Entry<BlockPos, FarmlandLedger.CoreKey> entry : rebind.entrySet()) {
-            ledger.migrate(entry.getKey(), entry.getValue());
-        }
-        for (BlockPos pos : toDirt) {
-            server.setBlock(pos, Blocks.DIRT.defaultBlockState(), Block.UPDATE_ALL);
-            ledger.remove(pos);
-        }
-        for (BlockPos pos : unbindOnly) {
-            ledger.remove(pos);                            // 只摘账，不碰方块
-        }
-        this.release();
+        this.cultivators.clear();       // 只清绑定列表；items 不动（掉落是 onRemove 的 Containers.dropContents）
+        this.setChanged();
+        this.release();                 // 最后一行：摘索引 + 释放区块票 + 请求刷新浮窗列表（既有方法）
     }
 
 
@@ -574,6 +740,12 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         tag.putLong(TAG_PLACED_GAME_TIME, this.placedGameTime);
         // D-166 / RT-44：存档面只增 Items 一块；键名走 ContainerHelper.TAG_ITEMS（"Items"）。
         ContainerHelper.saveAllItems(tag, this.items, registries);
+        // F-231：绑定列表落盘为 Cultivators（Long 列表，每条 BlockPos#asLong）。空列表也写，与 Items 同一体例。
+        ListTag cultivatorsTag = new ListTag();
+        for (BlockPos cultivatorPos : this.cultivators) {
+            cultivatorsTag.add(LongTag.valueOf(cultivatorPos.asLong()));
+        }
+        tag.put(TAG_CULTIVATORS, cultivatorsTag);
     }
 
     @Override
@@ -585,5 +757,13 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         // 老档兼容读（36 号 §2.6.2）：缺 Items 键时 loadAllItems 一次都不 set ⇒ this.items 保持 54 个空槽，
         // 不报错、不清档；老档里多出来的键（Bindings / ByCore 之类）不读、不删，原样留在 CompoundTag 里。
         ContainerHelper.loadAllItems(tag, this.items, registries);
+        // 缺 Cultivators 键 ⇒ 空列表（老核绑的是耕地，不是培养器，36 号 §2.6.2）；不按「键缺失」反推别的含义。
+        this.cultivators.clear();
+        ListTag cultivatorsTag = tag.getList(TAG_CULTIVATORS, Tag.TAG_LONG);
+        for (int i = 0; i < cultivatorsTag.size(); i++) {
+            if (cultivatorsTag.get(i) instanceof LongTag entry) {
+                this.cultivators.add(BlockPos.of(entry.getAsLong()));
+            }
+        }
     }
 }

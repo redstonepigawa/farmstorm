@@ -196,7 +196,7 @@ public final class QbounceMountController {
     }
 
     /** {@code qbounce.poseMode} 是否为 {@code mount}：只有服务端路径会调它（客户端读不到 server config）。 */
-    private static boolean isMountMode() {
+    public static boolean isMountMode() {
         return POSE_MODE_MOUNT.equalsIgnoreCase(FarmstormConfig.qbouncePoseMode.get());
     }
 

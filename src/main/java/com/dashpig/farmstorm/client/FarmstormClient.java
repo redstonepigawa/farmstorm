@@ -9,6 +9,8 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -45,6 +47,13 @@ public final class FarmstormClient {
             FarmstormEntityTypes.FRIEND_CHIVES,
             FarmstormEntityTypes.VIBRATION_BEAN,
             FarmstormEntityTypes.TURRET_BULLET);
+
+    /**
+     * 上一次看到的世界维度（F-240）：连线包**不带维度**（同维度的绑定才成立，36 号 §2.8.1），
+     * 因此「这张表属于哪个维度」只能由客户端自己记，变了就 {@code clear()}，
+     * 否则换维度后旧线会画在新世界的同一组坐标上（D-169 补充 / 35 号 §12 B-38）。
+     */
+    private static ResourceKey<Level> lastDimension;
 
     private FarmstormClient() {}
 
@@ -94,8 +103,18 @@ public final class FarmstormClient {
             Minecraft.getInstance().setScreen(new CoreHudDragScreen());
         }
         // 30 号 §8 ⑧ 的退路：LoggingOut 在部分路径下可能不触发，这里用「不在世界里」再兜一次。
-        if (Minecraft.getInstance().level == null) {
+        Level level = Minecraft.getInstance().level;
+        if (level == null) {
             ClientCoreList.clear();
+            ClientCultivatorLinks.clear();
+            lastDimension = null;
+        } else {
+            // F-240 / D-169 补充：换维度清空（35 号 §12 B-38）。客户端不跨维度缓存。
+            ResourceKey<Level> dimension = level.dimension();
+            if (!dimension.equals(lastDimension)) {
+                lastDimension = dimension;
+                ClientCultivatorLinks.clear();
+            }
         }
     }
 
@@ -128,6 +147,9 @@ public final class FarmstormClient {
     @SubscribeEvent
     public static void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
         ClientCoreList.clear();
+        // F-240：换服 / 断线清连线表与维度记录（D-169 补充：不缓存上一次会话）。
+        ClientCultivatorLinks.clear();
+        lastDimension = null;
     }
 
     /**
@@ -138,6 +160,9 @@ public final class FarmstormClient {
     @SubscribeEvent
     public static void onRenderStage(RenderLevelStageEvent event) {
         WildHunterOutline.onRenderStage(event);
+        // F-240：连线线框（AFTER_PARTICLES）。挂在这里而不是新建订阅点，是因为
+        // RenderLevelStageEvent 每阶段都发一次，两个消费者各自在体内判 stage 即可。
+        CultivatorLinkRenderer.onRenderStage(event);
     }
 
     @SubscribeEvent

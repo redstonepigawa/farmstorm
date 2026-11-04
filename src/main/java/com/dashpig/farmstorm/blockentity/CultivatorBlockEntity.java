@@ -6,6 +6,7 @@ import com.dashpig.farmstorm.item.DeployableCropItem;
 import com.dashpig.farmstorm.item.ModifiedCropItem;
 import com.dashpig.farmstorm.item.SeedItem;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
+import com.dashpig.farmstorm.network.CultivatorLinkBroadcaster;
 import com.dashpig.farmstorm.registry.FarmstormItems;
 import com.dashpig.farmstorm.util.CropProfile;
 import com.dashpig.farmstorm.util.CropTier;
@@ -283,6 +284,14 @@ public class CultivatorBlockEntity extends BlockEntity {
         contents.set(0, this.held);
         this.held = ItemStack.EMPTY;
         this.progress = 0;
+        // F-239 / 36 号 §2.8.2 时机 #3（培养器被拆）：本方法是**拆培养器唯一会走到的**服务端钩子
+        // （{@code CultivatorBlock#onRemove} 只调它）。核侧的 {@code Cultivators} 条目由
+        // {@code OutpostCoreBlockEntity#cultivators()} 的惰性清理摘掉，所以这里请求一次重算，
+        // 客户端在去抖窗口内（≤10 刻）就收到短一条的列表 —— 不必等 20 刻重扫（36 号 §8 #32）。
+        // 只多一句广播请求：掉落清单、槽与进度的清空逻辑一字未改。
+        if (this.level != null && !this.level.isClientSide) {
+            CultivatorLinkBroadcaster.requestAll(this.level.getServer());
+        }
         return contents;
     }
 

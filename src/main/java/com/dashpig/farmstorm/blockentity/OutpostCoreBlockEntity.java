@@ -5,6 +5,7 @@ import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.network.CoreListBroadcaster;
+import com.dashpig.farmstorm.network.CultivatorLinkBroadcaster;
 import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.outpost.OutpostCoreIndex;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
@@ -354,6 +355,11 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         this.cultivators.add(pos);
         this.setChanged();
         this.syncBindings();
+        // F-239 / 36 号 §2.8.2 时机 #3（绑定变化）：连线是**观察面**，这里只多一句「重算一次」，
+        // 本方法的返回值与落盘内容不受影响（服务端任何逻辑都不依赖连线是否发得出去）。
+        if (this.level instanceof ServerLevel server) {
+            CultivatorLinkBroadcaster.requestAll(server.getServer());
+        }
         return true;
     }
 
@@ -363,6 +369,10 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         }
         this.setChanged();
         this.syncBindings();
+        // F-239 时机 #3（解绑）：同 addCultivator，只多一次广播请求。
+        if (this.level instanceof ServerLevel server) {
+            CultivatorLinkBroadcaster.requestAll(server.getServer());
+        }
         return true;
     }
 
@@ -481,6 +491,9 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
             // F-200 / 30 号 §2.1.4 第 5、6 条（摧毁核 / 迁移完成）：迁移在 settleOnRemoval 里已改完绑定，
             // 且它末尾一定会走到本方法，所以一次请求覆盖两条时机；10 刻去抖把重复请求合并成一次发送。
             CoreListBroadcaster.requestAll(server.getServer());
+            // F-239 / 36 号 §2.8.2 时机 #4（核被拆）：同一个请求点。索引条目已摘，
+            // 所以组装结果自然不再含这个核 —— 客户端收到的新列表就是「线消失了」的权威答案。
+            CultivatorLinkBroadcaster.requestAll(server.getServer());
         }
     }
 

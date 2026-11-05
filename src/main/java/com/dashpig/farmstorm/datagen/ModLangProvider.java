@@ -7,13 +7,13 @@ import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
 /**
- * 语言文件（TECH §7）：zh_cn 与 en_us 各 **299** 键（v0.0.3 口径）。
+ * 语言文件（TECH §7）：zh_cn 与 en_us 各 **340** 键（v0.2.2 口径）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
- * 不存在「两份键各自维护」的可能。**条目构成（v0.2.0 / P39 实测，改表时必须同步本段）**：
- * 33 item + 27 block + 4 effect + 3 subtitles + **179** config（= 176 server + 3 client）+ 36 advancement + 6 death
- * + 20 tooltip + 13 entity + 9 gui + 2 container + 1 itemGroup + 0 message + 2 key + 3 command
- * = **338**。（P29 时是 314：同表但 config 166 / gui 8、无 key / command 两组。）
+ * 不存在「两份键各自维护」的可能。**条目构成（v0.2.2 / P52 实测，改表时必须同步本段）**：
+ * 34 item + 27 block + 4 effect + 3 subtitles + **179** config（= 176 server + 3 client）+ 36 advancement + 6 death
+ * + 20 tooltip + 13 entity + 1 villager + 9 gui + 2 container + 1 itemGroup + 0 message + 2 key + 3 command
+ * = **340**。（P29 时是 314：同表但 config 166 / gui 8、无 key / command 两组。）
  *
  * <p>v0.1.1 的 Phase 30 加的正是那 **9** 条：3 条 {@code farmstorm.configuration.hud.*}（CLIENT config）、
  * 2 条 {@code key.farmstorm.core_hud.*}（键位描述）、1 条 {@code gui.farmstorm.core_hud.self}（「自己」标识）、
@@ -107,6 +107,8 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "outpost_core", "据点核心", "Outpost Core");
         // ---- v0.2.0 的 1 个新物品（F-224 / D-160 / 36 号 §4.3.2 #1）----
         item(entries, "cultivator", "农作物培养器", "Cultivator");
+        // ---- v0.2.2 的 1 个新物品（F-281 / D-193 / 48 号 §5 #1）----
+        item(entries, "plain_chives", "平凡韭菜", "Plain Chives");
         // ---- 20 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
         block(entries, "puffed_wheat_crop", "膨胀麦", "Puffed Wheat");
         block(entries, "blast_carrot_crop", "胡罗贝", "Blast Carrot");
@@ -156,6 +158,9 @@ public final class ModLangProvider extends LanguageProvider {
         // 漏掉 entity(...) 时 /summon 反馈与死亡信息会退化成裸键 entity.farmstorm.*。----
         entity(entries, "friend_chives", "朋友的韭", "Friend Chives");
         entity(entries, "vibration_bean", "震动豆", "Vibration Bean");
+        // ---- v0.2.2 的 1 条村民职业名（F-281 / D-196 / 48 号 §5 #2）：键形由 Villager#getTypeName 决定、
+        // 必带命名空间段 farmstorm.，因此**不能用** entity(...) 助手（它的前缀是 entity.farmstorm.）----
+        plain(entries, "entity.minecraft.villager.farmstorm.botanist", "植物学家", "Botanist");
         // ---- 2 个 mob_effect（TECH §7.3 #8–#9；隐藏效果的键只用于 /effect 补全）----
         plain(entries, "effect.farmstorm.wild_hunter", "狂 野 猎 人", "Wild Hunter");
         plain(entries, "effect.farmstorm.zangief_piledriver", "桑吉尔蔗打桩", "Zangief Piledriver");

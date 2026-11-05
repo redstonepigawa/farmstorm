@@ -27,7 +27,7 @@ import net.minecraft.world.item.ItemStack;
  * 客户端兜底容器是 {@code SimpleContainer(54)}，内容由服务端槽位同步覆盖。
  */
 public class OutpostCoreMenu extends AbstractContainerMenu {
-    /** 存储格 6 行 × 9 列 = 54（D-166）。<b>与培养器名额 16 不是一个数</b>（裁定 #8）。 */
+    /** 存储格 6 行 × 9 列 = 54（D-166）。<b>与培养器名额 24 不是一个数</b>（裁定 #8）。 */
     public static final int ROWS = 6;
     public static final int COLUMNS = 9;
     public static final int SLOT_COUNT = ROWS * COLUMNS;

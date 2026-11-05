@@ -30,7 +30,8 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 public record CultivatorLinkPayload(List<Link> links) implements CustomPacketPayload {
     /**
      * 单包条目的**解码上限**（36 号 §2.8.1 的算术）：{@code maxPerPlayer} 上界 64 ×
-     * {@code cultivatorCapacity} 上界 16 = 1024。现实值是 {@code 2 × 16 = 32}（默认每玩家 2 核）。
+     * {@code cultivatorCapacity} 上界 64 = 4096 是理论最坏值；本常量取 1024 是**解码保护**，
+     * 不按默认值推导。新装默认下每玩家 4 核 × 24 = 96，远小于本上限。
      */
     public static final int MAX_LINKS = 1024;
 

@@ -426,7 +426,7 @@ public final class ModLangProvider extends LanguageProvider {
                 "Boundary particle interval in ticks (40 ticks = 2 s)");
         // ---- v0.2.0 的第 1 条 core 存储键（F-226 / D-166 / 36 号 §4.3.2 #10）----
         config(entries, "outpost_core.storageSlots", "核心存储的格子数", "Storage slots per core");
-        // ---- v0.2.0 的第 1 条 core 绑定键（F-231 / D-165）：16 是名额、54 是格子数（裁定 #8）----
+        // ---- v0.2.0 的第 1 条 core 绑定键（F-231 / D-165）：24 是名额、54 是格子数（裁定 #8）----
         config(entries, "outpost_core.cultivatorCapacity", "一个核心最多绑定的培养器数量",
                 "Cultivators bound per core");
         // ---- v0.2.0 的 2 条 cultivator 键（F-234 / D-163 / 36 号 §4.3.2 #8~#9）----

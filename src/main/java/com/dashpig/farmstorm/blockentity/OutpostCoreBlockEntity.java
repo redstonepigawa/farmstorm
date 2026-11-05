@@ -59,7 +59,7 @@ import org.joml.Vector3f;
 public class OutpostCoreBlockEntity extends BlockEntity implements Container {
     /**
      * 54 格 = 6 行 × 9 列 = 双箱 27 × 2（D-166）。
-     * <b>54 是格子数、16 是培养器名额</b>（裁定 #8）：后者在 F-231 才建，本类的 {@code cultivators} 留到那时。
+     * <b>54 是格子数、24 是培养器名额</b>（裁定 #8）：后者在 F-231 才建，本类的 {@code cultivators} 留到那时。
      */
     public static final int SLOT_COUNT = 54;
 
@@ -112,10 +112,10 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
 
     /**
-     * 核侧 16 条绑定列表（F-231 / D-165）：<b>唯一真相</b>在这里，容量读
-     * {@code outpost_core.cultivatorCapacity}（默认 16）。培养器侧 NBT 里的 {@code Core} 只是引用缓存。
+     * 核侧 24 条绑定列表（F-231 / D-165）：<b>唯一真相</b>在这里，容量读
+     * {@code outpost_core.cultivatorCapacity}（默认 24）。培养器侧 NBT 里的 {@code Core} 只是引用缓存。
      *
-     * <p><b>16 是名额、54 是格子数</b>（裁定 #8）：两者不同义，不与 {@link #items} 混用。
+     * <p><b>24 是名额、54 是格子数</b>（裁定 #8）：两者不同义，不与 {@link #items} 混用。
      */
     private final List<BlockPos> cultivators = new ArrayList<>();
 
@@ -266,7 +266,7 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
      * 核坐标字典序（D-165 的四判据 + 两级平手键）。
      *
      * <p><b>顺序不能反</b>：先取最近再判空位会把「最近的满了、别处还有空位」误判成「没有可绑的核」，
-     * 与「一核 16 个」的容量语义自相矛盾（35 号 §8.2 算例 1 / 算例 3）。
+     * 与「一核 24 个」的容量语义自相矛盾（35 号 §8.2 算例 1 / 算例 3）。
      *
      * <p><b>不为找核加载区块</b>：候选来自 {@link OutpostCoreIndex} 的只读视图；要读容量就得拿到方块实体，
      * 因此先用 {@code ServerChunkCache#getChunkNow} 确认区块在内存，再从**这个 {@link LevelChunk}** 上取
@@ -323,14 +323,14 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         return candidates.isEmpty() ? null : candidates.get(0);
     }
 
-    // ---- 核侧 16 条绑定列表（F-231 / D-165 / 裁定 #8）：唯一真相，培养器侧的 Core 只是引用缓存 ----
+    // ---- 核侧 24 条绑定列表（F-231 / D-165 / 裁定 #8）：唯一真相，培养器侧的 Core 只是引用缓存 ----
 
     /**
      * 绑定列表（**返回副本**，调用方可以边遍历边改自己的集合）。
      *
      * <p>只在这条低频路径上做一次惰性清理（36 号 §2.7 末段）：把「该格已不是培养器」的条目摘掉。
      * 区块用 {@code ServerChunkCache#getChunkNow} 取（只查已加载、不触发加载）；**取不到就保留该条**
-     * ——读不到不等于方块没了。运行期每刻的可用性判定不做这个校验（每刻 × 16 条 × 核数，代价不成比例）。
+     * ——读不到不等于方块没了。运行期每刻的可用性判定不做这个校验（每刻 × 24 条 × 核数，代价不成比例）。
      */
     public List<BlockPos> cultivators() {
         this.pruneCultivators();
@@ -346,7 +346,7 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         return this.cultivators.contains(pos);
     }
 
-    /** 满员判定：容量读 {@code outpost_core.cultivatorCapacity}（默认 16）。<b>不是 54</b>（裁定 #8）。 */
+    /** 满员判定：容量读 {@code outpost_core.cultivatorCapacity}（默认 24）。<b>不是 54</b>（裁定 #8）。 */
     public boolean isCultivatorListFull() {
         return this.cultivators.size() >= FarmstormConfig.outpostCoreCultivatorCapacity.get();
     }

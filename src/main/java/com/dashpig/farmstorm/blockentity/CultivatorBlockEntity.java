@@ -108,7 +108,7 @@ public class CultivatorBlockEntity extends BlockEntity {
 
     /**
      * 范围闸 + 绑定闸（36 号 §2.5.3 的 {@code isUsable()}）：
-     * 未绑定 / 核不在 / 核侧 16 条列表里没有它 / 不在 3 × 3 区块覆盖内 ⇒ {@code false}。
+     * 未绑定 / 核不在 / 核侧 24 条列表里没有它 / 不在 3 × 3 区块覆盖内 ⇒ {@code false}。
      *
      * <p>范围复用 {@link OutpostCoreBlockEntity#inRange} 的纯函数形态，不写第二份范围公式。
      * 每刻**不查区块**（36 号 §2.7 末段）：{@code getBlockEntity} 只读已加载的区块，不触发加载。

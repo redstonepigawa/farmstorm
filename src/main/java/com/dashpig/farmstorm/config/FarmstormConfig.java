@@ -233,9 +233,9 @@ public final class FarmstormConfig {
     public static ModConfigSpec.IntValue outpostCoreFarmlandBonus;
     public static ModConfigSpec.IntValue outpostCoreMaxPerPlayer;
     public static ModConfigSpec.IntValue outpostCoreBoundaryParticleIntervalTicks;
-    /** D-166：核心存储的格子数（54 = 6 × 9 双箱）。**与培养器名额 16 不是一个数**（裁定 #8）。 */
+    /** D-166：核心存储的格子数（54 = 6 × 9 双箱）。**与培养器名额 24 不是一个数**（裁定 #8）。 */
     public static ModConfigSpec.IntValue outpostCoreStorageSlots;
-    /** D-165 / F-231：一个核心最多绑定的培养器数量（默认 16）。**这是名额，不是格子数**（裁定 #8）。 */
+    /** D-165 / F-231：一个核心最多绑定的培养器数量（默认 24）。**这是名额，不是格子数**（裁定 #8）。 */
     public static ModConfigSpec.IntValue outpostCoreCultivatorCapacity;
 
     // D-163 / F-234：培养器的**顶层组**（与 outpost_core 同级，不是嵌套组）。
@@ -940,7 +940,7 @@ public final class FarmstormConfig {
                 // .defineInRange("farmlandBonus", 16, 0, 1024);
         outpostCoreMaxPerPlayer = b.comment("每玩家可放置的核心数；范围 1 ~ 64")
                 .translation(tr("outpost_core.maxPerPlayer"))
-                .defineInRange("maxPerPlayer", 2, 1, 64);
+                .defineInRange("maxPerPlayer", 4, 1, 64);
         outpostCoreBoundaryParticleIntervalTicks = b.comment("边界粒子刷新间隔（刻），40 刻 = 2 秒；范围 20 ~ 1200")
                 .translation(tr("outpost_core.boundaryParticleIntervalTicks"))
                 .defineInRange("boundaryParticleIntervalTicks", 40, 20, 1200);
@@ -949,11 +949,11 @@ public final class FarmstormConfig {
         outpostCoreStorageSlots = b.comment("核心存储的格子数；范围 54 ~ 54（钉死，改它会与界面版式脱节）")
                 .translation(tr("outpost_core.storageSlots"))
                 .defineInRange("storageSlots", 54, 54, 54);
-        // F-231 / 36 号 §4.1.1 第 2 行：绑定名额默认 16、值域 1 ~ 64。与 storageSlots 是**两个数**（裁定 #8）：
-        // 16 是「一个核能绑几个培养器」，54 是「一个核有几个格子」。
+        // F-231 / 36 号 §4.1.1 第 2 行：绑定名额默认 24、值域 1 ~ 64。与 storageSlots 是**两个数**（裁定 #8）：
+        // 24 是「一个核能绑几个培养器」，54 是「一个核有几个格子」。
         outpostCoreCultivatorCapacity = b.comment("一个核心最多绑定的培养器数量；范围 1 ~ 64（与 storageSlots 的 54 无关）")
                 .translation(tr("outpost_core.cultivatorCapacity"))
-                .defineInRange("cultivatorCapacity", 16, 1, 64);
+                .defineInRange("cultivatorCapacity", 24, 1, 64);
         b.pop();
 
         // F-234 / D-163 / 36 号 §4.1.1 #4~#5：培养器顶层组（与 outpost_core 同级，不是嵌套组）。

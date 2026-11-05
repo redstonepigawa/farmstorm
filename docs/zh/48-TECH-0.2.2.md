@@ -111,7 +111,7 @@ menu_type              2
 相加 = 34+27+8+13+4+3+1+1+1+3+1+2 = 98
 ```
 
-**三条独立算法互为校验**：本文逐条点名 = **98**；`Farmstorm#logRegistrySelfCheck`（`Farmstorm.java:161-185`）的 12 条运行期断言相加 = **98**（改后）；`tools/verify_project.py` 的 `EXPECTED_COUNTS`（`:377-393`）= **98**（改后）。本文的数**不是**从后两者抄的——它是按上表「调用次数」口径重新数出来的，两条旁证只用来确认口径没跑偏。
+**三条独立算法互为校验**：本文逐条点名 = **98**；`Farmstorm#logRegistrySelfCheck`（`Farmstorm.java:161-185`）的 12 条运行期断言相加 = **98**（改后）；`tools/verify_project.py` 的 `EXPECTED_COUNTS`（`:380-393`）= **98**（改后）。本文的数**不是**从后两者抄的——它是按上表「调用次数」口径重新数出来的，两条旁证只用来确认口径没跑偏。
 
 **本版只有 `items` 动了 1 个，另外 11 类 +0 的四条技术理由**：① tooltip 与两次 blit 都改在既有 `OutpostCoreScreen`（§2.1 / §2.2），**不新增屏幕类**，`menu_types` 仍 2；② 植物学家的两张表是**注册表对象**、不是物品 / 方块（§2.3），`blocks` / `block_entities` 不动；③ 方块标签不是注册对象（§2.6），`blocks` 仍 27；④ `plain_chives` 没有配方（裁定 #3），`recipe_types` / `recipe_serializers` 仍 1 / 1，它也不是投掷物（无 `ThrowableCropItem`），`entity_types` 仍 13。
 
@@ -133,7 +133,7 @@ menu_type              2
 
 1. **`ATTACHMENT_TYPES` 本版 0 增量**：它只是把 0.2.1 的登记搬进本表凑齐「累计 3 类」。本版对 `FarmstormAttachments` **一行不动**，`Farmstorm.java:63` 那行注册也照旧。
 2. **`VillagerProfession` 与 `PoiType` 是同一个 `farmstorm:botanist` 名字、两张不同的表**：两个注册表不同，id 相同不冲突，且这正是原版惯例（`minecraft:farmer` 既是 POI 类型也是职业）。写成两个名字（例如 POI 叫 `farmstorm:botanist_poi`）会让读者以为是两条数据，且与原版惯例不符——**本文确定取同名**（§0.3 第 1 项）。
-3. **`verify_project.py` 两类都不核**：它对注册面只做两件事——`EXPECTED`（`:333-375`）的 12 组 id 逐个 grep 字面量、`EXPECTED_COUNTS`（`:377-393`）的 12 个计数相加。两张新表**不在任何一组里** ⇒ 既不核存在、也不核计数。这是已知的覆盖缺口，**本版不扩工具**（46 号 D-188 范围闸），靠 §1.3 + §3 #7/#8/#9 + §8 #8 三处人工登记兜住。
+3. **`verify_project.py` 两类都不核**：它对注册面只做两件事——`EXPECTED`（`:334-375`）的 12 组 id 逐个 grep 字面量、`EXPECTED_COUNTS`（`:380-393`）的 12 个计数相加。两张新表**不在任何一组里** ⇒ 既不核存在、也不核计数。这是已知的覆盖缺口，**本版不扩工具**（46 号 D-188 范围闸），靠 §1.3 + §3 #7/#8/#9 + §8 #8 三处人工登记兜住。
 
 ### 1.4 config 与语言键基线
 
@@ -166,7 +166,7 @@ b.pop() 次数                    =  60
 
 | 项 | 现状（本文复核） | v0.2.2 | 证据 |
 |---|---|---|---|
-| 自定义网络包 | **2 个**：`farmstorm:core_list`、`farmstorm:cultivator_link` | **2 个，不新增**，协议串仍 `"2"` | `network/CultivatorLinkPayload.java:35`（`MAX_LINKS = 1024`）、`:38`（注册名）；本版对这两个包**只改一段注释**（§2.7.4） |
+| 自定义网络包 | **2 个**：`farmstorm:core_list`、`farmstorm:cultivator_link` | **2 个，不新增**，协议串仍 `"2"` | `network/CultivatorLinkPayload.java:36`（`MAX_LINKS = 1024`；改前 `:35`）、`:39`（注册名 `TYPE`；改前 `:38`）；本版对这两个包**只改一段注释**（§2.7.4） |
 | Mixin | **0 个** | **0 个**，继续禁止 | `src/` 全树 `@Mixin` 命中 **0**、`*.mixins.json` **0**；`build.gradle` / `neoforge.mods.toml` 无 mixin 段 |
 
 两条读法（写错任一条，§8 的 #5 会红）：
@@ -212,7 +212,7 @@ public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTi
 
 0.2.1 的 41 号 §3.2 认为「原版 `render` 自己会调 `renderTooltip`，没有人拦它」，于是 F-251 只加验收、不动代码。**这句是错的**（D-192）：原版的 `render` 里根本没有这一步，「没人拦」不等于「有人调」。本版**不再把「验收通过而代码一行没改」当正确结果**——§2.1.2 的六行代码是必改项（§3 #6）。
 
-`OutpostCoreScreen` 改后仍是**一个**类、**一个** `renderBg` 覆写 + **一个** `render` 覆写，行数 42 → 约 47，`menu_types` 不变（§1.2 第 12 行）。
+`OutpostCoreScreen` 改后仍是**一个**类、**一个** `renderBg` 覆写 + **一个** `render` 覆写，行数 42 → **53**（F-270 的两次 blit 改写 +6、F-271 的 `render` 覆写 +5），`menu_types` 不变（§1.2 第 12 行）。
 
 ### 2.2 两次 blit（Bug B）
 
@@ -379,8 +379,8 @@ public final class ModPoiTypeTagsProvider extends TagsProvider<PoiType> {
 
 ⇒ 三条直接后果（**必须成对写**，否则玩家会以为交易表坏了）：
 
-1. **22 个 listing ≠ 22 项可见**：22 条全部进 1 级 ⇒ `Villager.java:875` 写死只抽 2 条 ⇒ **每个植物学家只显示 2 项**（D-198、裁定 #17）。
-2. **一个满级植物学家的报价总数 = 3 项**（1 级可见 2 + 5 级 1）。
+1. **22 个 listing ≠ 22 项可见**：22 条**摊到 1~4 级 = 6 / 6 / 6 / 4** ⇒ `Villager.java:875` 写死**每级只抽 2 条** ⇒ **1 级只显示 2 项，升到满级最多看到 9 项**（4 级 × 2 + 5 级史诗 1）（D-198、裁定 #17）。
+2. **一个满级植物学家的报价总数最多 = 9 项**（1~4 级各抽 2 = 8，加 5 级史诗 1；不同植物学家抽到的项**可能重复**，所以写「最多」）。
 3. **`/reload` 不会重发该事件**（`VillagerTradingManager:38` 只认 `SERVER_DATA_LOAD`）⇒ 验收改完交易必须**重启服务端**，`/reload` 之后看到旧列表是正常的，不是「没生效」。
 
 #### 2.4.2 22 项普通交易：清单与数值
@@ -389,7 +389,7 @@ public final class ModPoiTypeTagsProvider extends TagsProvider<PoiType> {
 |---|---|---|
 | 项数 | **22** 条 `ItemListing` | 裁定 #10；D-197 |
 | 组成 | 20 个原版物品 + `plain_chives` + `compressed_puffed_wheat` | 裁定 #10；47 号 §2.3 的 22 行表就是**唯一清单**，本文不复制第 3 份 |
-| 等级 | **全部进 1 级**（`event.getTrades().get(1)`） | 裁定 #11 |
+| 等级 | **摊到 1~4 级 = 6 / 6 / 6 / 4**（`event.getTrades().get(1)` ~ `.get(4)`）；史诗 1 项仍在 **5 级** | 裁定 #11（作者 2026-11-05 改判） |
 | 价格 | **3 ~ 6** 绿宝石，闭区间（`6 − 3 + 1 = 4` 个取值） | 裁定 #12；取法与 `TierTrade:75` 同形 |
 | `maxUses` | **8** | 裁定 #12 |
 | 每次给几个 | **1** | 裁定 #12（性质见 47 号 §0.2 第 2 条） |
@@ -514,11 +514,11 @@ FoodProperties food = new FoodProperties.Builder()
 
 | # | 坑 | 现状 | 本版要做 |
 |---|---|---|---|
-| 1 | **物品模型** | `ModItemModelProvider#farmstormItems()`（`:85-94`）遍历 `BuiltInRegistries.ITEM` 里所有 `farmstorm:` 物品 ⇒ `plain_chives` **自动**被建模，落进 `basicItem(item)`（`:52`） | **代码不用改**，但 `basicItem` 指向 `farmstorm:item/plain_chives` ⇒ **必须补一张 16×16 贴图** `assets/farmstorm/textures/item/plain_chives.png`（`textures/item/` 现有 **29** 张，无此文件） |
+| 1 | **物品模型** | `ModItemModelProvider#farmstormItems()`（`:85-94`）遍历 `BuiltInRegistries.ITEM` 里所有 `farmstorm:` 物品 ⇒ `plain_chives` **自动**被建模，落进 `basicItem(item)`（`:52`） | **代码要改一行**：`farmstormItems()` 里给 `plain_chives` 单开一个分支 ⇒ `withExistingParent(...).texture("layer0", modLoc("item/friend_chives"))`（`ModItemModelProvider:51-54`）；**不新增贴图**，复用 `friend_chives` 那张作者原画；`textures/item/` 仍 **29** 张，`plain_chives.png` 不存在 |
 | 2 | **语言键** | `ModLangProvider#buildEntries`（`:70` 起，物品段 `:72-88`）逐条手写 | **+1 条** `item(entries, "plain_chives", "平凡韭菜", "Plain Chives")`（§5） |
 | 3 | **创造栏** | `creativeTabItems()`（`FarmstormItems:127-136`）是**手写清单**，不遍历注册表 | **+1 行** `items.add(PLAIN_CHIVES);` |
 
-**贴图怎么出**：`tools/gen_textures.py` 是现有的贴图生成器（`ICONS` 表 + drawer，输出 `assets/farmstorm/textures/item/<id>.png`），本版加一条 `plain_chives` 的 16×16 条目即可。**不要**指望 datagen 生成 PNG——`verify_project.py` 不校验贴图存在性（§8 #30 是唯一的人工闸）。
+**贴图怎么出**：**不出**。`tools/gen_textures.py` 里 `plain_chives` 那条**整体退役**（`--list` 现共 **99** 张：item 26 / stage 56 / block 16 / gui 1），模型改指 `farmstorm:item/friend_chives` 那张作者原画（§2.5.3 第 1 行）⇒ `textures/item/` 仍 **29** 张。**不要**指望 datagen 生成 PNG——`verify_project.py` 不校验贴图存在性（§8 #30 是唯一的人工闸）。
 
 #### 2.5.4 不许做的事（逐条给后果）
 
@@ -594,7 +594,7 @@ FoodProperties food = new FoodProperties.Builder()
 | 4 | `blockentity/OutpostCoreBlockEntity.java:116` | 「`cultivatorCapacity`（默认 **16**）」 | 24 | **必须** |
 | 5 | `blockentity/OutpostCoreBlockEntity.java:349` | 「容量读 `cultivatorCapacity`（默认 **16**）」 | 24 | **必须** |
 | 6 | `menu/OutpostCoreMenu.java:30` | 「**与培养器名额 16 不是一个数**」 | 24 | **必须** |
-| 7 | `network/CultivatorLinkPayload.java:32-33` | 「`maxPerPlayer` 上界 64 × `cultivatorCapacity` 上界 **16** = 1024」「现实值是 `2 × 16 = 32`」 | 见 §2.7.4 | **必须**（`BRIEF` §3.4 第 13 行已列） |
+| 7 | `network/CultivatorLinkPayload.java:32-33`（改前） | 「`maxPerPlayer` 上界 64 × `cultivatorCapacity` 上界 **16** = 1024」「现实值是 `2 × 16 = 32`」 | 见 §2.7.4 | **必须**（`BRIEF` §3.4 第 13 行已列） |
 
 **不动**的四处（数字 16 与本键无关，误改会引入新错误）：`FarmstormConfig:841`（桑吉尔蔗抬升 16 格）、`behavior/ZangiefPiledriverController.java:52`（16 格 / 15 刻）、`client/WildHunterClientState.java:15`（`loopSoundRange` 默认 16.0）、`FarmstormConfig:236` 之外的 `6 × 9 = 54` 那一串。
 
@@ -608,7 +608,7 @@ FoodProperties food = new FoodProperties.Builder()
 
 #### 2.7.4 `MAX_LINKS` 的注释：算术随容量重写，常量不动
 
-现注释（`CultivatorLinkPayload.java:31-34`，四行 javadoc）：
+现注释（`CultivatorLinkPayload.java:31-34`，改前的四行 javadoc）：
 
 ```
 单包条目的解码上限（36 号 §2.8.1 的算术）：maxPerPlayer 上界 64 ×
@@ -648,7 +648,7 @@ cultivatorCapacity 上界 16 = 1024。现实值是 2 × 16 = 32（默认每玩�
 | 9 | 类 | `registry/FarmstormVillagerProfessions` | 不存在 | **新增**（`DeferredRegister<VillagerProfession>`，六字段见 §2.3.4） | D-196 | RT-64 |
 | 10 | 类 | `Farmstorm.java` 构造器（`:47-63`） | **12** 行 `.register(modBus)`（11 类 + 1 个口径外附件；`damage_type` 数据驱动、无 register） | **+2 行**：POI 在前、职业在后，都排在 `FarmstormAttachments`（`:63`）之后 | D-196 | RT-64 |
 | 11 | 类 | `Farmstorm.java:176-179` | `total == 97` / `items == 33` | **`98` / `34`**，其余 10 个 `==` 不动 | D-189 | RT-70 |
-| 12 | 类 | **新增** `event/BotanistTrade` | 不存在 | 22 条 listing 全进 1 级（3-6 / `maxUses 8` / 每次 1 个） | D-197 | RT-66 |
+| 12 | 类 | **新增** `event/BotanistTrade` | 不存在 | 22 条 listing **摊到 1~4 级 = 6 / 6 / 6 / 4**（3-6 / `maxUses 8` / 每次 1 个） | D-197 | RT-66 |
 | 13 | 类 | **新增** `event/BotanistEpicTrade` | 不存在 | 1 条 listing 进 5 级（4 个史诗作物抽 1、40-64、`maxUses 1`） | D-199 | RT-67 |
 | 14 | 类 | `event/VillagerTradeEvents#onVillagerTrades`（`:29-36`） | 只处理 `FARMER`，1 / 3 / 5 各 `add` 一项 | **+植物学家分支**（写在前、带 `return`）；**农民 3 行原样保留** | D-197、D-200 | RT-66 |
 | 15 | 类 | `registry/FarmstormItems`（`:124` 之前） | 33 个物品 | **+1**：`registerItem("plain_chives", …)` + 固定 `FoodProperties`（`nutrition 2` / `saturationModifier 0.1` / **不** `alwaysEdible`） | D-193 | RT-69 |
@@ -664,12 +664,12 @@ cultivatorCapacity 上界 16 = 1024。现实值是 2 × 16 = 32（默认每玩�
 | 25 | 配置 | `config/FarmstormConfig:956` | `defineInRange("cultivatorCapacity", 16, 1, 64)` | **`24`** | D-195 | RT-63 |
 | 26 | 注释 | `FarmstormConfig:236` / `:238` / `:952-953` | 三处写死「16」 | **24**（逐条见 §2.7.2） | D-195 | RT-68 |
 | 27 | 注释 | `OutpostCoreBlockEntity:116` / `:349`、`OutpostCoreMenu:30` | 三处写死「16」 | **24** | D-195 | RT-68 |
-| 28 | 注释 | `network/CultivatorLinkPayload:32-33` | 「上界 64 × 上界 16 = 1024」「`2 × 16 = 32`」 | 按 §2.7.4 重写；**`MAX_LINKS = 1024`（`:35`）不动** | D-201 | RT-68 |
+| 28 | 注释 | `network/CultivatorLinkPayload:32-33`（改前） | 「上界 64 × 上界 16 = 1024」「`2 × 16 = 32`」 | 按 §2.7.4 重写；**`MAX_LINKS = 1024`（现 `:36`，改前 `:35`）不动** | D-201 | RT-68 |
 | 29 | 注释 | `event/VillagerTradeEvents:10-11` | 「每次 `TagsUpdatedEvent`（数据包重载，含起服）」 | 改成「`SERVER_DATA_LOAD` 时；`/reload` 不重发」（§2.4.5） | D-197 | — |
-| 30 | 数据 | `assets/farmstorm/textures/item/plain_chives.png` | **不存在**（现有 29 张 item 贴图） | **新增** 16×16（由 `tools/gen_textures.py` 出图） | D-193 | RT-69 |
+| 30 | 数据 | `assets/farmstorm/models/item/plain_chives.json` 的 `layer0` | 自动落 `basicItem` ⇒ 指向 `farmstorm:item/plain_chives`（一张不存在的 PNG） | **改指** `farmstorm:item/friend_chives`（`ModItemModelProvider:51-54`）；**不新增贴图**，`textures/item/` 仍 **29** 张 | D-193 | RT-69 |
 | 31 | 语言 | `datagen/ModLangProvider#buildEntries` | 338 条 | **+2 条**（`item.farmstorm.plain_chives`、`entity.minecraft.villager.farmstorm.botanist`） | D-189、D-193 | RT-69 |
 | 32 | 语言 | `ModLangProvider:14-19` 的类注释 | 「33 item …… = **338**」 | 「34 item + 1 villager …… = **340**」 | D-201 | — |
-| 33 | 工具 | `tools/verify_project.py:334` / `:378` | `EXPECTED["items"]` 含 33 项、`EXPECTED_COUNTS["items"] = 33` | **34**（两处同改） | D-201 | RT-70 |
+| 33 | 工具 | `tools/verify_project.py:334` / `:380`（`"items"` 行在 `:381`） | `EXPECTED["items"]` 含 33 项、`EXPECTED_COUNTS["items"] = 33` | **34**（两处同改） | D-201 | RT-70 |
 | — | 不改 | `TierTrade`（81 行）/ 农民 3 行（`VillagerTradeEvents:33-35`） | 3 项、每项 2 个、`maxUses 1` | **原样** | D-200 | — |
 | — | 不改 | `converter` 的方块 / 配方 / `CONVERTER_FUEL` / 菜单 | 全部照旧工作 | **原样**（不在标签里） | D-188 | — |
 | — | 不改 | `OutpostCoreBlockEntity` 的补绑（`:537-570`）与满即停 | 周期 100 刻、错峰、只补未绑、满则停 | **原样**（只改两处判据与注释） | D-176、D-177 | — |
@@ -823,7 +823,7 @@ ModLangProvider 的条目数        ⇒ 338 → 340
 |---|---|
 | 包数 | **2**，本版不新增（§1.5） |
 | 协议串 | 仍 **`"2"`** ⇒ 客户端与服务端的版本兼容面**没有变化** |
-| 本版对两个包的改动 | 只有 `CultivatorLinkPayload:32-33` 的**注释**（§2.7.4）；字节流、字段、`MAX_LINKS` 全不动 |
+| 本版对两个包的改动 | 只有 `CultivatorLinkPayload:32-33`（改前）的**注释**（§2.7.4）；字节流、字段、`MAX_LINKS` 全不动 |
 
 ### 6.6 卸载模组时会发生什么（登记，不改）
 
@@ -841,10 +841,10 @@ ModLangProvider 的条目数        ⇒ 338 → 340
 | **RT-63** | **改默认值对老存档无效** | ① 用老存档的 `run/config` 读 2 / 16 就判「没改成」；② 以为「改了 `defineInRange` 就等于玩家看到 4 / 24」 | 最可能收到的误报：「我升级了，怎么还是 2？」；反过来，开发者若拿老 toml 当验收基线，会得到一个**永远红**的验收 | (a) §2.7.3 写死「验收必须用新生成的 config」；(b) §8 #9 **专门有一条**用老 toml 验证「仍是 2 / 16」（这条的「红」是**期望中的红**）；(c) 不写迁移代码（46 号 §6） | §8 #8、#9 |
 | **RT-64** | **POI 与职业是两张新注册表**：注册顺序、`PoiType` 的 blockstate 集合、`VillagerProfession` 的谓词、**以及 `minecraft:acquirable_job_site` 标签**都要对；写错的表现是「村民不认领」而非报错 | ① 只注册职业不注册 POI；② 注册了 POI 但**没加** `acquirable_job_site` 标签（§2.3.5 的主形态）；③ 匹配集写成空集 / 写成别的方块；④ 谓词用 `ALL_ACQUIRABLE_JOBS`；⑤ 把 `outpost_core` 塞进原版某个 POI 类型 | 村民永不认领，界面上无任何报错，只有「村民四处走」——最难定位的一类失败 | (a) §2.3.2 ~ §2.3.5 逐条给代码路径（`Villager.java:181-182` → `ALL_ACQUIRABLE_JOBS` → `PoiTypeTags`）；(b) §3 #20 / #21 把标签 provider 列成必改；(c) §8 #13 ~ #16 用**行为**验（放核 + 无业村民 ⇒ 变植物学家），并**专设一条反向验收**（§8 #16：临时去掉标签，确认**不认领**） | §8 #13 ~ #16 |
 | **RT-65** | **有主核也能当工作台** ⇒ 村民会跑到玩家基地「上班」 | 有人把 `ownerUuid` 接进职业判据，或加「必须无主 / 必须己方」 | 加判据会让**把核放在基地的玩家永远招不到植物学家**（46 号 D-196 补充已否决） | (a) §2.3.4 的谓词只认 POI key，明写「不按方块、不按 owner、不按距离」；(b) §8 #15 用**有主核**验证认领成功（这条是防「好心加判据」的判决性验收） | §8 #15 |
-| **RT-66** | ~~22 项只显示 2 项~~ → **已由裁定 #17 接受**。剩下的是**表述风险** | 文档写「植物学家卖 22 项」而不写「每个只显示 2 项」，或反过来写「每个卖 22 项」 | 玩家把「我这儿只有 2 项」读成 bug；或实现者为了「让 22 项都能看到」去拆级 / 自建池 | (a) §2.4.1 用源码把「22 个 listing ≠ 22 项可见」钉死（`Villager.java:875` 的 `2`、`AbstractVillager:237-238` 的抽样语义）；(b) §8 #17 / #18 成对验收（列表 22 条 / 界面 2 项）；(c) 表述纪律进 47 号与 README（46 号 §7 第 1 条） | §8 #17、#18 |
+| **RT-66** | ~~22 项只显示 2 项~~ → **已由裁定 #17 接受**。剩下的是**表述风险** | 文档写「植物学家卖 22 项」而不写「每级只抽 2 项 / 满级最多 9 项」，或反过来写「每个卖 22 项」 | 玩家把「我这儿只有 2 项」读成 bug；或实现者为了「让 22 项都能看到」去拆级 / 自建池 | (a) §2.4.1 用源码把「22 个 listing ≠ 22 项可见」钉死（`Villager.java:875` 的 `2`、`AbstractVillager:237-238` 的抽样语义）；(b) §8 #17 / #18 成对验收（列表 22 条 / 界面 2 项）；(c) 表述纪律进 47 号与 README（46 号 §7 第 1 条） | §8 #17、#18 |
 | **RT-67** | ~~史诗项补货重抽~~ → **已由裁定 #18 改为固定 1 项**。剩下的是**文档风险** | 照抄 plan `:11` 的「额外刷新出」 | 被读成「每次补货换一个史诗项」，玩家会去刷补货然后报 bug | (a) §2.4.4 用 `Villager.java:398-408` 证明补货不重调 `getOffer`；(b) §8 #19 用「补货两次后仍是同一项」验收；(c) 46 号 §7 第 2 条与 47 号附录 A 第 2 行已登记为口径差异，本文 §10 第 5 条再点一次 | §8 #19 |
 | **RT-68** | `MAX_LINKS` 注释与 24 不符，且**同类注释共七处**（`BRIEF` 只列了一处） | 只改 `CultivatorLinkPayload` 那一段，其余六处仍写 16 | 注释与默认值不一致 ⇒ 下一位读者按注释推算，得出 32 / 1024 之类的错数 | (a) §2.7.2 的**七行表**（位置 + 现文 + 改成）逐条点名；(b) §8 #25 用 grep 验「`默认 16` / `名额 16` 在 `src/` 下命中 0」；(c) 常量 `MAX_LINKS = 1024` 明写不动 | §8 #24、#25 |
-| **RT-69** | `plain_chives` 不走 `cropItem` ⇒ 容易漏掉**创造栏、模型、贴图、语言键**（四个「加了但拿不到」） | ① 只加注册不加 `creativeTabItems()`；② 忘了贴图（`basicItem` 指向不存在的 PNG）；③ 忘了语言键（raw key） | 物品存在于注册表但玩家看不到 / 看到紫黑格 / 看到 `item.farmstorm.plain_chives` 字样 | (a) §2.5.3 的四行表（模型 / 语言 / 创造栏 / 贴图）逐个点名；(b) §8 #26 ~ #29 四条独立验收（创造栏可见、紫黑格检查、名称正确、能吃不生病）；(c) 贴图由 `tools/gen_textures.py` 出，不手搓 | §8 #26 ~ #29 |
+| **RT-69** | `plain_chives` 不走 `cropItem` ⇒ 容易漏掉**创造栏、模型、贴图、语言键**（四个「加了但拿不到」） | ① 只加注册不加 `creativeTabItems()`；② 忘了贴图（`basicItem` 指向不存在的 PNG）；③ 忘了语言键（raw key） | 物品存在于注册表但玩家看不到 / 看到紫黑格 / 看到 `item.farmstorm.plain_chives` 字样 | (a) §2.5.3 的四行表（模型 / 语言 / 创造栏 / 贴图）逐个点名；(b) §8 #26 ~ #29 四条独立验收（创造栏可见、紫黑格检查、名称正确、能吃不生病）；(c) 贴图**不出**：模型 `layer0` 直接指 `friend_chives` 那张原画（`gen_textures.py` 里 `plain_chives` 那条已整体退役） | §8 #26 ~ #29 |
 | **RT-70** | `verify_project.py` 的 `EXPECTED_COUNTS` 写死 33（且 `Farmstorm.java` 的断言写死 97 / 33） | ① 加了物品不改两处期望面；② 改了期望面但漏了 `Farmstorm.java:176-179`；③ 反过来把 config 期望面也动了 | 加了一个物品却全绿（A-66 那类假绿）；或启动日志 FAIL 而脚本通过（两套闸不一致） | (a) §3 #11 与 #33 把**两处**列成必改；(b) §4.4 明写「config 期望面一个字节都不改」；(c) §8 #2 / #3 / #4 三条分别验脚本、验日志、验「没多改」 | §8 #2 ~ #4 |
 
 **九条的共同点**（写给 49 / 50 号）：每条的缓释都是「**一处定义 + 一行注释 + 一条独立验收**」，没有一条靠「记得小心」。RT-62 / RT-63 的落点是**两条必须真的看界面 / 真的重生成 config 的验收**；RT-64 的落点是**那条 `acquirable_job_site` 标签**；RT-68 / RT-70 的落点是**可以 grep 的字符串**。
@@ -859,14 +859,14 @@ ModLangProvider 的条目数        ⇒ 338 → 340
 |---|---|---|---|
 | 1 | 启动日志出现 `自检 注册对象 98 个：items 34 / blocks 27 / block_entities 8 / entity_types 13 / mob_effects 4 / sound_events 3 / recipe_types 1 / recipe_serializers 1 / creative_tabs 1 / damage_types 3 / data_components 1 / menu_types 2 → OK`；且 `src/main/java` Java 文件数 = **154** | `run/logs/latest.log`（`Farmstorm.java:180-184` 的格式串）；文件计数 | §1.1、§1.2 |
 | 2 | `tools/verify_project.py` 打印 `已核 registry 对象: 98 / 98`，且第 1 节打印「文档口径键数 **176**」与「生成 toml 键数 176」 | 跑 `tools/verify_project.py` | §4.2、§4.4 |
-| 3 | `verify_project.py:334` 的 `EXPECTED["items"]` 含 `plain_chives`、`:378` 的 `EXPECTED_COUNTS["items"] == 34`；两处**同一个提交**改 | 源码 grep | §3 #33、RT-70 |
+| 3 | `verify_project.py:334` 的 `EXPECTED["items"]` 含 `plain_chives`（该条目在 `:342`）、`:380` 的 `EXPECTED_COUNTS["items"] == 34`（`"items": 34` 在 `:381`）；两处**同一个提交**改 | 源码 grep | §3 #33、RT-70 |
 | 4 | **反向**：`verify_project.py` 的 **config** 期望面**没有**被改（`expected_config_keys*` 五个函数体一字不动，`added7` 的断言行数仍是 1） | 源码 diff | §4.4、RT-70 |
 | 5 | 全仓 `@Mixin` = **0**；`src/` 下 `*.mixins.json` = **0**；网络包注册调用恰 **2** 处，协议串仍 `"2"` | 源码 grep | §1.5 |
 | 6 | `FarmstormTags` 恰 **7** 个 `TagKey`（4 block + 3 item）；产物 `data/farmstorm/tags/block/processing_block.json` 存在且**只有** `farmstorm:cultivator` 一个成员 | `src/generated/resources/...`（datagen 产物）+ 源码计数 | §2.6.1 |
 | 7 | `converter` **不在** `processing_block` 标签里；`converter` 的方块 / 配方 / `CONVERTER_FUEL` / 菜单全部照旧可用 | 标签 JSON + 进游戏试转换 | §2.6.1、§3「不改」行 |
 | 8 | 两张新表都被显式登记且不进 98：`registry/FarmstormPoiTypes` 有 **1** 个 `PoiType` 注册、`registry/FarmstormVillagerProfessions` 有 **1** 个职业注册；`Farmstorm.java` 构造器多 **2** 行 `.register(modBus)`；§1.3 存在且写明「不计入 98 / 工具不核它」 | 源码 + 本文 §1.3 | §1.3 |
 | 9 | **老 toml 的期望红**：把升级前的 `run/config/farmstorm-server.toml` 放回去启动 ⇒ 读到的是 `maxPerPlayer = 2`、`cultivatorCapacity = 16`（**这条「红」是正常的**，见下一条） | `run/config/farmstorm-server.toml:753` / `:765` | §2.7.3、§6.3、RT-63 |
-| 10 | **新 config 的绿**：删掉该 toml（先备份）后重启 ⇒ 重生成的 toml 里 `maxPerPlayer = 4`、`cultivatorCapacity = 24`，键数 176、段数 60 | 重生成的 toml | §4.2、RT-63 |
+| 10 | **新 config 的绿**：删掉该 toml（先备份）后重启 ⇒ 重生成的 toml 里 `maxPerPlayer = 4`、`cultivatorCapacity = 24`，键数 **176**、组数 **60**（= **36** 个顶层 `[表]` + **24** 个缩进点号子表，`^\s*\[` 口径；与源码 `b.push(` 计数 **60** 一致。只数 `^\[` 会得 36，别把 36 当结论） | 重生成的 toml | §4.2、RT-63 |
 | 11 | 语言文件 `zh = 340` / `en = 340` / zh-only **0** / en-only **0**；`item.farmstorm.plain_chives` 与 `entity.minecraft.villager.farmstorm.botanist` 两条都在；`farmstorm.configuration.*` 仍 **179** | 两份 `lang/*.json`（`-Encoding UTF8`） | §5 |
 | 12 | POI 类型存在且只绑一个方块：把 `outpost_core` 放下后，`/data get block <core>` 之外无法直接读 POI —— **改用行为判据**（下一条）；反向证据：`PoiTypes.hasPoi(outpost_core.defaultBlockState())` 在调试命令下为 `true`（若不可用则只按 #13 判） | 游戏内（`V-01`） | §2.3.2 |
 | 13 | **认领成功**：放 1 个据点核心 + 1 个**无业**村民 ⇒ 村民走到核旁 2 格内后职业变成植物学家（`/data get entity <villager> VillagerData.Profession` = `"farmstorm:botanist"`） | 游戏内（`V-02`） | §2.3.5、RT-64 |
@@ -886,7 +886,7 @@ ModLangProvider 的条目数        ⇒ 338 → 340
 | 27 | **平凡韭菜拿得到**：创造栏里能看到「平凡韭菜」（不是紫黑格、不是 raw key）；`/give farmstorm:plain_chives` 可用 | 游戏内（`V-12`） | §2.5.3、RT-69 |
 | 28 | **平凡韭菜能吃**：吃一个恢复 **2** 点饥饿值（`nutrition = 2`），饱食度满时**吃不下**（不 `alwaysEdible`）；不能种、不能喂村民、没有配方（配方书里搜不到）、`MODIFIED_CROPS` / `SEEDS` 两个标签里**都没有**它 | 游戏内 + 标签 JSON（`V-13`） | §2.5.2、§2.5.4 |
 | 29 | **平凡韭菜能被植物学家卖**：22 项清单里含它（第 20 行），且**它本身不是作物**：`Farmstorm#logSelfCheck` 的「作物 22 种 / 投掷 12 / 部署 7 / 食用 3」四个数**一字不变** | `latest.log` 的自检行（`Farmstorm.java:126-127`） | §2.5.4、D-193 |
-| 30 | **贴图真的存在**：`assets/farmstorm/textures/item/plain_chives.png` 是 16×16 PNG；`textures/item/` 下文件数 = **30**（改前 29） | 目录计数 + 打开文件看尺寸 | §2.5.3、RT-69 |
+| 30 | **贴图真的有（改法变了）**：`textures/item/` 下文件数**仍 29**（本版**不新增**）；`assets/farmstorm/textures/item/plain_chives.png` **不存在**；`models/item/plain_chives.json` 的 `textures.layer0` = `farmstorm:item/friend_chives`，而 `friend_chives.png` 的 IHDR 是 16×16 | 目录计数 + 读模型 JSON + 读 PNG 头 | §2.5.3、RT-69 |
 
 **30 条的分布**（**不重叠、逐段相加 = 30**）：发布与计数 **5**（#1~#5）/ 方块标签 **2**（#6, #7）/ 口径外与 POI **6**（#8, #12, #13, #14, #15, #16）/ 交易 **3**（#17~#19）/ 界面 **4**（#20~#23）/ 两个默认值 **4**（#9, #10, #24, #25）/ 语言 **1**（#11）/ 注释 **1**（#26）/ 平凡韭菜 **4**（#27~#30）= `5 + 2 + 6 + 3 + 4 + 4 + 1 + 1 + 4 = 30`。
 
@@ -913,7 +913,7 @@ ModLangProvider 的条目数        ⇒ 338 → 340
 | ⑥ | `AssignProfessionFromJobSite` 的 `findFirst()` 择业顺序 | **已核**：`BuiltInRegistries.VILLAGER_PROFESSION.stream().filter(...heldJobSite().test(poiType)).findFirst()`（`.scratch/.../ai/behavior/AssignProfessionFromJobSite.java:37-41`）、`setVillagerData`（`:43`）、2.0 格判据（`:24`） | ① 注册顺序决定「第一个」，但没有任何保证说我们的职业排在谁前面/后面（本版靠「没有第二个职业认 `outpost_core`」规避）；② 若两个职业都认同一个 POI，谁赢没有实测 | POI 任务（§8 #13） | 若将来出现第二个认 `outpost_core` 的职业 ⇒ 这是**模组冲突**，登记而非修（不许在自己这边加优先级 hack） |
 | ⑦ | `getOffer` 返回 `null` 的语义 | **已核**：`addOffersFromItemListings` 里 `if (merchantoffer != null)` 才 `add` 且 `i++`；为 null 时**跳过、不计数、不报错**（`.scratch/.../npc/AbstractVillager.java:237-243`） | 本版两个 `ItemListing` 都不返回 null，所以这条只用于「万一实现写错」的兜底判读 | 交易任务（§8 #17） | 若某条 listing 常量配错（例如 `Item` 为 null）⇒ 该条**静默消失**，列表长度会少于 22；§8 #17 的 `size() == 22` 是唯一能抓到它的闸 |
 | ⑧ | 未知职业 id 在 `VillagerData.CODEC` 上的解码行为 | **已核（读代码）**：`BuiltInRegistries.VILLAGER_PROFESSION.byNameCodec().fieldOf("profession").orElseGet(() -> VillagerProfession.NONE)`（`.scratch/.../npc/VillagerData.java:19-23`） | `orElseGet` 对「字段存在但 id 未知」是否也走默认值（而不只是「字段缺失」）取决于 DFU 的 `Codec#orElseGet` 实现——本机没有 DFU 源码可读 | 存档兼容任务（§6.4） | 若未知 id 会硬失败 ⇒ §6.6 改写为「卸载模组后带植物学家的存档会读档失败」，并把措辞从「回落」改成「须先清职业」 |
-| ⑨ | `plain_chives` 的贴图是否存在 | **未核**：`ModItemModelProvider` 走 `basicItem(item)`（`ModItemModelProvider.java:52`）⇒ 模型指向 `farmstorm:item/plain_chives`，但**没有任何工具校验该 PNG 存在**（`verify_project.py` 全文无 `texture` / `.png` 命中）；现有 `textures/item/` 29 张、无此项 | 贴图由 `tools/gen_textures.py` 生成，能不能出图取决于 `ICONS` 表的新条目写得对不对（这是工具行为，不是 API） | 物品任务（§8 #30） | 若 `gen_textures.py` 出不了图 ⇒ 手绘 16×16 PNG 放进目录即可（**不影响**注册面与语言键） |
+| ⑨ | `plain_chives` 的贴图是否存在 | **已核（改法变了）**：不再有独立贴图——`ModItemModelProvider:51-54` 给 `plain_chives` 单开分支，`withExistingParent(...).texture("layer0", modLoc("item/friend_chives"))`；`src/generated/.../models/item/plain_chives.json` 的 `layer0` 就是 `farmstorm:item/friend_chives`；`textures/item/` 仍 **29** 张、`plain_chives.png` 不存在；`verify_project.py` 全文仍无 `texture` / `.png` 命中（工具不校验） | 复用作者原画 `friend_chives.png`（16×16）⇒ 没有「生成器出不了图」这条路了 | 物品任务（§8 #30） | 若将来要独立贴图 ⇒ 先在 `gen_textures.py` 的 `ICONS` 表加回一条、同时删掉 `ModItemModelProvider` 那个分支（两处必须同改，否则模型指错） |
 | ⑩ | `PoiType` 注册表在**客户端**是否需要同样的条目 | **已核一半**：`PoiType` 走内建注册表（`Registries.java:177`），不是数据包注册表 ⇒ 双端都会加载模组的注册；但 POI **记录**（`world/poi/`）是服务端数据，客户端不持有 | ① 客户端在什么路径上会碰 `PoiType`（例如 `VillagerProfession` 的 `heldJobSite` 谓词在客户端跑不跑）；② 若客户端缺这个注册项会不会崩（理论上不会，因为双端同 jar） | 双端联机验收（§8 #13 的联机版） | 若客户端报缺注册项 ⇒ 说明某个客户端路径真的用了 POI（本版没有客户端 POI 逻辑），按 RT-64 登记；退路是**不加**客户端专用代码（本来就没有） |
 
 **三条「已从待验证降级为已核」的记录**（写在这里，免得 49 / 50 号再当风险）：① `VillagerProfession` 的六字段与 `workSound` 可为 null（`VillagerProfession.java:21-28` + `LivingEntity.java:1325-1329`）；② `Villager#getTypeName` 的语言键拼法（`Villager.java:743-749`，非 `minecraft` 命名空间必带命名空间段）；③ `ItemListing#getOffer` 的签名（`VillagerTrades.java` 的 `interface ItemListing`：`@Nullable MerchantOffer getOffer(Entity, RandomSource)`）。
@@ -927,7 +927,7 @@ ModLangProvider 的条目数        ⇒ 338 → 340
 | # | 涉及 | 上游写的 | 本文的处理 | 性质 |
 |---|---|---|---|---|
 | 1 | `BRIEF` §3.4 的 16 项必改 vs `Farmstorm.java:176-179` | 16 项里**没有**「改 `Farmstorm.java` 的 12 类断言」这一项 | **本文补上**（§3 #11）：`total == 97` → `98`、`items == 33` → `34`。不改的后果是启动日志直接打 `→ FAIL`（`:180-184`），与 `verify_project.py` 全绿形成**两套闸互相矛盾**。这是本版**最容易漏**的一项，因为它不在 `BRIEF` 的清单里、也不在任何文档的「必改」表里 | 上游漏项（本文补，建议 49 号把它列成独立任务） |
-| 2 | `BRIEF` §1.7 / §3.4 第 13 行 vs 实际注释数 | 两处都只说 `CultivatorLinkPayload:32-33` 这一处注释要改 | **实际有 6 处硬写「16」**（`FarmstormConfig:236` / `:238` / `:952-953`、`OutpostCoreBlockEntity:116` / `:349`、`OutpostCoreMenu:30`），加上 `CultivatorLinkPayload` 共 **7 处**（§2.7.2 逐条给位置与现文）。只改 1 处会让另外 6 处继续撒谎 | 上游计数不足（不影响 98 / 176 / 340，影响交付完整度） |
+| 2 | `BRIEF` §1.7 / §3.4 第 13 行 vs 实际注释数 | 两处都只说 `CultivatorLinkPayload:32-33`（改前）这一处注释要改 | **实际有 6 处硬写「16」**（`FarmstormConfig:236` / `:238` / `:952-953`、`OutpostCoreBlockEntity:116` / `:349`、`OutpostCoreMenu:30`），加上 `CultivatorLinkPayload` 共 **7 处**（§2.7.2 逐条给位置与现文）。只改 1 处会让另外 6 处继续撒谎 | 上游计数不足（不影响 98 / 176 / 340，影响交付完整度） |
 | 3 | `BRIEF` §1.6「全仓 0 处」 | 写「精确 grep `PoiType` / `VILLAGER_PROFESSION` / `POINT_OF_INTEREST` 命中 0」 | **按 `src/` 口径成立**（本文实测 `src/` 全树 0 命中）。⚠️ 但 `.scratch/p25a/src/` 里有原版的 `PoiTypes` / `PoiType` / `VillagerProfession`——那是**反编译源树**，不是本仓。验收若用「全仓 grep」会命中几十处 ⇒ 本文一律写「`src/` 下 0 命中」，并在 §0.2 第 5 条把两棵树分开点名 | 计数口径（不是缺陷） |
 | 4 | `BRIEF` §3.3 vs 47 号 §5.6 | `BRIEF` 说语言键「至少 +2，最终值由 47/48 号逐条点名后写死」；47 号写「**下限** 340」 | **本文钉死 340 × 2**（§5 两条逐字点名）。理由：新增面只有「一个物品名 + 一个职业名」两条；POI 类型、标签、交易项都没有语言键（交易项复用物品名）。⇒ 340 是**最终值**，不是下限 | 上游留的活，本文已办 |
 | 5 | 46 号 D-199 vs plan `:11` | plan 写「会**额外刷新出**一个史诗品质改良农作物交易」 | **本文按裁定 #18 写**（固定 1 项、首次抽定、之后不变），并在 §2.4.4 用 `Villager.java:398-408` 给源码依据。plan 的原文**只在 46 号 §7 ② 与 47 号附录 A 第 2 行出现**，本文不复述它的措辞（RT-67 的纪律：那五个字不许单独出现） | 口径差异（按裁定写） |

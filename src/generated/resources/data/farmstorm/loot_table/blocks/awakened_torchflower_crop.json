@@ -42,30 +42,6 @@
       "bonus_rolls": 0.0,
       "conditions": [
         {
-          "block": "farmstorm:awakened_torchflower_crop",
-          "condition": "minecraft:block_state_property",
-          "properties": {
-            "age": "3"
-          }
-        }
-      ],
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:explosion_decay"
-            }
-          ],
-          "name": "farmstorm:awakened_torchflower_seeds"
-        }
-      ],
-      "rolls": 1.0
-    },
-    {
-      "bonus_rolls": 0.0,
-      "conditions": [
-        {
           "condition": "minecraft:inverted",
           "term": {
             "block": "farmstorm:awakened_torchflower_crop",
@@ -84,7 +60,7 @@
               "function": "minecraft:explosion_decay"
             }
           ],
-          "name": "farmstorm:awakened_torchflower_seeds"
+          "name": "farmstorm:awakened_torchflower"
         }
       ],
       "rolls": 1.0

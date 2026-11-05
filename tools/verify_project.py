@@ -334,10 +334,9 @@ CROP_IDS = [
 EXPECTED = {
     "items": CROP_IDS + [
         "molotov", "zangief_cane", "wild_apple", "compressed_puffed_wheat",
-        "puffed_wheat_seeds", "power_beet_seeds", "melon_grenade_seeds",
-        "pumpkin_turret_seeds", "awakened_torchflower_seeds",
-        "awakened_pitcher_plant_pod", "crop_converter", "compressed_hay_block",
-        "chive_seeds", "outpost_core",  # v0.1.0 的 BlockItem（24-TECH §1.4 G1）
+        # v0.2.3 按 D-212 删掉 7 个播种物（F-295）；计数面（EXPECTED_COUNTS）归 F-308
+        "crop_converter", "compressed_hay_block",
+        "outpost_core",  # v0.1.0 的 BlockItem（24-TECH §1.4 G1）
         "cultivator",  # v0.2.0 的培养器方块物品（36-TECH §1.2）
         "plain_chives",  # v0.2.2 的平凡农作物（F-268 / D-193；非作物，没有 CropProfile）
     ],

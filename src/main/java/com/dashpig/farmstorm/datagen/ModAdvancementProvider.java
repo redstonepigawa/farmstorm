@@ -13,7 +13,6 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -26,7 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 
 /**
- * 12 条进度（DEC C-7 / DESIGN §6 / TECH §6.7）。
+ * 16 条进度（DEC C-7 / DESIGN §6 / TECH §6.7；v0.2.3 按 D-214 删掉「星之代价」与「闭环自给」两条 ⇒ 18 − 2 = 16）。
  *
  * <p>全部 {@code frame=task}、{@code show_toast=true}、{@code announce_to_chat=false}；
  * 根进度背景用 {@code minecraft:textures/block/hay_block_side.png}，{@code lucky_jackpot} 隐藏。
@@ -40,11 +39,11 @@ public final class ModAdvancementProvider {
     /**
      * 需要服务端 {@code award} 的进度（{@code minecraft:impossible} 触发器）。
      * 原版 criteria 无法表达这些判定，判定点全在服务端；清单的作用是让「进度」与「授予点」保持同步
-     * ——改这里就必须同时改 {@code util/FarmstormAdvancements} 的调用点。v0.0.2 收口时 11 条已全部接线，v0.0.3 收到 14 条（+3）。
+     * ——改这里就必须同时改 {@code util/FarmstormAdvancements} 的调用点。v0.0.2 收口时 11 条已全部接线，v0.0.3 收到 14 条（+3）；
+     * v0.2.3 按 D-214 删掉「星之代价」（下界之星门槛已随 D-209 消失）一项 ⇒ 13 条。
      */
     public static final List<String> AWARD_REQUIRED = List.of(
             "farmstorm:first_conversion",
-            "farmstorm:nether_star_toll",
             "farmstorm:first_throw",
             "farmstorm:demolition",
             "farmstorm:turret_hit",
@@ -88,22 +87,9 @@ public final class ModAdvancementProvider {
         AdvancementHolder firstConversion = impossible("first_conversion", converter, FarmstormItems.POWER_BEET.get(), false)
                 .save(output, "farmstorm:first_conversion");
 
-        // 4. 完成一次「原版 → 激活版」的火把花 / 瓶子草转换（消耗下界之星）
-        impossible("nether_star_toll", firstConversion, FarmstormItems.AWAKENED_TORCHFLOWER.get(), false)
-                .save(output, "farmstorm:nether_star_toll");
+        // 4.（D-214：原「星之代价」已删——它的门槛「消耗一次下界之星」随 D-209 一起消失，删掉的进度 id 不复用）
 
-        // 5. 收获一次成熟改良作物，并同时拾取作物与播种物（6 组独立播种物，任一组成立即可）
-        advancement("seed_cycle", firstConversion, FarmstormItems.PUFFED_WHEAT_SEEDS.get(), null, false)
-                .addCriterion("puffed_wheat", bothItems(FarmstormItems.PUFFED_WHEAT.get(), FarmstormItems.PUFFED_WHEAT_SEEDS.get()))
-                .addCriterion("power_beet", bothItems(FarmstormItems.POWER_BEET.get(), FarmstormItems.POWER_BEET_SEEDS.get()))
-                .addCriterion("melon_grenade", bothItems(FarmstormItems.MELON_GRENADE.get(), FarmstormItems.MELON_GRENADE_SEEDS.get()))
-                .addCriterion("pumpkin_turret", bothItems(FarmstormItems.PUMPKIN_TURRET.get(), FarmstormItems.PUMPKIN_TURRET_SEEDS.get()))
-                .addCriterion("awakened_torchflower",
-                        bothItems(FarmstormItems.AWAKENED_TORCHFLOWER.get(), FarmstormItems.AWAKENED_TORCHFLOWER_SEEDS.get()))
-                .addCriterion("awakened_pitcher_plant",
-                        bothItems(FarmstormItems.AWAKENED_PITCHER_PLANT.get(), FarmstormItems.AWAKENED_PITCHER_PLANT_POD.get()))
-                .requirements(AdvancementRequirements.Strategy.OR)
-                .save(output, "farmstorm:seed_cycle");
+        // 5.（D-214：原「闭环自给」已删——6 个判据都要「作物 + 对应播种物」，播种物随 D-212 全删，id 不复用）
 
         // 6. 投掷任意一件投掷型改良作物——没有原版触发器，服务端 award
         AdvancementHolder firstThrow = impossible("first_throw", root, FarmstormItems.UBI_SERVER.get(), false)
@@ -197,9 +183,4 @@ public final class ModAdvancementProvider {
                 background, AdvancementType.TASK, true, false, hidden);
     }
 
-    /** 「背包里同时有两种物品」判定，用于播种闭环。 */
-    private static Criterion<InventoryChangeTrigger.TriggerInstance> bothItems(ItemLike crop, ItemLike seed) {
-        return InventoryChangeTrigger.TriggerInstance.hasItems(
-                ItemPredicate.Builder.item().of(crop), ItemPredicate.Builder.item().of(seed));
-    }
 }

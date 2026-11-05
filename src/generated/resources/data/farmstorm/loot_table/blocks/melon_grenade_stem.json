@@ -46,30 +46,6 @@
       "bonus_rolls": 0.0,
       "conditions": [
         {
-          "block": "farmstorm:melon_grenade_stem",
-          "condition": "minecraft:block_state_property",
-          "properties": {
-            "age": "3"
-          }
-        }
-      ],
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:explosion_decay"
-            }
-          ],
-          "name": "farmstorm:melon_grenade_seeds"
-        }
-      ],
-      "rolls": 1.0
-    },
-    {
-      "bonus_rolls": 0.0,
-      "conditions": [
-        {
           "condition": "minecraft:inverted",
           "term": {
             "block": "farmstorm:melon_grenade_stem",
@@ -88,7 +64,7 @@
               "function": "minecraft:explosion_decay"
             }
           ],
-          "name": "farmstorm:melon_grenade_seeds"
+          "name": "farmstorm:melon_grenade"
         }
       ],
       "rolls": 1.0

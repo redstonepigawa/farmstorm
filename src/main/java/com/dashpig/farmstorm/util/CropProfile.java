@@ -48,44 +48,44 @@ public record CropProfile(
     /** D-16：部署型 / 食用型 / 播种物一档。 */
     public static final int OTHER_STACK_TIER = 64;
 
-    public static final CropProfile PUFFED_WHEAT = throwable("puffed_wheat", "puffed_wheat_crop", "puffed_wheat_seeds",
+    public static final CropProfile PUFFED_WHEAT = throwable("puffed_wheat", "puffed_wheat_crop",
             CropTier.COMMON, CropCategory.CONSTRUCTION);
-    public static final CropProfile BLAST_CARROT = deployed("blast_carrot", "blast_carrot_crop", "blast_carrot",
+    public static final CropProfile BLAST_CARROT = deployed("blast_carrot", "blast_carrot_crop",
             DeployedKind.BLAST_CARROT, CropTier.COMMON,
             categorySet(CropCategory.TRAP, CropCategory.DAMAGE), AttachFace.FLOOR);
-    public static final CropProfile UBI_SERVER = throwable("ubi_server", "ubi_server_crop", "ubi_server",
+    public static final CropProfile UBI_SERVER = throwable("ubi_server", "ubi_server_crop",
             CropTier.RARE, CropCategory.DEMOLITION, CropCategory.DAMAGE);
     public static final CropProfile TOXIC_UBI_SERVER = throwable("toxic_ubi_server", "toxic_ubi_server_crop",
-            "toxic_ubi_server", CropTier.RARE, CropCategory.BUFF, CropCategory.DEMOLITION, CropCategory.DAMAGE);
-    public static final CropProfile POWER_BEET = crop("power_beet", "power_beet_crop", "power_beet_seeds",
+            CropTier.RARE, CropCategory.BUFF, CropCategory.DEMOLITION, CropCategory.DAMAGE);
+    public static final CropProfile POWER_BEET = crop("power_beet", "power_beet_crop",
             CropTier.RARE, CropCategory.BUFF);
     /** 瓜片子不可种植（§3.2.3），故作物方块与播种物为空。D-108：类别只剩伤害，破障类已删。 */
     public static final CropProfile MELON_SLICE_BOMB = new CropProfile(
             Farmstorm.id("melon_slice_bomb"), CropType.THROWABLE,
             categorySet(CropCategory.DAMAGE),
             null, null, null, Set.of(), THROWABLE_STACK_TIER, CropTier.COMMON);
-    public static final CropProfile MELON_GRENADE = throwable("melon_grenade", "melon_grenade_stem", "melon_grenade_seeds",
+    public static final CropProfile MELON_GRENADE = throwable("melon_grenade", "melon_grenade_stem",
             CropTier.COMMON, CropCategory.DAMAGE);
     public static final CropProfile PUMPKIN_TURRET = deployed("pumpkin_turret", "pumpkin_turret_stem",
-            "pumpkin_turret_seeds", DeployedKind.PUMPKIN_TURRET, CropTier.COMMON,
+            DeployedKind.PUMPKIN_TURRET, CropTier.COMMON,
             categorySet(CropCategory.TURRET, CropCategory.DAMAGE),
             AttachFace.FLOOR, AttachFace.WALL, AttachFace.CEILING);
     public static final CropProfile AWAKENED_TORCHFLOWER = deployed("awakened_torchflower", "awakened_torchflower_crop",
-            "awakened_torchflower_seeds", DeployedKind.AWAKENED_TORCHFLOWER, CropTier.EPIC,
+            DeployedKind.AWAKENED_TORCHFLOWER, CropTier.EPIC,
             categorySet(CropCategory.TURRET, CropCategory.BUFF), AttachFace.FLOOR);
     public static final CropProfile AWAKENED_PITCHER_PLANT = deployed("awakened_pitcher_plant",
-            "awakened_pitcher_plant_crop", "awakened_pitcher_plant_pod", DeployedKind.AWAKENED_PITCHER_PLANT,
+            "awakened_pitcher_plant_crop", DeployedKind.AWAKENED_PITCHER_PLANT,
             CropTier.EPIC, categorySet(CropCategory.TURRET, CropCategory.BUFF), AttachFace.FLOOR);
     public static final CropProfile FANG_TRAP_CACTUS = deployed("fang_trap_cactus", "fang_trap_cactus_block",
-            "fang_trap_cactus", DeployedKind.FANG_TRAP_CACTUS, CropTier.COMMON,
+            DeployedKind.FANG_TRAP_CACTUS, CropTier.COMMON,
             categorySet(CropCategory.TRAP, CropCategory.DAMAGE), AttachFace.FLOOR);
     public static final CropProfile BAMBOO_FIRECRACKER = throwable("bamboo_firecracker", "bamboo_firecracker_stalk",
-            "bamboo_firecracker", CropTier.COMMON, CropCategory.DAMAGE);
+            CropTier.COMMON, CropCategory.DAMAGE);
     public static final CropProfile RED_MUSHROOM_PUFF = throwable("red_mushroom_puff", "red_mushroom_puff_block",
-            "red_mushroom_puff", CropTier.COMMON, CropCategory.BUFF);
+            CropTier.COMMON, CropCategory.BUFF);
     public static final CropProfile BROWN_MUSHROOM_PUFF = throwable("brown_mushroom_puff", "brown_mushroom_puff_block",
-            "brown_mushroom_puff", CropTier.COMMON, CropCategory.BUFF);
-    public static final CropProfile LUCKY_BERRY = crop("lucky_berry", "lucky_berry_bush", "lucky_berry",
+            CropTier.COMMON, CropCategory.BUFF);
+    public static final CropProfile LUCKY_BERRY = crop("lucky_berry", "lucky_berry_bush",
             CropTier.EPIC, CropCategory.BUFF);
 
     /** D-51：莫洛托夫不可种植，作物方块与播种物为空（先例瓜片子）；撒火与撒岩浆块都是写世界，故 DAMAGE + CONSTRUCTION。 */
@@ -110,10 +110,10 @@ public record CropProfile(
             null, null, null, Set.of(), THROWABLE_STACK_TIER, CropTier.RARE);
 
     /**
-     * D-84：朋友的韭，v0.0.3 的第 20 条档案（DEC §4）。投掷型 + 纯 BUFF，可种植（作物方块与播种物都非空）。
-     * 它是三条新档案里唯一有作物方块与种子的一条。
+     * D-84：朋友的韭，v0.0.3 的第 20 条档案（DEC §4）。投掷型 + 纯 BUFF，可种植（作物方块非空）。
+     * 它的播种物已随 D-212 删除，{@code seedItem} 置 {@code null}。
      */
-    public static final CropProfile FRIEND_CHIVES = throwable("friend_chives", "friend_chives_crop", "chive_seeds",
+    public static final CropProfile FRIEND_CHIVES = throwable("friend_chives", "friend_chives_crop",
             CropTier.RARE, CropCategory.BUFF);
     /**
      * D-86：近防菌，v0.0.3 的第 21 条档案。部署型 + 炮台类；不可种植（方块与播种物为空）。
@@ -196,22 +196,23 @@ public record CropProfile(
         return this.id.getPath();
     }
 
-    private static CropProfile crop(String itemPath, String cropBlockPath, String seedItemPath, CropTier tier,
+    /** D-212：7 个播种物已删，{@code seedItem} 一律 {@code null}（字段保留，{@code getBaseSeedId()} 的 null 分支返回空气）。 */
+    private static CropProfile crop(String itemPath, String cropBlockPath, CropTier tier,
                                     CropCategory... categories) {
         return new CropProfile(Farmstorm.id(itemPath), CropType.EDIBLE, categorySet(categories),
-                blockKey(cropBlockPath), itemKey(seedItemPath), null, Set.of(), OTHER_STACK_TIER, tier);
+                blockKey(cropBlockPath), null, null, Set.of(), OTHER_STACK_TIER, tier);
     }
 
-    private static CropProfile throwable(String itemPath, String cropBlockPath, String seedItemPath, CropTier tier,
+    private static CropProfile throwable(String itemPath, String cropBlockPath, CropTier tier,
                                          CropCategory... categories) {
         return new CropProfile(Farmstorm.id(itemPath), CropType.THROWABLE, categorySet(categories),
-                blockKey(cropBlockPath), itemKey(seedItemPath), null, Set.of(), THROWABLE_STACK_TIER, tier);
+                blockKey(cropBlockPath), null, null, Set.of(), THROWABLE_STACK_TIER, tier);
     }
 
-    private static CropProfile deployed(String itemPath, String cropBlockPath, String seedItemPath, DeployedKind kind,
+    private static CropProfile deployed(String itemPath, String cropBlockPath, DeployedKind kind,
                                         CropTier tier, Set<CropCategory> categories, AttachFace... faces) {
         return new CropProfile(Farmstorm.id(itemPath), CropType.DEPLOYABLE, categories,
-                blockKey(cropBlockPath), itemKey(seedItemPath), kind, Set.of(faces), OTHER_STACK_TIER, tier);
+                blockKey(cropBlockPath), null, kind, Set.of(faces), OTHER_STACK_TIER, tier);
     }
 
     /**
@@ -224,9 +225,5 @@ public record CropProfile(
 
     private static ResourceKey<Block> blockKey(String path) {
         return ResourceKey.create(Registries.BLOCK, Farmstorm.id(path));
-    }
-
-    private static ResourceKey<Item> itemKey(String path) {
-        return ResourceKey.create(Registries.ITEM, Farmstorm.id(path));
     }
 }

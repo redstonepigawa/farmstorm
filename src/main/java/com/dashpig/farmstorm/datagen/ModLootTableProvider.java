@@ -6,6 +6,7 @@ import com.dashpig.farmstorm.registry.FarmstormItems;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -40,6 +41,7 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
  * <p>作物表复用原版作物表的结构（成熟判定 + 数量区间 + 时运修正 + 爆炸衰减），只把 item 换成
  * 改良版的作物与播种物（DESIGN §3.2.4）；数量区间逐条照抄 TECH §6.7。
  * 「同名（本身可种）」的 8 个作物不另开播种物池——作物的播种形态就是它自己。
+ * <p>D-212 起 7 个播种物删完，15 张作物表的种子参数一律 {@code null}，播种物池整体消失。
  *
  * <p>部署方块按原版口径加 {@code survives_explosion}：被爆炸破坏时掉 0 个。
  * 转换器只掉方块本体，槽里那一个由 {@code CropConverterBlockEntity#releaseHeld} 交出去（两处不重叠）。
@@ -66,43 +68,45 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
     @Override
     protected void generate() {
         // ---- 15 张作物表（TECH §6.7 的逐条比例）----
-        // 膨胀麦：1 作物 + 0~3 种子（时运加成）
-        crop(FarmstormBlocks.PUFFED_WHEAT_CROP.get(), FarmstormItems.PUFFED_WHEAT.get(),
-                FarmstormItems.PUFFED_WHEAT_SEEDS.get(), ConstantValue.exactly(1), 3);
-        // 胡罗贝 / 育碧服务器 / 毒育碧：1~4 作物，本身可种
-        crop(FarmstormBlocks.BLAST_CARROT_CROP.get(), FarmstormItems.BLAST_CARROT.get(),
-                FarmstormItems.BLAST_CARROT.get(), UniformGenerator.between(1.0F, 4.0F), 0);
-        crop(FarmstormBlocks.UBI_SERVER_CROP.get(), FarmstormItems.UBI_SERVER.get(),
-                FarmstormItems.UBI_SERVER.get(), UniformGenerator.between(1.0F, 4.0F), 0);
-        crop(FarmstormBlocks.TOXIC_UBI_SERVER_CROP.get(), FarmstormItems.TOXIC_UBI_SERVER.get(),
-                FarmstormItems.TOXIC_UBI_SERVER.get(), UniformGenerator.between(1.0F, 4.0F), 0);
-        // 甜菜！：1 作物 + 0~1 种子
-        crop(FarmstormBlocks.POWER_BEET_CROP.get(), FarmstormItems.POWER_BEET.get(),
-                FarmstormItems.POWER_BEET_SEEDS.get(), ConstantValue.exactly(1), 1);
-        // 瓜！/ man瓜：1~4 与 1 作物 + 1 种子
-        crop(FarmstormBlocks.MELON_GRENADE_STEM.get(), FarmstormItems.MELON_GRENADE.get(),
-                FarmstormItems.MELON_GRENADE_SEEDS.get(), UniformGenerator.between(1.0F, 4.0F), 0);
-        crop(FarmstormBlocks.PUMPKIN_TURRET_STEM.get(), FarmstormItems.PUMPKIN_TURRET.get(),
-                FarmstormItems.PUMPKIN_TURRET_SEEDS.get(), ConstantValue.exactly(1), 0);
-        // 火把花 / 瓶子草：1 作物 + 1 播种物
-        crop(FarmstormBlocks.AWAKENED_TORCHFLOWER_CROP.get(), FarmstormItems.AWAKENED_TORCHFLOWER.get(),
-                FarmstormItems.AWAKENED_TORCHFLOWER_SEEDS.get(), ConstantValue.exactly(1), 0);
-        crop(FarmstormBlocks.AWAKENED_PITCHER_PLANT_CROP.get(), FarmstormItems.AWAKENED_PITCHER_PLANT.get(),
-                FarmstormItems.AWAKENED_PITCHER_PLANT_POD.get(), ConstantValue.exactly(1), 0);
-        // 仙人掌 / 爆竹 / 红菇 / 棕菇 / 幸运浆果：1~3、1、1~2、1~2、1~3，本身可种
-        crop(FarmstormBlocks.FANG_TRAP_CACTUS_BLOCK.get(), FarmstormItems.FANG_TRAP_CACTUS.get(),
-                FarmstormItems.FANG_TRAP_CACTUS.get(), UniformGenerator.between(1.0F, 3.0F), 0);
-        crop(FarmstormBlocks.BAMBOO_FIRECRACKER_STALK.get(), FarmstormItems.BAMBOO_FIRECRACKER.get(),
-                FarmstormItems.BAMBOO_FIRECRACKER.get(), ConstantValue.exactly(1), 0);
-        crop(FarmstormBlocks.RED_MUSHROOM_PUFF_BLOCK.get(), FarmstormItems.RED_MUSHROOM_PUFF.get(),
-                FarmstormItems.RED_MUSHROOM_PUFF.get(), UniformGenerator.between(1.0F, 2.0F), 0);
-        crop(FarmstormBlocks.BROWN_MUSHROOM_PUFF_BLOCK.get(), FarmstormItems.BROWN_MUSHROOM_PUFF.get(),
-                FarmstormItems.BROWN_MUSHROOM_PUFF.get(), UniformGenerator.between(1.0F, 2.0F), 0);
-        crop(FarmstormBlocks.LUCKY_BERRY_BUSH.get(), FarmstormItems.LUCKY_BERRY.get(),
-                FarmstormItems.LUCKY_BERRY.get(), UniformGenerator.between(1.0F, 3.0F), 0);
-        // 朋友的韭（D-84）：1 作物 + 0~3 种子，参数照膨胀麦那条二项分布
-        crop(FarmstormBlocks.FRIEND_CHIVES_CROP.get(), FarmstormItems.FRIEND_CHIVES.get(),
-                FarmstormItems.CHIVE_SEEDS.get(), ConstantValue.exactly(1), 3);
+        // D-212：7 个播种物已删，15 张表的种子参数一律传 null（参数位保留：F-297 的平凡作物表要传真实种子）；
+        // 作物本体的数量区间与时运修正一条不动。
+        // 膨胀麦：1 作物（时运加成）
+        crop(FarmstormBlocks.PUFFED_WHEAT_CROP.get(), FarmstormItems.PUFFED_WHEAT.get(), null,
+                ConstantValue.exactly(1), 3);
+        // 胡罗贝 / 育碧服务器 / 毒育碧：1~4 作物
+        crop(FarmstormBlocks.BLAST_CARROT_CROP.get(), FarmstormItems.BLAST_CARROT.get(), null,
+                UniformGenerator.between(1.0F, 4.0F), 0);
+        crop(FarmstormBlocks.UBI_SERVER_CROP.get(), FarmstormItems.UBI_SERVER.get(), null,
+                UniformGenerator.between(1.0F, 4.0F), 0);
+        crop(FarmstormBlocks.TOXIC_UBI_SERVER_CROP.get(), FarmstormItems.TOXIC_UBI_SERVER.get(), null,
+                UniformGenerator.between(1.0F, 4.0F), 0);
+        // 甜菜！：1 作物
+        crop(FarmstormBlocks.POWER_BEET_CROP.get(), FarmstormItems.POWER_BEET.get(), null,
+                ConstantValue.exactly(1), 1);
+        // 瓜！/ man瓜：1~4 与 1 作物
+        crop(FarmstormBlocks.MELON_GRENADE_STEM.get(), FarmstormItems.MELON_GRENADE.get(), null,
+                UniformGenerator.between(1.0F, 4.0F), 0);
+        crop(FarmstormBlocks.PUMPKIN_TURRET_STEM.get(), FarmstormItems.PUMPKIN_TURRET.get(), null,
+                ConstantValue.exactly(1), 0);
+        // 火把花 / 瓶子草：1 作物
+        crop(FarmstormBlocks.AWAKENED_TORCHFLOWER_CROP.get(), FarmstormItems.AWAKENED_TORCHFLOWER.get(), null,
+                ConstantValue.exactly(1), 0);
+        crop(FarmstormBlocks.AWAKENED_PITCHER_PLANT_CROP.get(), FarmstormItems.AWAKENED_PITCHER_PLANT.get(), null,
+                ConstantValue.exactly(1), 0);
+        // 仙人掌 / 爆竹 / 红菇 / 棕菇 / 幸运浆果：1~3、1、1~2、1~2、1~3
+        crop(FarmstormBlocks.FANG_TRAP_CACTUS_BLOCK.get(), FarmstormItems.FANG_TRAP_CACTUS.get(), null,
+                UniformGenerator.between(1.0F, 3.0F), 0);
+        crop(FarmstormBlocks.BAMBOO_FIRECRACKER_STALK.get(), FarmstormItems.BAMBOO_FIRECRACKER.get(), null,
+                ConstantValue.exactly(1), 0);
+        crop(FarmstormBlocks.RED_MUSHROOM_PUFF_BLOCK.get(), FarmstormItems.RED_MUSHROOM_PUFF.get(), null,
+                UniformGenerator.between(1.0F, 2.0F), 0);
+        crop(FarmstormBlocks.BROWN_MUSHROOM_PUFF_BLOCK.get(), FarmstormItems.BROWN_MUSHROOM_PUFF.get(), null,
+                UniformGenerator.between(1.0F, 2.0F), 0);
+        crop(FarmstormBlocks.LUCKY_BERRY_BUSH.get(), FarmstormItems.LUCKY_BERRY.get(), null,
+                UniformGenerator.between(1.0F, 3.0F), 0);
+        // 朋友的韭（D-84）：1 作物
+        crop(FarmstormBlocks.FRIEND_CHIVES_CROP.get(), FarmstormItems.FRIEND_CHIVES.get(), null,
+                ConstantValue.exactly(1), 3);
 
         // ---- 8 张部署方块表：掉自身，被爆炸破坏时掉 0 个 ----
         deployed(FarmstormBlocks.BLAST_CARROT.get());
@@ -137,11 +141,15 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
     /**
      * 作物表：成熟时掉作物（数量区间 + 时运）与播种物（二项分布 + 时运），未成熟只掉 1 个播种物。
      *
+     * @param seed 独立播种物；{@code null} 表示这个作物没有独立播种物（D-212 之后 15 张作物表全是这种），
+     *             此时不开播种物池，未成熟掉作物本体（原本 8 条自指档案就是这个形状）
      * @param seedBinomialExtra 播种物的二项分布上界（0 表示固定 1 个）
      */
-    private void crop(Block cropBlock, Item product, Item seed, NumberProvider productCount, int seedBinomialExtra) {
+    private void crop(Block cropBlock, Item product, @Nullable Item seed, NumberProvider productCount,
+                      int seedBinomialExtra) {
         Holder<Enchantment> fortune = this.registries.holderOrThrow(Enchantments.FORTUNE);
         LootItemCondition.Builder mature = matureCondition(cropBlock);
+        Item seedDrop = seed == null ? product : seed;
 
         LootPoolSingletonContainer.Builder<?> productEntry = LootItem.lootTableItem(product)
                 .apply(SetItemCountFunction.setCount(productCount))
@@ -149,20 +157,20 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
         LootTable.Builder table = LootTable.lootTable()
                 .withPool(LootPool.lootPool().when(mature).add(this.applyExplosionDecay(cropBlock, productEntry)));
 
-        // 播种物与作物不是同一件物品时才另开池（本身可种的 8 个作物跳过这步）
-        if (seed != product) {
+        // 播种物与作物不是同一件物品时才另开池（本身可种的 8 个作物与 D-212 之后的 15 张表都跳过这步）
+        if (seedDrop != product) {
             LootItemConditionalFunction.Builder<?> seedBonus = seedBinomialExtra > 0
                     ? ApplyBonusCount.addBonusBinomialDistributionCount(fortune, SEED_BINOMIAL_PROBABILITY, seedBinomialExtra)
                     : null;
-            LootPoolSingletonContainer.Builder<?> seedEntry = LootItem.lootTableItem(seed);
+            LootPoolSingletonContainer.Builder<?> seedEntry = LootItem.lootTableItem(seedDrop);
             if (seedBonus != null) {
                 seedEntry = seedEntry.apply(seedBonus);
             }
             table = table.withPool(LootPool.lootPool().when(mature).add(this.applyExplosionDecay(cropBlock, seedEntry)));
         }
 
-        // 未成熟：只掉 1 个播种物（本身可种时就是作物本体）
-        LootPoolSingletonContainer.Builder<?> immatureEntry = LootItem.lootTableItem(seed);
+        // 未成熟：只掉 1 个播种物（本身可种 / 播种物已删时就是作物本体）
+        LootPoolSingletonContainer.Builder<?> immatureEntry = LootItem.lootTableItem(seedDrop);
         this.add(cropBlock, table.withPool(
                 LootPool.lootPool().when(mature.invert()).add(this.applyExplosionDecay(cropBlock, immatureEntry))));
     }

@@ -39,13 +39,9 @@ public final class ModItemTagsProvider extends ItemTagsProvider {
                 FarmstormItems.BROWN_MUSHROOM_PUFF.get(),
                 FarmstormItems.LUCKY_BERRY.get());
 
-        tag(FarmstormTags.SEEDS).add(
-                FarmstormItems.PUFFED_WHEAT_SEEDS.get(),
-                FarmstormItems.POWER_BEET_SEEDS.get(),
-                FarmstormItems.MELON_GRENADE_SEEDS.get(),
-                FarmstormItems.PUMPKIN_TURRET_SEEDS.get(),
-                FarmstormItems.AWAKENED_TORCHFLOWER_SEEDS.get(),
-                FarmstormItems.AWAKENED_PITCHER_PLANT_POD.get());
+        // D-212：6 个成员随 7 个播种物一起删空（标签仍然生成，values 是空数组）；成员 1 个由 F-298 的
+        // plain_chives_seeds 补上（HC-159：本版收口时成员 1 个，不是空集）。
+        tag(FarmstormTags.SEEDS);
 
         // F-71 / D-52 / DESIGN §2.5：37 项 = 18 项原版农作物 + 19 条改良作物（22 条档案减播种物 / 二级合成物 / 方块）。
         // 不入标签的三类：播种物（是种子不是农作物）、compressed_puffed_wheat（D-56 二级合成物）、

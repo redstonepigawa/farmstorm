@@ -42,30 +42,6 @@
       "bonus_rolls": 0.0,
       "conditions": [
         {
-          "block": "farmstorm:pumpkin_turret_stem",
-          "condition": "minecraft:block_state_property",
-          "properties": {
-            "age": "3"
-          }
-        }
-      ],
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "minecraft:explosion_decay"
-            }
-          ],
-          "name": "farmstorm:pumpkin_turret_seeds"
-        }
-      ],
-      "rolls": 1.0
-    },
-    {
-      "bonus_rolls": 0.0,
-      "conditions": [
-        {
           "condition": "minecraft:inverted",
           "term": {
             "block": "farmstorm:pumpkin_turret_stem",
@@ -84,7 +60,7 @@
               "function": "minecraft:explosion_decay"
             }
           ],
-          "name": "farmstorm:pumpkin_turret_seeds"
+          "name": "farmstorm:pumpkin_turret"
         }
       ],
       "rolls": 1.0

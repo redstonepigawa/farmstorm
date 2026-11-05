@@ -190,7 +190,7 @@ public final class Farmstorm {
 
     /**
      * 数据驱动的伤害类型没有 DeferredRegister，只能把声明出来的 ResourceKey 逐个列出来数。
-     * <p>新增伤害类型时**必须**同时加进这个列表：总数 98 的断言会因此失败，不会静默漂移。
+     * <p>新增伤害类型时**必须**同时加进这个列表：总数 92 的断言会因此失败，不会静默漂移。
      * 不用反射，是因为 {@code getDeclaredFields()} 依赖字段形状，改名或换个同类型常量都会悄悄改变结果。
      */
     private static int damageTypeCount() {

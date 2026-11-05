@@ -1,7 +1,7 @@
 package com.dashpig.farmstorm.datagen;
 
 import com.dashpig.farmstorm.Farmstorm;
-import com.dashpig.farmstorm.block.ConverterBlock;
+import com.dashpig.farmstorm.block.CropConverterBlock;
 import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import java.util.ArrayList;
@@ -66,7 +66,7 @@ public final class ModItemModelProvider extends ItemModelProvider {
      * 游戏里是紫黑格（36 号 §5、§10 第 10 条）。本版 {@code textures/item} 不新增任何文件。
      */
     private static boolean usesBlockModel(Block block) {
-        return block instanceof ConverterBlock || block instanceof OutpostCoreBlock || block instanceof CultivatorBlock;
+        return block instanceof CropConverterBlock || block instanceof OutpostCoreBlock || block instanceof CultivatorBlock;
     }
 
     private static String registryPath(Item item) {

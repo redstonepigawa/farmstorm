@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
  *
  * <p>{@code renderBg} 必须显式给出<b>贴图尺寸</b>：{@code blit} 的缺省重载按 256 × 256 算 UV 是对的，
  * 但不能把 {@code IMAGE_WIDTH / IMAGE_HEIGHT} 当成贴图尺寸传进去——那样会把 256 × 256 的图按 176 × 222
- * 重新采样，槽位框与物品格整体错开（{@code ConverterScreen} 头上那条注释记过同一件事的反向错误）。
+ * 重新采样，槽位框与物品格整体错开（已下线的转换器界面在同一个坐标上记过相反方向的错误，v0.2.3 起该界面不存在）。
  * 这里传的是 {@code 256, 256}。
  */
 public class OutpostCoreScreen extends AbstractContainerScreen<OutpostCoreMenu> {

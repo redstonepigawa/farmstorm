@@ -1,19 +1,14 @@
 package com.dashpig.farmstorm.block;
 
 import com.dashpig.farmstorm.blockentity.ConverterBlockEntity;
-import com.dashpig.farmstorm.menu.ConverterMenu;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -28,14 +23,14 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * 农产品转换器方块（TECH §4.8.1）。单槽 GUI、带朝向；转换事务在 {@link ConverterBlockEntity} 上。
- * 方块属性（{@code strength(3.5F)} / {@code requiresCorrectToolForDrops()}）在 FarmstormBlocks 注册处声明。
+ * 农产品转换器方块（TECH §4.8.1）。带朝向；转换事务在 {@link ConverterBlockEntity} 上。
+ * 方块属性（铁砧七项，D-207）在 FarmstormBlocks 注册处声明；v0.2.3 起没有界面（D-208）。
  */
-public class ConverterBlock extends BaseEntityBlock {
+public class CropConverterBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final MapCodec<ConverterBlock> CODEC = simpleCodec(ConverterBlock::new);
+    public static final MapCodec<CropConverterBlock> CODEC = simpleCodec(CropConverterBlock::new);
 
-    public ConverterBlock(BlockBehaviour.Properties properties) {
+    public CropConverterBlock(BlockBehaviour.Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
@@ -65,14 +60,6 @@ public class ConverterBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new ConverterBlockEntity(pos, state);
-    }
-
-    @Nullable
-    @Override
-    protected MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
-        return new SimpleMenuProvider(
-                (id, inventory, player) -> new ConverterMenu(id, inventory, player, ContainerLevelAccess.create(level, pos)),
-                Component.translatable("container.farmstorm.converter"));
     }
 
     /**

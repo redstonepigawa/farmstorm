@@ -41,11 +41,13 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
         // RT-09：给整合包作者的豁免口子，模组自己不填，空列表起步
         tag(FarmstormTags.BLAST_PROOF);
 
-        // D-194：可被据点核心绑定的方块；本版唯一成员是培养器（converter 不进，裁定 5）
-        tag(FarmstormTags.PROCESSING_BLOCK).add(FarmstormBlocks.CULTIVATOR.get());
+        // D-208：可被据点核心绑定的方块，成员 2 = 培养器 + 农作物转换器（crop_converter）
+        tag(FarmstormTags.PROCESSING_BLOCK).add(
+                FarmstormBlocks.CULTIVATOR.get(),
+                FarmstormBlocks.CROP_CONVERTER.get());
 
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
-                FarmstormBlocks.CONVERTER.get(),
+                FarmstormBlocks.CROP_CONVERTER.get(),
                 FarmstormBlocks.BLAST_CARROT.get(),
                 FarmstormBlocks.PUMPKIN_TURRET.get(),
                 FarmstormBlocks.AWAKENED_TORCHFLOWER.get(),

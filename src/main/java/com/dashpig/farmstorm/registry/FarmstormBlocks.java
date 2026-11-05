@@ -1,7 +1,7 @@
 package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
-import com.dashpig.farmstorm.block.ConverterBlock;
+import com.dashpig.farmstorm.block.CropConverterBlock;
 import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.block.FarmstormCropBlock;
@@ -68,8 +68,14 @@ public final class FarmstormBlocks {
             deployed(CropProfile.VIBRATION_BEAN, false, false, false, true);
 
     // ---- 1 个功能方块 ----
-    public static final DeferredBlock<ConverterBlock> CONVERTER = REGISTER.registerBlock("converter", ConverterBlock::new,
-            BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3.5F).requiresCorrectToolForDrops());
+    public static final DeferredBlock<CropConverterBlock> CROP_CONVERTER = REGISTER.registerBlock("crop_converter",
+            CropConverterBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(5.0F, 1200.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.ANVIL)
+                    .pushReaction(PushReaction.BLOCK));
 
     // ---- 1 个建材方块（D-57：硬度照远古残骸 30.0，抗性照圆石 6.0，六面同材质不可旋转）----
     public static final DeferredBlock<Block> COMPRESSED_HAY_BLOCK = REGISTER.registerBlock("compressed_hay_block",

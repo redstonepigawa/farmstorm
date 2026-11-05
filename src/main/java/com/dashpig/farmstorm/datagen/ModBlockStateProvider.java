@@ -1,7 +1,7 @@
 package com.dashpig.farmstorm.datagen;
 
 import com.dashpig.farmstorm.Farmstorm;
-import com.dashpig.farmstorm.block.ConverterBlock;
+import com.dashpig.farmstorm.block.CropConverterBlock;
 import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.block.FarmstormCropBlock;
@@ -72,7 +72,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
                 cropStates(block);
             } else if (block instanceof DeployedCropBlock) {
                 deployedStates(block);
-            } else if (block instanceof ConverterBlock) {
+            } else if (block instanceof CropConverterBlock) {
                 converterStates(block);
             } else if (block instanceof OutpostCoreBlock) {
                 outpostCoreStates(block);
@@ -178,7 +178,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         }
         getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
                 .modelFile(model)
-                .rotationY(facingRotationY(state.getValue(ConverterBlock.FACING)))
+                .rotationY(facingRotationY(state.getValue(CropConverterBlock.FACING)))
                 .uvLock(true)
                 .build());
     }

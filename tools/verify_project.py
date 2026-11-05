@@ -336,7 +336,7 @@ EXPECTED = {
         "molotov", "zangief_cane", "wild_apple", "compressed_puffed_wheat",
         "puffed_wheat_seeds", "power_beet_seeds", "melon_grenade_seeds",
         "pumpkin_turret_seeds", "awakened_torchflower_seeds",
-        "awakened_pitcher_plant_pod", "converter", "compressed_hay_block",
+        "awakened_pitcher_plant_pod", "crop_converter", "compressed_hay_block",
         "chive_seeds", "outpost_core",  # v0.1.0 的 BlockItem（24-TECH §1.4 G1）
         "cultivator",  # v0.2.0 的培养器方块物品（36-TECH §1.2）
         "plain_chives",  # v0.2.2 的平凡农作物（F-268 / D-193；非作物，没有 CropProfile）
@@ -348,7 +348,7 @@ EXPECTED = {
         "bamboo_firecracker_stalk", "red_mushroom_puff_block", "brown_mushroom_puff_block",
         "lucky_berry_bush",
         "blast_carrot", "pumpkin_turret", "awakened_torchflower", "awakened_pitcher_plant",
-        "fang_trap_cactus", "converter", "zangief_cane", "compressed_hay_block",
+        "fang_trap_cactus", "crop_converter", "zangief_cane", "compressed_hay_block",
         "friend_chives_crop", "point_defense_fungus", "vibration_bean",
         "outpost_core",  # v0.1.0 的据点核心方块（24-TECH §1.4 G1）
         "cultivator",  # v0.2.0 的培养器方块（36-TECH §1.2）

@@ -64,7 +64,7 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
     private int cachedGeneration;
 
     public ConverterBlockEntity(BlockPos pos, BlockState state) {
-        super(FarmstormBlockEntities.CONVERTER.get(), pos, state);
+        super(FarmstormBlockEntities.CROP_CONVERTER.get(), pos, state);
     }
 
     // ---- Container 契约 ----
@@ -361,7 +361,7 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
         return taken;
     }
 
-    // ---- 供 ConverterMenu 读取（服务端权威） ----
+    // ---- 服务端权威的容器数据视图（v0.2.3 起没有菜单读取，构造契约留待 F-293 重写） ----
 
     /** 输入槽只接受能匹配配方的物品（TECH §8.3）。 */
     public boolean accepts(ItemStack stack) {

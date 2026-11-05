@@ -5,8 +5,10 @@ import com.dashpig.farmstorm.client.render.TurretBulletRenderer;
 import com.dashpig.farmstorm.config.FarmstormClientConfig;
 import com.dashpig.farmstorm.registry.FarmstormEntityTypes;
 import com.dashpig.farmstorm.registry.FarmstormMenus;
+import com.dashpig.farmstorm.registry.FarmstormRecipes;
 import java.util.List;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -59,7 +61,6 @@ public final class FarmstormClient {
 
     @SubscribeEvent
     public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
-        event.register(FarmstormMenus.CONVERTER.get(), ConverterScreen::new);
         // F-227 / D-166：54 格存储界面。漏掉这一行 ⇒ 打开界面时崩或黑屏（36 号 §2.6.3）。
         event.register(FarmstormMenus.OUTPOST_CORE.get(), OutpostCoreScreen::new);
     }
@@ -72,7 +73,7 @@ public final class FarmstormClient {
      */
     @SubscribeEvent
     public static void onRecipeBookCategories(RegisterRecipeBookCategoriesEvent event) {
-        ConverterRecipeBookCategory.onRegisterRecipeBookCategories(event);
+        event.registerRecipeCategoryFinder(FarmstormRecipes.CONVERTING_TYPE.get(), holder -> RecipeBookCategories.UNKNOWN);
     }
 
     /**

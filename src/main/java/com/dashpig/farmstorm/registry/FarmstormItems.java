@@ -109,8 +109,8 @@ public final class FarmstormItems {
             seedItem("awakened_pitcher_plant_pod", CropProfile.AWAKENED_PITCHER_PLANT);
 
     // ---- 3 个方块物品 ----
-    public static final DeferredItem<BlockItem> CONVERTER = REGISTER.registerItem("converter",
-            properties -> new BlockItem(FarmstormBlocks.CONVERTER.get(), properties), otherProperties());
+    public static final DeferredItem<BlockItem> CROP_CONVERTER = REGISTER.registerItem("crop_converter",
+            properties -> new BlockItem(FarmstormBlocks.CROP_CONVERTER.get(), properties), otherProperties());
     /** DESIGN §3.4：方块物品沿用原版 64 上限，不纳入 stack.throwable。 */
     public static final DeferredItem<BlockItem> COMPRESSED_HAY_BLOCK = REGISTER.registerItem("compressed_hay_block",
             properties -> new BlockItem(FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(), properties), otherProperties());
@@ -140,7 +140,7 @@ public final class FarmstormItems {
     public static List<DeferredItem<? extends Item>> creativeTabItems() {
         List<DeferredItem<? extends Item>> items = new ArrayList<>(CROP_ITEMS.values());
         items.addAll(SEED_ITEMS);
-        items.add(CONVERTER);
+        items.add(CROP_CONVERTER);
         items.add(COMPRESSED_HAY_BLOCK);
         items.add(OUTPOST_CORE);
         // A-64：本版没有培养器配方，不进口袋就等于「谁都拿不到」。

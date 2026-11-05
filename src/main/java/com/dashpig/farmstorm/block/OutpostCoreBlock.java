@@ -102,7 +102,7 @@ public class OutpostCoreBlock extends BaseEntityBlock {
     }
 
     /**
-     * 核心存储的菜单（F-229 / D-166 / 36 号 §2.6.4）：照 {@code ConverterBlock#getMenuProvider} 的形态，
+     * 核心存储的菜单（F-229 / D-166 / 36 号 §2.6.4）：照 {@code CropConverterBlock#getMenuProvider} 的形态，
      * 容器由 {@link ContainerLevelAccess} 在服务端解析成 {@link OutpostCoreBlockEntity} 本身
      * （{@link OutpostCoreMenu#resolveContainer}），标题键 {@code container.farmstorm.outpost_core}。
      */
@@ -152,7 +152,7 @@ public class OutpostCoreBlock extends BaseEntityBlock {
      *       不掉落。</li>
      *   <li><b>非活塞推动</b>：{@code !movedByPiston}。漏这一条就是**物品复制漏洞** —— 活塞推动时方块实体
      *       连同内容物一起走到新坐标，这里再原地刷一份，等于凭空多一份。</li>
-     *   <li><b>走 {@link Containers#dropContents}</b>：与原版箱子、{@code ConverterBlock.java:88-96} 同一个入口，
+     *   <li><b>走 {@link Containers#dropContents}</b>：与原版箱子、{@code CropConverterBlock.java:88-96} 同一个入口，
      *       不自己遍历槽位。</li>
      * </ol>
      *

@@ -109,7 +109,7 @@ public final class ModRecipeProvider extends RecipeProvider {
      * <p>分类取 {@code DECORATIONS}：原版的工作站方块（工作台 / 熔炉 / 锻造台）都在这一类。
      */
     private static void converter(RecipeOutput recipeOutput) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, FarmstormItems.CONVERTER.get())
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, FarmstormItems.CROP_CONVERTER.get())
                 .define('T', Items.CRAFTING_TABLE)
                 .define('F', FarmstormTags.CONVERTER_FUEL)
                 .pattern("FFF")

@@ -104,7 +104,7 @@ public class CultivatorBlock extends BaseEntityBlock {
     /**
      * 放入动作（F-235 / 36 号 §2.5.3）：没有菜单（D-160），右键直接把手上那**一个**放进槽里。
      *
-     * <p>顺序与四道闸：客户端先 {@code SUCCESS}（照 {@code ConverterBlock} 的 HC-03 取舍，
+     * <p>顺序与四道闸：客户端先 {@code SUCCESS}（照 {@code CropConverterBlock} 的 HC-03 取舍，
      * 「右键无反应」的定义是行为面无反应，不是动画面无反应）→ 服务端把范围 / 绑定 / 手持档 / 空槽
      * **合并成一次判定**，任一不过就 {@code PASS}（不消耗、不提示、不报错）→ 通过则 {@code split(1)} + {@code CONSUME}。
      *
@@ -130,7 +130,7 @@ public class CultivatorBlock extends BaseEntityBlock {
     /**
      * 破坏掉落（F-237 / 36 号 §2.5.6）：四条件后掉**内部那一个培养物**。
      *
-     * <p>四条件与 {@code ConverterBlock#onRemove} 逐字同形：真移除（{@code !state.is(newState.getBlock())}）
+     * <p>四条件与 {@code CropConverterBlock#onRemove} 逐字同形：真移除（{@code !state.is(newState.getBlock())}）
      * ∧ 非活塞推动（{@code !movedByPiston}）。第一条同时挡住「{@code working} 属性变化触发的那次 onRemove」
      * ——属性变化时新旧 state 属于同一个方块，{@code state.is(newState.getBlock())} 为真。
      *

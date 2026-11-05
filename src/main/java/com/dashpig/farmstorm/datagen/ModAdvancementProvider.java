@@ -79,9 +79,9 @@ public final class ModAdvancementProvider {
                 .save(output, "farmstorm:root");
 
         // 2. 放置一台农产品转换器
-        AdvancementHolder converter = advancement("converter", root, FarmstormItems.CONVERTER.get(), null, false)
+        AdvancementHolder converter = advancement("converter", root, FarmstormItems.CROP_CONVERTER.get(), null, false)
                 .addCriterion("placed_converter",
-                        ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(FarmstormBlocks.CONVERTER.get()))
+                        ItemUsedOnLocationTrigger.TriggerInstance.placedBlock(FarmstormBlocks.CROP_CONVERTER.get()))
                 .save(output, "farmstorm:converter");
 
         // 3. 在转换器内完成一次转换（任意方向）——没有原版触发器，服务端 award

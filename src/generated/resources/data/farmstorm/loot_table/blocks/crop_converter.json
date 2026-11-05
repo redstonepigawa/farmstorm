@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "farmstorm:converter"
+          "name": "farmstorm:crop_converter"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "farmstorm:blocks/converter"
+  "random_sequence": "farmstorm:blocks/crop_converter"
 }

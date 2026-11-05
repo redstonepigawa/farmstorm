@@ -128,7 +128,7 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 this.createSingleItemTable(FarmstormBlocks.OUTPOST_CORE.get()));
 
         // ---- 1 张转换器表：只掉本体（内容物由 dropContents 负责）----
-        this.add(FarmstormBlocks.CONVERTER.get(), this.createSingleItemTable(FarmstormBlocks.CONVERTER.get()));
+        this.add(FarmstormBlocks.CROP_CONVERTER.get(), this.createSingleItemTable(FarmstormBlocks.CROP_CONVERTER.get()));
 
         // ---- 1 张农作物培养器表：掉自身（F-225 / D-160；槽里的那一个由 CultivatorBlock#onRemove 负责，F-237）----
         this.add(FarmstormBlocks.CULTIVATOR.get(), this.createSingleItemTable(FarmstormBlocks.CULTIVATOR.get()));
@@ -216,7 +216,7 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormBlocks.VIBRATION_BEAN.get(),
                 FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
                 FarmstormBlocks.OUTPOST_CORE.get(),
-                FarmstormBlocks.CONVERTER.get(),
+                FarmstormBlocks.CROP_CONVERTER.get(),
                 FarmstormBlocks.CULTIVATOR.get());
     }
 }

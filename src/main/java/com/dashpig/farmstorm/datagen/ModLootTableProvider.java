@@ -107,6 +107,10 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
         // 朋友的韭（D-84）：1 作物
         crop(FarmstormBlocks.FRIEND_CHIVES_CROP.get(), FarmstormItems.FRIEND_CHIVES.get(), null,
                 ConstantValue.exactly(1), 3);
+        // 平凡韭菜（F-297 / D-215）：1 作物 + 0~3 播种物，参数照膨胀麦那条二项分布（54 号 §3.5）。
+        // 播种物由 F-298 的 plain_chives_seeds 提供：成熟掉 1 个平凡韭菜 + 0~3 个种子，未成熟只掉 1 个种子。
+        crop(FarmstormBlocks.PLAIN_CHIVES_CROP.get(), FarmstormItems.PLAIN_CHIVES.get(),
+                FarmstormItems.PLAIN_CHIVES_SEEDS.get(), ConstantValue.exactly(1), 3);
 
         // ---- 8 张部署方块表：掉自身，被爆炸破坏时掉 0 个 ----
         deployed(FarmstormBlocks.BLAST_CARROT.get());
@@ -225,6 +229,8 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
                 FarmstormBlocks.OUTPOST_CORE.get(),
                 FarmstormBlocks.CROP_CONVERTER.get(),
-                FarmstormBlocks.CULTIVATOR.get());
+                FarmstormBlocks.CULTIVATOR.get(),
+                // F-297：平凡作物的那张表（漏登记 ⇒ BlockLootSubProvider 的 validate 报缺表）
+                FarmstormBlocks.PLAIN_CHIVES_CROP.get());
     }
 }

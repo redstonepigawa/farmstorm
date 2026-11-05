@@ -4,6 +4,7 @@ import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.item.DeployableCropItem;
 import com.dashpig.farmstorm.item.FoodCropItem;
+import com.dashpig.farmstorm.item.PlainSeedItem;
 import com.dashpig.farmstorm.item.ThrowableCropItem;
 import com.dashpig.farmstorm.util.CropProfile;
 import java.util.ArrayList;
@@ -117,6 +118,15 @@ public final class FarmstormItems {
                     .saturationModifier(0.1F)
                     .build()));
 
+    /**
+     * v0.2.3 新增的平凡韭菜种子（F-298 / D-216）：`PlainSeedItem` 拿原版放置流程，可播种。
+     * <p>不是 `SeedItem`（它的 `useOn` 无条件 `PASS`，红线 2 / N-142），也不进 `CROP_ITEMS`——
+     * 平凡韭菜没有档案，这个种子只由 `#farmstorm:seeds` 标签与创造栏认领。
+     * 堆叠走 `otherProperties()`（`stack.other`，与 D-16 的「播种物」一档）。
+     */
+    public static final DeferredItem<PlainSeedItem> PLAIN_CHIVES_SEEDS = REGISTER.registerItem("plain_chives_seeds",
+            properties -> new PlainSeedItem(FarmstormBlocks.PLAIN_CHIVES_CROP.get(), properties), otherProperties());
+
     private FarmstormItems() {}
 
     /** 创造标签页内容：作物 → 播种物 → 工具方块（TECH §3.6）。 */
@@ -129,6 +139,8 @@ public final class FarmstormItems {
         items.add(CULTIVATOR);
         // D-193：平凡韭菜不是作物（不在 CROP_ITEMS 里），必须手写进清单，否则创造栏看不到。
         items.add(PLAIN_CHIVES);
+        // F-298：平凡韭菜种子同属「手写」这一档（不占 CROP_ITEMS），漏了它创造栏里就没有播种物。
+        items.add(PLAIN_CHIVES_SEEDS);
         return items;
     }
 

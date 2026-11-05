@@ -339,6 +339,7 @@ EXPECTED = {
         "outpost_core",  # v0.1.0 的 BlockItem（24-TECH §1.4 G1）
         "cultivator",  # v0.2.0 的培养器方块物品（36-TECH §1.2）
         "plain_chives",  # v0.2.2 的平凡农作物（F-268 / D-193；非作物，没有 CropProfile）
+        "plain_chives_seeds",  # v0.2.3 的平凡韭菜种子（F-298 / D-216：PlainSeedItem，可播种）
     ],
     "blocks": [
         "puffed_wheat_crop", "blast_carrot_crop", "ubi_server_crop", "toxic_ubi_server_crop",
@@ -351,6 +352,7 @@ EXPECTED = {
         "friend_chives_crop", "point_defense_fungus", "vibration_bean",
         "outpost_core",  # v0.1.0 的据点核心方块（24-TECH §1.4 G1）
         "cultivator",  # v0.2.0 的培养器方块（36-TECH §1.2）
+        "plain_chives_crop",  # v0.2.3 的平凡作物方块（F-297 / D-215：PlainCropBlock，age 0~3，不进 CropProfile）
     ],
     "block_entity_type": [
         "blast_carrot", "pumpkin_turret", "awakened_torchflower",

@@ -39,9 +39,9 @@ public final class ModItemTagsProvider extends ItemTagsProvider {
                 FarmstormItems.BROWN_MUSHROOM_PUFF.get(),
                 FarmstormItems.LUCKY_BERRY.get());
 
-        // D-212：6 个成员随 7 个播种物一起删空（标签仍然生成，values 是空数组）；成员 1 个由 F-298 的
-        // plain_chives_seeds 补上（HC-159：本版收口时成员 1 个，不是空集）。
-        tag(FarmstormTags.SEEDS);
+        // D-212 把 6 个成员随 7 个播种物一起删空；F-298 / D-216 又把平凡韭菜种子补回来——它是本版唯一的
+        // 真播种物，成员 1 个（HC-159：本版收口时成员 1 个，不是空集）。
+        tag(FarmstormTags.SEEDS).add(FarmstormItems.PLAIN_CHIVES_SEEDS.get());
 
         // F-71 / D-52 / DESIGN §2.5：37 项 = 18 项原版农作物 + 19 条改良作物（22 条档案减播种物 / 二级合成物 / 方块）。
         // 不入标签的三类：播种物（是种子不是农作物）、compressed_puffed_wheat（D-56 二级合成物）、

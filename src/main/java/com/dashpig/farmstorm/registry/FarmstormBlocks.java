@@ -6,6 +6,7 @@ import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.block.FarmstormCropBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
+import com.dashpig.farmstorm.block.PlainCropBlock;
 import com.dashpig.farmstorm.util.CropProfile;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
@@ -106,6 +107,16 @@ public final class FarmstormBlocks {
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.ANVIL)
                     .pushReaction(PushReaction.BLOCK));
+
+    // ---- 1 个平凡作物（F-297 / D-215）：属性照上面 crop(...) 工厂的四项，不写 randomTicks（生长走计划 tick）----
+    /** 平凡韭菜的种植形态：age 0~3，贴图复用朋友的韭的 4 张 stage 图（裁定 #18）；不进 {@code CropProfile}。 */
+    public static final DeferredBlock<PlainCropBlock> PLAIN_CHIVES_CROP = REGISTER.registerBlock("plain_chives_crop",
+            PlainCropBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.PLANT)
+                    .noCollission()
+                    .instabreak()
+                    .sound(SoundType.CROP));
 
     private FarmstormBlocks() {}
 

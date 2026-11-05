@@ -6,6 +6,7 @@ import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
 import com.dashpig.farmstorm.block.FarmstormCropBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
+import com.dashpig.farmstorm.block.PlainCropBlock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,10 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         for (Block block : farmstormBlocks()) {
             if (block instanceof FarmstormCropBlock) {
                 cropStates(block);
+            } else if (block instanceof PlainCropBlock) {
+                // 平凡作物与 FarmstormCropBlock 没有继承关系，两支互不命中；漏了这一支会落进 simpleBlock 兜底，
+                // 世界里的韭菜变成六面立方块且不报错（RT-77 / 陷阱 16）。
+                plainCropStates(block);
             } else if (block instanceof DeployedCropBlock) {
                 deployedStates(block);
             } else if (block instanceof CropConverterBlock) {
@@ -96,6 +101,28 @@ public final class ModBlockStateProvider extends BlockStateProvider {
             String stageName = base + "_stage" + age;
             stages[age] = models().withExistingParent(stageName, mcLoc("block/crop"))
                     .texture("crop", modLoc("block/" + stageName))
+                    .renderType(CUTOUT);
+        }
+        VariantBlockStateBuilder builder = getVariantBuilder(block);
+        for (int age = 0; age < CROP_AGES; age++) {
+            builder.partialState().with(BlockStateProperties.AGE_3, age)
+                    .modelForState().modelFile(stages[age]).addModel();
+        }
+    }
+
+    /**
+     * 平凡韭菜（F-297 / D-215、裁定 #18）：age 0~3 → 模型 <base>_stage0..3，父模型 minecraft:block/crop。
+     *
+     * <p><b>不能复用 {@link #cropStates}</b>：那个方法按「模型名 = 贴图名」拼路径，会拼出不存在的
+     * {@code block/plain_chives_stageN}；素材是朋友的韭的 {@code friend_chives_stageN}（陷阱 17 / 54 号 §3.5），
+     * 故这里把贴图路径显式写成 {@code block/friend_chives_stageN}，不新增任何 PNG。
+     */
+    private void plainCropStates(Block block) {
+        String base = cropBase(registryPath(block));
+        ModelFile[] stages = new ModelFile[CROP_AGES];
+        for (int age = 0; age < CROP_AGES; age++) {
+            stages[age] = models().withExistingParent(base + "_stage" + age, mcLoc("block/crop"))
+                    .texture("crop", modLoc("block/friend_chives_stage" + age))
                     .renderType(CUTOUT);
         }
         VariantBlockStateBuilder builder = getVariantBuilder(block);

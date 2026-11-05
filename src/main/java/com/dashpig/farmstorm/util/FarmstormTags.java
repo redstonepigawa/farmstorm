@@ -32,7 +32,7 @@ public final class FarmstormTags {
     /** 15 个改良作物物品（D-09：不具备原版用途）。 */
     public static final TagKey<Item> MODIFIED_CROPS = item("modified_crops");
 
-    /** 6 个独立播种物 + 4 个自身即播种物的作物。 */
+    /** 1 个播种物（平凡韭菜种子）：改良作物的 7 个种子已删（D-212），它由 F-298 / D-216 补回来。 */
     public static final TagKey<Item> SEEDS = item("seeds");
 
     /** 转换器可作燃料的物品（D-52）：19 条作物档案对应物品 + 原版农作物。内容属 datagen，本表不含成员。 */

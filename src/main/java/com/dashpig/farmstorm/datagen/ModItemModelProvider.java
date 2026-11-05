@@ -17,7 +17,7 @@ import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 /**
- * 31 个物品模型（TECH §6.4）：15 个作物 + 7 个独立播种物 + 2 个二级合成物 + 4 个 v0.0.3 新物品 + 1 个转换器。
+ * 本模组注册的全部物品的模型（数量由注册表决定；TECH §6.4）。
  * 部署方块的世界模型分两类（隐形的陷阱 / 原版的炮台光环），图标因此不再统一引用方块模型：
  * 炮台 / 光环类与瓜！指向原版方块模型，两个隐形陷阱指向自己的 item 贴图，转换器与据点核心（D-123）引用自家方块模型。
  */
@@ -81,7 +81,7 @@ public final class ModItemModelProvider extends ItemModelProvider {
         return id.getPath();
     }
 
-    /** 本模组注册的 31 个物品。 */
+    /** 本模组注册的全部物品（数量由注册表决定）。 */
     private static List<Item> farmstormItems() {
         List<Item> items = new ArrayList<>();
         for (Item item : BuiltInRegistries.ITEM) {

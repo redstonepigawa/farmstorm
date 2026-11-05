@@ -262,6 +262,9 @@ ICONS: tuple[tuple[str, str, tuple[tuple[str, str], ...]], ...] = (
     ("zangief_cane", "桑吉尔蔗", (("item", "sugar_cane"),)),
     ("wild_apple", "狂野苹果", (("item", "apple"),)),
     ("compressed_puffed_wheat", "压缩膨胀麦", (("block", "hay_block_side"),)),
+    # v0.2.2 · F-269 / D-193：平凡韭菜是「朋友的韭」的平凡对应物，原版没有同名物品贴图可转
+    # （朋友的韭那张是作者原画转的），因此候选链留空、走 ICON_DRAWERS 里的专用画法 draw_plain_chives()。
+    ("plain_chives", "平凡韭菜", ()),
 )
 
 # 需要走 HAY_TONE 映射表的方块贴图（v0.1.0 · F-164 的压缩麦侧面）。
@@ -762,6 +765,46 @@ def draw_chive_stage(index: int) -> Image.Image:
     return image
 
 
+# --- v0.2.2 · F-269 / D-193：平凡韭菜的物品图标 ---
+# 「朋友的韭」的平凡对应物，原版没有同名物品贴图可转（朋友的那张是作者原画转的），因此按模块自己的
+# 平凡档口径程序绘制：同一套 4 个韭绿（CHIVE_COLORS）、纯色、alpha 只有 0 / 255。比朋友的韭
+# （斜向密束、125 色）更朴素——5 根直叶从同一个叶鞘里散开，远处一眼能读成「一把韭」。
+PLAIN_CHIVES_LEAVES: tuple[tuple[tuple[int, int], tuple[int, int], str], ...] = (
+    # (起点, 终点, 叶身色档)：全部从叶鞘散开，中三根高、最外侧两根矮，叶尖统一用最亮一档。
+    ((7, 12), (2, 6), "b"),
+    ((7, 12), (4, 3), "c"),
+    ((8, 12), (8, 1), "c"),
+    ((8, 12), (11, 4), "c"),
+    ((8, 12), (13, 7), "b"),
+)
+# 叶鞘：5 根叶的合生处 + 一个根部像素，用最暗的一档压住汇聚点（左含右含）。
+PLAIN_CHIVES_SHEATH = (6, 12, 9, 13)
+PLAIN_CHIVES_ROOT = (7, 14)
+# 画完逐张断言的不透明像素数（与 CHIVE_OPAQUE 同口径）：改画法时若外观跟着变，这里当场报数。
+PLAIN_CHIVES_OPAQUE = 47
+
+
+def draw_plain_chives() -> Image.Image:
+    """16x16「平凡韭菜」物品图标：5 根韭叶 + 叶鞘 + 根部（纯坐标表，无随机数）。"""
+    image = Image.new("RGBA", (TEXTURE_SIZE, TEXTURE_SIZE), CLEAR)
+    draw = ImageDraw.Draw(image)
+    for (x0, y0), (x1, y1), symbol in PLAIN_CHIVES_LEAVES:
+        draw.line((x0, y0, x1, y1), fill=CHIVE_COLORS[symbol])
+        draw.point((x1, y1), fill=CHIVE_COLORS["d"])
+    left, top, right, bottom = PLAIN_CHIVES_SHEATH
+    draw.rectangle((left, top, right, bottom), fill=CHIVE_COLORS["a"])
+    draw.point(PLAIN_CHIVES_ROOT, fill=CHIVE_COLORS["a"])
+    opaque = sum(
+        1
+        for y in range(TEXTURE_SIZE)
+        for x in range(TEXTURE_SIZE)
+        if image.getpixel((x, y))[3] != 0
+    )
+    if opaque != PLAIN_CHIVES_OPAQUE:
+        raise ValueError(f"平凡韭菜的不透明像素 {opaque}，应为 {PLAIN_CHIVES_OPAQUE}")
+    return image
+
+
 # --- v0.1.0 · F-164：压缩麦的顶 / 底两张切面 ---
 def draw_hay_cross_section(levels: tuple[int, ...]) -> Image.Image:
     """16x16 干草捆切面：四周 1 px 描边（本面最暗一档）+ 内部每 2 行一组的横向束纹（亮档 / 暗档交替）。"""
@@ -846,6 +889,8 @@ BLOCK_DRAWERS = {
 # F-163：要读作者源图的物品图标；源图缺失时 compose() 退回候选链。
 ICON_DRAWERS = {
     "wild_apple": draw_wild_apple,
+    # F-269：平凡韭菜没有原版来源，整张由 draw_plain_chives() 画。
+    "plain_chives": draw_plain_chives,
 }
 
 DRAWERS = {**ITEM_DRAWERS, **STAGE_DRAWERS, **BLOCK_DRAWERS, **ICON_DRAWERS}

@@ -12,6 +12,8 @@ r"""Farmstorm v0.1.1 静态验收器。
                    v0.1.1 是 pumpkin_turret 的三行），键名与前面的清单重名，按集合去重后是
                    167 个键；再加 36 号 §4.1.1 的 10 个增键、扣掉两个删键（`REMOVED_KEYS` 的
                    farmland.limitPerPlayer 与 §4.1.1 第 1 行的 outpost_core.farmlandBonus）= 175 个键
+                   + docs/zh/42-TECH-0.2.1.md §4.1.1（v0.2.1 的 1 行：增 1 / 删 0，F-261）⇒ v0.2.1 加
+                   1 个键，合计 **176** 个键
   - 97 个注册 ID  <- docs/zh/36-TECH-0.2.0.md §1.2 的 v0.2.0 列逐类小计（12 类，相加 97；
                    基线 93 见 24-TECH-0.1.0.md §2.1，本版 +4）
 
@@ -175,6 +177,56 @@ def expected_config_keys_v012(tech6: Path) -> tuple[list[str], list[str]]:
                          f"行号 {[n for n, _ in added + removed]}），文档口径是 11 行")
     if len(added) != 10 or len(removed) != 1:
         raise ValueError(f"{tech6.name}:{base_line}：§4.1.1 应是「增 10 / 删 1」，实际"
+                         f"「增 {len(added)} / 删 {len(removed)}」")
+    return [k for _, k in added], [k for _, k in removed]
+
+
+def expected_config_keys_v021(tech7: Path) -> tuple[list[str], list[str]]:
+    r"""42-TECH §4.1.1 的 1 行 →（增键列表，删键列表）。
+
+    表列与 36 号 §4.1.1 同格式（序号 | 完整键路径 | 类型 | 默认 | 值域 | 动作 | 决策号）：键取第 2
+    列反引号内的 `<组>.<键>`，动作取第 6 列的「增」/「删」。范围用 `^#### 4\.1\.1\b` 与随后的
+    `^#### 4\.1\.2\b` **界定**——42 号的 §3 与 §7 两张表第一列也是序号，全文扫
+    `^\|\s*\d+\s*\|` 会把它们的行一起抓进来。增删**从文档读**，不在本文件里抄第二份清单
+    （抄一份答案会让「读文档现算」退化成「对答案」，A-66 的原始缺陷原地复活）。
+
+    解析失败一律带（文件名 + 表行号）抛出：静默跳过会让期望集悄悄停在 175，比报错更糟。
+    """
+    text = read(tech7)
+    head = re.search(r"^#### 4\.1\.1\b.*$", text, re.MULTILINE)
+    if not head:
+        raise ValueError(f"{tech7.name}：找不到「#### 4.1.1」的表格标题（表格格式变了？）")
+    base_line = text[:head.start()].count("\n") + 1
+    tail = re.search(r"^#### 4\.1\.2\b", text[head.start():], re.MULTILINE)
+    if not tail:
+        raise ValueError(f"{tech7.name}:{base_line}：§4.1.1 之后找不到「#### 4.1.2」，无法界定表格范围")
+    added: list[tuple[int, str]] = []
+    removed: list[tuple[int, str]] = []
+    for offset, line in enumerate(text[head.start():head.start() + tail.start()].splitlines()):
+        # 只在本节范围内认数据行（第一列是序号）；表头 / 分隔行 / 本节正文都不以「| 数字 |」开头。
+        if not re.match(r"^\|\s*\d+\s*\|", line):
+            continue
+        lineno = base_line + offset
+        cols = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cols) != 7:
+            raise ValueError(f"{tech7.name}:{lineno}：§4.1.1 的表行应 7 列"
+                             f"（序号/键路径/类型/默认/值域/动作/决策号），实际 {len(cols)} 列：{line.strip()[:70]}")
+        key = re.fullmatch(r"`([A-Za-z0-9_]+\.[A-Za-z0-9_.]+)`", cols[1])
+        if not key:
+            raise ValueError(f"{tech7.name}:{lineno}：§4.1.1 第 2 列不是反引号内的「组.键」：{cols[1]!r}")
+        act = cols[5].strip("*").strip()
+        if act.startswith("增"):
+            added.append((lineno, key.group(1)))
+        elif act.startswith("删"):
+            removed.append((lineno, key.group(1)))
+        else:
+            raise ValueError(f"{tech7.name}:{lineno}：§4.1.1 第 6 列既不是「增」也不是「删」：{cols[5]!r}")
+    if len(added) + len(removed) != 1:
+        raise ValueError(f"{tech7.name}:{base_line}：§4.1.1 从第 {base_line} 行起只解析出"
+                         f"{len(added) + len(removed)} 行（增 {len(added)} / 删 {len(removed)}，"
+                         f"行号 {[n for n, _ in added + removed]}），文档口径是 1 行")
+    if len(added) != 1 or len(removed) != 0:
+        raise ValueError(f"{tech7.name}:{base_line}：§4.1.1 应是「增 1 / 删 0」，实际"
                          f"「增 {len(added)} / 删 {len(removed)}」")
     return [k for _, k in added], [k for _, k in removed]
 
@@ -353,6 +405,7 @@ def main() -> int:
     tech4 = root / "docs/zh/24-TECH-0.1.0.md"
     tech5 = root / "docs/zh/30-TECH-0.1.1.md"
     tech6 = root / "docs/zh/36-TECH-0.2.0.md"
+    tech7 = root / "docs/zh/42-TECH-0.2.1.md"
     base = expected_config_keys(design)
     added = expected_config_keys_v002(tech)
     added3 = expected_config_keys_v003(tech3)
@@ -376,7 +429,12 @@ def main() -> int:
     except (ValueError, OSError) as exc:
         fail(f"36-TECH §4.1.1 解析失败，期望键集无法现算：{exc}")
         added6 = None
-    if added4 is None or added5 is None or added6 is None:
+    try:
+        added7, removed7 = expected_config_keys_v021(tech7)
+    except (ValueError, OSError) as exc:
+        fail(f"42-TECH §4.1.1 解析失败，期望键集无法现算：{exc}")
+        added7 = None
+    if added4 is None or added5 is None or added6 is None or added7 is None:
         exp_ok, exp = False, set()
     else:
         before6 = set(base) | set(added) | set(added3) | set(added4) | set(added5)
@@ -384,20 +442,26 @@ def main() -> int:
         overlap4 = set(added4) & (set(base) | set(added) | set(added3))
         overlap5 = set(added5) & (set(base) | set(added) | set(added3) | set(added4))
         overlap6 = set(added6) & before6
-        union = before6 | set(added6)
+        before7 = before6 | set(added6)
+        overlap7 = set(added7) & before7
+        union = before7 | set(added7)
         # 已删键在并集旁边扣一次（REMOVED_KEYS 的唯一用处），不散落到解析函数里；
-        # v0.2.0 的第 2 个删键由 36-TECH §4.1.1 现算（removed6），不写死在这里。
-        gone = REMOVED_KEYS | set(removed6)
+        # v0.2.0 的第 2 个删键由 36-TECH §4.1.1 现算（removed6）、v0.2.1 的第 3 个由
+        # 42-TECH §4.1.1 现算（removed7），都不写死在这里。
+        gone = REMOVED_KEYS | set(removed6) | set(removed7)
         exp_ok, exp = True, union - gone
         print(f"  30-TECH §4.1：{groups5} 组 / {len(added5)} 键"
               f"（v0.1.1 的 58 行数据表现算，其中 {len(overlap5)} 个键名已在前四份清单里）")
         print(f"  36-TECH §4.1.1：{len(added6) + len(removed6)} 行（增 {len(added6)} / 删 {len(removed6)}；"
               f"v0.2.0 的 11 行数据表现算，其中 {len(overlap6)} 个键名与前面的清单重名）")
+        print(f"  42-TECH §4.1.1：{len(added7) + len(removed7)} 行（增 {len(added7)} / 删 {len(removed7)}；"
+              f"v0.2.1 的 1 行数据表现算，其中 {len(overlap7)} 个键名与前面的清单重名）")
         print(f"  剔除已删键 {len(gone)} 个：{'、'.join(sorted(gone))}")
         print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}"
               f" + 18-TECH §8.1 {len(added3)} 行"
               f" + 24-TECH §8.1 {len(added4) + len(changed4)} 行（新 {len(added4)} + 改 {len(changed4)}）"
-              f" + 30-TECH §4.1 {len(added5)} 键 + 36-TECH §4.1.1 {len(added6)} 键；其中 24 / 18 号另有"
+              f" + 30-TECH §4.1 {len(added5)} 键 + 36-TECH §4.1.1 {len(added6)} 键"
+              f" + 42-TECH §4.1.1 {len(added7)} 键；其中 24 / 18 号另有"
               f" {len(overlap) + len(overlap4)} 行是改既有默认值、§4.1 另有 {len(overlap5)} 个键名与"
               f"前面的清单重名；按并集去重后 {len(union)}，再扣掉 {len(gone)} 个已删键 = {len(exp)}）")
     toml = root / "run/config/farmstorm-server.toml"

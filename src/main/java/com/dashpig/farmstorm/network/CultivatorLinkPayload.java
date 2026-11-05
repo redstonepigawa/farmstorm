@@ -38,10 +38,15 @@ public record CultivatorLinkPayload(List<Link> links) implements CustomPacketPay
     /** 注册名必须是 {@code farmstorm:cultivator_link}（36 号 §8 #2 的注册行判据）。 */
     public static final Type<CultivatorLinkPayload> TYPE = new Type<>(Farmstorm.id("cultivator_link"));
 
-    /** 单条连线 2 字段 codec：两个 {@code BlockPos} 组合成二元 {@code composite}。 */
+    /**
+     * 单条连线 **3 字段** codec（F-302 / 54 号 §5.1）：两个 {@code BlockPos} + 一个 {@code Kind} 字节，
+     * 三元 {@code composite}。第三段 {@code ByteBufCodecs.BYTE} 只占 **1 字节**，列表 codec 与
+     * {@link #MAX_LINKS} 一个字符不动（D-210 第 1 条）。
+     */
     public static final StreamCodec<FriendlyByteBuf, Link> LINK_STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, Link::core,
             BlockPos.STREAM_CODEC, Link::cultivator,
+            ByteBufCodecs.BYTE.map(Link.Kind::byId, Link.Kind::id), Link::kind,
             Link::new);
 
     /** 一元 {@code composite} + 列表 codec（1 元重载，与 {@link CoreListPayload} 同一体例）。 */
@@ -49,8 +54,44 @@ public record CultivatorLinkPayload(List<Link> links) implements CustomPacketPay
             LINK_STREAM_CODEC.apply(ByteBufCodecs.list(MAX_LINKS)), CultivatorLinkPayload::links,
             CultivatorLinkPayload::new);
 
-    /** 一条连线：核的坐标 + 培养器的坐标。两个都是方块坐标，画线时各取格心（+0.5）。 */
-    public record Link(BlockPos core, BlockPos cultivator) {}
+    /**
+     * 一条连线：核的坐标 + 机器的坐标 + **连着哪一类机器**。三个都是线上字段，画线时两侧各取格心（+0.5）。
+     *
+     * <p>{@link Kind} 之所以叫「kind」而不是「color」：语义是「这条线连着哪一类机器」，颜色只是它的后果；
+     * 将来第三种机器只加一个枚举成员（D-210 补充）。
+     */
+    public record Link(BlockPos core, BlockPos cultivator, Kind kind) {
+        /**
+         * 连线类型（F-302 / D-210 / 54 号 §5.1）：线上各占 **1 字节**，{@code CULTIVATOR = 0}、
+         * {@code CROP_CONVERTER = 1}。未知码按 {@link #CULTIVATOR} 解——第三类机器的服务端连到旧客户端时，
+         * 画出来是既有的青色线，而不是崩或画错色（前向兼容）。
+         */
+        public enum Kind {
+            CULTIVATOR(0),
+            CROP_CONVERTER(1);
+
+            private final int id;
+
+            Kind(int id) {
+                this.id = id;
+            }
+
+            /** 线上码：{@code BYTE} 只占 1 字节，与 {@link #byId(int)} 成对，不留第二条编码规则。 */
+            public byte id() {
+                return (byte) this.id;
+            }
+
+            /** 线上码 → 枚举；未知码回落 {@link #CULTIVATOR}（54 号 §5.1 的「未知码」判据）。 */
+            public static Kind byId(int id) {
+                for (Kind kind : values()) {
+                    if (kind.id == id) {
+                        return kind;
+                    }
+                }
+                return CULTIVATOR;
+            }
+        }
+    }
 
     @Override
     public Type<CultivatorLinkPayload> type() {

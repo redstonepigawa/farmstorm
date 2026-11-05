@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.block;
 
 import com.dashpig.farmstorm.blockentity.CultivatorBlockEntity;
 import com.dashpig.farmstorm.blockentity.OutpostCoreBlockEntity;
+import com.dashpig.farmstorm.network.CultivatorLinkPayload.Link;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
@@ -96,7 +97,7 @@ public class CultivatorBlock extends BaseEntityBlock {
         if (core == null) {
             return;                                   // 未绑定：不写 Core 键（缺键就是未绑定）
         }
-        if (core.addCultivator(pos)) {
+        if (core.addCultivator(pos, Link.Kind.CULTIVATOR)) {   // F-303 写入点 ①：培养器自报类型
             cultivator.setCore(core.getBlockPos());
         }
     }

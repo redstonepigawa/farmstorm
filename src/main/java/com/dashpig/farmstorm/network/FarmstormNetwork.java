@@ -20,9 +20,13 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 public final class FarmstormNetwork {
     /**
      * 握手版本串：codec 一变必须跟着变（30 号 §2.1.2）。
-     * F-238：新增第二个 S2C 包 ⇒ {@code "1"} → {@code "2"}，与 codec 同一个提交（36 号 §7 翻车点 1）。
+     * F-238：新增第二个 S2C 包 ⇒ 版本 1 → 2，与 codec 同一个提交（36 号 §7 翻车点 1）。
+     * F-302：{@code Link} 从 2 字段变 3 字段（多一个 {@code Kind} 字节）⇒ 版本 2 → 3
+     * （D-210 的强制连带项 / 54 号 §5.5 / A-99 / 死命令 5）。停在 2 会让 0.2.2 客户端**协商通过**
+     * 之后按旧 codec 解新字节流，那是必崩的解码错误；升到 3 之后 {@code optional()} 让它拿不到这条通道，
+     * 只是没有连线、不崩。
      */
-    public static final String PROTOCOL_VERSION = "2";
+    public static final String PROTOCOL_VERSION = "3";
 
     private FarmstormNetwork() {}
 
@@ -38,7 +42,7 @@ public final class FarmstormNetwork {
                 .playToClient(CoreListPayload.TYPE, CoreListPayload.STREAM_CODEC,
                         (payload, context) -> ClientCoreList.handle(payload, context))
                 // 第 2 个包（F-238 / D-169 / D-172）：同样 optional + S2C 只读，客户端不回包。
-                // 协议串已随之升到 "2"——只加这条而忘改版本串，会让「装了新模组的客户端连旧服」握手不匹配。
+                // 协议串随 F-238 升到 2、随 F-302 升到 3 —— 只加这条而忘改版本串，会让「装了新模组的客户端连旧服」握手不匹配。
                 .optional()
                 .playToClient(CultivatorLinkPayload.TYPE, CultivatorLinkPayload.STREAM_CODEC,
                         (payload, context) -> ClientCultivatorLinks.handle(payload, context));

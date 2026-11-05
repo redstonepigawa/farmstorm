@@ -32,15 +32,31 @@ import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
  *       {@code AFTER_PARTICLES}（{@code RenderLevelStageEvent.java:179-185}）。</li>
  * </ol>
  *
- * <p><b>颜色沿用核心边界粒子的同一组数值</b>（{@code OutpostCoreBlockEntity.java:84} 的
- * {@code DustParticleOptions(new Vector3f(0.30F, 0.85F, 0.90F), 1.0F)}）：同一视觉语义（核心范围）
- * 用同一个颜色，不发明新数值。
+ * <p><b>颜色只由 payload 的 {@code kind} 字节决定</b>（F-304 / D-210 / 54 号 §5.4）：培养器沿用核心边界
+ * 粒子的同一组数值（{@code OutpostCoreBlockEntity.java:84} 的
+ * {@code DustParticleOptions(new Vector3f(0.30F, 0.85F, 0.90F), 1.0F)}），转换器用红色。
+ *
+ * <p><b>红线 3 / N-143</b>：本类**不碰** {@code level} / {@code BlockState} / 方块实体。连线常画在远端
+ * 未加载区块上，按坐标反查机器类型要么触发区块加载、要么猜——猜错就是服务端侧的闪色。
+ * payload 里的那一个字节是唯一真相。
  */
 public final class CultivatorLinkRenderer {
-    /** 核边界粒子的那三个分量（36 号 §2.8.3）；alpha 取 1.0，遮挡交给深度测试。 */
-    private static final float RED = 0.30F;
-    private static final float GREEN = 0.85F;
-    private static final float BLUE = 0.90F;
+    /**
+     * 培养器：核边界粒子的那三个分量（36 号 §2.8.3），**一个字节都不许变**（D-210 第 4 条）；
+     * alpha 取 1.0，遮挡交给深度测试。
+     */
+    private static final float CULTIVATOR_RED = 0.30F;
+    private static final float CULTIVATOR_GREEN = 0.85F;
+    private static final float CULTIVATOR_BLUE = 0.90F;
+
+    /**
+     * 转换器：红（54 号 §5.4）。不用纯 {@code 0xFF0000} —— 纯红在高饱和草地与岩浆上会被同类色淹没，
+     * 且与生命值条同色、读起来像「报错」；这三个分量与青逐一拉开 0.62 / 0.63 / 0.68，且都低于 1.0。
+     */
+    private static final float CONVERTER_RED = 0.92F;
+    private static final float CONVERTER_GREEN = 0.22F;
+    private static final float CONVERTER_BLUE = 0.22F;
+
     private static final float ALPHA = 1.0F;
 
     /** 端点小框边长 0.25 格（36 号附录 A 第 9 项）：以格心为中心，各方向 ±0.125。 */
@@ -71,11 +87,25 @@ public final class CultivatorLinkRenderer {
         for (CultivatorLinkPayload.Link link : links) {
             Vec3 core = center(link.core());
             Vec3 cultivator = center(link.cultivator());
+            // 按 kind 选色（F-304 / 54 号 §5.4）：主线与两端的小框共用同一组，颜色不会一半青一半红。
+            float red = CULTIVATOR_RED;
+            float green = CULTIVATOR_GREEN;
+            float blue = CULTIVATOR_BLUE;
+            switch (link.kind()) {
+                case CROP_CONVERTER -> {
+                    red = CONVERTER_RED;
+                    green = CONVERTER_GREEN;
+                    blue = CONVERTER_BLUE;
+                }
+                case CULTIVATOR -> {
+                    // 保持默认的青色（D-210 第 4 条：三个分量一个字节都不许变）
+                }
+            }
             LevelRenderer.renderLineBox(poseStack, consumer,
                     new AABB(core.x, core.y, core.z, cultivator.x, cultivator.y, cultivator.z),
-                    RED, GREEN, BLUE, ALPHA);
-            LevelRenderer.renderLineBox(poseStack, consumer, endpoint(link.core()), RED, GREEN, BLUE, ALPHA);
-            LevelRenderer.renderLineBox(poseStack, consumer, endpoint(link.cultivator()), RED, GREEN, BLUE, ALPHA);
+                    red, green, blue, ALPHA);
+            LevelRenderer.renderLineBox(poseStack, consumer, endpoint(link.core()), red, green, blue, ALPHA);
+            LevelRenderer.renderLineBox(poseStack, consumer, endpoint(link.cultivator()), red, green, blue, ALPHA);
         }
         buffers.endBatch(RenderType.lines());
     }

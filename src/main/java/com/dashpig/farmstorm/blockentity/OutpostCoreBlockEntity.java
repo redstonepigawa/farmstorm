@@ -5,6 +5,7 @@ import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.network.CoreListBroadcaster;
 import com.dashpig.farmstorm.network.CultivatorLinkBroadcaster;
+import com.dashpig.farmstorm.network.CultivatorLinkPayload.Link;
 import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.outpost.OutpostCoreIndex;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
@@ -24,6 +25,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.Tag;
@@ -72,6 +74,16 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
      */
     private static final String TAG_CULTIVATORS = "Cultivators";
 
+    /**
+     * 绑定类型的旁挂键（F-303 / 54 号 §5.2）：{@code ListTag &lt; IntTag &gt;}，与 {@link #TAG_CULTIVATORS}
+     * **同长同下标**，{@code 0} = 培养器 / {@code 1} = 转换器。
+     *
+     * <p>为什么旁挂而不是把一条记录改成 compound：那会把 {@code Cultivators} 从 {@code long[]} 变成
+     * {@code {pos, kind}} 列表，0.2.2 存档的旧键直接读不出来，还要写迁移分支。新键是**零迁移成本**的写法，
+     * 代价只是两条列表必须同长——这条约束由「只在三处写入点动它」保证（D-210 / 陷阱 6）。
+     */
+    private static final String TAG_CULTIVATOR_KINDS = "CultivatorKinds";
+
     /** 3 × 3 区块 = 所在区块 + 周围 8 区块（D-120 第 2 项，与 D-118、D-121 同一组数字）。 */
     private static final int RANGE_CHUNKS = 1;
 
@@ -118,6 +130,13 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
      * <p><b>24 是名额、54 是格子数</b>（裁定 #8）：两者不同义，不与 {@link #items} 混用。
      */
     private final List<BlockPos> cultivators = new ArrayList<>();
+
+    /**
+     * 与 {@link #cultivators} **同长同下标**的类型列表（F-303 / 54 号 §5.2）：{@code 0} = 培养器 /
+     * {@code 1} = 转换器。三条不变量：增删只走 {@link #addCultivator} / {@link #removeCultivator}、
+     * 惰性清理两条同删、读档按较短者截断并补齐——任一处漏掉，kind 就整体错位（陷阱 6）。
+     */
+    private final List<Link.Kind> cultivatorKinds = new ArrayList<>();
 
     @Nullable
     private UUID ownerUuid;
@@ -342,6 +361,23 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         return this.cultivators.size();
     }
 
+    /**
+     * kind 快照（F-304 的广播端按**同一下标**与 {@link #cultivators()} 配对读出）。不触发惰性清理：
+     * 调用方先取 {@link #cultivators()}（那一步会清理两条列表），再取这一份，两者同长。
+     */
+    public List<Link.Kind> cultivatorKinds() {
+        return List.copyOf(this.cultivatorKinds);
+    }
+
+    /** 某坐标的 kind（迁移改绑用）：不在列表里按 {@code CULTIVATOR} 解，不抛。 */
+    public Link.Kind kindOf(BlockPos pos) {
+        int index = this.cultivators.indexOf(pos);
+        if (index < 0 || index >= this.cultivatorKinds.size()) {
+            return Link.Kind.CULTIVATOR;
+        }
+        return this.cultivatorKinds.get(index);
+    }
+
     public boolean hasCultivator(BlockPos pos) {
         return this.cultivators.contains(pos);
     }
@@ -354,12 +390,17 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
     /**
      * 加一条绑定（放置绑定 / 迁移改绑的唯一入口）：已绑或满员返回 {@code false}，**不挤掉已绑的**
      * （35 号 §8.2 算例 2）。成功时 {@code setChanged()} + 同 tick 刷新，与 {@link #acceptAll} 同一纪律。
+     *
+     * <p>{@code kind} 由**放下这台机器的那一方**传进来（{@code CultivatorBlock} / {@code CropConverterBlock}
+     * 各自知道自己是哪一类）：绑定写入的那一刻正是方块自己知道答案的那一刻，此后广播、迁移改绑与渲染
+     * 都只读这份存档，**不按坐标反查方块类型**（D-210 / 红线 3 / N-143）。
      */
-    public boolean addCultivator(BlockPos pos) {
+    public boolean addCultivator(BlockPos pos, Link.Kind kind) {
         if (this.hasCultivator(pos) || this.isCultivatorListFull()) {
             return false;
         }
         this.cultivators.add(pos);
+        this.cultivatorKinds.add(kind);
         this.setChanged();
         this.syncBindings();
         // F-239 / 36 号 §2.8.2 时机 #3（绑定变化）：连线是**观察面**，这里只多一句「重算一次」，
@@ -371,8 +412,15 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
     }
 
     public boolean removeCultivator(BlockPos pos) {
-        if (!this.cultivators.remove(pos)) {
+        // 签名不变（仍按坐标删），但两条**平行列表**必须同下标一起删：只删一条会让 kind 整体错位，
+        // 于是拆掉培养器换放转换器后，那条线的颜色会「串」到隔壁机器上（陷阱 6）。
+        int index = this.cultivators.indexOf(pos);
+        if (index < 0) {
             return false;
+        }
+        this.cultivators.remove(index);
+        if (index < this.cultivatorKinds.size()) {
+            this.cultivatorKinds.remove(index);
         }
         this.setChanged();
         this.syncBindings();
@@ -388,10 +436,18 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         if (this.cultivators.isEmpty() || !(this.level instanceof ServerLevel server)) {
             return;
         }
-        boolean removed = this.cultivators.removeIf(pos -> {
+        boolean removed = false;
+        for (int index = this.cultivators.size() - 1; index >= 0; index--) {   // 倒序：删完下标不漂
+            BlockPos pos = this.cultivators.get(index);
             LevelChunk chunk = server.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-            return chunk != null && !isProcessingBlock(chunk.getBlockState(pos));
-        });
+            if (chunk != null && !isProcessingBlock(chunk.getBlockState(pos))) {
+                this.cultivators.remove(index);
+                if (index < this.cultivatorKinds.size()) {
+                    this.cultivatorKinds.remove(index);      // 两条平行列表同删（陷阱 6）
+                }
+                removed = true;
+            }
+        }
         if (removed) {
             this.setChanged();
         }
@@ -543,27 +599,49 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
             return;                                       // 满员：这一轮连枚举都不做
         }
         int added = 0;
-        List<CultivatorBlockEntity> candidates =
-                AreaBlockEntities.collect(server, this.getBlockPos(), RANGE_CHUNKS, CultivatorBlockEntity.class);
+        // F-303 / A-100：候选**两种机器都收**。只认培养器的话，先放转换器后放核的转换器永远绑不上
+        // （陷阱 9）——那是「服务端一点日志都没有」的静默失效。kind 只在这里由方块自己写下。
+        List<BlockEntity> candidates = new ArrayList<>();
+        candidates.addAll(AreaBlockEntities.collect(server, this.getBlockPos(), RANGE_CHUNKS,
+                CultivatorBlockEntity.class));
+        candidates.addAll(AreaBlockEntities.collect(server, this.getBlockPos(), RANGE_CHUNKS,
+                CropConverterBlockEntity.class));
         candidates.sort(Comparator
-                .comparingDouble((CultivatorBlockEntity candidate) -> candidate.getBlockPos().distSqr(this.getBlockPos()))
+                .comparingDouble((BlockEntity candidate) -> candidate.getBlockPos().distSqr(this.getBlockPos()))
                 .thenComparingInt(candidate -> candidate.getBlockPos().getX())
                 .thenComparingInt(candidate -> candidate.getBlockPos().getY())
                 .thenComparingInt(candidate -> candidate.getBlockPos().getZ()));
-        for (CultivatorBlockEntity candidate : candidates) {
+        for (BlockEntity candidate : candidates) {
             if (cultivatorCount() >= cap) {
                 break;                                    // 每绑一个重读：满即停
             }
-            if (candidate.corePos() != null) {
+            BlockPos candidatePos = candidate.getBlockPos();
+            Link.Kind kind;
+            BlockPos cachedCore;
+            if (candidate instanceof CultivatorBlockEntity cultivatorCandidate) {
+                kind = Link.Kind.CULTIVATOR;
+                cachedCore = cultivatorCandidate.corePos();
+            } else if (candidate instanceof CropConverterBlockEntity converterCandidate) {
+                kind = Link.Kind.CROP_CONVERTER;
+                cachedCore = converterCandidate.corePos();
+            } else {
+                continue;                                 // 两种机器之外（收集面已过滤，防御性分支）
+            }
+            if (cachedCore != null) {
                 continue;                                 // 已绑（含指向别的核）⇒ 跳过，不夺
             }
-            if (hasCultivator(candidate.getBlockPos())) {
+            if (hasCultivator(candidatePos)) {
                 continue;                                 // 核侧已有这一条 ⇒ 跳过（两侧不一致只跳过，不摘）
             }
-            if (addCultivator(candidate.getBlockPos())) {
-                candidate.setCore(this.getBlockPos());    // 先核侧、后培养器侧
-                added++;
+            if (!addCultivator(candidatePos, kind)) {
+                continue;
             }
+            if (candidate instanceof CultivatorBlockEntity cultivatorBind) {
+                cultivatorBind.setCore(this.getBlockPos());          // 先核侧、后机器侧
+            } else if (candidate instanceof CropConverterBlockEntity converterBind) {
+                converterBind.setCore(this.getBlockPos());
+            }
+            added++;
         }
         if (added > 0) {
             Farmstorm.LOGGER.info("补绑：核 {} 本轮新增 {} 条（累计 {}/{}，周期 {} 刻）",
@@ -765,11 +843,16 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         for (BlockPos pos : bound) {
             // 出口①：接替核 = 覆盖 ∧ 己方（相对本核归属者）∧ 未满，最近优先；本次已写走的名额自然包含在内
             OutpostCoreBlockEntity next = selectCore(server, pos, self, corePos);
-            if (next != null && next.addCultivator(pos)) {
+            // F-303 / 54 号 §5.2 的第三个写入点：迁移改绑按**该条自己的 kind** 搬走，不按方块类型猜。
+            Link.Kind kind = kindOf(pos);
+            if (next != null && next.addCultivator(pos, kind)) {
                 LevelChunk nextChunk = server.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-                if (nextChunk != null
-                        && nextChunk.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator) {
-                    cultivator.setCore(next.getBlockPos());        // 两侧都写：核侧已写，这里写培养器侧缓存
+                if (nextChunk != null) {
+                    if (nextChunk.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator) {
+                        cultivator.setCore(next.getBlockPos());    // 两侧都写：核侧已写，这里写培养器侧缓存
+                    } else if (nextChunk.getBlockEntity(pos) instanceof CropConverterBlockEntity converter) {
+                        converter.setCore(next.getBlockPos());
+                    }
                 }
                 continue;
             }
@@ -789,7 +872,9 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
                 Farmstorm.LOGGER.info("迁移失败：培养器留原地并标为未绑定 {}", pos);
             }
         }
-        this.cultivators.clear();       // 只清绑定列表；items 不动（掉落是 onRemove 的 Containers.dropContents）
+        // 只清绑定列表（两条平行列表同清，F-303 / 陷阱 6）；items 不动（掉落是 onRemove 的 Containers.dropContents）。
+        this.cultivators.clear();
+        this.cultivatorKinds.clear();
         this.setChanged();
         this.release();                 // 最后一行：摘索引 + 释放区块票 + 请求刷新浮窗列表（既有方法）
     }
@@ -850,6 +935,13 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
             cultivatorsTag.add(LongTag.valueOf(cultivatorPos.asLong()));
         }
         tag.put(TAG_CULTIVATORS, cultivatorsTag);
+        // F-303 / 54 号 §5.2：kind 旁挂在**新键**里，与 Cultivators 同长同下标；Cultivators 的形状一个字符不动
+        // （0.2.2 存档照旧读得出 24 条坐标，不需要迁移分支）。
+        ListTag kindsTag = new ListTag();
+        for (Link.Kind kind : this.cultivatorKinds) {
+            kindsTag.add(IntTag.valueOf(kind.id()));
+        }
+        tag.put(TAG_CULTIVATOR_KINDS, kindsTag);
     }
 
     @Override
@@ -867,6 +959,32 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         for (int i = 0; i < cultivatorsTag.size(); i++) {
             if (cultivatorsTag.get(i) instanceof LongTag entry) {
                 this.cultivators.add(BlockPos.of(entry.getAsLong()));
+            }
+        }
+        // F-303 / 54 号 §5.2：缺 CultivatorKinds 键 ⇒ 全部按 CULTIVATOR 解（0.2.2 只可能绑过培养器，
+        // 这个默认值是**真值**而不是猜测）——缺键是合法状态，**不告警**。
+        this.cultivatorKinds.clear();
+        ListTag kindsTag = tag.getList(TAG_CULTIVATOR_KINDS, Tag.TAG_INT);
+        for (int i = 0; i < kindsTag.size(); i++) {
+            if (kindsTag.get(i) instanceof IntTag entry) {
+                this.cultivatorKinds.add(Link.Kind.byId(entry.getAsInt()));
+            }
+        }
+        int positions = this.cultivators.size();
+        int loadedKinds = this.cultivatorKinds.size();
+        if (loadedKinds != positions) {
+            // 两条平行列表必须同长：缺的补 0（CULTIVATOR，即 0.2.2 存档的正确默认值）、多的按较短者截断。
+            // 只有「键存在却不同长」才是异常，打**一条** WARN（陷阱 6）。
+            while (this.cultivatorKinds.size() < positions) {
+                this.cultivatorKinds.add(Link.Kind.CULTIVATOR);
+            }
+            if (this.cultivatorKinds.size() > positions) {
+                this.cultivatorKinds.subList(positions, this.cultivatorKinds.size()).clear();
+            }
+            if (tag.contains(TAG_CULTIVATOR_KINDS)) {
+                Farmstorm.LOGGER.warn("核 {} 的 Cultivators（{} 条）与 CultivatorKinds（{} 条）长度不一致 ⇒ "
+                        + "按较短者截断、缺的补 Cultivator（0），现为 {} 条", this.getBlockPos(), positions,
+                        loadedKinds, this.cultivatorKinds.size());
             }
         }
     }

@@ -71,11 +71,16 @@ public final class CultivatorLinkBroadcaster {
     /**
      * 显式排序（陷阱 4）：{@code OutpostCoreIndex#owners()} 是 {@code HashMap} 的键集，
      * 绑定列表的顺序也不是可依赖的比较键。两次启动给出不同顺序 ⇒ 指纹抖动 ⇒ 每 20 刻重发一次包。
-     * 排序键取两侧坐标的 {@code asLong()}，与「线就是这两格之间的一段」同一语义。
+     * 排序键取两侧坐标的 {@code asLong()} + 类型码，与「线就是这两格之间的一段」同一语义。
+     *
+     * <p><b>F-304（54 号 §5.3 第 1 处）</b>：第三键 {@code kind().id()}。同一坐标不可能有两种 kind
+     * （绑定列表里一条坐标只出现一次），补它是为了让比较器**全序**——不补就等于把「kind 不同、
+     * 坐标相同」的两个元素交给排序算法自己决定先后，而它的稳定性是实现细节。
      */
     private static final Comparator<CultivatorLinkPayload.Link> ORDER = Comparator
             .comparingLong((CultivatorLinkPayload.Link link) -> link.core().asLong())
-            .thenComparingLong(link -> link.cultivator().asLong());
+            .thenComparingLong(link -> link.cultivator().asLong())
+            .thenComparingInt(link -> link.kind().id());
 
     private CultivatorLinkBroadcaster() {}
 
@@ -214,8 +219,13 @@ public final class CultivatorLinkBroadcaster {
                 if (!(chunk.getBlockEntity(entry.pos()) instanceof OutpostCoreBlockEntity core)) {
                     continue;                                     // 索引里的条目已过期（方块没了）
                 }
-                for (BlockPos cultivator : core.cultivators()) {
-                    links.add(new CultivatorLinkPayload.Link(entry.pos(), cultivator));
+                // F-304（54 号 §5.3 第 3 处）：两条平行列表按**同一下标**配对读出。kind 的真相在核侧
+                // 存档里（{@code CultivatorKinds}），绝不在这里按坐标反查方块类型（红线 3 / N-143）。
+                List<BlockPos> machines = core.cultivators();
+                List<CultivatorLinkPayload.Link.Kind> kinds = core.cultivatorKinds();
+                int bound = Math.min(machines.size(), kinds.size());     // 同长由 F-303 保证；这里只是防御
+                for (int slot = 0; slot < bound; slot++) {               // 同名 index 已被上面的核索引占用
+                    links.add(new CultivatorLinkPayload.Link(entry.pos(), machines.get(slot), kinds.get(slot)));
                 }
             }
         }
@@ -223,12 +233,19 @@ public final class CultivatorLinkBroadcaster {
         return links;
     }
 
-    /** 列表指纹：只由「已排序的两侧坐标」决定，与遍历顺序无关。 */
+    /**
+     * 列表指纹：由「已排序的两侧坐标 + 类型码」决定，与遍历顺序无关。
+     *
+     * <p><b>F-304（54 号 §5.3 第 2 处）</b>：{@code kind().id()} 必须进哈希 —— 不进的话「把已绑定的培养器
+     * 拆掉、原位置换放一台转换器」在去抖看来完全没变化 ⇒ 那条线**永远青色**，而服务端看起来一切正常
+     * （RT-75 / 陷阱 40）。
+     */
     private static long fingerprint(List<CultivatorLinkPayload.Link> links) {
         long hash = 17L;
         for (CultivatorLinkPayload.Link link : links) {
             hash = hash * 31L + link.core().asLong();
             hash = hash * 31L + link.cultivator().asLong();
+            hash = hash * 31L + link.kind().id();
         }
         return hash;
     }

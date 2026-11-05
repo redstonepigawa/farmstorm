@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.block;
 
 import com.dashpig.farmstorm.blockentity.CropConverterBlockEntity;
 import com.dashpig.farmstorm.blockentity.OutpostCoreBlockEntity;
+import com.dashpig.farmstorm.network.CultivatorLinkPayload.Link;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
@@ -83,8 +84,8 @@ public class CropConverterBlock extends BaseEntityBlock {
      * 最近的那一个，两侧都写——核的 {@code Cultivators} 列表（唯一真相）+ 转换器的 {@code Core} 引用缓存。
      *
      * <p>先核后机器：两侧不一致时按未绑定处理，顺序反过来会留下「核说没绑、机器说绑了」的假象。
-     * <b>没有可用核时方块照样放下</b>，此刻未绑定、不可使用；补绑（核每 100 刻扫一遍 3 × 3 区块）是
-     * F-303 的写入点，本阶段按现状只写单参 {@code addCultivator(pos)}。
+     * <b>没有可用核时方块照样放下</b>，此刻未绑定、不可使用；补绑（核每 100 刻扫一遍 3 × 3 区块，F-303
+     * 已把候选收集扩到两种机器）是另一个写入点，那里同样由本方块自报 {@code CROP_CONVERTER}。
      */
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
@@ -100,7 +101,7 @@ public class CropConverterBlock extends BaseEntityBlock {
         if (core == null) {
             return;                                   // 未绑定：不写 Core 键（缺键就是未绑定）
         }
-        if (core.addCultivator(pos)) {
+        if (core.addCultivator(pos, Link.Kind.CROP_CONVERTER)) {   // F-303 写入点 ②：转换器自报类型
             converter.setCore(core.getBlockPos());
         }
     }

@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · 当前发布 **v0.2.1**
+Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · 当前发布 **v0.2.1**（**v0.2.2 只有文档，代码未实现**）
 
 [下载](https://github.com/redstonepigawa/farmstorm/releases) · [文档索引](#文档) · [构建方法](#构建与调试)
 
@@ -235,6 +235,33 @@ python -X utf8 tools/verify_project.py
 
 长期有效的基础文档：[`00-DECISIONS`](docs/zh/00-DECISIONS.md)、[`01-DESIGN`](docs/zh/01-DESIGN.md)、[`02-TECH-SPEC`](docs/zh/02-TECH-SPEC.md)、[`07-PUBLISH`](docs/zh/07-PUBLISH.md)、[`08-DEV-GUIDE`](docs/zh/08-DEV-GUIDE.md)、[`09-IMPL-VS-PLAN`](docs/zh/09-IMPL-VS-PLAN.md)。
 
+### 下一版文档（v0.2.2，代码未实现）
+
+六份已写完并冻结，**代码尚未开始**，且**只出中文**（`docs/en/` 保持在 v0.2.1）。想实现它的人从这里进：
+
+| 文件 | 内容 |
+|---|---|
+| [`docs/zh/46-DECISIONS-0.2.2.md`](docs/zh/46-DECISIONS-0.2.2.md) | **唯一真相源**：16 条决策 D-187~D-202 + **18 条作者裁定** |
+| [`docs/zh/47-DESIGN-0.2.2.md`](docs/zh/47-DESIGN-0.2.2.md) | 设计增量：5 条需求 R1~R5、数值表、27 条边界 B-01~B-27、附录 A 六行差异 |
+| [`docs/zh/48-TECH-0.2.2.md`](docs/zh/48-TECH-0.2.2.md) | 技术增量：注册面 **98**、口径外累计 **3 类**、动作面 33 行、**30 条验收**、10 条待验证 API、RT-62~RT-70 |
+| [`docs/zh/49-TASKS-0.2.2.md`](docs/zh/49-TASKS-0.2.2.md) | 任务拆分：**19 个任务 F-267~F-285**、8 个 Phase 46~53、六张覆盖表、A-82~A-91 |
+| [`docs/zh/50-PROMPT-MAIN-0.2.2.md`](docs/zh/50-PROMPT-MAIN-0.2.2.md) | 实现方主提示词：HC-138~HC-155、N-127~N-140、**55 条陷阱** |
+| [`docs/zh/51-PROMPT-TASKS-0.2.2.md`](docs/zh/51-PROMPT-TASKS-0.2.2.md) | 分阶段任务清单：Phase 46~53 各一节，52 条出口判据 |
+
+投喂顺序：**先投 50 号一次**，之后每个 Phase 开工时只投 51 号对应的那一节。
+
+四条需求，两个 bug：
+
+- **植物学家**（新村民职业）：职业方块就是**据点核心**（有主的也能当、一核一村民）。普通交易 **22 项**全在新手级、3-6 绿宝石、8 次封顶；另 1 项史诗 @大师级、40-64、**一次**。
+  ⚠️ **已知限制**：原版每级只抽 2 项（`Villager.java:875`），所以**每个植物学家只会随机卖 22 项里的 2 项**——要多找几个才能凑齐，不是交易表坏了。
+- **平凡农作物**：`plain_chives`（平凡韭菜），可食、不做合成。只补 **1 个**——22 个作物里只有「朋友的韭」没有对应的原版农作物。
+- **方块标签** `farmstorm:processing_block`：可被核心绑定的处理方块，本版只有培养器带它；绑定名额 **16 → 24**（所有带该标签的方块**共享**）。
+- **两个 bug**：核心储物界面**没有 tooltip**（1.21.1 的容器界面不自带，必须每个界面自己调 `renderTooltip`）；背包物品**比格子高 1 px**（原版用两次 blit、本模组用一次）。外加放置上限 **2 → 4**。
+
+目标值（实现后 `数字快照` 才会有这些数）：注册对象 **98**（+1）、**口径外累计 3 类**（`ATTACHMENT_TYPES` / `VillagerProfession` / `PoiType`，都不计入 98）、server config **176 键 / 60 组不变**（只改两个默认值）、语言键 **340 × 2**、网络包仍 **2 个**（不新增）。
+
+> ⚠️ **改 config 默认值不会更新已存在的 toml**：老存档升级后 `maxPerPlayer` 仍是 2、`cultivatorCapacity` 仍是 16，要删掉 `config/farmstorm-server.toml` 重生成才拿到 4 / 24。
+
 ### 上一版文档（v0.2.0，已归档）
 
 口径以当时为准；与 v0.2.1 冲突时以 **40 号**为准。
@@ -254,7 +281,7 @@ python -X utf8 tools/verify_project.py
 
 ### 历史文档（已冻结）
 
-`03`~`06`（v0.0.1 期）与 `10`~`33`（v0.0.2 / v0.0.3 / v0.1.0 / v0.1.1 各六份）**不再修改**，它们记的是当时的口径；与现行版本冲突时以 **34 号**为准，涉及 v0.2.1 的内容以 **40 号**为准。
+`03`~`06`（v0.0.1 期）与 `10`~`33`（v0.0.2 / v0.0.3 / v0.1.0 / v0.1.1 各六份）**不再修改**，它们记的是当时的口径；与现行版本冲突时以 **34 号**为准，涉及 v0.2.1 的内容以 **40 号**为准，涉及 v0.2.2 的内容以 **46 号**为准。
 
 > ⚠️ 关于「0 个自定义网络包」的说法**已全部作废**；`22`~`33` 里关于耕地绑定制的说法也随 v0.2.0 停用。
 
@@ -268,6 +295,7 @@ python -X utf8 tools/verify_project.py
 
 | 版本 | 日期 | 一句话 |
 |---|---|---|
+| v0.2.2 | —（**文档阶段**，代码未实现） | 植物学家职业（22 项普通 + 1 项史诗，职业方块就是据点核心）、平凡韭菜、`processing_block` 标签与 24 名额、核心界面的 tooltip 与 1 px 错位两个 bug、放置上限 4 |
 | v0.2.1 | 2026-11-05 | 核心每 100 刻自动补绑培养器、核心储物 90 格悬停显示详情、震动豆与 Q弹 让生物停手（AI 原值落盘）、陷阱对敌对 ×3（`trap.damageMultiplier`） |
 | v0.2.0 | 2026-11-04 | 核心变 54 格容器、培养器（16/核 · 600 刻 · 按档准入）、农民交易给史诗档、连线线框；撤销耕地绑定、作物不可种植、转换器停功能 |
 | v0.1.1 | 2026-11-03 | 浮窗（自己 + 队友全部核心，含跨维度）、耕地-核心绑定制、狂野苹果 64×64、man瓜 数值与贴脸收敛、朋友的韭持续场 |
@@ -348,16 +376,17 @@ python -X utf8 tools/verify_project.py
 
 A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
-**Current release: v0.2.0** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`).
+**Current release: v0.2.1** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`).
 
-A **v0.2.1 document set is written and frozen but not implemented**: cores auto-rebind unbound cultivators every 100 ticks while under 16, core storage shows item tooltips, the vibration bean and Q-Bounce suspend AI of non-player mobs, and trap crops deal ×3 to hostile mobs. Registry stays at **97** (plus 1 attachment type *outside* the count), config 175 → **176**, language keys 337 → **338**.
+A **v0.2.2 document set is written and frozen but not implemented**, and it is **Chinese-only** (no English translation for this round): a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI bugs (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registried types *outside* the count), config stays **176** (two defaults change), language keys 337 → **340**.
 
 - **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.2.1+mc1.21.1.jar` into `mods/`; the `-sources.jar` is for IDEs.
+- **What's new in 0.2.1**: cores auto-rebind unbound cultivators every 100 ticks while under 16, core storage shows item tooltips, the vibration bean and Q-Bounce suspend AI of non-player mobs (the original AI flag is persisted on the entity), and trap crops deal ×3 to hostile mobs (`trap.damageMultiplier`).
 - **What's new in 0.2.0**: the outpost core became a 54-slot container; the new **cultivator** binds to the nearest own core (max 16 per core) and delivers every 600 ticks (2 items, plus 2 seeds when the crop has its own seed item); **farmer trades** at levels 1/3/5 are the only source of EPIC crops; in-world **link lines** connect a core to its cultivators. Crops are **no longer plantable**, the 0.1.1 farmland binding is **disabled** (both classes remain in the tree, unused), and the converter block is decorative.
 - **Build** (never call `gradle` directly): `cmd /c ""D:\project_farm\.tools\gw.cmd" build`.
 - **Static check**: `python -X utf8 tools/verify_project.py` — must print `97 / 97`, `176 个配置键`, `共 338 键` **and** `FAIL 0` with exit code 0. `FAIL 0` alone is not enough (the tool once verified only 93 of 97 objects).
 - **Red line**: no Mixin. Custom packets are uncapped (2 in this version, both S2C read-only, protocol string `2`).
 - **Known limitations**: see the tables above (the Chinese section is authoritative). Link-line visuals and the HUD still need a human eye on a real client.
-- **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds translations. v0.2.0 spec: `docs/zh/34`–`39`. The **v0.2.1 spec — documents only, not implemented — is `docs/zh/40`–`45`**.
+- **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds translations. v0.2.0 spec: `docs/zh/34`–`39`; v0.2.1 spec: `docs/zh/40`–`45`. The **v0.2.2 spec — documents only, not implemented, Chinese only — is `docs/zh/46`–`51`**.
 
 Asset provenance and the non-commercial terms are above — **keep that section verbatim when redistributing**.

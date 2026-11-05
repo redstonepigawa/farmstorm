@@ -16,6 +16,7 @@ import com.dashpig.farmstorm.registry.FarmstormEntityTypes;
 import com.dashpig.farmstorm.registry.FarmstormItems;
 import com.dashpig.farmstorm.registry.FarmstormMenus;
 import com.dashpig.farmstorm.registry.FarmstormMobEffects;
+import com.dashpig.farmstorm.registry.FarmstormPoiTypes;
 import com.dashpig.farmstorm.registry.FarmstormRecipes;
 import com.dashpig.farmstorm.registry.FarmstormSounds;
 import com.dashpig.farmstorm.team.ScoreboardTeamResolver;
@@ -61,6 +62,7 @@ public final class Farmstorm {
         // 口径外的第 13 类（F-252 / 裁定 #17 / A-73）：实体附件类型 1 个 farmstorm:ai_suspend，
         // 注在 NeoForgeRegistries.Keys.ATTACHMENT_TYPES，**不计入 98**；logRegistrySelfCheck 的 12 类断言一字不动。
         FarmstormAttachments.REGISTER.register(modBus);
+        FarmstormPoiTypes.REGISTER.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, FarmstormConfig.SPEC);
         // F-201：CLIENT 3 键单独一份 config/farmstorm-client.toml。**不进** FarmstormConfig——

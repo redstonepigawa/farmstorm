@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · 当前发布 **v0.2.1**（**v0.2.2 只有文档，代码未实现**）
+Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · 当前发布 **v0.2.2**
 
 [下载](https://github.com/redstonepigawa/farmstorm/releases) · [文档索引](#文档) · [构建方法](#构建与调试)
 
@@ -32,10 +32,10 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 ### 安装
 
 1. 用启动器建一个 1.21.1 + NeoForge 21.1.x 的实例。
-2. 打开实例的 `mods` 文件夹（没有就新建），把 `farmstorm-0.2.1+mc1.21.1.jar` 丢进去。
+2. 打开实例的 `mods` 文件夹（没有就新建），把 `farmstorm-0.2.2+mc1.21.1.jar` 丢进去。
 3. 启动。创造模式物品栏最后会多一个「农场风云」标签页。
 
-`farmstorm-0.2.1+mc1.21.1-sources.jar` 是源码包，给 IDE 看实现用，**不要**放进 `mods`。
+`farmstorm-0.2.2+mc1.21.1-sources.jar` 是源码包，给 IDE 看实现用，**不要**放进 `mods`。
 
 ### 这个版本会生成哪些配置文件
 
@@ -43,6 +43,27 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 |---|---|---|
 | `config/farmstorm-server.toml` | **176 键 / 60 组** | 服务端行为；首次起服自动生成 |
 | `config/farmstorm-client.toml` | **3 键**（`hud.enabled` / `hud.x` / `hud.y`） | 客户端浮窗开关与位置；**首次进游戏**才生成 |
+
+### v0.2.2 有什么
+
+**植物学家（新村民职业）**
+- 职业方块是**据点核心** —— 拿一个核就招一个，要第二个得再放一个核；**有主的核一样能当工作台**（作者口径：不额外加「必须无主 / 必须己方」的判据）。
+- 普通交易 **22 项**：价格 **3-6** 绿宝石、每项换 **8** 次、每次给 **1** 个，全部挂在新手级。
+- 史诗交易 **1 项**：价格 **40-64**，只能换 **1** 次，在 5 级（大师级）出现；首次生成时在 4 个史诗作物里抽定 1 个，之后整个存档不变。
+- 农民原有的 3 档交易**照旧并存**，两者分工不同。
+
+**平凡韭菜（`farmstorm:plain_chives`）与新的一类物品**
+- 可食，回 **2** 点饱食度；不做合成、不参与转化、不占 `CROP_ITEMS`。
+- 它是「**平凡农作物**」这一类里的第一个 —— 给没有对应原版农作物的改良作物做对应物。
+
+**核心储物界面两处修复（都是「缺一行」，不是调参）**
+- **悬停终于有 tooltip**：1.21.1 的 `AbstractContainerScreen#render` 体内**不画** tooltip，每个具体界面必须自己调 `renderTooltip` —— 上一版只覆写了 `renderBg`，所以 54 格全程没有详情。
+- **背包那段对齐了**：原版 `renderBg` 是**两次 blit**（下段把贴图 `v=126` 画到 `y=125`，自身错开 1 px），本模组此前一次 blit 整张 ⇒ 背景比物品低 1 px。
+
+**方块标签 `farmstorm:processing_block` 与名额**
+- 带这个标签的方块才能被核心绑定；本版成员只有农作物培养器。以后想让别的方块能被绑，**改数据包就行，不用改代码**。
+- 一个核能绑定的名额 **16 → 24**（所有带该标签的方块**共享**一个上限）。
+- 每个玩家可放置的核心 **2 → 4**。
 
 ### v0.2.1 有什么
 
@@ -127,7 +148,7 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 
 物品、配方、进度都向后兼容，不需要迁移存档。
 
-### 已知限制（v0.2.1）
+### 已知限制（v0.2.2）
 
 **本版特有（v0.2.2）**
 
@@ -136,11 +157,11 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 | **每个植物学家只卖 22 项里的 2 项** | 植物学家的普通交易共 **22 项**、全部挂在新手级，但原版每级只从该级列表里抽 **2 项**（`Villager.java:875`）⇒ 一个植物学家只随机卖这 22 项里的 **2 项**，剩下 20 项要看别的植物学家。**多找几个植物学家才能凑齐**，这不是交易表坏了（裁定 #17 / D-198） |
 | **一个植物学家只卖 1 个史诗作物** | 4 个史诗作物里，每个植物学家在**首次生成报价时**随机抽 **1 个**，之后整个存档不变（补货不换项）。凑齐 4 个同样要**多找几个植物学家**（裁定 #18 / D-199） |
 
-**本版特有（v0.2.1）**
+**v0.2.1 遗留（本版未动）**
 
 | 限制 | 现象 / 口径 |
 |---|---|
-| **悬停 tooltip 的观感未经人眼验收** | 本版验收跑在专用服务端 + 协议机器人上，没有渲染面。代码层证据是「界面没有覆写 `renderTooltip`、90 格全部交给原版 `Slot`」；实际显示效果需要玩家确认 |
+| ~~**悬停 tooltip 的观感未经人眼验收**~~ **v0.2.2 已修** | 上一版这里是缺了一行 `renderTooltip` 调用（不是配置问题）。本版补上 `render` 覆写，**观感仍需玩家确认**（验收环境没有渲染面，只有源码与字节码证据） |
 | 补绑是**每核心 100 刻一次** | 满 16 的核不补；无主核不补；读不到的区块跳过、不为补绑加载区块。先放培养器后放核，要等下一轮才会被认领 |
 | `trap.damageMultiplier` **只作用于 2 个陷阱作物** | `blast_carrot` / `zangief_cane` 参与；`fang_trap_cactus` 走原版 `EvokerFangs`、`vibration_bean` 本来就是 0 伤害 |
 | 「3×3 里某区块读不到」这条边界**构造不出来** | 核自己的区块票 `distance = 1` 就把 3×3 的 9 个区块全加载了（A-43），该前提在核活着时不成立。详见 `.work/v021-verify/boundaries.md` 的 `B-03` / `B-12` |
@@ -196,8 +217,9 @@ cmd /c ""D:\project_farm\.tools\gw.cmd" runData      :: 重新生成 src/generat
 
 ```
 src/main/java/com/dashpig/farmstorm/
-├── registry/     12 类注册面：items 33 / blocks 27 / block_entities 8 / entity 13 / mob_effect 4 /
-│                 sound 3 / recipe 2 / creative_tab 1 / damage_type 3 / data_component 1 / menu 2 = 97
+├── registry/     12 类注册面：items 34 / blocks 27 / block_entities 8 / entity 13 / mob_effect 4 /
+│                 sound 3 / recipe 2 / creative_tab 1 / damage_type 3 / data_component 1 / menu 2 = 98
+│                 （另 3 类口径外：ENTRY 附件类型 / POI / 村民职业，都不进这个 98）
 ├── blockentity/  部署方块、转换器、据点核心（54 格容器）、培养器
 ├── block/        方块类与它们的交互 / 掉落 / 放置绑定
 ├── behavior/     作物行为（投掷 / 部署 / 陷阱 / 炮台 / 食用 / 范围效果）
@@ -220,18 +242,18 @@ src/main/java/com/dashpig/farmstorm/
 python -X utf8 tools/verify_project.py
 ```
 
-它从**文档**现算期望值再与产物比对。v0.2.1 终态四段同时成立：
+它从**文档**现算期望值再与产物比对。v0.2.2 终态四段同时成立：
 
 ```
 [OK]   176 个配置键与文档逐字一致（toml 176 键）
-      已核 registry 对象: 97 / 97
-[OK]   lang 键集一致，共 338 键
+      已核 registry 对象: 98 / 98
+[OK]   lang 键集一致，共 340 键
 结论：FAIL 0 项，WARN 1 项
 ```
 
 > v0.2.1 起 `42-TECH §4.1.1` 也进了读取面（新解析器 `expected_config_keys_v021`）：**加键不加解析器会让工具当场报红带文件名 + 行号**，不再有「键加了但没人核」的假绿。
 
-> ⚠️ **只写「FAIL 0」是假绿**：这个工具曾经在只核 93 个对象的情况下也退出 0。引用结论时必须同时给出 `97 / 97`。新增注册对象时的固定顺序是「先加清单 → 再改计数 → 再加 config 来源 → 最后改打印串」。
+> ⚠️ **只写「FAIL 0」是假绿**：这个工具曾经在只核 93 个对象的情况下也退出 0。引用结论时必须同时给出 `98 / 98`。新增注册对象时的固定顺序是「先加清单 → 再改计数 → 再加 config 来源 → 最后改打印串」。
 
 ---
 
@@ -239,22 +261,11 @@ python -X utf8 tools/verify_project.py
 
 中文版是**权威**，`docs/en/` 是它的翻译。规矩是**文档先行**：每个版本先出六份（决策 / 设计 / 技术 / 任务 / 主提示词 / 分阶段任务），代码按任务书实现；决策 `D-xx`、任务 `F-xx`、裁决 `A-xx`、风险 `RT-xx`，改动必须回灌到编号所在文档。
 
-### 现行文档（v0.2.1）
-
-| 文件 | 内容 |
-|---|---|
-| [`docs/zh/40-DECISIONS-0.2.1.md`](docs/zh/40-DECISIONS-0.2.1.md) | **唯一真相源**：14 条决策 D-173~D-186 + **17 条作者裁定** |
-| [`docs/zh/41-DESIGN-0.2.1.md`](docs/zh/41-DESIGN-0.2.1.md) | 设计增量：5 条需求 R1~R5、42 行数值表、36 条边界 B-01~B-36 |
-| [`docs/zh/42-TECH-0.2.1.md`](docs/zh/42-TECH-0.2.1.md) | 技术增量：注册面 **97（+0）**、动作面 31 行、**31 条验收**、10 条待验证 API、RT-51~RT-60b |
-| [`docs/zh/43-TASKS-0.2.1.md`](docs/zh/43-TASKS-0.2.1.md) | 任务拆分：**20 个任务 F-247~F-266**、6 个 Phase 40~45、六张覆盖表、A-70~A-81 |
-| [`docs/zh/44-PROMPT-MAIN-0.2.1.md`](docs/zh/44-PROMPT-MAIN-0.2.1.md) | 实现方主提示词：HC-121~HC-137、N-115~N-126、**41 条陷阱** |
-| [`docs/zh/45-PROMPT-TASKS-0.2.1.md`](docs/zh/45-PROMPT-TASKS-0.2.1.md) | 分阶段任务清单：Phase 40~45 各一节，45 条出口判据 |
-
 长期有效的基础文档：[`00-DECISIONS`](docs/zh/00-DECISIONS.md)、[`01-DESIGN`](docs/zh/01-DESIGN.md)、[`02-TECH-SPEC`](docs/zh/02-TECH-SPEC.md)、[`07-PUBLISH`](docs/zh/07-PUBLISH.md)、[`08-DEV-GUIDE`](docs/zh/08-DEV-GUIDE.md)、[`09-IMPL-VS-PLAN`](docs/zh/09-IMPL-VS-PLAN.md)。
 
-### 下一版文档（v0.2.2，代码未实现）
+### 现行文档（v0.2.2）
 
-六份已写完并冻结，**代码尚未开始**，且**只出中文**（`docs/en/` 保持在 v0.2.1）。想实现它的人从这里进：
+六份中文文档已全部实现（`docs/en/` 仍停在 v0.2.1，本轮不出英译）。
 
 | 文件 | 内容 |
 |---|---|
@@ -275,11 +286,24 @@ python -X utf8 tools/verify_project.py
 - **方块标签** `farmstorm:processing_block`：可被核心绑定的处理方块，本版只有培养器带它；绑定名额 **16 → 24**（所有带该标签的方块**共享**）。
 - **两个 bug**：核心储物界面**没有 tooltip**（1.21.1 的容器界面不自带，必须每个界面自己调 `renderTooltip`）；背包物品**比格子高 1 px**（原版用两次 blit、本模组用一次）。外加放置上限 **2 → 4**。
 
-目标值（实现后 `数字快照` 才会有这些数）：注册对象 **98**（+1）、**口径外累计 3 类**（`ATTACHMENT_TYPES` / `VillagerProfession` / `PoiType`，都不计入 98）、server config **176 键 / 60 组不变**（只改两个默认值）、语言键 **340 × 2**、网络包仍 **2 个**（不新增）。
+已实现（v0.2.2 发布件）：注册对象 **98**（+1）、**口径外累计 3 类**（`ATTACHMENT_TYPES` / `VillagerProfession` / `PoiType`，都不计入 98）、server config **176 键 / 60 组不变**（只改两个默认值）、语言键 **340 × 2**、网络包仍 **2 个**。
 
 > ⚠️ **改 config 默认值不会更新已存在的 toml**：老存档升级后 `maxPerPlayer` 仍是 2、`cultivatorCapacity` 仍是 16，要删掉 `config/farmstorm-server.toml` 重生成才拿到 4 / 24。
 
-### 上一版文档（v0.2.0，已归档）
+### 上一版文档（v0.2.1，已归档）
+
+口径以当时为准；与 v0.2.2 冲突时以 **46 号**为准。
+
+| 文件 | 内容 |
+|---|---|
+| [`docs/zh/40-DECISIONS-0.2.1.md`](docs/zh/40-DECISIONS-0.2.1.md) | **唯一真相源**：14 条决策 D-173~D-186 + **17 条作者裁定** |
+| [`docs/zh/41-DESIGN-0.2.1.md`](docs/zh/41-DESIGN-0.2.1.md) | 设计增量：5 条需求 R1~R5、42 行数值表、36 条边界 B-01~B-36 |
+| [`docs/zh/42-TECH-0.2.1.md`](docs/zh/42-TECH-0.2.1.md) | 技术增量：注册面 **97（+0）**、动作面 31 行、**31 条验收**、10 条待验证 API、RT-51~RT-60b |
+| [`docs/zh/43-TASKS-0.2.1.md`](docs/zh/43-TASKS-0.2.1.md) | 任务拆分：**20 个任务 F-247~F-266**、6 个 Phase 40~45、六张覆盖表、A-70~A-81 |
+| [`docs/zh/44-PROMPT-MAIN-0.2.1.md`](docs/zh/44-PROMPT-MAIN-0.2.1.md) | 实现方主提示词：HC-121~HC-137、N-115~N-126、**41 条陷阱** |
+| [`docs/zh/45-PROMPT-TASKS-0.2.1.md`](docs/zh/45-PROMPT-TASKS-0.2.1.md) | 分阶段任务清单：Phase 40~45 各一节，45 条出口判据 |
+
+### 更早版本文档（v0.2.0，已归档）
 
 口径以当时为准；与 v0.2.1 冲突时以 **40 号**为准。
 
@@ -292,10 +316,6 @@ python -X utf8 tools/verify_project.py
 | [`docs/zh/38-PROMPT-MAIN-0.2.0.md`](docs/zh/38-PROMPT-MAIN-0.2.0.md) | 实现方主提示词：HC-97~HC-120、N-93~N-114、31 条陷阱 |
 | [`docs/zh/39-PROMPT-TASKS-0.2.0.md`](docs/zh/39-PROMPT-TASKS-0.2.0.md) | 分阶段任务清单：Phase 32~39 各一节 |
 
-本版已实现：**67 条**验收（31 技术 + 36 边界）跑完，失败 0；落地记录见下面的「实施台账」。
-
-已实现（v0.2.1 发布件）：注册对象 **97**（+0，另有 1 个**口径外**的附件类型 `farmstorm:ai_suspend`，不计入 12 类）、server config **176 键 / 60 组**、语言键 **338 × 2**、网络包 **2 个**。
-
 ### 历史文档（已冻结）
 
 `03`~`06`（v0.0.1 期）与 `10`~`33`（v0.0.2 / v0.0.3 / v0.1.0 / v0.1.1 各六份）**不再修改**，它们记的是当时的口径；与现行版本冲突时以 **34 号**为准，涉及 v0.2.1 的内容以 **40 号**为准，涉及 v0.2.2 的内容以 **46 号**为准。
@@ -304,7 +324,7 @@ python -X utf8 tools/verify_project.py
 
 ### 实施台账
 
-[`.work/PLAN.md`](.work/PLAN.md) 与 [`.work/V021-DISPATCH.md`](.work/V021-DISPATCH.md)；各 Phase 的任务书与证据 `.work/TASK-V021-P*.md`；v0.2.1 的 **67 条**验收记录（31 技术 + 36 边界）与签字在 [`.work/v021-verify/`](.work/v021-verify)。上一版的 76 条在 [`.work/v020-verify/`](.work/v020-verify)。
+[`.work/PLAN.md`](.work/PLAN.md) 与 [`.work/V022-DISPATCH.md`](.work/V022-DISPATCH.md)；各波次的任务书 `.work/TASK-V022-W0*.md`；v0.2.2 的 **57 条**验收记录（30 技术 + 27 边界）与签字在 [`.work/v022-verify/`](.work/v022-verify)。上一版的 67 条在 [`.work/v021-verify/`](.work/v021-verify)。
 
 ---
 
@@ -312,7 +332,7 @@ python -X utf8 tools/verify_project.py
 
 | 版本 | 日期 | 一句话 |
 |---|---|---|
-| v0.2.2 | —（**文档阶段**，代码未实现） | 植物学家职业（22 项普通 + 1 项史诗，职业方块就是据点核心）、平凡韭菜、`processing_block` 标签与 24 名额、核心界面的 tooltip 与 1 px 错位两个 bug、放置上限 4 |
+| v0.2.2 | 2026-11-05 | 植物学家职业（22 项普通 + 1 项史诗，职业方块就是据点核心）、平凡韭菜、`processing_block` 标签与 24 名额、核心界面的 tooltip 与 1 px 错位两个 bug、放置上限 4 |
 | v0.2.1 | 2026-11-05 | 核心每 100 刻自动补绑培养器、核心储物 90 格悬停显示详情、震动豆与 Q弹 让生物停手（AI 原值落盘）、陷阱对敌对 ×3（`trap.damageMultiplier`） |
 | v0.2.0 | 2026-11-04 | 核心变 54 格容器、培养器（16/核 · 600 刻 · 按档准入）、农民交易给史诗档、连线线框；撤销耕地绑定、作物不可种植、转换器停功能 |
 | v0.1.1 | 2026-11-03 | 浮窗（自己 + 队友全部核心，含跨维度）、耕地-核心绑定制、狂野苹果 64×64、man瓜 数值与贴脸收敛、朋友的韭持续场 |
@@ -322,19 +342,21 @@ python -X utf8 tools/verify_project.py
 | v0.0.2 | 2026-10-29 | 7 项新内容 + 三个客户端子系统（世界灰度、红色剪影、键鼠拦截） |
 | v0.0.1 | 2026-10-28 | 15 种作物、转换器、64 个注册对象 |
 
-## 数字快照（v0.2.1 发布件）
+## 数字快照（v0.2.2 发布件）
 
 | 项 | 值 |
 |---|---|
-| 注册对象 | **97**（v0.2.1 **+0**；另有 1 个**口径外**的附件类型 `farmstorm:ai_suspend`，不计入 12 类） |
-| config 键 | server **176 键 / 60 组**（v0.2.0 的 175 + `trap.damageMultiplier`）；client **3 键**（独立文件，不计入 176） |
-| 语言键 | **338 × 2**（中英键集逐字相等） |
+| 注册对象 | **98**（v0.2.2 **+1**：`plain_chives`）；另有 **3 类口径外**（实体附件 `ai_suspend` / POI 类型 `botanist` / 村民职业 `botanist`），**都不计入 98** |
+| config 键 | server **176 键 / 60 组**（键数不变，只改了两个默认值：`maxPerPlayer` 2 → **4**、`cultivatorCapacity` 16 → **24**）；client **3 键** |
+| 语言键 | **340 × 2**（v0.2.1 的 338 + 两条新键；中英键集逐字相等） |
+| 方块标签 | **7** 个（新增 `farmstorm:processing_block`） |
 | 自定义网络包 | **2**（`core_list` + `cultivator_link`，都 S2C 只读，协议串 `2`） |
 | 改良作物档案 | 22（普通 11 / 稀有 7 / 史诗 4） |
-| 进度 / 材质 | 18 条进度；本版**未改任何贴图** |
-| 验收 | **67 条** = 31 技术 + 36 边界；分布 = 通过 **59** + 构造不可达 **3**（`#9` / `B-03` / `B-12`）+ 观感【未验证】 **5**；**失败 0**。20 个任务（F-247~F-266）全部落地 |
-| 发布件 | `farmstorm-0.2.1+mc1.21.1.jar` **1,131,260 B** / SHA256 `7DE77738866599510D252286209074317B98130876551D62DC0873D4AC686A5A` |
-| 源码包 | `farmstorm-0.2.1+mc1.21.1-sources.jar` **1,054,637 B** / SHA256 `15F76E5883ED32DAC6DC1EB3F196E18213DAB259B75130546A1AAF257F41305B` |
+| 进度 / 材质 | 18 条进度；本版新增 1 张贴图（`plain_chives.png`，16×16 程序绘制的占位稿） |
+| Java 源码文件 | **154** |
+| 验收 | **57 条**（30 技术 + 27 边界）= 通过 **46** + 观感类【未验证】 **11**；**失败 0**。19 个任务（F-267~F-285）全部落地 |
+| 发布件 | `farmstorm-0.2.2+mc1.21.1.jar` **1,141,476 B** / SHA256 `E752A833617B4E82B1DCD131214F22C5EBA90791A4FAF3F2E6B1754344CEB4D1` |
+| 源码包 | `farmstorm-0.2.2+mc1.21.1-sources.jar` **1,067,763 B** / SHA256 `3D0F8802A1062412D6C6EEA0D843A114CFC44FFEE4D826D22B9ACEAE9AA19821` |
 
 ---
 
@@ -393,17 +415,18 @@ python -X utf8 tools/verify_project.py
 
 A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
-**Current release: v0.2.1** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`).
+**Current release: v0.2.2** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`).
 
-A **v0.2.2 document set is written and frozen but not implemented**, and it is **Chinese-only** (no English translation for this round): a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI bugs (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registried types *outside* the count), config stays **176** (two defaults change), language keys 337 → **340**.
+**v0.2.2** ships a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI fixes (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registered types *outside* that count), config stays **176** keys (two defaults change), language keys 338 → **340**. The v0.2.2 spec is **Chinese-only** (no English translation for this round).
 
-- **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.2.1+mc1.21.1.jar` into `mods/`; the `-sources.jar` is for IDEs.
+- **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.2.2+mc1.21.1.jar` into `mods/`; the `-sources.jar` is for IDEs.
+- **What's new in 0.2.2**: the Botanist profession (job site = Outpost Core; 22 trades at level 1, one epic at level 5), the `plain_chives` plain crop, the `farmstorm:processing_block` tag with a shared 24-binding cap, the two Outpost Core UI fixes, and caps of 4 cores / 24 cultivators per core.
 - **What's new in 0.2.1**: cores auto-rebind unbound cultivators every 100 ticks while under 16, core storage shows item tooltips, the vibration bean and Q-Bounce suspend AI of non-player mobs (the original AI flag is persisted on the entity), and trap crops deal ×3 to hostile mobs (`trap.damageMultiplier`).
 - **What's new in 0.2.0**: the outpost core became a 54-slot container; the new **cultivator** binds to the nearest own core (max 16 per core) and delivers every 600 ticks (2 items, plus 2 seeds when the crop has its own seed item); **farmer trades** at levels 1/3/5 are the only source of EPIC crops; in-world **link lines** connect a core to its cultivators. Crops are **no longer plantable**, the 0.1.1 farmland binding is **disabled** (both classes remain in the tree, unused), and the converter block is decorative.
 - **Build** (never call `gradle` directly): `cmd /c ""D:\project_farm\.tools\gw.cmd" build`.
-- **Static check**: `python -X utf8 tools/verify_project.py` — must print `97 / 97`, `176 个配置键`, `共 338 键` **and** `FAIL 0` with exit code 0. `FAIL 0` alone is not enough (the tool once verified only 93 of 97 objects).
+- **Static check**: `python -X utf8 tools/verify_project.py` — must print `98 / 98`, `176 个配置键`, `共 340 键` **and** `FAIL 0` with exit code 0. `FAIL 0` alone is not enough (the tool once verified only 93 objects).
 - **Red line**: no Mixin. Custom packets are uncapped (2 in this version, both S2C read-only, protocol string `2`).
 - **Known limitations**: see the tables above (the Chinese section is authoritative). Link-line visuals and the HUD still need a human eye on a real client.
-- **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds translations. v0.2.0 spec: `docs/zh/34`–`39`; v0.2.1 spec: `docs/zh/40`–`45`. The **v0.2.2 spec — documents only, not implemented, Chinese only — is `docs/zh/46`–`51`**.
+- **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds translations. v0.2.0 spec: `docs/zh/34`–`39`; v0.2.1 spec: `docs/zh/40`–`45`; **v0.2.2 spec (current, Chinese only): `docs/zh/46`–`51`**.
 
 Asset provenance and the non-commercial terms are above — **keep that section verbatim when redistributing**.

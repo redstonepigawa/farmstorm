@@ -177,10 +177,10 @@ public final class Farmstorm {
         int menuTypes = FarmstormMenus.REGISTER.getEntries().size();
         int total = items + blocks + blockEntities + entityTypes + mobEffects + soundEvents + recipeTypes
                 + recipeSerializers + creativeTabs + damageTypes + dataComponents + menuTypes;
-        boolean ok = total == 98
-                && items == 34 && blocks == 27 && blockEntities == 8 && entityTypes == 13
+        boolean ok = total == 92
+                && items == 28 && blocks == 28 && blockEntities == 8 && entityTypes == 13
                 && mobEffects == 4 && soundEvents == 3 && recipeTypes == 1 && recipeSerializers == 1
-                && creativeTabs == 1 && damageTypes == 3 && dataComponents == 1 && menuTypes == 2;
+                && creativeTabs == 1 && damageTypes == 3 && dataComponents == 1 && menuTypes == 1;
         LOGGER.info("自检 注册对象 {} 个：items {} / blocks {} / block_entities {} / entity_types {} / mob_effects {} / "
                         + "sound_events {} / recipe_types {} / recipe_serializers {} / creative_tabs {} / damage_types {} / "
                         + "data_components {} / menu_types {} → {}",

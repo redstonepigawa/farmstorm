@@ -7,13 +7,13 @@ import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
 /**
- * 语言文件（TECH §7）：zh_cn 与 en_us 各 **340** 键（v0.2.2 口径）。
+ * 语言文件（TECH §7）：zh_cn 与 en_us 各 **321** 键（v0.2.3 口径，54 号 §7.5）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
- * 不存在「两份键各自维护」的可能。**条目构成（v0.2.2 / P52 实测，改表时必须同步本段）**：
- * 34 item + 27 block + 4 effect + 3 subtitles + **179** config（= 176 server + 3 client）+ 36 advancement + 6 death
- * + 20 tooltip + 13 entity + 1 villager + 9 gui + 2 container + 1 itemGroup + 0 message + 2 key + 3 command
- * = **340**。（P29 时是 314：同表但 config 166 / gui 8、无 key / command 两组。）
+ * 不存在「两份键各自维护」的可能。**条目构成（v0.2.3 / 54 号 §7.5 的按组复核，改表时必须同步本段）**：
+ * **28** `item.` + **28** `block.` + **32** `advancements.` + **178** `farmstorm.configuration.`（= 175 server + 3 client）
+ * + **13** `entity.farmstorm.` + **42** 其余（4 effect + 3 subtitles + 6 death + 20 tooltip + 1 villager + 1 gui
+ * + 1 container + 1 itemGroup + 2 key + 3 command）= **321**（28 + 28 + 32 + 178 + 13 + 42）。
  *
  * <p>v0.1.1 的 Phase 30 加的正是那 **9** 条：3 条 {@code farmstorm.configuration.hud.*}（CLIENT config）、
  * 2 条 {@code key.farmstorm.core_hud.*}（键位描述）、1 条 {@code gui.farmstorm.core_hud.self}（「自己」标识）、
@@ -85,13 +85,7 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "red_mushroom_puff", "？！菇菇！？", "Red Mushroom Puff");
         item(entries, "brown_mushroom_puff", "？！棕色菇菇色棕！？", "Brown Mushroom Puff");
         item(entries, "lucky_berry", "幸运浆果", "Lucky Berry");
-        item(entries, "puffed_wheat_seeds", "膨胀麦种子", "Puffed Wheat Seeds");
-        item(entries, "power_beet_seeds", "甜菜！种子", "Power Beet Seeds");
-        item(entries, "melon_grenade_seeds", "瓜！种子", "Melon Grenade Seeds");
-        item(entries, "pumpkin_turret_seeds", "man瓜种子", "Pumpkin Turret Seeds");
-        item(entries, "awakened_torchflower_seeds", "激活的火把花种子", "Awakened Torchflower Seeds");
-        item(entries, "awakened_pitcher_plant_pod", "激活的瓶子草豆荚", "Awakened Pitcher Plant Pod");
-        item(entries, "converter", "农产品转换器", "Converter");
+        item(entries, "crop_converter", "农作物转换器", "Crop Converter");
         // ---- v0.0.2 的 5 个新物品（TECH §7.3 #1–#5，文案逐字）----
         item(entries, "molotov", "莫洛托夫！", "Molotov");
         item(entries, "zangief_cane", "桑吉尔蔗", "Zangief Cane");
@@ -100,7 +94,6 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "compressed_hay_block", "压缩干草块", "Compressed Hay Block");
         // ---- v0.0.3 的 4 个新物品（F-134 / 18-TECH §9.4）----
         item(entries, "friend_chives", "朋友的韭", "Friend Chives");
-        item(entries, "chive_seeds", "朋友的韭种子", "Chive Seeds");
         item(entries, "point_defense_fungus", "近防菌", "Point Defense Fungus");
         item(entries, "vibration_bean", "震动豆", "Vibration Bean");
         // ---- v0.1.0 的 1 个新物品（F-169 / 24-TECH §9.4）：据点核心的 BlockItem 名 ----
@@ -109,6 +102,8 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "cultivator", "农作物培养器", "Cultivator");
         // ---- v0.2.2 的 1 个新物品（F-281 / D-193 / 48 号 §5 #1）----
         item(entries, "plain_chives", "平凡韭菜", "Plain Chives");
+        // ---- v0.2.3 的 1 个新物品（F-298 / D-216 / 54 号 §7.2 第 2 行）：平凡韭菜种子，新类 PlainSeedItem 可播种 ----
+        item(entries, "plain_chives_seeds", "平凡韭菜种子", "Plain Chives Seeds");
         // ---- 20 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
         block(entries, "puffed_wheat_crop", "膨胀麦", "Puffed Wheat");
         block(entries, "blast_carrot_crop", "胡罗贝", "Blast Carrot");
@@ -129,7 +124,7 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "awakened_torchflower", "激活的火把花", "Awakened Torchflower");
         block(entries, "awakened_pitcher_plant", "激活的瓶子草", "Awakened Pitcher Plant");
         block(entries, "fang_trap_cactus", "刺球", "Fang Trap Cactus");
-        block(entries, "converter", "农产品转换器", "Converter");
+        block(entries, "crop_converter", "农作物转换器", "Crop Converter");
         // ---- v0.0.2 的 2 个新方块（TECH §7.3 #6–#7）----
         block(entries, "zangief_cane", "桑吉尔蔗", "Zangief Cane");
         block(entries, "compressed_hay_block", "压缩干草块", "Compressed Hay Block");
@@ -141,6 +136,8 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "outpost_core", "据点核心", "Outpost Core");
         // ---- v0.2.0 的 1 个新方块（F-224 / D-160 / 36 号 §4.3.2 #2）：方块名与物品名各 1 条，不共用 ----
         block(entries, "cultivator", "农作物培养器", "Cultivator");
+        // ---- v0.2.3 的 1 个新方块（F-297 / D-215 / 54 号 §7.2 第 1 行）：平凡作物，age 0~3、不进 CropProfile ----
+        block(entries, "plain_chives_crop", "平凡韭菜", "Plain Chives");
         // ---- 13 个实体类型（TECH §3.4）----
         entity(entries, "puffed_wheat", "膨胀麦", "Puffed Wheat");
         entity(entries, "ubi_server", "育碧服务器", "Ubi Server");
@@ -174,17 +171,8 @@ public final class ModLangProvider extends LanguageProvider {
         plain(entries, "subtitles.farmstorm.friend_chives", "朋友的韭命中", "Chives hit");
         // ---- 固定键：创造标签页 / GUI / 提示 / 死亡信息（TECH §7.2 逐条）----
         plain(entries, "itemGroup.farmstorm.main", "农场风云", "Farmstorm");
-        plain(entries, "container.farmstorm.converter", "农产品转换器", "Converter");
         // ---- v0.2.0 的 1 条新 container 键（F-227 / D-166 / 36 号 §4.3.2 #3）----
         plain(entries, "container.farmstorm.outpost_core", "据点核心", "Outpost Core");
-        plain(entries, "gui.farmstorm.converter.convert", "转换", "Convert");
-        plain(entries, "gui.farmstorm.converter.xp_cost", "消耗经验：%s", "Experience cost: %s");
-        plain(entries, "gui.farmstorm.converter.no_recipe", "无法转换", "Cannot convert");
-        plain(entries, "gui.farmstorm.converter.need_catalyst", "缺少催化剂：%s", "Missing catalyst: %s");
-        plain(entries, "gui.farmstorm.converter.not_enough_xp", "经验不足", "Not enough experience");
-        plain(entries, "gui.farmstorm.converter.forward", "原版 → 改良", "Vanilla → Modified");
-        plain(entries, "gui.farmstorm.converter.reverse", "改良 → 原版", "Modified → Vanilla");
-        plain(entries, "gui.farmstorm.converter.tooltip", "放入原版或改良作物进行 1:1 转换", "Insert a vanilla or modified crop to convert 1:1");
         plain(entries, "tooltip.farmstorm.deployed_by", "部署者：%s", "Deployed by: %s");
         plain(entries, "tooltip.farmstorm.attached_face", "附着面：%s", "Attached face: %s");
         plain(entries, "tooltip.farmstorm.floating", "悬空", "Floating");
@@ -217,16 +205,14 @@ public final class ModLangProvider extends LanguageProvider {
                 "%1$s was slammed into the ground by %2$s's Zangief Cane");
         // ---- 12 条进度 × (title + description)（DEC C-7）----
         advancement(entries, "root", "农场风云", "Farmstorm", "获得任意一件改良作物", "Obtain any modified crop");
-        advancement(entries, "converter", "装个转换器", "Get a Converter", "放置一台农产品转换器", "Place a Crop Converter");
+        advancement(entries, "converter", "装个转换器", "Get a Converter", "放置一台农作物转换器", "Place a Crop Converter");
         advancement(entries, "first_conversion", "双向奔赴", "Two-Way Trip", "在转换器内完成一次转换", "Complete one conversion in a Crop Converter");
-        advancement(entries, "nether_star_toll", "星之代价", "The Star's Toll", "消耗下界之星完成一次激活的火把花或瓶子草转换", "Spend a nether star on an Awakened Torchflower or Awakened Pitcher Plant conversion");
-        advancement(entries, "seed_cycle", "闭环自给", "Self-Sufficient Cycle", "收获一次成熟改良作物，并同时拾取作物与播种物", "Harvest a mature modified crop and pick up both the crop and its seed");
         advancement(entries, "first_throw", "出手", "First Throw", "投掷任意一件投掷型改良作物", "Throw any throwable modified crop");
         advancement(entries, "first_deploy", "落子", "First Seed", "部署任意一件部署型改良作物", "Deploy any deployable modified crop");
         advancement(entries, "demolition", "未授权拆墙", "Unauthorized Demolition", "用破障类作物的爆炸破坏至少一个方块", "Break at least one block with a block-breaking crop explosion");
         advancement(entries, "turret_hit", "别站那儿", "Don't Stand There", "被 man瓜 的导弹命中一次", "Get hit by a Pumpkin Turret missile");
         advancement(entries, "aura_bath", "光环洗浴", "Aura Bath", "从激活的火把花或瓶子草获得一次光环效果", "Receive an aura effect from an Awakened Torchflower or Awakened Pitcher Plant");
-        advancement(entries, "fang_dance", "最扎人的一集", "The Itchiest Episode", "触发一次「赢过输过没死过」", "Trigger a Fang Trap Cactus once");
+        advancement(entries, "fang_dance", "最扎人的一集", "The Itchiest Episode", "触发一次「刺球」", "Trigger a \"Fang Ball\" once");
         advancement(entries, "lucky_jackpot", "老实发育，很枯燥吧", "Playing It Safe Is Boring", "食用幸运浆果并抽中 0.1% 的创造模式分支", "Eat a Lucky Berry and hit the 0.1% creative mode branch");
         // ---- v0.0.2 的 3 条新进度（DEC A-09 的短句；TECH §7.3 #12–#17）----
         // 进度 JSON 由 F-98 生成，键先在这里立好，F-98 落地时不必再改语言表。

@@ -120,7 +120,7 @@ public final class FarmstormItems {
 
     /**
      * v0.2.3 新增的平凡韭菜种子（F-298 / D-216）：`PlainSeedItem` 拿原版放置流程，可播种。
-     * <p>不是 `SeedItem`（它的 `useOn` 无条件 `PASS`，红线 2 / N-142），也不进 `CROP_ITEMS`——
+     * <p>不是 D-152 ② 那个 `useOn` 无条件 `PASS` 的播种物类（它已随 7 个种子删除，D-212），也不进 `CROP_ITEMS`——
      * 平凡韭菜没有档案，这个种子只由 `#farmstorm:seeds` 标签与创造栏认领。
      * 堆叠走 `otherProperties()`（`stack.other`，与 D-16 的「播种物」一档）。
      */

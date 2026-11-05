@@ -2,26 +2,31 @@ package com.dashpig.farmstorm.blockentity;
 
 import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.config.FarmstormConfig;
-import com.dashpig.farmstorm.item.DeployableCropItem;
 import com.dashpig.farmstorm.item.ModifiedCropItem;
-import com.dashpig.farmstorm.item.SeedItem;
+import com.dashpig.farmstorm.recipe.ConverterRecipe;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.network.CultivatorLinkBroadcaster;
 import com.dashpig.farmstorm.registry.FarmstormItems;
+import com.dashpig.farmstorm.registry.FarmstormRecipes;
 import com.dashpig.farmstorm.util.CropProfile;
 import com.dashpig.farmstorm.util.CropTier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -129,18 +134,18 @@ public class CultivatorBlockEntity extends BlockEntity {
     }
 
     /**
-     * 手持闸（D-162）：**普通与稀有档放得进，史诗档一律拒绝**。
+     * 手持闸（D-218）：**只收转换配方的输入，且该配方输出的档案不是史诗档**。
      *
-     * <p>准入<b>只读 {@code tier()}</b>，不按 id 白名单 —— 22 条档案的 tier 一改，准入面自动跟着变（RT-49）。
-     * 档案由物品类反查（{@code SeedItem} / {@code DeployableCropItem} / {@code ModifiedCropItem} 三者各有
-     * {@code profile()}），因此本方法里不出现任何注册 id 的比较。
+     * <p>判据只有一个来源 —— {@code farmstorm:converting} 配方表的只读视图（{@link #outputProfileOf}）：
+     * 这里不写物品白名单、也没有「17」这个常量，数据包新增一条转换配方，培养器自动多收一个投入物（HC-163）。
+     * 改良作物因此一个都收不进 —— 它们是转换的**输出**，不是任何一条配方的输入（RT-49）。
      */
-    public static boolean admissible(ItemStack stack) {
+    public boolean admissible(ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
         }
-        CropProfile profile = profileOf(stack);
-        return profile != null && profile.tier() != CropTier.EPIC;
+        CropProfile output = outputProfileOf(stack);
+        return output != null && output.tier() != CropTier.EPIC;
     }
 
     /** 四道闸合并成**一次**判定：范围 ∧ 绑定 ∧ 手持档 ∧ 空槽。任一不过 = 右键无反应（36 号 §2.5.3）。 */
@@ -148,18 +153,33 @@ public class CultivatorBlockEntity extends BlockEntity {
         return this.isUsable() && this.held.isEmpty() && admissible(stack);
     }
 
-    /** 物品 → 父作物档案：三个物品类的 {@code profile()} 返回同一条档案，所以放种子与放作物产出相同。 */
+    /**
+     * 投入物 → 它那条转换配方的**输出**档案（D-218）。
+     *
+     * <p>名字不是 {@code profileOf}：输入侧全是原版物品，自己没有档案，档案只存在于输出那一侧。
+     * 输出物品是 {@link ModifiedCropItem} 时直接取它的 {@code profile()}；其余（部署型）按注册 id
+     * 回落到 {@link CropProfile#ALL} 查表。两处都取不到 = {@code null}，等价于「这个物品没有转换输出」。
+     */
     @Nullable
-    private static CropProfile profileOf(ItemStack stack) {
-        Item item = stack.getItem();
+    private CropProfile outputProfileOf(ItemStack stack) {
+        Level level = this.level;
+        if (level == null || stack.isEmpty()) {
+            return null;
+        }
+        Optional<RecipeHolder<ConverterRecipe>> match = level.getRecipeManager()
+                .getRecipeFor(FarmstormRecipes.CONVERTING_TYPE.get(), new SingleRecipeInput(stack), level);
+        if (match.isEmpty()) {
+            return null;
+        }
+        Item item = match.get().value().result().getItem();
         if (item instanceof ModifiedCropItem crop) {
             return crop.profile();
         }
-        if (item instanceof DeployableCropItem deployed) {
-            return deployed.profile();
-        }
-        if (item instanceof SeedItem seed) {
-            return seed.profile();
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        for (CropProfile profile : CropProfile.ALL) {
+            if (profile.id().equals(id)) {
+                return profile;
+            }
         }
         return null;
     }
@@ -212,40 +232,59 @@ public class CultivatorBlockEntity extends BlockEntity {
         }
     }
 
-    /** 整批投递进绑定核（D-164 / 36 号 §2.6.1：先算后写、按整批判）。失败时物品仍在槽里，不落地、不丢。 */
+    /**
+     * 整批投递进绑定核（D-164 / 36 号 §2.6.1：先算后写、按整批判）。失败时物品仍在槽里，不落地、不丢。
+     *
+     * <p>守卫直接读准入闸本身：产出面已只由「投入物 + 对应种子」决定（{@link #batch}），不再需要输出档案，
+     * 于是整条链上只有 {@link #admissible} 一处读配方表 —— 「判据只有一个来源」也就落在这里（D-218）。
+     */
     private boolean deliver() {
         OutpostCoreBlockEntity core = this.core();
         if (core == null) {
             return false;
         }
-        CropProfile profile = profileOf(this.held);
-        if (profile == null) {
-            // 不可达：准入闸只放带档案的物品进来。真到了这里也不销毁物品 —— 留在槽里，拆方块可原样取回。
+        if (!admissible(this.held)) {
+            // 不可达：准入闸只放「命中转换配方且输出非史诗」的物品进来。真到了这里也不销毁物品 ——
+            // 留在槽里，拆方块可原样取回。
             return false;
         }
-        return core.acceptAll(batch(profile));
-    }
-
-    /** 产出批次（36 号 §2.5.4）：有独立种子 ⇒ {@code [作物 × yield, 种子 × yield]}，否则只 {@code [作物 × yield]}。 */
-    private static List<ItemStack> batch(CropProfile profile) {
-        int amount = FarmstormConfig.cultivatorYield.get();
-        List<ItemStack> batch = new ArrayList<>(2);
-        batch.add(new ItemStack(FarmstormItems.forProfile(profile).get(), amount));
-        if (hasOwnSeed(profile)) {
-            ResourceKey<Item> seed = profile.seedItem();
-            batch.add(new ItemStack(BuiltInRegistries.ITEM.get(seed.location()), amount));
-        }
-        return batch;
+        return core.acceptAll(batch(this.held));
     }
 
     /**
-     * 「有独立种子物品」的判据（36 号 §2.5.4）：{@code seedItem() != null} <b>且</b>它不等于 {@code id()}。
-     * 22 条档案里 8 条的 {@code seedItem} 指向**自身**，只写 {@code != null} 会让这些档案的产出翻倍
-     * （D-163 补充明确否决）。准入面内因此是 5 条给 2 + 2、13 条只给 2。
+     * 产出批次（D-219 / 54 号 §4.3.2）：**永远两组** —— 投入物 × {@code cultivator.yield}
+     * + 对应种子 × {@code cultivator.yield}，两组同乘一个键（陷阱 29）。
+     *
+     * <p>自身即种子的 11 条两组装的是同一个物品，因此玩家实际收到 <b>4 个同一物品</b>
+     * （胡萝卜 4 胡萝卜、毒马铃薯 4 毒马铃薯）。这是 v0.2.3 唯一一处产出翻倍，属平衡变更（陷阱 28 / 30）。
      */
-    private static boolean hasOwnSeed(CropProfile profile) {
-        ResourceKey<Item> seed = profile.seedItem();
-        return seed != null && !seed.location().equals(profile.id());
+    private static List<ItemStack> batch(ItemStack input) {
+        int amount = FarmstormConfig.cultivatorYield.get();
+        List<ItemStack> batch = new ArrayList<>(2);
+        batch.add(new ItemStack(input.getItem(), amount));
+        batch.add(new ItemStack(correspondingSeed(input.getItem()), amount));
+        return batch;
+    }
+
+    /** 6 条在原版里有**独立**种子物品的投入物（D-219 / 54 号 §4.3.2）：小麦 / 甜菜根 / 西瓜片 / 西瓜 / 南瓜 / 平凡韭菜。 */
+    private static final Map<Item, Item> INDEPENDENT_SEEDS = Map.of(
+            Items.WHEAT, Items.WHEAT_SEEDS,
+            Items.BEETROOT, Items.BEETROOT_SEEDS,
+            Items.MELON_SLICE, Items.MELON_SEEDS,
+            Items.MELON, Items.MELON_SEEDS,
+            Items.PUMPKIN, Items.PUMPKIN_SEEDS,
+            FarmstormItems.PLAIN_CHIVES.get(), FarmstormItems.PLAIN_CHIVES_SEEDS.get());
+
+    /**
+     * 「对应种子」查表（D-219 补充 / 裁定 #16）：只有上表 6 条给另一个物品，**表外一律是它自己**。
+     *
+     * <p>其余 11 条（胡萝卜 / 马铃薯 / 毒马铃薯 / 仙人掌 / 竹子 / 红蘑菇 / 棕蘑菇 / 甘蔗 / 绯红菌 / 诡异菌 /
+     * 可可豆）按字面收口：原版里没有独立种子物品的就是它自己 —— 因此毒马铃薯产出毒马铃薯，不映射成马铃薯
+     * （陷阱 30）。不为这 11 条再写第二张表。
+     */
+    private static Item correspondingSeed(Item input) {
+        Item seed = INDEPENDENT_SEEDS.get(input);
+        return seed != null ? seed : input;
     }
 
     /** {@code working} 只在值真的变化时写一次 blockstate（D-161 / 36 号 §2.5.2），且带 {@code UPDATE_CLIENTS}。 */

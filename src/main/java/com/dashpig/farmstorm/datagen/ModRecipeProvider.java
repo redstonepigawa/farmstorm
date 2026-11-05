@@ -35,6 +35,8 @@ import net.neoforged.neoforge.registries.DeferredItem;
  *
  * <p>F-168 再加 1 条 3 × 3 合成配方：据点核心（D-122 第 3 条）。
  *
+ * <p>F-301 补上培养器的 3 × 3 合成配方（D-220）：这结束了 0.2.0 起「培养器只能靠创造栏 / {@code /give}」的状态（A-64）。
+ *
  * <p>JSON 由 serializer codec 落盘（R-03：不手写数据包 JSON），落盘只剩 {@code input} / {@code result}
  * 两个字段。
  */
@@ -47,6 +49,8 @@ public final class ModRecipeProvider extends RecipeProvider {
     protected void buildRecipes(RecipeOutput recipeOutput) {
         // 转换器没有配方就拿不到，21 条转换配方也无从用起（D-52：本条是首条合成配方）
         converter(recipeOutput);
+        // 培养器同理，0.2.2 之前只能创造栏 /give，补配方后第一次有生存途径（D-220 / A-64）
+        cultivator(recipeOutput);
         // 压缩膨胀麦是二级合成物，原料就是膨胀麦（D-67）：先给出获得途径，转换配方表照旧不动
         compressedPuffedWheat(recipeOutput);
         // 据点核心是工作台 3×3 配方（D-122 第 3 条）：没有获得途径就没有核心，第 2 个上限也就无从生效
@@ -100,6 +104,28 @@ public final class ModRecipeProvider extends RecipeProvider {
                 .pattern("III")
                 .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
                 .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("crop_converter"));
+    }
+
+    /**
+     * D-220 / 54 号 §0.3 第 13 项：有序 3×3，四角 {@code minecraft:iron_ingot}、四边 {@code minecraft:glass}、
+     * 正中一格 {@code minecraft:redstone}，产出 1 个培养器 —— 即 4 铁锭 + 4 玻璃 + 1 红石粉。
+     *
+     * <p>与 {@link #converter} 只差排布（那台是六铁两玻璃）：这是 plan 的原文，照抄，不自行「优化」以提高辨识度（D-220 补充）。
+     * 解锁条件用**原版**物品 {@code minecraft:glass}，不用 {@code #farmstorm:} 前缀的本模组标签 ——
+     * 否则配方在首次进入世界时不可见（D-220 补充）。
+     *
+     * <p>同样剥掉配方解锁进度（{@link #recipeWithoutAdvancement}）：本 Provider 只产配方 JSON。
+     */
+    private static void cultivator(RecipeOutput recipeOutput) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, FarmstormItems.CULTIVATOR.get())
+                .define('I', Items.IRON_INGOT)
+                .define('G', Items.GLASS)
+                .define('R', Items.REDSTONE)
+                .pattern("IGI")
+                .pattern("GRG")
+                .pattern("IGI")
+                .unlockedBy("has_glass", has(Items.GLASS))
+                .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("cultivator"));
     }
 
     /**

@@ -113,7 +113,7 @@ public class ModifiedCropItem extends Item {
 
     /**
      * 裁定 #4 / D-152 ①：v0.2.0 起本模组作物不可种植——判据恒 {@code false}，{@code plantCrop} 一律回 PASS。
-     * 注意这只堵「自定义播种」这一条；7 个独立种子走的是 {@code SeedItem#useOn}，另一条（陷阱 23 / RT-48）。
+     * 注意这只堵「自定义播种」这一条；7 个独立种子那条链已在 v0.2.3 随种子一起删除（D-212），另一条（陷阱 23 / RT-48）。
      */
     private static boolean isPlantableSoil(UseOnContext ctx, BlockState soil) {
         // 原判据（「是 FarmBlock 才允许」）留成注释备查，不删（36 号 §2.2 路径①）：

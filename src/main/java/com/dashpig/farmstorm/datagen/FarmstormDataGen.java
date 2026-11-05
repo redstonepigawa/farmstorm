@@ -36,6 +36,9 @@ public final class FarmstormDataGen {
         ModBlockTagsProvider blockTags = new ModBlockTagsProvider(output, lookupProvider);
         generator.addProvider(event.includeServer(), blockTags);
         generator.addProvider(event.includeServer(), new ModItemTagsProvider(output, lookupProvider, blockTags));
+        // D-196 / 48 号 §2.3.5：POI 要进 minecraft:acquirable_job_site，否则村民永不认领（RT-64），且不报错；
+        // 不挂这行 Provider 永不被调度，产物不会出现（48 号 §3 #21）。
+        generator.addProvider(event.includeServer(), new ModPoiTypeTagsProvider(output, lookupProvider));
 
         // 方块模型必须先于物品模型生成：物品模型的 parent 指向刚生成的方块模型，
         // Provider 按注册顺序串行执行，顺序反了会触发「Model does not exist」。

@@ -19,6 +19,7 @@ import com.dashpig.farmstorm.registry.FarmstormMobEffects;
 import com.dashpig.farmstorm.registry.FarmstormPoiTypes;
 import com.dashpig.farmstorm.registry.FarmstormRecipes;
 import com.dashpig.farmstorm.registry.FarmstormSounds;
+import com.dashpig.farmstorm.registry.FarmstormVillagerProfessions;
 import com.dashpig.farmstorm.team.ScoreboardTeamResolver;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.dashpig.farmstorm.util.CropProfile;
@@ -63,6 +64,7 @@ public final class Farmstorm {
         // 注在 NeoForgeRegistries.Keys.ATTACHMENT_TYPES，**不计入 98**；logRegistrySelfCheck 的 12 类断言一字不动。
         FarmstormAttachments.REGISTER.register(modBus);
         FarmstormPoiTypes.REGISTER.register(modBus);
+        FarmstormVillagerProfessions.REGISTER.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, FarmstormConfig.SPEC);
         // F-201：CLIENT 3 键单独一份 config/farmstorm-client.toml。**不进** FarmstormConfig——

@@ -23,8 +23,9 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 33 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器）：
- * 22 个作物 + 7 个独立播种物 + 4 个方块物品（转换器 / 压缩干草块 / 据点核心 / 农作物培养器）。
+ * 34 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器、v0.2.2 按 D-193 加 1 个平凡韭菜）：
+ * 22 个作物 + 7 个独立播种物 + 4 个方块物品（转换器 / 压缩干草块 / 据点核心 / 农作物培养器）
+ * + 1 个平凡农作物（平凡韭菜：不是作物、没有 CropProfile）。
  * 堆叠数按 D-16 分两档，实际数值来自 stack.*（§4.11.5）。
  */
 public final class FarmstormItems {
@@ -121,6 +122,18 @@ public final class FarmstormItems {
     public static final DeferredItem<BlockItem> CULTIVATOR = REGISTER.registerItem("cultivator",
             properties -> new BlockItem(FarmstormBlocks.CULTIVATOR.get(), properties), otherProperties());
 
+    /**
+     * v0.2.2 新增的 1 个平凡农作物（F-268 / D-193）：平凡韭菜，可食、饱食 2。
+     * <p>它没有 {@link CropProfile} ⇒ 走不了 {@code cropItem}；食物属性也**不能**复用 {@code foodProperties}
+     * （那个方法要档案读 config、且带 {@code alwaysEdible()}）——这里用固定常量，因此不新增 config 键（176 不变）。
+     * 堆叠走 {@code otherProperties()}（{@code stack.other}），不进 {@code CROP_ITEMS} / 播种物清单。
+     */
+    public static final DeferredItem<Item> PLAIN_CHIVES = REGISTER.registerItem("plain_chives", Item::new,
+            otherProperties().food(new FoodProperties.Builder()
+                    .nutrition(2)
+                    .saturationModifier(0.1F)
+                    .build()));
+
     private FarmstormItems() {}
 
     /** 创造标签页内容：作物 → 播种物 → 工具方块（TECH §3.6）。 */
@@ -132,6 +145,8 @@ public final class FarmstormItems {
         items.add(OUTPOST_CORE);
         // A-64：本版没有培养器配方，不进口袋就等于「谁都拿不到」。
         items.add(CULTIVATOR);
+        // D-193：平凡韭菜不是作物（不在 CROP_ITEMS 里），必须手写进清单，否则创造栏看不到。
+        items.add(PLAIN_CHIVES);
         return items;
     }
 

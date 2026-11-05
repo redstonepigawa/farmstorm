@@ -14,8 +14,9 @@ r"""Farmstorm v0.1.1 静态验收器。
                    farmland.limitPerPlayer 与 §4.1.1 第 1 行的 outpost_core.farmlandBonus）= 175 个键
                    + docs/zh/42-TECH-0.2.1.md §4.1.1（v0.2.1 的 1 行：增 1 / 删 0，F-261）⇒ v0.2.1 加
                    1 个键，合计 **176** 个键
-  - 97 个注册 ID  <- docs/zh/36-TECH-0.2.0.md §1.2 的 v0.2.0 列逐类小计（12 类，相加 97；
-                   基线 93 见 24-TECH-0.1.0.md §2.1，本版 +4）
+  - 98 个注册 ID  <- docs/zh/36-TECH-0.2.0.md §1.2 的 v0.2.0 列逐类小计（12 类，相加 97；
+                   基线 93 见 24-TECH-0.1.0.md §2.1，v0.2.0 +4）+ v0.2.2 的 1 个物品
+                   （`plain_chives`，F-268 / D-193）
 
 用法：python -X utf8 tools/verify_project.py [--root <仓库根>]
 """
@@ -338,6 +339,7 @@ EXPECTED = {
         "awakened_pitcher_plant_pod", "converter", "compressed_hay_block",
         "chive_seeds", "outpost_core",  # v0.1.0 的 BlockItem（24-TECH §1.4 G1）
         "cultivator",  # v0.2.0 的培养器方块物品（36-TECH §1.2）
+        "plain_chives",  # v0.2.2 的平凡农作物（F-268 / D-193；非作物，没有 CropProfile）
     ],
     "blocks": [
         "puffed_wheat_crop", "blast_carrot_crop", "ubi_server_crop", "toxic_ubi_server_crop",
@@ -373,9 +375,10 @@ EXPECTED = {
 }
 
 # 36-TECH-0.2.0 §1.2 的 v0.2.0 列：12 类逐类小计，相加 97（基线 93 + 本版 4）。
+# v0.2.2 在这一列上再 +1 个物品（`plain_chives`，F-268 / D-193）⇒ 下面的 EXPECTED_COUNTS 相加 98。
 # ID 清单少一个、多一个都在这里露出来。
 EXPECTED_COUNTS = {
-    "items": 33,
+    "items": 34,
     "blocks": 27,
     "block_entity_type": 8,
     "entity_type": 13,
@@ -511,7 +514,7 @@ def main() -> int:
     else:
         warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
 
-    print("== 2. 97 个注册 ID 逐字核对（全源码树） ==")
+    print("== 2. 98 个注册 ID 逐字核对（全源码树） ==")
     total = 0
     for group, ids in EXPECTED.items():
         missed = [i for i in ids if f'"{i}"' not in all_java]
@@ -523,7 +526,7 @@ def main() -> int:
         if len(ids) != expected:
             fail(f"{group}: 清单 {len(ids)} 个 ID，但 36-TECH §1.2 的 v0.2.0 列是 {expected} 个")
         total += len(ids)
-    print(f"  已核 registry 对象: {total} / 97")
+    print(f"  已核 registry 对象: {total} / 98")
 
     print("== 3. 语言文件键集一致 ==")
     gen = root / "src/generated/resources"

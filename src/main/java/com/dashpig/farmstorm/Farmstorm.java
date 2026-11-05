@@ -59,7 +59,7 @@ public final class Farmstorm {
         FarmstormMobEffects.REGISTER.register(modBus);
         FarmstormSounds.REGISTER.register(modBus);
         // 口径外的第 13 类（F-252 / 裁定 #17 / A-73）：实体附件类型 1 个 farmstorm:ai_suspend，
-        // 注在 NeoForgeRegistries.Keys.ATTACHMENT_TYPES，**不计入 97**；logRegistrySelfCheck 的 12 类断言一字不动。
+        // 注在 NeoForgeRegistries.Keys.ATTACHMENT_TYPES，**不计入 98**；logRegistrySelfCheck 的 12 类断言一字不动。
         FarmstormAttachments.REGISTER.register(modBus);
 
         container.registerConfig(ModConfig.Type.SERVER, FarmstormConfig.SPEC);
@@ -153,8 +153,8 @@ public final class Farmstorm {
     }
 
     /**
-     * 注册对象自检（F-66 / F-103 / TECH §11 #2）：64 → 77 → 90 → 97 的那 12 类**当场数**（各 DeferredRegister 的条目数），
-     * 相加不等于 97、或任何一类的条目数与 36 号 §1.2 的 v0.2.0 列不符，就打 FAIL——不写死常量再自己跟自己比。
+     * 注册对象自检（F-66 / F-103 / TECH §11 #2）：64 → 77 → 90 → 98 的那 12 类**当场数**（各 DeferredRegister 的条目数），
+     * 相加不等于 98、或任何一类的条目数与 36 号 §1.2 的 v0.2.0 列不符，就打 FAIL——不写死常量再自己跟自己比。
      * 伤害类型是数据驱动（R-02：代码侧只有 ResourceKey、没有 DeferredRegister），
      * 因此这一类数的是 {@link FarmstormDamageTypes} 里声明的静态 ResourceKey 常量本身。
      */
@@ -173,8 +173,8 @@ public final class Farmstorm {
         int menuTypes = FarmstormMenus.REGISTER.getEntries().size();
         int total = items + blocks + blockEntities + entityTypes + mobEffects + soundEvents + recipeTypes
                 + recipeSerializers + creativeTabs + damageTypes + dataComponents + menuTypes;
-        boolean ok = total == 97
-                && items == 33 && blocks == 27 && blockEntities == 8 && entityTypes == 13
+        boolean ok = total == 98
+                && items == 34 && blocks == 27 && blockEntities == 8 && entityTypes == 13
                 && mobEffects == 4 && soundEvents == 3 && recipeTypes == 1 && recipeSerializers == 1
                 && creativeTabs == 1 && damageTypes == 3 && dataComponents == 1 && menuTypes == 2;
         LOGGER.info("自检 注册对象 {} 个：items {} / blocks {} / block_entities {} / entity_types {} / mob_effects {} / "
@@ -186,7 +186,7 @@ public final class Farmstorm {
 
     /**
      * 数据驱动的伤害类型没有 DeferredRegister，只能把声明出来的 ResourceKey 逐个列出来数。
-     * <p>新增伤害类型时**必须**同时加进这个列表：总数 97 的断言会因此失败，不会静默漂移。
+     * <p>新增伤害类型时**必须**同时加进这个列表：总数 98 的断言会因此失败，不会静默漂移。
      * 不用反射，是因为 {@code getDeclaredFields()} 依赖字段形状，改名或换个同类型常量都会悄悄改变结果。
      */
     private static int damageTypeCount() {

@@ -25,7 +25,7 @@ import net.neoforged.neoforge.client.model.generators.VariantBlockStateBuilder;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 /**
- * 20 个 blockstate + 62 个方块模型（TECH §6.2 / §6.3）。
+ * 本模组的方块状态与方块模型（数量由注册表与状态机决定；TECH §6.2 / §6.3）。
  * 贴图名一律取 assets/farmstorm/textures/block 下真实存在的 PNG（先列目录再写，不按文档猜）。
  * 5 个部署方块按作者口径分两类：陷阱类给空模型（世界里隐形），炮台 / 光环类借用原版方块模型。
  */
@@ -73,7 +73,7 @@ public final class ModBlockStateProvider extends BlockStateProvider {
             } else if (block instanceof DeployedCropBlock) {
                 deployedStates(block);
             } else if (block instanceof CropConverterBlock) {
-                converterStates(block);
+                cropConverterStates(block);
             } else if (block instanceof OutpostCoreBlock) {
                 outpostCoreStates(block);
             } else if (block instanceof CultivatorBlock) {
@@ -153,34 +153,44 @@ public final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     /**
-     * 转换器六面贴图（FIX-5）：四个侧面各叠一种作物，顶面与底面都是原版工作台顶面 ——
-     * 原版 crafting_table 模型的 up / down 也用同一张 crafting_table_top，底面跟着照抄。
-     * 键用 Direction#getSerializedName()，正好是 minecraft:block/cube 的 up/down/north/south/east/west。
+     * 农作物转换器（D-211 / 54 号 §3.2）：{@code FACING} × {@code WORKING} = **8 个 variant**、两张模型。
+     *
+     * <p>{@code working=false} 引三张 {@code _a_*_still} 静态副本（**不带 mcmeta**），{@code working=true}
+     * 引三张 16 帧帧条（{@code _a_front} / {@code _a_side} / {@code _a_top}，各带
+     * {@code {"animation":{"frametime":2}}}）；底面 {@code _a_bottom} 两态同值、静态且不带 mcmeta。
+     * 「只有工作时才动」由此天然成立——动态 PNG 一旦被引用就会自己播，代码碰不到 {@code frametime}，
+     * 所以这里不写、也不许写任何暂停 / 恢复动画的代码（红线 4 / 陷阱 1）。
+     *
+     * <p><b>不能用 {@code simpleBlock(block, model)}</b>：它只生成单态，8 个 variant 里有 4 个工作态会
+     * 找不到模型（陷阱 38）。朝向走 {@link #facingRotationY}（north 0 / east 90 / south 180 / west 270），
+     * 不用 {@code Direction#toYRot()}（陷阱 37）。
      */
-    private static final Map<Direction, String> CONVERTER_FACE_TEXTURES = Map.of(
-            Direction.NORTH, "block/converter_side_wheat",
-            Direction.EAST, "block/converter_side_carrot",
-            Direction.SOUTH, "block/converter_side_potato",
-            Direction.WEST, "block/converter_side_beetroot",
-            Direction.UP, "block/converter_top",
-            Direction.DOWN, "block/converter_top");
-
-    /**
-     * 转换器：整格 cube，四面各贴一种作物；朝向只靠 blockstate 的 y 旋转（四个 facing 共用一个模型文件），
-     * 因此作物顺序会跟着朝向转 —— 已确认 4 个 variant 都指向同一个模型、无空变体。
-     */
-    private void converterStates(Block block) {
+    private void cropConverterStates(Block block) {
         String name = registryPath(block);
-        BlockModelBuilder model = models().withExistingParent(name, mcLoc("block/cube"))
-                .texture("particle", modLoc(CONVERTER_FACE_TEXTURES.get(Direction.NORTH)));
-        for (Direction direction : Direction.values()) {
-            model.texture(direction.getSerializedName(), modLoc(CONVERTER_FACE_TEXTURES.get(direction)));
-        }
+        BlockModelBuilder idle = cubeSixFaces(name, name + "_a_front_still", name + "_a_side_still",
+                name + "_a_top_still", name + "_a_bottom");
+        BlockModelBuilder working = cubeSixFaces(name + "_working", name + "_a_front", name + "_a_side",
+                name + "_a_top", name + "_a_bottom");
         getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(model)
+                .modelFile(state.getValue(CropConverterBlock.WORKING) ? working : idle)
                 .rotationY(facingRotationY(state.getValue(CropConverterBlock.FACING)))
                 .uvLock(true)
                 .build());
+    }
+
+    /**
+     * 六面显式（父模型 {@code minecraft:block/cube}）+ {@code particle}：正面 / 三个侧面 / 顶面 / 底面
+     * 各一张，只有正面与侧面 / 顶面的图在两态间不同，故两张模型共用一个助手。
+     */
+    private BlockModelBuilder cubeSixFaces(String modelName, String front, String side, String top, String bottom) {
+        return models().withExistingParent(modelName, mcLoc("block/cube"))
+                .texture("north", modLoc("block/" + front))
+                .texture("south", modLoc("block/" + side))
+                .texture("east", modLoc("block/" + side))
+                .texture("west", modLoc("block/" + side))
+                .texture("up", modLoc("block/" + top))
+                .texture("down", modLoc("block/" + bottom))
+                .texture("particle", modLoc("block/" + front));
     }
 
     /**

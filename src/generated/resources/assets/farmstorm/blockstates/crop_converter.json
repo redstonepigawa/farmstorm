@@ -1,21 +1,40 @@
 {
   "variants": {
-    "facing=east": {
+    "facing=east,working=false": {
       "model": "farmstorm:block/crop_converter",
       "uvlock": true,
       "y": 90
     },
-    "facing=north": {
+    "facing=east,working=true": {
+      "model": "farmstorm:block/crop_converter_working",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=north,working=false": {
       "model": "farmstorm:block/crop_converter",
       "uvlock": true
     },
-    "facing=south": {
+    "facing=north,working=true": {
+      "model": "farmstorm:block/crop_converter_working",
+      "uvlock": true
+    },
+    "facing=south,working=false": {
       "model": "farmstorm:block/crop_converter",
       "uvlock": true,
       "y": 180
     },
-    "facing=west": {
+    "facing=south,working=true": {
+      "model": "farmstorm:block/crop_converter_working",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=west,working=false": {
       "model": "farmstorm:block/crop_converter",
+      "uvlock": true,
+      "y": 270
+    },
+    "facing=west,working=true": {
+      "model": "farmstorm:block/crop_converter_working",
       "uvlock": true,
       "y": 270
     }

@@ -2,7 +2,7 @@ package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.behavior.DeployedKind;
-import com.dashpig.farmstorm.blockentity.ConverterBlockEntity;
+import com.dashpig.farmstorm.blockentity.CropConverterBlockEntity;
 import com.dashpig.farmstorm.blockentity.CultivatorBlockEntity;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
 import com.dashpig.farmstorm.blockentity.OutpostCoreBlockEntity;
@@ -40,9 +40,9 @@ public final class FarmstormBlockEntities {
             REGISTER.register("fang_trap_cactus", () -> BlockEntityType.Builder
                     .of(DeployedCropBlockEntity::new, FarmstormBlocks.FANG_TRAP_CACTUS.get(),
                             FarmstormBlocks.ZANGIEF_CANE.get(), FarmstormBlocks.VIBRATION_BEAN.get()).build(null));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ConverterBlockEntity>> CROP_CONVERTER =
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CropConverterBlockEntity>> CROP_CONVERTER =
             REGISTER.register("crop_converter", () -> BlockEntityType.Builder
-                    .of(ConverterBlockEntity::new, FarmstormBlocks.CROP_CONVERTER.get()).build(null));
+                    .of(CropConverterBlockEntity::new, FarmstormBlocks.CROP_CONVERTER.get()).build(null));
     /**
      * v0.1.0 的第 7 个 type（D-119；24 号 §2.2 注 1）：据点核心既不是部署方块、也没有 DeployedKind，
      * 挂进既有 6 个里的任何一个都会在方块实体构造期崩，因此这 +1 是那 +1 个方块的必然结果。

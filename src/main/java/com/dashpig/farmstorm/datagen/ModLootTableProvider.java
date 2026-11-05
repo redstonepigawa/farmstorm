@@ -42,7 +42,7 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
  * 「同名（本身可种）」的 8 个作物不另开播种物池——作物的播种形态就是它自己。
  *
  * <p>部署方块按原版口径加 {@code survives_explosion}：被爆炸破坏时掉 0 个。
- * 转换器只掉方块本体，内容物由 {@code ConverterBlockEntity} 的 {@code dropContents} 负责。
+ * 转换器只掉方块本体，槽里那一个由 {@code CropConverterBlockEntity#releaseHeld} 交出去（两处不重叠）。
  */
 public final class ModLootTableProvider extends BlockLootSubProvider {
     /** 成熟等级：age 等于该值时同时掉作物与播种物（FarmstormCropBlock.MAX_CUSTOM_AGE）。 */

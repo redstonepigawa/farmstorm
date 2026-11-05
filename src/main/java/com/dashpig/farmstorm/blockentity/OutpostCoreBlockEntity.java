@@ -202,7 +202,7 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         return simulated;
     }
 
-    // ---- Container 契约（D-166 / 36 号 §2.6.1 的逐方法形态，照 ConverterBlockEntity）----
+    // ---- Container 契约（D-166 / 36 号 §2.6.1 的逐方法形态）----
 
     @Override
     public int getContainerSize() {

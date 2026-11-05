@@ -1,7 +1,6 @@
 package com.dashpig.farmstorm.blockentity;
 
 import com.dashpig.farmstorm.Farmstorm;
-import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.OutpostCoreBlock;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.network.CoreListBroadcaster;
@@ -12,6 +11,7 @@ import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.dashpig.farmstorm.util.AreaBlockEntities;
 import com.dashpig.farmstorm.util.DeployedOwnership;
+import com.dashpig.farmstorm.util.FarmstormTags;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -390,7 +390,7 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         }
         boolean removed = this.cultivators.removeIf(pos -> {
             LevelChunk chunk = server.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-            return chunk != null && !(chunk.getBlockState(pos).getBlock() instanceof CultivatorBlock);
+            return chunk != null && !isProcessingBlock(chunk.getBlockState(pos));
         });
         if (removed) {
             this.setChanged();
@@ -780,7 +780,7 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
                 Farmstorm.LOGGER.info("迁移失败且区块未加载：保留 NBT 原值 {}", pos);   // 出口③
                 continue;
             }
-            if (!(cultivatorChunk.getBlockState(pos).getBlock() instanceof CultivatorBlock)) {
+            if (!isProcessingBlock(cultivatorChunk.getBlockState(pos))) {
                 Farmstorm.LOGGER.info("迁移失败且该格已不是培养器：保留 NBT 原值 {}", pos);  // 出口③
                 continue;
             }
@@ -792,6 +792,15 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         this.cultivators.clear();       // 只清绑定列表；items 不动（掉落是 onRemove 的 Containers.dropContents）
         this.setChanged();
         this.release();                 // 最后一行：摘索引 + 释放区块票 + 请求刷新浮窗列表（既有方法）
+    }
+
+    /**
+     * 判据（D-194）：该格带「已处理方块」标签，即 {@code state.is(FarmstormTags.PROCESSING_BLOCK)}。
+     * 惰性清理（{@link #pruneCultivators()}）与迁移失败路径（{@link #settleOnRemoval()}）共用这一份实现
+     * （48 号 §2.6.3；标签成员由 DataGen 生成，代码不写死）。
+     */
+    private static boolean isProcessingBlock(BlockState state) {
+        return state.is(FarmstormTags.PROCESSING_BLOCK);
     }
 
 

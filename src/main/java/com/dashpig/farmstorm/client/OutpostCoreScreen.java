@@ -36,8 +36,13 @@ public class OutpostCoreScreen extends AbstractContainerScreen<OutpostCoreMenu> 
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.blit(BACKGROUND, this.leftPos, this.topPos, 0.0F, 0.0F,
-                IMAGE_WIDTH, IMAGE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        int x = this.leftPos;
+        int y = this.topPos;
+        int upper = OutpostCoreMenu.ROWS * 18 + 17;               // 6 × 18 + 17 = 125
+        // 上段：54 格区，贴图 v=0
+        graphics.blit(BACKGROUND, x, y, 0.0F, 0.0F, IMAGE_WIDTH, upper, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        // 下段：玩家背包 + 快捷栏，贴图 v=126 画到 y=125（1 px 错开是原版自身的行为）
+        graphics.blit(BACKGROUND, x, y + upper, 0.0F, 126.0F, IMAGE_WIDTH, 96, TEXTURE_WIDTH, TEXTURE_HEIGHT);
     }
 
     @Override

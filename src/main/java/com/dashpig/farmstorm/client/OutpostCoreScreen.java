@@ -39,4 +39,10 @@ public class OutpostCoreScreen extends AbstractContainerScreen<OutpostCoreMenu> 
         graphics.blit(BACKGROUND, this.leftPos, this.topPos, 0.0F, 0.0F,
                 IMAGE_WIDTH, IMAGE_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
     }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        this.renderTooltip(graphics, mouseX, mouseY);
+    }
 }

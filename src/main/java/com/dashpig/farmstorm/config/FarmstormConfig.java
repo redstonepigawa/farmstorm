@@ -15,10 +15,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class FarmstormConfig {
     public static final ModConfigSpec SPEC;
 
-    // ---- 4.11.1 通用项（14）----
-    public static ModConfigSpec.IntValue converterXpCost;
-    public static ModConfigSpec.IntValue converterNetherStarForwardCost;
-    public static ModConfigSpec.BooleanValue converterNetherStarOnReverse;
+    // ---- 4.11.1 通用项（12）----
+    public static ModConfigSpec.IntValue cropConverterProcessTicks;
 
     public static ModConfigSpec.IntValue stackThrowable;
     public static ModConfigSpec.IntValue stackOther;
@@ -70,6 +68,7 @@ public final class FarmstormConfig {
     public static ModConfigSpec.IntValue pumpkinTurretKnockbackLevel;
     public static ModConfigSpec.IntValue pumpkinTurretFireIntervalTicks;
     public static ModConfigSpec.DoubleValue pumpkinTurretBulletSpeed;
+    public static ModConfigSpec.IntValue pumpkinTurretBulletLifetimeTicks;
 
     public static ModConfigSpec.DoubleValue torchflowerAuraRadius;
     public static ModConfigSpec.IntValue torchflowerRefreshTicks;
@@ -292,16 +291,10 @@ public final class FarmstormConfig {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
 
         // ---- 通用项 ----
-        b.push("converter");
-        converterXpCost = b.comment("D-12：每次转换扣除的经验点数（不足则拒绝转换，绝不扣等级）")
-                .translation(tr("converter.xpCost"))
-                .defineInRange("xpCost", 3, 0, 1000);
-        converterNetherStarForwardCost = b.comment("D-12：火把花 / 瓶子草正向转换额外消耗的下界之星个数")
-                .translation(tr("converter.netherStarForwardCost"))
-                .defineInRange("netherStarForwardCost", 1, 0, 64);
-        converterNetherStarOnReverse = b.comment("D-12：反向转换是否也消耗下界之星")
-                .translation(tr("converter.netherStarOnReverse"))
-                .define("netherStarOnReverse", false);
+        b.push("crop_converter");
+        cropConverterProcessTicks = b.comment("D-223：转换周期（刻），600 刻 = 30 秒")
+                .translation(tr("crop_converter.processTicks"))
+                .defineInRange("processTicks", 600, 20, 72000);
         b.pop();
 
         b.push("stack");
@@ -458,6 +451,10 @@ public final class FarmstormConfig {
         pumpkinTurretBulletSpeed = b.comment("导弹速度（格/刻），0.45 = 每秒 9 格；范围 0.0 ~ 4.0")
                 .translation(tr("pumpkin_turret.bulletSpeed"))
                 .defineInRange("bulletSpeed", 0.45, 0.0, 4.0);
+        // D-221：炮弹寿命（刻），300 刻 = 15 秒；下界取 1 刻（0 刻等于一生成就消失）。
+        pumpkinTurretBulletLifetimeTicks = b.comment("炮弹寿命（刻），300 刻 = 15 秒")
+                .translation(tr("pumpkin_turret.bulletLifetimeTicks"))
+                .defineInRange("bulletLifetimeTicks", 300, 1, 72000);
         b.pop();
 
         b.push("awakened_torchflower");

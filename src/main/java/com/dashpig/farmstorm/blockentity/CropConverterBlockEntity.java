@@ -1,6 +1,7 @@
 package com.dashpig.farmstorm.blockentity;
 
 import com.dashpig.farmstorm.block.CropConverterBlock;
+import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.network.CultivatorLinkBroadcaster;
 import com.dashpig.farmstorm.recipe.ConverterRecipe;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
@@ -38,11 +39,13 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class CropConverterBlockEntity extends BlockEntity {
     /**
-     * 转换周期（刻）：600 刻 = 30 秒（D-208）。
+     * 转换周期（刻）：读 {@code crop_converter.processTicks}（默认 600 刻 = 30 秒，D-208 / D-223）。
      *
-     * <p>本阶段用类内常量；配置键 {@code crop_converter.processTicks} 在 F-305 才加入，届时改读 config。
+     * <p>每次现读，不缓存到静态字段：改配置后下一次 tick 就按新阈值算。
      */
-    private static final int PROCESS_TICKS = 600;
+    private static int processTicks() {
+        return FarmstormConfig.cropConverterProcessTicks.get();
+    }
 
     /** 槽内待转换物品的 NBT 键（54 号 §4.1.2）：{@code ItemStack#save} / {@code ItemStack#parse}。 */
     private static final String TAG_HELD = "Held";
@@ -53,7 +56,7 @@ public class CropConverterBlockEntity extends BlockEntity {
 
     /** 槽内那一个待转换物品；不叠加、不替换（空槽闸）。 */
     private ItemStack held = ItemStack.EMPTY;
-    /** 已累计刻数；到达 {@link #PROCESS_TICKS} 时本刻结算一次（{@code /data get block} 读的就是它）。 */
+    /** 已累计刻数；到达 {@link #processTicks()} 时本刻结算一次（{@code /data get block} 读的就是它）。 */
     private int progress;
     /** 绑定的核心坐标；{@code null} = 未绑定（引用缓存，真相在核侧）。 */
     @Nullable
@@ -161,7 +164,7 @@ public class CropConverterBlockEntity extends BlockEntity {
             return;
         }
         // 第 3 步：有货且可用 ⇒ 累计一刻。
-        if (converter.progress < PROCESS_TICKS) {
+        if (converter.progress < processTicks()) {
             converter.progress++;
             converter.setChanged();
             converter.setWorking(true);
@@ -169,7 +172,7 @@ public class CropConverterBlockEntity extends BlockEntity {
         }
         // 第 4 步：进度到达阈值 ⇒ 本刻结算一次（进度只由本类的累计与 {@link #loadAdditional} 的夹取写入，
         // 因此「小于阈值」与「等于阈值」两支已穷尽，不存在第三态）。
-        if (converter.progress == PROCESS_TICKS) {
+        if (converter.progress == processTicks()) {
             if (converter.deliver()) {
                 converter.held = ItemStack.EMPTY;
                 converter.progress = 0;
@@ -276,7 +279,7 @@ public class CropConverterBlockEntity extends BlockEntity {
                 ? ItemStack.parse(registries, tag.get(TAG_HELD)).orElse(ItemStack.EMPTY)
                 : ItemStack.EMPTY;
         // 进度越过阈值时夹回阈值：状态机的第 3 / 4 步因此穷尽所有取值，不会出现「大于阈值」的第三态。
-        this.progress = Math.min(tag.getInt(TAG_PROGRESS), PROCESS_TICKS);
+        this.progress = Math.min(tag.getInt(TAG_PROGRESS), processTicks());
         this.corePos = tag.contains(TAG_CORE) ? BlockPos.of(tag.getLong(TAG_CORE)) : null;
     }
 }

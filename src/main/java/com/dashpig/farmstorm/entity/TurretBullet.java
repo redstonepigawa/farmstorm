@@ -78,6 +78,12 @@ public class TurretBullet extends ThrowableItemProjectile {
         if (this.launchOrigin == null) {
             this.launchOrigin = this.position();
         }
+        // D-221：寿命从**出膛**起算（不是从最后一次命中），到点静默 discard()：不加粒子、不加音效、不写进度。
+        // 已飞刻数不持久化 —— 读档后 tickCount 归零，重新计满一轮（与 target 一样不跨存档保留）。
+        if (this.tickCount >= FarmstormConfig.pumpkinTurretBulletLifetimeTicks.get()) {
+            this.discard();
+            return;
+        }
         if (this.level() instanceof ServerLevel) {
             if (this.target != null && !this.target.isAlive()) {
                 this.target = null;

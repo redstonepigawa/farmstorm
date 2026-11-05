@@ -240,9 +240,7 @@ public final class ModLangProvider extends LanguageProvider {
         advancement(entries, "vibration_bean_trigger", "留个纪念", "A Souvenir", "首次踩中震动豆并完成结算",
                 "Trigger a Vibration Bean for the first time");
         // ---- 139 个配置项（键路径 = run/config/farmstorm-server.toml 的段/键）----
-        config(entries, "converter.xpCost", "每次转换扣除的经验点数", "Experience points spent per conversion");
-        config(entries, "converter.netherStarForwardCost", "正向转换额外消耗的下界之星个数", "Nether stars consumed per forward conversion");
-        config(entries, "converter.netherStarOnReverse", "反向转换是否也消耗下界之星", "Whether reverse conversions consume a nether star too");
+        config(entries, "crop_converter.processTicks", "转换周期（刻，600 刻 = 30 秒）", "Conversion cycle in ticks (600 ticks = 30 s)");
         config(entries, "stack.throwable", "投掷型作物的堆叠上限", "Stack size of throwable crops");
         config(entries, "stack.other", "部署型 / 食用型 / 播种物的堆叠上限", "Stack size of deployable, edible and seed items");
         config(entries, "deploy.turretMiningTicks", "炮台硬挖时长（tick）", "Turret hard-mining duration (ticks)");
@@ -279,6 +277,7 @@ public final class ModLangProvider extends LanguageProvider {
         config(entries, "pumpkin_turret.knockbackLevel", "命中时施加的击退等级", "Knockback level applied on hit");
         config(entries, "pumpkin_turret.fireIntervalTicks", "开火间隔（tick）", "Fire interval (ticks)");
         config(entries, "pumpkin_turret.bulletSpeed", "导弹速度（格/刻）", "Missile speed (blocks per tick)");
+        config(entries, "pumpkin_turret.bulletLifetimeTicks", "炮弹寿命（刻，300 刻 = 15 秒）", "Missile lifetime in ticks (300 ticks = 15 s)");
         config(entries, "awakened_torchflower.auraRadius", "光环欧氏半径", "Aura Euclidean radius");
         config(entries, "awakened_torchflower.refreshTicks", "光环刷新间隔（tick）", "Aura refresh interval (ticks)");
         config(entries, "awakened_torchflower.fireAspectLevel", "手持剑时授予的火焰附加等级", "Fire Aspect level granted to held swords");

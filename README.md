@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · 当前发布 **v0.2.2**
+Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · 当前发布 **v0.2.2**（**v0.2.3 只有文档，代码未实现**）
 
 [下载](https://github.com/redstonepigawa/farmstorm/releases) · [文档索引](#文档) · [构建方法](#构建与调试)
 
@@ -15,7 +15,7 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 - **22 种改良作物档案**：投掷型 12 / 部署型 7 / 食用型 3，按**品质三档**分：普通 **11** / 稀有 **7** / 史诗 **4**。
 - 两种**正交**分类：`CropType`（单值，决定怎么用）与 `CropCategory`（多值，决定战术功能——陷阱 / 炮台 / 破障 / buff / 建造 / 伤害）。行为由标签驱动，不写死在调用点。
 - **v0.2.0 起不能种植**：15 个作物方块与 22 个作物物品、7 个种子仍全部注册，但右键耕地不响应、不消耗；7 个部署型物品照常摆出。
-- 改造入口是**农产转换器**（本版只作装饰，右键无反应，29 条配方与原方块全部保留）。
+- 改造入口是**农产转换器**（v0.2.2 只作装饰，右键无反应，26 条转换配方与原方块全部保留）。**v0.2.3 会把它重做成「农作物转换器」，见下文。**
 - **史诗档的唯一入口是农民交易**：农民在第 1 / 3 / 5 级各多一项本模组交易，只收绿宝石、每项只能换一次。
 - 队伍归属走**原版记分板**（`TeamResolver` 抽象），不引入自定义阵营系统。
 
@@ -41,10 +41,23 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 
 | 文件 | 内容 | 说明 |
 |---|---|---|
-| `config/farmstorm-server.toml` | **176 键 / 60 组** | 服务端行为；首次起服自动生成 |
+| `config/farmstorm-server.toml` | **176 键 / 60 组**（v0.2.3 起为 **175 键**，见下文） | 服务端行为；首次起服自动生成 |
 | `config/farmstorm-client.toml` | **3 键**（`hud.enabled` / `hud.x` / `hud.y`） | 客户端浮窗开关与位置；**首次进游戏**才生成 |
 
-### v0.2.2 有什么
+### 下一版（v0.2.3，**只有文档，代码未实现**）
+
+**农业流水线闭环了：种原版 → 培养器增殖 → 转换器升级。**
+
+- **农作物转换器重做**（`farmstorm:crop_converter`，取代旧的 `farmstorm:converter`）：硬度与爆炸抗性照**铁砧**；右键把手上**一个**原版作物或平凡作物放进去，**30 秒**后产出 **1 个**对应改良作物并**自动送进绑定的据点核心**。没有界面、不收经验、不收下界之星。工作时方块播放动画、与核心的连线变**红色**（培养器是青色）。
+- **改良作物不再有种子**：7 个种子物品全部删除。改良作物从此**只能靠转换器产出**（或植物学家交易 / 创造栏），不能种。
+- **培养器改装原版作物了**：以前它只收改良作物，现在反过来——**只收原版农作物与平凡作物**，一个改良作物也收不进去。每次给 **2 个投入物 + 2 个对应种子**（自身即种子的作物，比如胡萝卜，直接给 **4 个**）。同时第一次有了**合成配方**（4 铁 + 4 玻璃 + 1 红石）。
+- **平凡韭菜变成能种的作物**：新增 `plain_chives_crop` 方块与 `plain_chives_seeds` 种子，贴图复用朋友的韭。它也是唯一能靠转换器变成朋友的韭的平凡作物。
+- **man瓜炮弹 300 刻后自毁**（15 秒），可配。
+- 进度「最扎人的一集」的描述改为「触发一次「刺球」」。
+
+数字：注册对象 **92**、server config **175 键 / 60 组**、语言键 **321 × 2**、转换配方 **21 条**（原 26，删 6 条种子配方、加 1 条平凡韭菜）。
+
+### 上一版：v0.2.2 有什么
 
 **植物学家（新村民职业）**
 - 职业方块是**据点核心** —— 拿一个核就招一个，要第二个得再放一个核；**有主的核一样能当工作台**（作者口径：不额外加「必须无主 / 必须己方」的判据）。
@@ -264,6 +277,26 @@ python -X utf8 tools/verify_project.py
 
 长期有效的基础文档：[`00-DECISIONS`](docs/zh/00-DECISIONS.md)、[`01-DESIGN`](docs/zh/01-DESIGN.md)、[`02-TECH-SPEC`](docs/zh/02-TECH-SPEC.md)、[`07-PUBLISH`](docs/zh/07-PUBLISH.md)、[`08-DEV-GUIDE`](docs/zh/08-DEV-GUIDE.md)、[`09-IMPL-VS-PLAN`](docs/zh/09-IMPL-VS-PLAN.md)。
 
+### 下一版文档（v0.2.3，**代码未实现**）
+
+六份中文文档已写完，**代码一行未写**。本轮不出英译，`docs/en/` 仍停在 v0.2.1。
+
+| 文件 | 内容 |
+|---|---|
+| [`docs/zh/52-DECISIONS-0.2.3.md`](docs/zh/52-DECISIONS-0.2.3.md) | **唯一真相源**：22 条决策 D-203~D-224 + **18 条作者裁定** |
+| [`docs/zh/53-DESIGN-0.2.3.md`](docs/zh/53-DESIGN-0.2.3.md) | 设计增量：5 条需求 R1~R5、**31 条边界 B-28~B-58**、附录 A 22 行差异、3 节已知影响 |
+| [`docs/zh/54-TECH-0.2.3.md`](docs/zh/54-TECH-0.2.3.md) | 技术规格：注册面 **92**、config **175 键**、语言键 **321 × 2**、**32 条验收**、12 条风险 RT-71~RT-82 |
+| [`docs/zh/55-TASKS-0.2.3.md`](docs/zh/55-TASKS-0.2.3.md) | 任务拆分：**26 个任务 F-286~F-311**、**12 个 Phase 54~65**、六张覆盖表、A-92~A-101、44 人日 |
+| [`docs/zh/56-PROMPT-MAIN-0.2.3.md`](docs/zh/56-PROMPT-MAIN-0.2.3.md) | 实现方主提示词：HC-156~HC-172、N-141~N-154、**44 条陷阱**、20 行事实卡 |
+| [`docs/zh/57-PROMPT-TASKS-0.2.3.md`](docs/zh/57-PROMPT-TASKS-0.2.3.md) | 分阶段任务清单：Phase 54~65 各一节，**76 条出口判据** |
+
+投喂顺序：**先投 56 号一次**，之后每个 Phase 开工时只投 57 号对应的那一节。
+
+**实装时有两个坑必须先知道：**
+
+- **改 config 默认值不会更新已存在的 toml**。盘上现在还是 0.2.1 时代的 `maxPerPlayer = 2`、`cultivatorCapacity = 16`（0.2.2 的 4 / 24 至今没落到文件里）。验收 config 前**先删掉 `config/farmstorm-server.toml` 重新生成**，否则会拿到假红。
+- **老存档升级有损**：`farmstorm:converter` 方块会变成缺失方块、7 种种子物品失效。这是「改名 + 删种子」两条裁定的既定代价。
+
 ### 现行文档（v0.2.2）
 
 六份中文文档已全部实现（`docs/en/` 仍停在 v0.2.1，本轮不出英译）。
@@ -333,6 +366,7 @@ python -X utf8 tools/verify_project.py
 
 | 版本 | 日期 | 一句话 |
 |---|---|---|
+| v0.2.3 | —（**文档阶段**，代码未实现） | 农作物转换器重做（铁砧硬度、右键放入、30 秒、产物进核心、红线、工作动画）、改良作物去种子、培养器只收原版/平凡并给出种子、平凡韭菜可种植、man瓜炮弹 300 刻寿命、进度文案 |
 | v0.2.2 | 2026-11-05 | 植物学家职业（22 项普通 + 1 项史诗，职业方块就是据点核心）、平凡韭菜、`processing_block` 标签与 24 名额、核心界面的 tooltip 与 1 px 错位两个 bug、放置上限 4 |
 | v0.2.1 | 2026-11-05 | 核心每 100 刻自动补绑培养器、核心储物 90 格悬停显示详情、震动豆与 Q弹 让生物停手（AI 原值落盘）、陷阱对敌对 ×3（`trap.damageMultiplier`） |
 | v0.2.0 | 2026-11-04 | 核心变 54 格容器、培养器（16/核 · 600 刻 · 按档准入）、农民交易给史诗档、连线线框；撤销耕地绑定、作物不可种植、转换器停功能 |
@@ -421,6 +455,7 @@ A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 **v0.2.2** ships a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI fixes (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registered types *outside* that count), config stays **176** keys (two defaults change), language keys 338 → **340**. The v0.2.2 spec is **Chinese-only** (no English translation for this round).
 
 - **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.2.2+mc1.21.1.jar` into `mods/`; the `-sources.jar` is for IDEs.
+- **v0.2.3 is documentation-only** (code not implemented yet) and **Chinese-only**: `docs/zh/52`–`57`. It reworks the converter into a crop converter (anvil hardness, right-click insert, 30 s, output auto-delivered to the bound core, red link, working animation), removes all 7 improved-crop seed items, flips the cultivator to accept only vanilla/plain crops, makes `plain_chives` plantable, gives the man-melon bullet a 300-tick lifetime, and renames one advancement description. Registry 98 → 92, config 176 → 175, language keys 340 → 321.
 - **What's new in 0.2.2**: the Botanist profession (job site = Outpost Core; 22 trades at level 1, one epic at level 5), the `plain_chives` plain crop, the `farmstorm:processing_block` tag with a shared 24-binding cap, the two Outpost Core UI fixes, and caps of 4 cores / 24 cultivators per core.
 - **What's new in 0.2.1**: cores auto-rebind unbound cultivators every 100 ticks while under 16, core storage shows item tooltips, the vibration bean and Q-Bounce suspend AI of non-player mobs (the original AI flag is persisted on the entity), and trap crops deal ×3 to hostile mobs (`trap.damageMultiplier`).
 - **What's new in 0.2.0**: the outpost core became a 54-slot container; the new **cultivator** binds to the nearest own core (max 16 per core) and delivers every 600 ticks (2 items, plus 2 seeds when the crop has its own seed item); **farmer trades** at levels 1/3/5 are the only source of EPIC crops; in-world **link lines** connect a core to its cultivators. Crops are **no longer plantable**, the 0.1.1 farmland binding is **disabled** (both classes remain in the tree, unused), and the converter block is decorative.

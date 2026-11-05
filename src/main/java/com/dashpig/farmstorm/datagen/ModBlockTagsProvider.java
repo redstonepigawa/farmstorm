@@ -10,7 +10,7 @@ import net.minecraft.tags.BlockTags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 
 /**
- * 3 条 farmstorm 方块标签 + 2 条并入 minecraft 的挖掘标签（TECH §6.7；needs_diamond_tool 由 F-74 新建）。
+ * 4 条 farmstorm 方块标签 + 2 条并入 minecraft 的挖掘标签（TECH §6.7；needs_diamond_tool 由 F-74 新建）。
  * 条目全部取自注册对象，不写字符串 ID。
  */
 public final class ModBlockTagsProvider extends BlockTagsProvider {
@@ -40,6 +40,9 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
 
         // RT-09：给整合包作者的豁免口子，模组自己不填，空列表起步
         tag(FarmstormTags.BLAST_PROOF);
+
+        // D-194：可被据点核心绑定的方块；本版唯一成员是培养器（converter 不进，裁定 5）
+        tag(FarmstormTags.PROCESSING_BLOCK).add(FarmstormBlocks.CULTIVATOR.get());
 
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 FarmstormBlocks.CONVERTER.get(),

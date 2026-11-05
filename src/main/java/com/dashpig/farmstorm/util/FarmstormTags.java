@@ -8,7 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 /**
- * 6 个 tag key（TECH §2 datagen 一节：v0.0.1 的 5 个 + v0.0.2 的 1 个）。
+ * 7 个 tag key（TECH §2 datagen 一节：v0.0.1 的 5 个 + v0.0.2 的 1 个 + v0.2.2 的 1 个）。
  * 只在这里声明 key，内容由 DataGen Provider 生成，代码不写死成员。
  */
 public final class FarmstormTags {
@@ -25,6 +25,9 @@ public final class FarmstormTags {
 
     /** 5 个部署方块，供 DataGen 与整合包作者批量处理。 */
     public static final TagKey<Block> DEPLOYED_CROPS = block("deployed_crops");
+
+    /** 据点核心「这一格还是不是可绑定的方块」的语义判据（D-194）：本版唯一成员是培养器，converter 不进（裁定 #5）。 */
+    public static final TagKey<Block> PROCESSING_BLOCK = block("processing_block");
 
     /** 15 个改良作物物品（D-09：不具备原版用途）。 */
     public static final TagKey<Item> MODIFIED_CROPS = item("modified_crops");

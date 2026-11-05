@@ -43,7 +43,7 @@
 ① 红线两条：Mixin 0（src/ 下 @Mixin 与 *.mixins.json 均 0 命中）；自定义网络包累计 2 个，协议串仍 "2"，
    本版不新增。两条都不许为了任何一条交易 / POI 需求破例。
 ② 中间态窗口 = F-268（开）→ F-281（关）。窗口内只写「本条键存在 / 不存在」+「本条自己的计数」
-   （贴图 30 张 / 标签 7 个 key / 交易 22 条 / 池 4 条）；语言键总数 340 只在 F-281 断言一次。
+   （贴图**仍 29 张** / 标签 7 个 key / 交易 22 条 / 池 4 条）；语言键总数 340 只在 F-281 断言一次。
 ③ Farmstorm.java:176-179 的断言（total == 97 → 98、items == 33 → 34）必须与 plain_chives 注册
    同一个提交；任何中间状态的启动日志必打 FAIL（格式串在 :180-184）。
 ④ POI 必须进 minecraft:acquirable_job_site 标签（F-276）；不加的后果是村民永不认领，而且不报错。
@@ -72,7 +72,7 @@
 | 段 | 任务边界 | `items` 注册数 | 语言键 | 段内能断言什么 |
 |---|---|---|---|---|
 | 窗口前 | F-267（Phase 46） | **33** | **338** | 可断言 33 / 338（此间无增删），但**不许**断言 34 / 340；本节判据里两个数一个都不写 |
-| 窗口内 A | F-268 ~ F-269（Phase 47） | 实际 **34** | 实际 **338** | 只写「`plain_chives` 这条在注册表里存在」+「`items` 期望 **34**」+「贴图 **30** 张」；**不许**写 340 |
+| 窗口内 A | F-268 ~ F-269（Phase 47） | 实际 **34** | 实际 **338** | 只写「`plain_chives` 这条在注册表里存在」+「`items` 期望 **34**」+「贴图**仍 29 张**」；**不许**写 340 |
 | 窗口内 B | F-270 ~ F-280（Phase 48 ~ 51） | 实际 **34** | 实际 **338** | 只写本条对象的读数（tooltip 出现 / 两段 blit / 标签 7 个 key / 两张新表各 1 个 / 22 项 / 4 池）；**总数一律不写** |
 | 关窗 | F-281（Phase 52） | **34** | **340** | 一次写 340 × 2 + 前缀分组 + 两处注释同步；这是全文第一次出现 340 |
 | 关窗后 | F-282 ~ F-285（Phase 52 ~ 53） | 34 | 340 | 98 / 3 类 / 176 / 60 / 7 / 340 六个数都可断言（F-285 签字引用 F-281 的读数） |
@@ -156,7 +156,7 @@
 
 - 上一节 §1.4 的**第 1 / 2 / 3 条**已绿：`farmstorm-0.2.2+mc1.21.1.jar` 与 sources jar 同时产出、`0.2.2` 命中 6 处、`git diff gradle.properties` 只 1 行。
 - 基线读数（UTF-8 读法）：`registry/FarmstormItems.java` 现 **197** 行，物品段 = **22** 次 `cropItem(` + **7** 次 `seedItem(` + **4** 次 `registerItem(`（48 号 §1.2 第 1 行逐条给了行号）；`Farmstorm.java` 的断言在 `:176-179`；`src/main/java` 的 Java 文件数 **149**；`textures/item/` 现 **29** 张 PNG。
-- **中间态窗口在本节 F-268 打开**：开窗动作 = `plain_chives` 注册 + `Farmstorm.java:176-179` 的断言 + 8 处「97」注释 + `verify_project.py` 两处期望 **同一个提交**。窗口内本节只写「`plain_chives` 这条在注册表里存在」「`items` 期望 **34**」「贴图 **30** 张」；**不写**语言键的任何总数。
+- **中间态窗口在本节 F-268 打开**：开窗动作 = `plain_chives` 注册 + `Farmstorm.java:176-179` 的断言 + 8 处「97」注释 + `verify_project.py` 两处期望 **同一个提交**。窗口内本节只写「`plain_chives` 这条在注册表里存在」「`items` 期望 **34**」「贴图**仍 29 张**」；**不写**语言键的任何总数。
 - **断言与注册同一提交（死命令）**：只改注册不改断言 ⇒ 启动日志 `:180-184` 打 `→ FAIL`；只改断言不改注册 ⇒ `verify_project.py` 报 `98 / 97`。任一中间状态都是一个**必打 FAIL** 的提交，不许留在历史里。
 - 冻结面：`verify_project.py` 的 **config 期望面**一个字节不动（`expected_config_keys*` 五个函数体、期望数 **176**）；`FarmstormItems` 的 `foodProperties(...)` / `otherProperties()` 两个方法体一行不动；`CropProfile` / `CROP_ITEMS` / `MODIFIED_CROPS` / `SEEDS` 在 `src/` 下各 **0** 命中。
 - 手边四份：49 号 F-268 / F-269 与 §5.2 / §5.6（A-83 / A-84 / A-87）；48 号 §2.5、§3 #11 / #15 / #16 / #17 / #30 / #33；47 号 §3；`BRIEF` §3.4 第 14、17 行。
@@ -167,14 +167,14 @@
 
 把 `plain_chives` 从「注册表里的一个 id」变成「玩家在创造栏里看得见、后来还能被植物学家卖出来的物品」，并且**在同一个提交里**把注册面从 97 / 33 推到 98 / 34——这是本版唯一一处「改一半就打 FAIL」的地方。
 
-本节结束时：启动日志 `98 / 34 … → OK`、脚本 `98 / 98`、贴图 30 张；语言键的总数**不在本节出现**，它由 F-281 一次收口。
+本节结束时：启动日志 `98 / 34 … → OK`、脚本 `98 / 98`、贴图**仍 29 张**；语言键的总数**不在本节出现**，它由 F-281 一次收口。
 
 ### 2.3 任务清单（F-268 ~ F-269）
 
 | 任务 | 标题 | 复杂度 | 人日 | 依赖 | 本阶段交付物 |
 |---|---|---|---|---|---|
 | F-268 | `plain_chives` 注册 + 注册面 98 的原子提交（**开窗**） | M | 1.5 | — | `FarmstormItems`（`:124` 前 +1 个 `DeferredItem`、`:127-136` +1 行、`:26` 注释 33 → 34）、`Farmstorm.java:176-179`（98 / 34）、8 处「97」注释、`tools/verify_project.py:334` / `:378` |
-| F-269 | 平凡韭菜的可见面：贴图 + 模型注释 | S | 0.5 | F-268 | `tools/gen_textures.py` 的 `ICONS` +1 条、产物 `textures/item/plain_chives.png`、`ModItemModelProvider:20` / `:84` 的两处「31 个」 |
+| F-269 | 平凡韭菜的可见面：模型改指朋友的韭 + 模型注释 | S | 0.5 | F-268 | `tools/gen_textures.py`（`plain_chives` 那条退役）、`ModItemModelProvider:51-54`（`layer0` 改指 `item/friend_chives`）、`:20` / `:84` 的两处「31 个」 |
 
 阶段小计：**2 个任务、2.0 人日**（S 1 / M 1 / L 0）。
 
@@ -184,9 +184,9 @@
 - [ ] **工具两行读数（F-268 / 48 号 §8 #2）**：怎么验：`python -X utf8 tools/verify_project.py`。通过的样子：打印 `已核 registry 对象: 98 / 98`；第 1 节 config 两行仍是 **176**（本任务不加键）；退出码 **0**。
 - [ ] **断言只动两处、其余 11 处不动（F-268 / 49 号 A-83）**：怎么验：读 `Farmstorm.java:176-179` 并逐个数 `==`。通过的样子：`total == 98` **1** 处、`items == 34` **1** 处；**其余 11 个逐类 `==`**（`blocks 27` / `block_entities 8` / `entity_types 13` / `mob_effects 4` / `sound_events 3` / `recipe_types 1` / `recipe_serializers 1` / `creative_tabs 1` / `damage_types 3` / `data_components 1` / `menu_types 2`）逐字未变——是 11 个，不是 10 个。
 - [ ] **8 处注释同提交（F-268 / 49 号 A-84）**：怎么验：`grep -n '\b97\b'` 在 `src/main/java` 下。通过的样子：改前 **9** 行（8 行注释 + `:176` 的代码），改后 **0** 行；8 处 = `Farmstorm.java:62` / `:156` / `:157` / `:189` + `registry/FarmstormAttachments.java:13` / `:16` / `:18` / `:22`。其中 `:156` 的沿革序列与 `Attachments:18` 的「97 → 98」按**改写**处理而不是逐字替换（见 §2.5 第 2 条），两行的语义仍成立。Java 文件数仍 **149**（本任务不新增类）。
-- [ ] **工具两处期望面（F-268 / 48 号 §8 #3、#4）**：怎么验：读 `tools/verify_project.py:334` 与 `:378`。通过的样子：`EXPECTED["items"]` 的长度 = **34**（含 `plain_chives`）、`EXPECTED_COUNTS["items"] == 34`，且两处**同一个提交**；`EXPECTED_COUNTS` 的其余 **11** 项逐字未变；config 期望面（`expected_config_keys*` 五个函数体、期望数 176）**一个字节未改**。
+- [ ] **工具两处期望面（F-268 / 48 号 §8 #3、#4）**：怎么验：读 `tools/verify_project.py:334` 与 `:380`（`EXPECTED` 里的 `plain_chives` 在 `:342`、`EXPECTED_COUNTS` 的 `"items"` 在 `:381`）。通过的样子：`EXPECTED["items"]` 的长度 = **34**（含 `plain_chives`）、`EXPECTED_COUNTS["items"] == 34`，且两处**同一个提交**；`EXPECTED_COUNTS` 的其余 **11** 项逐字未变；config 期望面（`expected_config_keys*` 五个函数体、期望数 176）**一个字节未改**。
 - [ ] **进创造栏、不进作物面（F-268 / 48 号 §8 #28、#29）**：怎么验：读 `FarmstormItems#creativeTabItems()` 与作物自检行。通过的样子：该清单多 **1** 行、总数 **33 → 34** 项；`Farmstorm#logSelfCheck` 的「作物 22 种 / 投掷 12 / 部署 7 / 食用 3」四个数**一字不变**；`CROP_ITEMS` / `MODIFIED_CROPS` / `SEEDS` 里 `plain_chives` 命中 **0**。
-- [ ] **贴图与模型注释（F-269 / 48 号 §8 #30、§10 #9）**：怎么验：数 `textures/item/` 的 `.png` 数并读 PNG 头四个字节，再 grep 注释。通过的样子：文件数 **29 → 30**；`plain_chives.png` 的 IHDR 宽高都是 **16**；`ModItemModelProvider.java` 里 `31 个` 命中 **0**（`:20` 与 `:84` 两处都改），`basicItem(` 仍 **1** 处调用。
+- [ ] **贴图与模型注释（F-269 / 48 号 §8 #30、§10 #9）**：怎么验：数 `textures/item/` 的 `.png` 数并读 PNG 头四个字节，再 grep 注释。通过的样子：文件数**仍 29**（本版**不新增**）、`textures/item/plain_chives.png` **不存在**；`models/item/plain_chives.json` 的 `layer0` = `farmstorm:item/friend_chives`，该 PNG 的 IHDR 宽高都是 **16**；`ModItemModelProvider.java` 里 `31 个` 命中 **0**（`:20` 与 `:84` 两处都改），`basicItem(` 仍 **1** 处调用。
 
 ### 2.5 翻车点
 
@@ -198,14 +198,14 @@
 | 顺手动 `verify_project.py` 的 **config** 期望面 | 把「改默认值」误当成「改期望面」，去动 176 ⇒ 方向错（48 号 §4.4） | config 期望面一个字节不改；判据 5 的负向半句单独核一遍 |
 | 给 `plain_chives` 加合成配方 / 加种子 / 建方块形态 | 多出第四条获取路径；`blocks` 27 → 28、`entity_types` 13 → 14，§2.4 的整行日志崩 | 裁定 #3 明令不做配方；`CropProfile` / `SEEDS` 命中 0 |
 | 顺手改 `ModLangProvider` 的两处总数注释 | 窗口内提前改语言面 ⇒ 后面的每节都要重算总数，必有一节算错 | 窗口纪律第 2 条：`ModLangProvider` 一个字不动，直到 F-281 |
-| 只补注册不补贴图 | 注册表里有、创造栏里是紫黑格 | 判据 7 单独核 PNG 的张数与 IHDR；提醒「datagen 不出 PNG」 |
+| 只补注册不改模型 | 注册表里有、创造栏里是紫黑格 | 判据 7 单独核 PNG 张数（仍 29）+ 模型 `layer0` + IHDR；提醒「datagen 不出 PNG」 |
 
 ### 2.6 汇报格式
 
-- **改了哪些文件**：`git diff --stat` 原文；F-268 的四处（`FarmstormItems` 三段、`Farmstorm.java:176-179`、两个类的 8 行注释、`verify_project.py:334` / `:378`）逐处点名；F-269 的两处模型注释与 `gen_textures.py` 的 `ICONS` 条目。
+- **改了哪些文件**：`git diff --stat` 原文；F-268 的四处（`FarmstormItems` 三段、`Farmstorm.java:176-179`、两个类的 8 行注释、`verify_project.py:334` / `:380`）逐处点名；F-269 的两处模型注释、`ModItemModelProvider` 的 `layer0` 分支与 `gen_textures.py` 里退役的那一条。
 - **跑了什么命令**：`.tools\gw.cmd build` 的退出码；一次起服的日志读法；`python -X utf8 tools/verify_project.py` 的完整输出；`grep -c '\b97\b'` 改前改后两次；`textures/item/` 的文件计数。
 - **观察到什么**：`latest.log` 那条自检行的**完整原文**（含 12 个逐类读数与末尾的 `OK`）；`EXPECTED_COUNTS["items"]` 的前后两行；`ModItemModelProvider` 两处注释的前后对照。
-- **没做的与做不了的**：一条一行写「未验证」与原因（例如「紫黑格」只能进游戏看，写明替代读数：PNG 张数 + IHDR 尺寸）。
+- **没做的与做不了的**：一条一行写「未验证」与原因（例如「紫黑格」只能进游戏看，写明替代读数：PNG 张数（仍 29）+ 模型 `layer0` + IHDR 尺寸）。
 - **未关闭的问题**：例如 `plain_chives` 的 `saturationModifier = 0.1` 与「饱食 2」的配套关系是否与 47 号 §3.3 逐字一致，本节只登记实现取值、不重开设计。
 
 ---
@@ -244,7 +244,7 @@
 - [ ] **`render` 覆写的形态（F-270 / 48 号 §2.1.2）**：怎么验：读 `OutpostCoreScreen` 并数调用点。通过的样子：`renderTooltip(` 命中 **1**、`super.render(` 命中 **1** 且文本上**先**出现；`render` 覆写 **1** 处（4 参 `GuiGraphics, int, int, float`，`@Override` 在位）；`renderBg` 覆写仍 **1** 处且逐字未变；`public` 可见性只在既有方法上，没有把 `renderTooltip` 改成 `public`。
 - [ ] **两次 blit 的形态（F-271 / 48 号 §8 #23）**：怎么验：读 `renderBg` 的方法体。通过的样子：`blit(` 恰 **2** 处；两个 `v` 分别是 **0** 与 **126**；第二段的 y 是 `topPos + 125`、高 **96**；贴图尺寸仍 **256 × 256**（不是 176 × 222）；`imageWidth` 仍 **176**、`imageHeight` 仍 **222**。
 - [ ] **像素级对齐（F-271 / 48 号 §8 #22）**：怎么验：把同一种物品分别放进 54 格区与玩家背包区，截图并与 0.2.1 的旧图并排比对背包 3 行。通过的样子：背景格顶边与物品 16×16 顶边相差 **0 px**（改前 **1 px**）；截图文件名进汇报。
-- [ ] **槽位与行数（F-271 / 负向）**：怎么验：读 `OutpostCoreMenu:44-46` / `:80`、`OutpostCoreScreen` 的 UTF-8 行数与 `git diff --stat`。通过的样子：槽位 y 仍是 **139 / 157 / 175 / 197**（一个都没动）；`OutpostCoreScreen` 由 **42** 行只增不减且 ≥ **47**（`render` 覆写的 **5** 行：注解 + 签名 + `super.render` + `renderTooltip` + 收尾；`blit` 由 1 处拆成 2 处、净增记在 `git diff --stat` 里）——**不写「约 47」**，精确值由 diff 的 `+N / −M` 给；`menu_types` 仍 **2**（不新增屏幕类）。
+- [ ] **槽位与行数（F-271 / 负向）**：怎么验：读 `OutpostCoreMenu:44-46` / `:80`、`OutpostCoreScreen` 的 UTF-8 行数与 `git diff --stat`。通过的样子：槽位 y 仍是 **139 / 157 / 175 / 197**（一个都没动）；`OutpostCoreScreen` 由 **42** 行只增不减、终值 **53**（F-270 的两次 blit +6、F-271 的 `render` 覆写 +5：注解 + 签名 + `super.render` + `renderTooltip` + 收尾）；精确值仍以 `git diff --stat` 的 `+N / −M` 为证据；`menu_types` 仍 **2**（不新增屏幕类）。
 
 ### 3.5 翻车点
 
@@ -277,7 +277,7 @@
 - 默认值现状：`config/FarmstormConfig:943` 是 `maxPerPlayer` 的 `defineInRange(..., 2, 1, 64)`、`:956` 是 `cultivatorCapacity` 的 `defineInRange(..., 16, 1, 64)`；盘上 `run/config/farmstorm-server.toml:753` = **2**、`:765` = **16**。
 - **本节仍在中间态窗口内**：本节的三个任务都不新增语言键，判据里语言键总数出现 **0** 次；「上限 4 / 绑定 24」是新 config 的读数，与语言面无关。
 - **老 toml 的红是期望中的红**：改默认值**不会**更新已存在的 toml（NeoForge 只补键 / 删键）⇒ 判据 6 专门用老 toml 断言「仍是 2 / 16」，它必须与判据 5（新 config 的绿）**成对**跑。只跑一条就是误判。
-- 冻结面：`MAX_LINKS = 1024`（`network/CultivatorLinkPayload:35`）一个字符不动；`FarmstormConfig` 的 `b.push(` / `b.pop()` 各 **60**、行首 `.define*` **176**；`OutpostCoreBlockEntity:546-547` 的 `AreaBlockEntities.collect(..., CultivatorBlockEntity.class)` 不改；`addCultivator(BlockPos)` 签名不动；`converter` 的方块 / 配方 / `CONVERTER_FUEL` / 菜单全部照旧。
+- 冻结面：`MAX_LINKS = 1024`（`network/CultivatorLinkPayload:36`）一个字符不动；`FarmstormConfig` 的 `b.push(` / `b.pop()` 各 **60**、行首 `.define*` **176**；`OutpostCoreBlockEntity:546-547` 的 `AreaBlockEntities.collect(..., CultivatorBlockEntity.class)` 不改；`addCultivator(BlockPos)` 签名不动；`converter` 的方块 / 配方 / `CONVERTER_FUEL` / 菜单全部照旧。
 - 手边四份：49 号 F-272 / F-273 / F-274 与 §5.3 / §5.4（A-85 / A-90）；48 号 §2.6 / §2.7、§3 #18 ~ #28、§8 #6 / #9 / #10 / #24 ~ #26；47 号 §4、§5.3 ~ §5.5；`BRIEF` §3.4 第 5、6、12、13、18 行。
 - **三个「16」的白名单**：`FarmstormConfig:841`（桑吉尔蔗抬升 16 格）、`behavior/ZangiefPiledriverController:52`（16 格 / 15 刻）、`client/WildHunterClientState:15`（`loopSoundRange` 默认 16.0）——这三个数与本键无关，改它们会引入新错误。
 
@@ -293,7 +293,7 @@
 |---|---|---|---|---|---|
 | F-272 | `FarmstormTags.PROCESSING_BLOCK` + 标签产物 | S | 0.5 | — | `util/FarmstormTags.java:18-36` 第 7 个 `TagKey<Block>`；`datagen/ModBlockTagsProvider` +1 条 `tag(...)`；产物 `data/farmstorm/tags/block/processing_block.json` |
 | F-273 | 绑定判据落点：两处 `instanceof` → 标签判定 | M | 1.5 | F-272 | `blockentity/OutpostCoreBlockEntity:393` / `:783` 改调同一个私有静态辅助方法（判据即「该 state 带 `PROCESSING_BLOCK` 标签」） |
-| F-274 | 两个默认值 4 / 24 + 八处注释同提交 | M | 1.5 | F-273 | `config/FarmstormConfig:943` 与 `:956` 的第二实参；8 处注释（`:236` / `:238` / `:952` / `:333` / `OutpostCoreBlockEntity:116` / `:349`、`OutpostCoreMenu:30`、`CultivatorLinkPayload:31-34`） |
+| F-274 | 两个默认值 4 / 24 + 八处注释同提交 | M | 1.5 | F-273 | `config/FarmstormConfig:943` 与 `:956` 的第二实参；8 处注释（`:236` / `:238` / `:952` / `:333` / `OutpostCoreBlockEntity:116` / `:349`、`OutpostCoreMenu:30`、`CultivatorLinkPayload:31-34`（改前）） |
 
 阶段小计：**3 个任务、3.5 人日**（S 1 / M 2 / L 0）。
 
@@ -301,7 +301,7 @@
 
 - [ ] **标签 7 个 key（F-272 / 48 号 §8 #6）**：怎么验：读 `FarmstormTags` 数 `TagKey` 声明。通过的样子：声明数 = **7**（`TagKey<Block>` **4** 个 + `TagKey<Item>` **3** 个）；`PROCESSING_BLOCK` 的 path 字面量是 `processing_block`；**不是 8**——POI 那条标签用的是原版 `PoiTypeTags.ACQUIRABLE_JOB_SITE`，不在本类里。
 - [ ] **标签产物只有一个成员（F-272 / 48 号 §8 #6、#7）**：怎么验：跑一次 datagen 后读 `src/generated/resources/data/farmstorm/tags/block/processing_block.json`。通过的样子：文件存在，`values` 里**只有** `farmstorm:cultivator` 一个成员；`converter` 命中 **0**；`ModBlockTagsProvider` 的 `tag(` 调用 **5 → 6**。
-- [ ] **判据落点（F-273 / 48 号 §2.6.3）**：怎么验：grep 两个 `instanceof` 与辅助方法。通过的样子：`instanceof CultivatorBlock` 在 `src/main/java` 下命中 **0**；新辅助方法的声明 **1** 处、调用 **2** 处（`:393` 与 `:783`）。
+- [ ] **判据落点（F-273 / 48 号 §2.6.3）**：怎么验：grep 两个 `instanceof` 与辅助方法。通过的样子：`instanceof CultivatorBlock` 在**落点文件 `OutpostCoreBlockEntity`** 内命中 **0**（全仓另有 **3** 处既有命中：`CultivatorBlockEntity:257`、`ModItemModelProvider:69`、`ModBlockStateProvider:79`，属按方块类型判别的 datagen / 方块自身逻辑，**不属本判据面、不许改**）；新辅助方法的声明 **1** 处、调用 **2** 处（`:393` 与 `:783` 是改前位置）。
 - [ ] **类型面不放开（F-273 / 负向）**：怎么验：读 `OutpostCoreBlockEntity:546-547` 与 `:358`。通过的样子：`AreaBlockEntities.collect(..., CultivatorBlockEntity.class)` 仍是 **1** 处且参数未变；`addCultivator(BlockPos)` 的签名与 `:783` 的日志文案逐字未变；行为等价（把已绑位置换成非标签方块 ⇒ 该条被摘；换成 `cultivator` ⇒ 保留）。
 - [ ] **新 config 的绿（F-274 / 48 号 §8 #10、#24、#25）**：怎么验：备份后删掉 `run/config/farmstorm-server.toml`，重启让游戏重生成。通过的样子：重生成的 toml 里 `maxPerPlayer = 4`、`cultivatorCapacity = 24`；键 **176**、段 **60**；游戏内同一玩家放第 **4** 个核成功、第 **5** 个被拒绝，且被拒绝时物品**不消耗、不掉落**。
 - [ ] **老 toml 的期望红（F-274 / 48 号 §8 #9）**：怎么验：把升级前的 toml 放回再启动，读 `:753` 与 `:765`。通过的样子：读到 `maxPerPlayer = 2` 与 `cultivatorCapacity = 16`——**这条红是正常的**，必须与上一条成对记录，并写明「默认值只对新装生效」。绑定侧的读数：一个核周围放 **25** 个培养器 ⇒ 绑定表恰 **24** 条且不再增长，第 25 个绑不上，已绑的 24 条顺序与坐标一条不变。
@@ -317,7 +317,7 @@
 | 以为改了 `defineInRange` 就等于玩家看到 4 / 24 | 老存档 toml **不会**变，拿老 toml 判这两条**必然假红**（RT-63） | 判据 5 与 6 成对；汇报里两条必须相邻出现 |
 | 漏 `OutpostCoreBlockEntity:333` 的「× 16 条」 | 48 号 §8 #26 的 grep 永远留一个命中，判据 7 的「3 处白名单」不成立 | 按 A-85 把它列进八处；改后 grep 只有 3 行白名单 |
 | 顺手改了三处无关的 16（`:841` / `:52` / `:15`） | 抬升高度、相位常数、音效范围被换成 24 ⇒ 三处玩法数值被动 | 白名单三条点名写死；判据 7 只允许这 3 行 |
-| 把 `MAX_LINKS` 抬到 4096 | 协议串仍 `"2"` 的兼容承诺多一个不必要的变更点（D-201 已否决） | 常量在 `:35`，冻结面；只改 `:31-34` 的 javadoc |
+| 把 `MAX_LINKS` 抬到 4096 | 协议串仍 `"2"` 的兼容承诺多一个不必要的变更点（D-201 已否决） | 常量在 `:36`（改前 `:35`），冻结面；只改 `:31-34`（改前）的 javadoc |
 | 注释分两次提交 | 留下「注释说 16、代码是 24」的窗口——比不写注释更糟 | 八处注释与两个数字同一个提交；判据 7 一次核全部 |
 | 以为「名额改 24」要顺手改语言键的描述 | 去动 `ModLangProvider` 或两份 `lang/*.json` ⇒ 窗口内提前开第二个口子，F-281 的「一次改齐」失效 | 两个键的描述**不含默认值**（48 号 §2.7.1 第 2 条）⇒ 语言键**不用改**；本节判据里语言键总数出现 0 次 |
 
@@ -366,7 +366,7 @@
 - [ ] **职业六字段（F-277 / 48 号 §2.3.4）**：怎么验：读新类逐字段比对。通过的样子：恰 **1** 个职业注册，id 字面量 `botanist`；`requestedItems` 与 `secondaryPoi` 都是**空集**；`workSound` 是 `null`；两个谓词**只认 POI key**——不按方块、不按 `ownerUuid`、不按距离，且**不是** `ALL_ACQUIRABLE_JOBS`。
 - [ ] **注册行数 12 → 14 且 POI 在前（F-275 / F-277 / 48 号 §3 #10）**：怎么验：数 `Farmstorm.java` 构造器的 `.register(modBus)` 并看行序。通过的样子：**14** 行；`FarmstormPoiTypes` 那一行的行号**小于** `FarmstormVillagerProfessions` 那一行；两行都在 `FarmstormAttachments`（`:63`）之后；`:176-179` 的断言**逐字未变**（相对 F-268 之后的状态，即 `total == 98` / `items == 34`）。
 - [ ] **POI 标签产物（F-276 / 48 号 §8 #8、#16）**：怎么验：跑一次 datagen 后读产物路径与内容。通过的样子：`src/generated/resources/data/minecraft/tags/point_of_interest_type/acquirable_job_site.json` 存在，`values` 含 `farmstorm:botanist`；`data/farmstorm/` 下**没有**同名文件；没有多出 `minecraft:village` 与 `minecraft:bee_home` 两份不该由我们写的文件；`FarmstormDataGen` 的 `addProvider` **11 → 12**，新 provider 挂在 `event.includeServer()`。
-- [ ] **Java 文件数（F-275 ~ F-277 / 48 号 §1.1）**：怎么验：数 `src/main/java` 的 `.java` 文件。通过的样子：**149 → 152**（三个任务各 +1，逐节记录 150 / 151 / 152）；`menu_types` 仍 **2**、`blocks` 仍 **27**。
+- [ ] **Java 文件数（F-275 ~ F-277 / 48 号 §1.1）**：怎么验：数 `src/main/java` 的 `.java` 文件。通过的样子：**149 → 152**（三个任务各 +1，逐节记录 150 / 151 / 152；本版终态 **154**）；`menu_types` 仍 **2**、`blocks` 仍 **27**。
 - [ ] **认领的行为读数（F-283 复核，本节只留可复现步骤）**：怎么验：放 1 个据点核心 + 1 个**无业**村民，站到核旁 2 格内后读 `/data get entity <villager> VillagerData.Profession`。通过的样子：读数是 `"farmstorm:botanist"`；同一核旁再拉 1 个无业村民 ⇒ 第二个**不会**变成植物学家（`maxTickets = 1` 的语义）；**有主**的核（`ownerUuid` 非空）**照样**被认领。反向那一条（临时注释掉 `tag(...)` 再 datagen ⇒ 永不认领）由 §8.4 的 `#16` 执行，本节只负责让「加着」成为默认态。
 
 ### 5.5 翻车点
@@ -424,7 +424,7 @@
 
 - [ ] **22 条普通交易（F-278 / 48 号 §8 #17）**：怎么验：`grep -c 'new BotanistTrade('` 与 `BotanistTrade.NORMAL.size()`。通过的样子：前者 = **22**；后者 = **22**；清单第 **19** 项是 `farmstorm:compressed_puffed_wheat`、第 **20** 项是 `farmstorm:plain_chives`（47 号 §2.3 的对应两行）；`getOffer` 里**没有**第二次抽签、**不返回 `null`**。
 - [ ] **六个类常量与键数不变（F-278 / 48 号 §2.4.3）**：怎么验：读常量并数 config 键。通过的样子：`3` / `6` / `8` / `1` / `2` / `0.0F` 六个值逐一在位；`FarmstormConfig` 的键数仍 **176**、组数仍 **60**（价格是类常量，不读 `trade.*`、不新增键）。
-- [ ] **史诗池与常量（F-279 / 48 号 §8 #19 的前半）**：怎么验：读池的构造与常量。通过的样子：池大小 = **4**，成员是 `awakened_torchflower` / `awakened_pitcher_plant` / `lucky_berry` / `wild_apple`；常量 = `40` / `64` / `1` / `1` / `2` / `0.0F`；`getOffer` 里的随机抽取调用恰 **1** 处；进的是 **5 级**。
+- [ ] **史诗池与常量（F-279 / 48 号 §8 #19 的前半）**：怎么验：读池的构造与常量。通过的样子：池大小 = **4**，成员是 `awakened_torchflower` / `awakened_pitcher_plant` / `lucky_berry` / `wild_apple`；常量 = `40` / `64` / `1` / `1` / `2` / `0.0F`；**池抽取**恰 **1** 处（`pool.get(random.nextInt(pool.size()))`，`BotanistEpicTrade:57`）；**定价另有一处 `random.nextInt`**（`MIN_PRICE + random.nextInt(MAX_PRICE - MIN_PRICE + 1)`，与 `TierTrade:75` 同形）⇒ **不许用机械 grep 数 `random.nextInt` 总数**；进的是 **5 级**。
 - [ ] **分支接线与农民三行（F-280 / 48 号 §3 #14、#29）**：怎么验：读 `VillagerTradeEvents:29-36` 与 `:10-11`。通过的样子：植物学家分支**写在农民早退之前**且**带 `return`**，两段**不是**合并成一个 `if`；`VillagerProfession.FARMER` 的判断仍在且**在植物学家分支之后**；`:33` / `:34` / `:35` 三行 `add` 的文本逐字未变；`:10-11` 里 `TagsUpdatedEvent` 命中 **0**、`SERVER_DATA_LOAD` 命中 ≥ **1**。
 - [ ] **界面只见 2 项（F-280 / 48 号 §8 #18，必须重启服务端）**：怎么验：改完交易后**重启服务端**（不用 `/reload`），与植物学家开界面。通过的样子：只显示 **2** 项普通交易（不是 22 项）；换一个**新**植物学家 ⇒ 至少有一项不同；记录里写明「重启」二字与启动的 `gameTime`。
 - [ ] **5 级 1 项史诗且补货不变（F-280 / 48 号 §8 #19，必须重启服务端）**：怎么验：把植物学家练到 5 级，看报价；再让它补货**两次**。通过的样子：出现 **1** 项史诗报价；补货两次后**仍是同一个物品**，价格仍落在 **40 ~ 64**；记录里不出现「每次补货重抽」这类表述（RT-67）。
@@ -439,7 +439,7 @@
 | 在 `getOffer` 里再抽一次签 | 「22 项」变成「22 × 每次刷新」，列表长度不可复现 | 判据 1 明写不抽签；`size() == 22` 是唯一能抓到的闸 |
 | 某条 listing 返回 `null` | 该条**静默消失**（原版对 null 是「跳过、不计数、不报错」），列表少于 22 条 | 判据 1 的 `size() == 22` 逐条兜；不许写 `null` 分支 |
 | 用 `/reload` 判分支是否生效 | 看到旧列表，误判成「代码没生效」，进而去改本来没坏的代码（`VillagerTradingManager` 只认 `SERVER_DATA_LOAD`） | 判据 5 / 6 都写「重启服务端」；汇报里写明重启方式 |
-| 把 22 项分散到 5 级，或为了「都能看到」自建池 | 推翻裁定 #11；可见项数的算术（`2 × 5 = 10`）也不成立 | 全进 1 级；判据 5 只要求 2 项 |
+| 把 22 项摊错级别（全塞 1 级、或摊到 5 级），或为了「都能看到」自建池 | 推翻裁定 #11（1~4 级 = 6 / 6 / 6 / 4）；满级可见数的算术（`4 × 2 + 1 = 9`）也不成立 | 摊到 1~4 级；判据 5 只要求 1 级那 **2** 项 |
 | 把史诗写成「4 个都卖」或「补货换一个」 | 玩家会去刷补货然后报 bug（RT-67）；4 项也超出「固定 1 项」 | 判据 3 点明池 4 取 1；判据 6 用「补货两次仍是同一物品」验 |
 | 顺手给交易项加 config 键 | 176 → 178，与 D-189 冲突 | 判据 2 核 176 / 60；价格写类常量 |
 | 顺手给交易界面加语言键（标题 / 说明） | 窗口内新增第二条语言键 ⇒ 玩家的 raw key 风险前移，且 F-281 算出的总数不再是最终值 | 22 项复用物品名、史诗复用作物名，交易面**没有**自有语言键；本节判据里语言键总数出现 0 次 |
@@ -584,7 +584,7 @@
 | 3 | POI 必须进 `minecraft:acquirable_job_site`，否则永不认领且不报错 | 前置：§5（含代码路径 `Villager.java:181-182`）；翻车点：§5 第 1 / 3 行；判据：§5 第 4 条（产物路径 + 命名空间）、§8 第 2 条（`#16` 反向） | 村民四处走、界面无任何报错——最难定位的一类失败（RT-64） |
 | 4 | 「上限 4 / 绑定 24」必须用新生成的 config；老 toml `:753` = 2、`:765` = 16 是期望中的红 | 前置：§4（含盘上读数）、§8；翻车点：§4 第 4 行、§8 第 1 / 3 行；判据：§4 第 5 / 6 条（**必须成对**）、§8 第 2 条 | 拿老 toml 判这两条必然假红；只跑 `#10` 会把「只对新装生效」读成回归 |
 | 5 | 交易相关验收必须**重启服务端**（`/reload` 不重发 `VillagerTradesEvent`） | 前置：§6（含 `SERVER_DATA_LOAD` 依据）、§8；翻车点：§6 第 5 行、§8 第 2 行；判据：§6 第 5 / 6 条、§8 第 2 条 | `/reload` 之后看到旧列表是正常的，会被误判成「分支没生效」 |
-| 6 | 改默认值要同改 **八处**注释；注册面 97 → 98 要同改 **八处**「97」注释——两组各 8 处，互不重叠 | 前置：§2（8 处「97」：`Farmstorm.java:62/156/157/189` + `FarmstormAttachments:13/16/18/22`）、§4（8 处默认值：`FarmstormConfig:236/238/952` + `OutpostCoreBlockEntity:116/349/333` + `OutpostCoreMenu:30` + `CultivatorLinkPayload:31-34`）；翻车点：§2 第 2 行、§4 第 5 / 8 行；判据：§2 第 4 条、§4 第 7 条 | 注释与代码相反，下一位读者按注释推算得出 32 / 1024 之类的错数（RT-68）；本版两组共 **16** 行注释，是 0.2.1 的三倍工作量 |
+| 6 | 改默认值要同改 **八处**注释；注册面 97 → 98 要同改 **八处**「97」注释——两组各 8 处，互不重叠 | 前置：§2（8 处「97」：`Farmstorm.java:62/156/157/189` + `FarmstormAttachments:13/16/18/22`）、§4（8 处默认值：`FarmstormConfig:236/238/952` + `OutpostCoreBlockEntity:116/349/333` + `OutpostCoreMenu:30` + `CultivatorLinkPayload:31-34`（改前））；翻车点：§2 第 2 行、§4 第 5 / 8 行；判据：§2 第 4 条、§4 第 7 条 | 注释与代码相反，下一位读者按注释推算得出 32 / 1024 之类的错数（RT-68）；本版两组共 **16** 行注释，是 0.2.1 的三倍工作量 |
 | 7 | 三处「原子提交」不许拆（F-268 / F-274 / F-281） | 前置：§2 / §4 / §7 各一句；翻车点：三节的最后一行；判据：§2 第 4 条、§4 第 7 条、§7 第 3 条 | 拆开就留下「注册了没断言」「改了值没改注释」「加了键没改总数」三种半截状态 |
 
 ## 10. 本文件的一致性自检
@@ -597,7 +597,7 @@
 | 4 | 任务号 / 标题 / 复杂度 / 人日 / 依赖与 49 号一致 | 19 行逐行比对 49 号 §1 表与各任务标题行：编号 **19/19**、标题 **19/19**、S/M/L **19/19**、人日 **19/19**、依赖 **19/19**（依赖为 `—` 的共 **5** 个：F-267 / F-268 / F-270 / F-272 / F-279——49 号 §1 表逐行如此，而 49 号 §7 第 10 条写「4 个」漏了 F-279，本文按表取 5） | 通过 |
 | 5 | 人日自洽 | 八节小计 `0.5 + 2.0 + 1.0 + 3.5 + 4.5 + 2.5 + 2.0 + 7.5 = 23.5`；复杂度 `S 8 / M 9 / L 2`；`23.5 × 1.25 = 29.375` | 通过 |
 | 6 | 出口判据总数与分布 | 合计 **52** 条：§1 **5** / §2 **7** / §3 **6** / §4 **7** / §5 **6** / §6 **7** / §7 **7** / §8 **7**；每条以 `- [ ]` 开头，每节 ≥ **5** 条（硬底是 4） | 通过 |
-| 7 | 中间态窗口写对 | 窗口只落在 §2（F-268 开）与 §7（F-281 关）：§2 只写「这条在注册表里存在」+「`items` 期望 34」+「贴图 30 张」，§3 ~ §6 只写本条自己的计数，§7 一次写 340 × 2，§8 只引用不重算；`340` 在 §2 ~ §6 **0** 次 | 通过 |
+| 7 | 中间态窗口写对 | 窗口只落在 §2（F-268 开）与 §7（F-281 关）：§2 只写「这条在注册表里存在」+「`items` 期望 34」+「贴图**仍 29 张**」，§3 ~ §6 只写本条自己的计数，§7 一次写 340 × 2，§8 只引用不重算；`340` 在 §2 ~ §6 **0** 次 | 通过 |
 | 8 | toml 取数纪律 | `run/config/farmstorm-server.toml` 在 §4 与 §8 的前置与判据里各出现 ≥ 1 次，且都要求「新生成」；老 toml 的 `:753` / `:765` 只出现在「期望中的红」的句子里 | 通过 |
 | 9 | 三处原子提交与两组八处注释 | F-268（注册 + 断言 + 8 处「97」）、F-274（2 个默认值 + 8 处注释）、F-281（2 条语言键 + 2 处计数注释）三处都写明「同一提交」与「拆开后的当场后果」；两组 8 处注释在 §9 第 6 行分开点名，互不重叠 | 通过 |
 | 10 | 数字不发明 | 98 / 34 / 97 / 33 / 27 / 8 / 13 / 4 / 3 / 1 / 2 / 149 / 154 / 176 / 60 / 338 / 340 / 179 / 7 / 6 / 5 / 30 / 29 / 22 / 2 / 4 / 40 / 64 / 3-6 / 25 / 96 / 1024 / 4096 / 125 / 126 / 96 / 221 / 222 / 176 / 139 / 157 / 175 / 197 / 42 / 47 / 27 / 19 / 57 / 52 —— 每个都能追到 49 号 §1 ~ §6、48 号 §1 ~ §9、47 号 §2 ~ §8，或它们的算术（`97 + 1 = 98`、`33 + 1 = 34`、`338 + 2 = 340`、`149 + 5 = 154`、`6 × 18 + 17 = 125`、`125 + 96 = 221`、`4 × 24 = 96`、`6 − 3 + 1 = 4`、`64 − 40 + 1 = 25`、`29 + 1 = 30`、`4 × 2 = 8`、`2 + 1 = 3`、`30 + 27 = 57`）；新增的只有本文件的节号与判据编号 | 通过 |

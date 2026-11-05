@@ -1,7 +1,6 @@
 package com.dashpig.farmstorm.blockentity;
 
 import com.dashpig.farmstorm.Farmstorm;
-import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.recipe.ConverterRecipe;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import com.dashpig.farmstorm.registry.FarmstormRecipes;
@@ -14,10 +13,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
@@ -30,8 +27,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 
 /**
- * 转换器方块实体：双槽容器（输入 + 催化剂）+ 事务化转换（TECH §4.8.2，DEC D-11 / D-12）。
- * 校验顺序即安全性——空槽 → 配方 → 经验 → 催化剂全部通过，才动状态（步骤 5 / 6）。
+ * 转换器方块实体：双槽容器（输入 + 催化剂）+ 事务化转换（TECH §4.8.2）。
+ * D-209 起配方单向且无成本：校验顺序只剩「空槽 → 配方」，通过即动状态（步骤 5 / 6）。
  * 本类不含任何客户端判定分支：转换入口只接受 {@link ServerPlayer}（HC-03）。
  */
 @EventBusSubscriber(modid = Farmstorm.MOD_ID)
@@ -55,10 +52,10 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
 
     private ItemStack input = ItemStack.EMPTY;
     private ItemStack catalyst = ItemStack.EMPTY;
-    /** 命中方向所属的原始配方；byKey 校验用它的 id（1.21.1 的 id 挂在 RecipeHolder 上，不在 Recipe 上）。 */
+    /** 命中配方；byKey 校验用它的 id（1.21.1 的 id 挂在 RecipeHolder 上，不在 Recipe 上）。 */
     @Nullable
     private RecipeHolder<ConverterRecipe> cachedHolder;
-    /** 进入匹配的方向视图 + 该方向的成本（TECH §4.8.2 的 cachedRecipe / cachedXpCost 合并成一个不可拆的整体）。 */
+    /** 进入匹配的配方视图（TECH §4.8.2 的 cachedRecipe；D-209 之后没有成本分量）。 */
     @Nullable
     private Match cachedMatch;
     private int cachedGeneration;
@@ -148,7 +145,7 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
     // ---- 配方匹配与缓存（RT-07） ----
 
     /**
-     * 解析当前输入命中的配方：先正向，未命中再按 {@code result} 比对反向（TECH §4.8.2 步骤 2）。
+     * 解析当前输入命中的配方：只做正向匹配（D-209 之后配方单向，没有反向视图）。
      * 缓存失效有两条独立通道：资源重载自增 {@link #recipeGeneration}，以及 {@code byKey} 身份校验。
      */
     @Nullable
@@ -166,22 +163,7 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
                 FarmstormRecipes.CONVERTING_TYPE.get(), new SingleRecipeInput(stack), level);
         if (forward.isPresent()) {
             RecipeHolder<ConverterRecipe> holder = forward.get();
-            return this.cache(holder, holder.value(), false);
-        }
-
-        for (RecipeHolder<ConverterRecipe> holder : recipes.getAllRecipesFor(FarmstormRecipes.CONVERTING_TYPE.get())) {
-            ConverterRecipe candidate = holder.value();
-            if (!candidate.bidirectional()) {
-                continue;                                   // D-12：火把花 / 瓶子草只允许正向
-            }
-            if (!ItemStack.isSameItemSameComponents(candidate.result(), stack)) {
-                continue;
-            }
-            ConverterRecipe view = candidate.reverse();
-            if (!view.matches(new SingleRecipeInput(stack), level)) {
-                continue;
-            }
-            return this.cache(holder, view, true);
+            return this.cache(holder, holder.value());
         }
         return null;
     }
@@ -199,8 +181,8 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
         return level.getRecipeManager().byKey(this.cachedHolder.id()).orElse(null) == this.cachedHolder;
     }
 
-    private Match cache(RecipeHolder<ConverterRecipe> holder, ConverterRecipe view, boolean reverse) {
-        Match match = new Match(view, reverse, Math.max(0, view.xpCost()));
+    private Match cache(RecipeHolder<ConverterRecipe> holder, ConverterRecipe view) {
+        Match match = new Match(view);
         this.cachedHolder = holder;
         this.cachedMatch = match;
         this.cachedGeneration = recipeGeneration;
@@ -233,132 +215,40 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
 
     // ---- 事务化转换（TECH §4.8.2 的 6 步） ----
 
-    /** 事务化转换：先全量校验（步骤 1–4），全部通过才扣材并产出（步骤 5–6）。 */
+    /** 事务化转换：先全量校验（步骤 1–2），全部通过才扣材并产出（步骤 5–6）。 */
     public boolean tryConvert(ServerPlayer player) {
         Plan plan = this.plan(player);
         if (plan == null) {
             return false;
         }
         Level level = player.level();
-        // 步骤 5：走到这里表示步骤 1–4 全部通过，开始动状态
+        // 步骤 5：走到这里表示步骤 1–2 全部通过，开始动状态
         this.input.shrink(1);
         if (this.input.isEmpty()) {
             this.input = ItemStack.EMPTY;
         }
         this.clearCache();
-        if (plan.xpCost() > 0) {
-            player.giveExperiencePoints(-plan.xpCost());
-        }
-        int fromSlot = this.takeStoredCatalyst(plan.view().catalyst(), plan.catalystCost());
-        reduceCatalyst(player, plan.view().catalyst(), plan.catalystCost() - fromSlot);
         player.getInventory().placeItemBackInInventory(plan.produced());
         FarmstormAdvancements.award(player, "first_conversion");
-        if (!plan.reverse() && plan.catalystCost() > 0) {
-            FarmstormAdvancements.award(player, "nether_star_toll");
-        }
         // 步骤 6：存档 + 刷新 GUI
         this.setChanged();
         level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_CLIENTS);
         return true;
     }
 
-    /** 步骤 1–4：任一条件不满足即返回 null，调用方因此拿不到可执行方案（D-12 的「绝不扣等级」）。 */
+    /** 步骤 1–2：槽为空或没有命中配方即返回 null，调用方因此拿不到可执行方案（D-209：不再有成本判定）。 */
     @Nullable
     private Plan plan(Player player) {
         if (this.input.isEmpty()) {
             return null;                                    // 步骤 1：空槽
         }
         Level level = player.level();
-        Match match = this.resolve(level, this.input);      // 步骤 2：正向 → 反向
+        Match match = this.resolve(level, this.input);      // 步骤 2：单向匹配
         if (match == null) {
             return null;
         }
-        int xpCost = match.xpCost();
-        if (player.totalExperience < xpCost) {
-            return null;                                    // 步骤 3：经验不足 → 拒绝，绝不扣等级
-        }
-        int catalystCost = requiredCatalyst(match.view(), match.reverse());
-        Ingredient catalyst = match.view().catalyst();
-        if (catalystCost > 0 && this.storedCatalyst(catalyst) + countCatalyst(player, catalyst) < catalystCost) {
-            return null;                                    // 步骤 4：槽位 + 背包合计不够 → 拒绝
-        }
         ItemStack produced = match.view().assemble(new SingleRecipeInput(this.input), level.registryAccess());
-        return new Plan(match.view(), match.reverse(), xpCost, catalystCost, produced);
-    }
-
-    /** 催化剂需求量：正向读 {@code converter.netherStarForwardCost}，反向由 {@code netherStarOnReverse} 决定（D-12）。 */
-    private static int requiredCatalyst(ConverterRecipe view, boolean reverse) {
-        if (view.catalyst().isEmpty()) {
-            return 0;
-        }
-        if (reverse) {
-            return FarmstormConfig.converterNetherStarOnReverse.get() ? Math.max(0, view.catalystCount()) : 0;
-        }
-        return Math.max(0, FarmstormConfig.converterNetherStarForwardCost.get());
-    }
-
-    /** 统计背包 + 副手的催化剂总数；主手物品本身不算、也不消耗（TECH §4.8.2 步骤 4）。 */
-    private static int countCatalyst(Player player, Ingredient catalyst) {
-        Inventory inventory = player.getInventory();
-        int found = 0;
-        for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
-            if (slot == inventory.selected) {
-                continue;
-            }
-            found += countIn(inventory.items.get(slot), catalyst);
-        }
-        return found + countIn(inventory.offhand.get(0), catalyst);
-    }
-
-    private static int countIn(ItemStack stack, Ingredient catalyst) {
-        return !stack.isEmpty() && catalyst.test(stack) ? stack.getCount() : 0;
-    }
-
-    /** 催化剂槽里现存的催化剂数量：与背包合计后仍不够才拒绝转换（槽位优先，背包兜底）。 */
-    private int storedCatalyst(Ingredient catalyst) {
-        return countIn(this.catalyst, catalyst);
-    }
-
-    /** 先扣催化剂槽，返回实际扣掉的数量；不足的部分仍由 {@link #reduceCatalyst} 从背包 / 副手补齐。 */
-    private int takeStoredCatalyst(Ingredient catalyst, int amount) {
-        if (amount <= 0) {
-            return 0;
-        }
-        int taken = takeFrom(this.catalyst, catalyst, amount);
-        if (taken <= 0) {
-            return 0;
-        }
-        if (this.catalyst.isEmpty()) {
-            this.catalyst = ItemStack.EMPTY;
-        }
-        this.setChanged();
-        return taken;
-    }
-
-    private static void reduceCatalyst(Player player, Ingredient catalyst, int amount) {
-        int remaining = amount;
-        if (remaining <= 0) {
-            return;
-        }
-        Inventory inventory = player.getInventory();
-        for (int slot = 0; slot < Inventory.INVENTORY_SIZE && remaining > 0; slot++) {
-            if (slot == inventory.selected) {
-                continue;
-            }
-            remaining -= takeFrom(inventory.items.get(slot), catalyst, remaining);
-        }
-        if (remaining > 0) {
-            takeFrom(inventory.offhand.get(0), catalyst, remaining);
-        }
-    }
-
-    private static int takeFrom(ItemStack stack, Ingredient catalyst, int limit) {
-        if (stack.isEmpty() || !catalyst.test(stack)) {
-            return 0;
-        }
-        int taken = Math.min(limit, stack.getCount());
-        stack.shrink(taken);
-        return taken;
+        return new Plan(match.view(), produced);
     }
 
     // ---- 服务端权威的容器数据视图（v0.2.3 起没有菜单读取，构造契约留待 F-293 重写） ----
@@ -379,13 +269,11 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
         return match == null ? ItemStack.EMPTY : match.view().assemble(new SingleRecipeInput(this.input), level.registryAccess());
     }
 
-    /** GUI 数据（TECH §4.8.3）：[xpCost, canConvert, reverse]，无配方时 xpCost 回落到全局配置值。 */
+    /** GUI 数据（TECH §4.8.3）：[xpCost, canConvert, reverse]；D-209 之后只剩「能否转换」有意义。 */
     public int containerData(int index, Player player) {
         Plan plan = this.plan(player);
         return switch (index) {
-            case DATA_XP_COST -> plan == null ? FarmstormConfig.converterXpCost.get() : plan.xpCost();
             case DATA_CAN_CONVERT -> plan == null ? 0 : 1;
-            case DATA_REVERSE -> plan != null && plan.reverse() ? 1 : 0;
             default -> 0;
         };
     }
@@ -427,9 +315,9 @@ public class ConverterBlockEntity extends BlockEntity implements Container {
         return tag;
     }
 
-    /** 一次命中的方向视图与成本。 */
-    private record Match(ConverterRecipe view, boolean reverse, int xpCost) {}
+    /** 一次命中的配方视图。 */
+    private record Match(ConverterRecipe view) {}
 
-    /** 步骤 1–4 全部通过后的执行方案；拿不到方案就等于不可转换。 */
-    private record Plan(ConverterRecipe view, boolean reverse, int xpCost, int catalystCost, ItemStack produced) {}
+    /** 步骤 1–2 全部通过后的执行方案；拿不到方案就等于不可转换。 */
+    private record Plan(ConverterRecipe view, ItemStack produced) {}
 }

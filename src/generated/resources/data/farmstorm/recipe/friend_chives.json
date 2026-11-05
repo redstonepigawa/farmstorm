@@ -1,0 +1,10 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "farmstorm:plain_chives"
+  },
+  "result": {
+    "count": 1,
+    "id": "farmstorm:friend_chives"
+  }
+}

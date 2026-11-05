@@ -48,6 +48,10 @@ public final class ModItemModelProvider extends ItemModelProvider {
                 // TECH §3.14 / D-107 第 1、2 项：压缩麦的方块物品与压缩膨胀麦都直接复用方块模型
                 // （物品栏里是小方块），不额外要一张 item 贴图，故不写 item/generated + layer0。
                 withExistingParent(path, modLoc("block/compressed_hay_block"));
+            } else if ("plain_chives".equals(path)) {
+                // v0.2.2 热修 · M2（作者 2026-11-05）「平凡农作物使用对应改良农作物的材质」：平凡韭菜
+                // 直接指向朋友的韭那张作者原画，autocreated 的占位贴图 plain_chives.png 已删。
+                withExistingParent(path, mcLoc("item/generated")).texture("layer0", modLoc("item/friend_chives"));
             } else {
                 basicItem(item);
             }

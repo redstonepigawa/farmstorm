@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "farmstorm:item/plain_chives"
+    "layer0": "farmstorm:item/friend_chives"
   }
 }

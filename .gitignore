@@ -11,6 +11,11 @@ dist/
 .tools/
 .scratch/
 
+# 外部素材包原件（作者提供的贴图包，归档备查；成品已进 src/main/resources）
+# 含 crop_converter_a_32x32_pack / cultivator_a_animation_pack / outpost_core_all_textures
+# 不出版本库的理由：这些是「源」，仓库里要的是「成品」；留档只为将来改尺寸/重导出时不至于丢失
+.assets/
+
 # 不属于项目的归档：会话转录、崩溃报告（体积大且含本机信息）
 dsh-session-*.zip
 错误报告-*.zip

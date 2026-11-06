@@ -37,7 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <p>{@code corePos} 是<b>引用缓存</b>：绑定关系的唯一真相在核侧（D-165），使用前要用核侧列表校验。
  */
-public class CropConverterBlockEntity extends BlockEntity {
+public class CropConverterBlockEntity extends BlockEntity implements CoreBound {
     /**
      * 转换周期（刻）：读 {@code crop_converter.processTicks}（默认 600 刻 = 30 秒，D-208 / D-223）。
      *
@@ -89,6 +89,29 @@ public class CropConverterBlockEntity extends BlockEntity {
     public void setCore(BlockPos pos) {
         this.corePos = pos;
         this.setChanged();
+        this.syncCore();
+    }
+
+    /**
+     * 清掉引用缓存（核被拆且没有接替核时的清理出口②，D-229）：留原地、内容保留、{@code Core} 键消失。
+     * 不清槽内物与进度（D-168 继续有效），与培养器同形。
+     */
+    public void clearCore() {
+        if (this.corePos == null) {
+            return;
+        }
+        this.corePos = null;
+        this.setChanged();
+        this.syncCore();
+    }
+
+    /** 绑定变化的同步时点（D-247，与培养器同形）：只把方块状态推一次，不触发方块重算。 */
+    private void syncCore() {
+        if (this.level == null || this.level.isClientSide) {
+            return;
+        }
+        BlockState state = this.getBlockState();
+        this.level.sendBlockUpdated(this.getBlockPos(), state, state, Block.UPDATE_CLIENTS);
     }
 
     // ---- 四道准入闸：范围 / 绑定 / 手持 / 空槽，合并成一次判定（54 号 §4.1.3）----
@@ -126,7 +149,7 @@ public class CropConverterBlockEntity extends BlockEntity {
      * 四条史诗输入），不写物品白名单，也不抄培养器那套「输出档案非史诗」的 17 条判据（RT-73）：
      * 数据包新增一条 {@code converting} 配方，转换器自动多收一个输入物。
      */
-    private boolean convertible(ItemStack stack) {
+    public boolean convertible(ItemStack stack) {
         Level level = this.level;
         if (level == null || stack.isEmpty()) {
             return false;

@@ -41,7 +41,7 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <p>{@code corePos} 是<b>引用缓存</b>：绑定关系的唯一真相在核侧（D-165），使用前要用核侧列表校验。
  */
-public class CultivatorBlockEntity extends BlockEntity {
+public class CultivatorBlockEntity extends BlockEntity implements CoreBound {
     /** 绑定核坐标的 NBT 键（36 号 §6 ④）：{@code long}（{@link BlockPos#asLong()}）；**缺键 = 未绑定**。 */
     private static final String TAG_CORE = "Core";
     /** 槽内培养物的 NBT 键（36 号 §2.5.2）：{@code ItemStack#save} / {@code ItemStack#parse}。 */

@@ -9,6 +9,7 @@ import com.dashpig.farmstorm.network.CultivatorLinkPayload.Link;
 import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.outpost.OutpostCoreIndex;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
+import com.dashpig.farmstorm.registry.FarmstormBlocks;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.dashpig.farmstorm.util.AreaBlockEntities;
 import com.dashpig.farmstorm.util.DeployedOwnership;
@@ -108,6 +109,20 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
      * 因此不存在「配成 0」的可能，补绑的相位门也就不需要边界粒子门那条非零守卫。
      */
     private static final int REBIND_INTERVAL_TICKS = 100;
+
+    /**
+     * 「方块 → {@code Link.Kind}」的单一映射（F-317 / D-235）：{@link CoreBound} 不承担类型（D-234）、
+     * 标签只存方块 id（{@code util/FarmstormTags.java:30} 是 {@code TagKey<Block>}），于是 kind 只能查这张表。
+     *
+     * <p>取值点取到 {@code null} 就 {@code continue}：**没登记进本表的新标签成员只被发现、不写 kind、
+     * 不绑定**（58 号 §8 第 4 条的已知限制，RT-86）。新增标签成员时必须同时登记本表与
+     * {@code datagen/ModBlockTagsProvider.java:44-47}（两处同改，BRIEF §7 第 1 条）。
+     *
+     * <p>不复用方法名 {@code kindOf}：{@link #kindOf(BlockPos)} 是迁移取 kind，同名不同参会造出第二份真相。
+     */
+    private static final Map<Block, Link.Kind> KIND_BY_BLOCK = Map.of(
+            FarmstormBlocks.CULTIVATOR.get(), Link.Kind.CULTIVATOR,
+            FarmstormBlocks.CROP_CONVERTER.get(), Link.Kind.CROP_CONVERTER);
 
     /** 两档衰减（23 号 §8.7）：矩形内的玩家每轮满点；矩形外扩 16 格的余量带每 4 轮 1 次；再远不发。 */
     private static final double RING_MARGIN = 16.0;
@@ -600,12 +615,11 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
         }
         int added = 0;
         // F-303 / A-100：候选**两种机器都收**。只认培养器的话，先放转换器后放核的转换器永远绑不上
-        // （陷阱 9）——那是「服务端一点日志都没有」的静默失效。kind 只在这里由方块自己写下。
-        List<BlockEntity> candidates = new ArrayList<>();
-        candidates.addAll(AreaBlockEntities.collect(server, this.getBlockPos(), RANGE_CHUNKS,
-                CultivatorBlockEntity.class));
-        candidates.addAll(AreaBlockEntities.collect(server, this.getBlockPos(), RANGE_CHUNKS,
-                CropConverterBlockEntity.class));
+        // （陷阱 9）——那是「服务端一点日志都没有」的静默失效。
+        // F-317 / D-230：改成**一次按标签**发现（判据复用 isProcessingBlock），不再两次按类枚举；
+        // kind 不由类推、由下面那张「方块 → Link.Kind」静态映射给（D-234：标签存不下类型）。
+        List<BlockEntity> candidates = AreaBlockEntities.collect(server, this.getBlockPos(), RANGE_CHUNKS,
+                be -> isProcessingBlock(be.getBlockState()));
         candidates.sort(Comparator
                 .comparingDouble((BlockEntity candidate) -> candidate.getBlockPos().distSqr(this.getBlockPos()))
                 .thenComparingInt(candidate -> candidate.getBlockPos().getX())
@@ -615,19 +629,15 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
             if (cultivatorCount() >= cap) {
                 break;                                    // 每绑一个重读：满即停
             }
-            BlockPos candidatePos = candidate.getBlockPos();
-            Link.Kind kind;
-            BlockPos cachedCore;
-            if (candidate instanceof CultivatorBlockEntity cultivatorCandidate) {
-                kind = Link.Kind.CULTIVATOR;
-                cachedCore = cultivatorCandidate.corePos();
-            } else if (candidate instanceof CropConverterBlockEntity converterCandidate) {
-                kind = Link.Kind.CROP_CONVERTER;
-                cachedCore = converterCandidate.corePos();
-            } else {
-                continue;                                 // 两种机器之外（收集面已过滤，防御性分支）
+            if (!(candidate instanceof CoreBound bound)) {
+                continue;                                 // 没进接口集合（收集面已过滤，防御性分支）
             }
-            if (cachedCore != null) {
+            Link.Kind kind = KIND_BY_BLOCK.get(candidate.getBlockState().getBlock());
+            if (kind == null) {
+                continue;                                 // 标签成员没登记 kind ⇒ 只发现、不绑定（RT-86）
+            }
+            BlockPos candidatePos = candidate.getBlockPos();
+            if (bound.corePos() != null) {
                 continue;                                 // 已绑（含指向别的核）⇒ 跳过，不夺
             }
             if (hasCultivator(candidatePos)) {
@@ -636,11 +646,7 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
             if (!addCultivator(candidatePos, kind)) {
                 continue;
             }
-            if (candidate instanceof CultivatorBlockEntity cultivatorBind) {
-                cultivatorBind.setCore(this.getBlockPos());          // 先核侧、后机器侧
-            } else if (candidate instanceof CropConverterBlockEntity converterBind) {
-                converterBind.setCore(this.getBlockPos());
-            }
+            bound.setCore(this.getBlockPos());            // 先核侧、后机器侧（D-232：经接口写）
             added++;
         }
         if (added > 0) {
@@ -848,15 +854,13 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
             if (next != null && next.addCultivator(pos, kind)) {
                 LevelChunk nextChunk = server.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
                 if (nextChunk != null) {
-                    if (nextChunk.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator) {
-                        cultivator.setCore(next.getBlockPos());    // 两侧都写：核侧已写，这里写培养器侧缓存
-                    } else if (nextChunk.getBlockEntity(pos) instanceof CropConverterBlockEntity converter) {
-                        converter.setCore(next.getBlockPos());
+                    if (nextChunk.getBlockEntity(pos) instanceof CoreBound machine) {
+                        machine.setCore(next.getBlockPos());       // 两侧都写：核侧已写，这里写机器侧缓存
                     }
                 }
                 continue;
             }
-            // 以下都是「没有可用的接替核」：先看培养器那一格读不读得到、还是不是培养器（都不动世界）
+            // 以下都是「没有可用的接替核」：先看该格读不读得到、还是不是处理方块（都不动世界）
             LevelChunk cultivatorChunk = server.getChunkSource()
                     .getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
             if (cultivatorChunk == null) {
@@ -864,12 +868,12 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
                 continue;
             }
             if (!isProcessingBlock(cultivatorChunk.getBlockState(pos))) {
-                Farmstorm.LOGGER.info("迁移失败且该格已不是培养器：保留 NBT 原值 {}", pos);  // 出口③
+                Farmstorm.LOGGER.info("迁移失败且该格已不是处理方块：保留 NBT 原值 {}", pos);  // 出口③
                 continue;
             }
-            if (cultivatorChunk.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator) {
-                cultivator.clearCore();                    // 出口②：留原地、清 Core、内容保留、不可使用
-                Farmstorm.LOGGER.info("迁移失败：培养器留原地并标为未绑定 {}", pos);
+            if (cultivatorChunk.getBlockEntity(pos) instanceof CoreBound machine) {
+                machine.clearCore();                       // 出口②：留原地、清 Core、内容保留、不可使用
+                Farmstorm.LOGGER.info("迁移失败：标签方块留原地并标为未绑定 {}", pos);
             }
         }
         // 只清绑定列表（两条平行列表同清，F-303 / 陷阱 6）；items 不动（掉落是 onRemove 的 Containers.dropContents）。

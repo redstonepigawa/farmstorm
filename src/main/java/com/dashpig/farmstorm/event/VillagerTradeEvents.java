@@ -24,6 +24,18 @@ public final class VillagerTradeEvents {
 
     private VillagerTradeEvents() {}
 
+    /**
+     * 五级成交经验的唯一映射（F-318 / D-236）：右值只在这里写，三个交易类一律引用（D-239：等级 ≠ 作物档位）。
+     *
+     * <p>等级由 {@code onVillagerTrades} 的切片位置决定（植物学家 1~4 级 = 22 项的四段、5 级 = 史诗项；
+     * 农民 1 / 3 / 5 级各一档）。1 级取 2 是保留现值，不跟原版的 {@code XP_LEVEL_1_SELL = 1}（D-236）。
+     */
+    public static final int XP_LEVEL_1 = 2;
+    public static final int XP_LEVEL_2 = 5;
+    public static final int XP_LEVEL_3 = 10;
+    public static final int XP_LEVEL_4 = 15;
+    public static final int XP_LEVEL_5 = 30;
+
     /** 由 {@code Farmstorm} 构造器与 {@link FarmstormGameEvents} 并列挂到同一条 game 总线。 */
     public static void register(IEventBus gameBus) {
         gameBus.addListener(VillagerTradeEvents::onVillagerTrades);

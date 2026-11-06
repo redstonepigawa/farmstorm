@@ -25,7 +25,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * ⇒ 同一村民的这一项整个存档内只卖一个作物 id、一个基准价。
  *
  * <p>三项数值全部照 36 号 §2.4 的表格：{@code maxUses = 1}（断货由它承担，不写第二套计时器）、
- * {@code xp = 2}（原版农民交易最常见的值，三档统一）、{@code priceMultiplier = 0.0F}
+ * {@code xp}（三档各自带值：1 / 3 / 5 级取 {@link VillagerTradeEvents} 里对应级的常量）、{@code priceMultiplier = 0.0F}
  * （把 {@code MerchantOffer#getModifiedCostCount} 里的 {@code floor(i × demand × multiplier)} 归零
  * ⇒ 成交后不涨价；声望折扣 {@code specialPriceDiff} 是独立加法项，照常作用）。
  *
@@ -33,29 +33,32 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * @param pool   该档全集的档案，由 {@code CropProfile.ALL} 按 {@code tier()} 过滤得来（不写第二份 id 清单）
  * @param minKey 价格下界的 config 键（{@code trade.<档>.min}）
  * @param maxKey 价格上界的 config 键（{@code trade.<档>.max}）
+ * @param xp     本档的成交经验，由等级决定（1 / 3 / 5 级各取 {@code VillagerTradeEvents} 里对应级的常量）
  */
 public record TierTrade(CropTier tier, List<CropProfile> pool, ModConfigSpec.IntValue minKey,
-                        ModConfigSpec.IntValue maxKey) implements VillagerTrades.ItemListing {
+                        ModConfigSpec.IntValue maxKey, int xp) implements VillagerTrades.ItemListing {
 
     /** 单次给出的作物数（35 号 §4.3：三档一致，且不进 config）。 */
     public static final int CROP_COUNT = 2;
     /** 成交一次即售罄（D-158）。 */
     public static final int MAX_USES = 1;
-    /** 成交经验（36 号 §2.4 的确定值）。 */
-    public static final int VILLAGER_XP = 2;
     /** 锁死基准价：关掉供需浮动通道（36 号 §2.4.1）。 */
     public static final float PRICE_MULTIPLIER = 0.0F;
 
     public static final TierTrade COMMON =
-            of(CropTier.COMMON, FarmstormConfig.tradeCommonMin, FarmstormConfig.tradeCommonMax);
+            of(CropTier.COMMON, FarmstormConfig.tradeCommonMin, FarmstormConfig.tradeCommonMax,
+                    VillagerTradeEvents.XP_LEVEL_1);
     public static final TierTrade RARE =
-            of(CropTier.RARE, FarmstormConfig.tradeRareMin, FarmstormConfig.tradeRareMax);
+            of(CropTier.RARE, FarmstormConfig.tradeRareMin, FarmstormConfig.tradeRareMax,
+                    VillagerTradeEvents.XP_LEVEL_3);
     public static final TierTrade EPIC =
-            of(CropTier.EPIC, FarmstormConfig.tradeEpicMin, FarmstormConfig.tradeEpicMax);
+            of(CropTier.EPIC, FarmstormConfig.tradeEpicMin, FarmstormConfig.tradeEpicMax,
+                    VillagerTradeEvents.XP_LEVEL_5);
 
-    private static TierTrade of(CropTier tier, ModConfigSpec.IntValue minKey, ModConfigSpec.IntValue maxKey) {
+    private static TierTrade of(CropTier tier, ModConfigSpec.IntValue minKey, ModConfigSpec.IntValue maxKey,
+                                int xp) {
         return new TierTrade(tier, CropProfile.ALL.stream().filter(profile -> profile.tier() == tier).toList(),
-                minKey, maxKey);
+                minKey, maxKey, xp);
     }
 
     @Override
@@ -76,6 +79,6 @@ public record TierTrade(CropTier tier, List<CropProfile> pool, ModConfigSpec.Int
         // 步 4 / 5：只收绿宝石，给 2 个同档作物。
         ItemCost cost = new ItemCost(Items.EMERALD, price);
         return new MerchantOffer(cost, Optional.empty(), new ItemStack(item, CROP_COUNT),
-                MAX_USES, VILLAGER_XP, PRICE_MULTIPLIER);
+                MAX_USES, this.xp, PRICE_MULTIPLIER);
     }
 }

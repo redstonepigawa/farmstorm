@@ -25,7 +25,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
  * <p><b>「固定 1 项」不是「4 个都卖」</b>：一个植物学家只有这 1 项，凑齐 4 个史诗作物同样要多找几个植物学家。
  * 这是作者选定的机制（裁定 #18），不是原版限制。
  *
- * <p>数值：{@code maxUses = 1}（断货由它承担）、{@code xp = 2}（照 {@link TierTrade#VILLAGER_XP}）、
+ * <p>数值：{@code maxUses = 1}（断货由它承担）、{@code xp}（5 级档，取 {@link VillagerTradeEvents} 的五级常量，D-238）、
  * {@code priceMultiplier = 0.0F}（把 {@code MerchantOffer#getModifiedCostCount} 里的
  * {@code floor(i × demand × multiplier)} 归零 ⇒ 成交后不涨价；声望折扣 {@code specialPriceDiff}
  * 是独立加法项，照常作用）。价格取<b>类常量</b>，不读 {@code trade.*} 的 6 个键、不新增 config 键（176 不变）。
@@ -42,8 +42,8 @@ public record BotanistEpicTrade(List<CropProfile> pool) implements VillagerTrade
     public static final int MAX_USES = 1;
     /** 单次给出的作物数（48 号 §2.4.4：每次 1 个）。 */
     public static final int COUNT = 1;
-    /** 成交经验（沿用 {@link TierTrade#VILLAGER_XP} 的 2）。 */
-    public static final int VILLAGER_XP = 2;
+    /** 成交经验：5 级档，引用 {@link VillagerTradeEvents} 的五级常量（D-238）。 */
+    public static final int VILLAGER_XP = VillagerTradeEvents.XP_LEVEL_5;
     /** 锁死基准价：关掉供需浮动通道（照 {@code TierTrade:47}）。 */
     public static final float PRICE_MULTIPLIER = 0.0F;
 

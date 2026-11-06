@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · **v0.2.3 已实现**（本轮**不发布 Release**，Releases 页仍是 **v0.2.2**）
+Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · **v0.2.4 文档已出**：四处修复待实现，`farmland` 死代码清理**已落地**（当前可玩版本仍是 **v0.2.3**；不发布 Release，Releases 页仍是 **v0.2.2**）
 
 [下载](https://github.com/redstonepigawa/farmstorm/releases) · [文档索引](#文档) · [构建方法](#构建与调试)
 
@@ -43,7 +43,7 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 
 | 文件 | 内容 | 说明 |
 |---|---|---|
-| `config/farmstorm-server.toml` | **175 键 / 60 组**（v0.2.3 删 3 加 2；v0.2.2 是 176 键） | 服务端行为；首次起服自动生成 |
+| `config/farmstorm-server.toml` | **175 键 / 60 组**（v0.2.3 删 3 加 2；v0.2.2 是 176 键；**v0.2.4 无变化**） | 服务端行为；首次起服自动生成 |
 | `config/farmstorm-client.toml` | **3 键**（`hud.enabled` / `hud.x` / `hud.y`） | 客户端浮窗开关与位置；**首次进游戏**才生成 |
 
 ### 本版（v0.2.3，**已实现**；本轮不发布 Release）
@@ -142,7 +142,7 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 **撤销的东西**
 - 0.1.1 的**耕地-核心绑定制整体停用**：不再拦锄地、不再有踩踏保护、两条动作栏提示不再出现。
 - `/farmstorm farmlandlimit`（0.1.1 已删）本版不恢复；服务端没有 `/farmstorm` 指令树。
-- 两个类（`FarmlandLedger` / `FarmlandGuard`）**保留在源码树里、仍编译**，只是没有运行期调用者；`farmstorm_farmland.dat` **不读不写不删**。
+- 两个类（`FarmlandLedger` / `FarmlandGuard`）在 v0.2.3 时**保留在源码树里、仍编译**，只是没有运行期调用者；`farmstorm_farmland.dat` **不读不写不删**。**v0.2.4 起这两个类已整体删除**（连同 `farmland/` 目录，857 行），存档文件仍不读不写不删。
 
 ### 从 v0.2.1 升级必看
 
@@ -258,7 +258,7 @@ src/main/java/com/dashpig/farmstorm/
 ├── event/        事件挂载点（含村民交易）
 ├── config/       FarmstormConfig（server 175 键）+ FarmstormClientConfig（client 3 键）
 ├── datagen/      语言键 / 模型 / 战利品 / 配方生成
-├── farmland/     【0.2.0 已停用】两个类保留、仍编译、无运行期调用者
+├── （farmland/ 已在 v0.2.4 整体删除）
 └── util/ recipe/ item/ trap/ combat/ explosion/ effect/ outpost/ team/
 ```
 
@@ -291,9 +291,24 @@ python -X utf8 tools/verify_project.py
 
 长期有效的基础文档：[`00-DECISIONS`](docs/zh/00-DECISIONS.md)、[`01-DESIGN`](docs/zh/01-DESIGN.md)、[`02-TECH-SPEC`](docs/zh/02-TECH-SPEC.md)、[`07-PUBLISH`](docs/zh/07-PUBLISH.md)、[`08-DEV-GUIDE`](docs/zh/08-DEV-GUIDE.md)、[`09-IMPL-VS-PLAN`](docs/zh/09-IMPL-VS-PLAN.md)。
 
-### 现行文档（v0.2.3，**已实现**）
+### 现行文档（v0.2.4，**文档已出、代码未实现**）
 
-六份中文文档已写完，**并已按文档实现**（26 个任务 F-286 ~ F-311、12 个 Phase 54 ~ 65 全部落地）。本轮仍未出英译，`docs/en/` 停在 v0.2.1。
+六份中文文档已写完，**代码尚未实现**（16 个任务 F-312 ~ F-327、7 个 Phase 66 ~ 72 全部待办）。本轮仍未出英译，`docs/en/` 停在 v0.2.1。
+
+| 文件 | 内容 |
+|---|---|
+| [`docs/zh/58-DECISIONS-0.2.4.md`](docs/zh/58-DECISIONS-0.2.4.md) | **唯一真相源**：28 条决策 D-225~D-252 + **7 条作者裁定** |
+| [`docs/zh/59-DESIGN-0.2.4.md`](docs/zh/59-DESIGN-0.2.4.md) | 设计增量：4 条需求 R1~R4、**15 条边界 B-59~B-73**、附录 A 14 行差异、4 条已知影响 |
+| [`docs/zh/60-TECH-0.2.4.md`](docs/zh/60-TECH-0.2.4.md) | 技术规格：注册面 **92**、config **175 键 + 3**、语言键 **321 × 2**、Java 文件 **150 → 151**、**25 条验收**、9 条风险 RT-83~RT-91 |
+| [`docs/zh/61-TASKS-0.2.4.md`](docs/zh/61-TASKS-0.2.4.md) | 任务拆分：**16 个任务 F-312~F-327**、**7 个 Phase 66~72**、六张覆盖表、A-102~A-110、**18.0 人日** |
+| [`docs/zh/62-PROMPT-MAIN-0.2.4.md`](docs/zh/62-PROMPT-MAIN-0.2.4.md) | 实现方主提示词：HC-173~HC-188、N-155~N-166、**26 条陷阱**、18 行事实卡 |
+| [`docs/zh/63-PROMPT-TASKS-0.2.4.md`](docs/zh/63-PROMPT-TASKS-0.2.4.md) | 分阶段任务清单：Phase 66~72 各一节，**48 条出口判据 E-66-1 ~ E-72-7** |
+
+投喂顺序：**先投 62 号一次**，之后每个 Phase 开工时只投 63 号对应的那一节。
+
+### 上一版（v0.2.3，**已实现**）
+
+六份中文文档已写完，**并已按文档实现**（26 个任务 F-286 ~ F-311、12 个 Phase 54 ~ 65 全部落地）。
 
 | 文件 | 内容 |
 |---|---|

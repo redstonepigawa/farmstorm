@@ -376,8 +376,8 @@ E 系列的形状是 `E-<Phase>-<序>`（不是全局流水号），所以它的
 - **编号**：D-253
 - **结论**：删除 `farmland/FarmlandGuard.java`（225 行）与 `farmland/FarmlandLedger.java`（555 行）两个类，空的 `farmland/` 目录一并删除。
 - **依据**：裁定 #8；这两个类是 v0.2.0 撤销耕地（D-153）时按「本体一行不改」刻意留下的死代码，运行期不可达、全树无读者——两者只互相引用，清理前 `event/FarmstormGameEvents` 里只剩被注释掉的监听器还提到它们（清理后该文件 0 处引用）；大小写敏感的 `grep -n "Farmland\|farmland" src/main/java` 复跑只剩 `datagen/ModLangProvider.java:39-40` 两行历史记账。
-- **落地位置**：`src/main/java/com/dashpig/farmstorm/farmland/`（删 2 个文件 + 删目录）；连带清理 `event/FarmstormGameEvents`——2 个 import、17 行耕地注释（`git show HEAD` 实点：`// 裁定 #3…` 5 行 + 其余 12 行）、`onRightClickBlock` / `onFarmlandTrample` 两个死方法（整段 javadoc 与本体）、4 个随之变死的 import（`Component` / `TriState` / `PlayerInteractEvent` / `BlockEvent`），头注释从「七件事」改为按 `register()` 的 9 个 `addListener` 逐条穷举；`outpost/OutpostCoreIndex` 的 `ownerOf` javadoc 删掉指向 `FarmlandGuard#inOwnRange` 的那一行。
-- **补充**：数字面 152 − 2 = **150**，再加本版新增的 `CoreBound.java` 得 **151**（D-227、D-228）；其余冻结项一项不动（注册面 92、server config 175 键 / 60 组、client config 3 键、语言键 321 × 2、进度 16、转换配方 21、网络包 2、Mixin 0、`PROTOCOL_VERSION = "3"`）。否决「保留两个类以留回头路」（A-62 的否决项 ③）：那条否决的理由是「删了就没有回头路」，而本版连同字段声明一起删（D-254），恢复面已不由这两个文件承担；留 780 行不可达代码只让下一次 grep 把死代码当活代码。
+- **落地位置**：`src/main/java/com/dashpig/farmstorm/farmland/`（删 2 个文件 + 删目录）；连带清理 `event/FarmstormGameEvents`——2 个 import、17 行耕地注释（`git show HEAD` 实点：`// 裁定 #3…` 5 行 + 其余 12 行）、`onRightClickBlock` / `onFarmlandTrample` 两个死方法（整段 javadoc 与本体）、4 个随之变死的 import（`Component` / `TriState` / `PlayerInteractEvent` / `BlockEvent`），头注释从「七件事」改为按 `register()` 的 9 个 `addListener` 逐条穷举；`outpost/OutpostCoreIndex` 的 `ownerOf` 整个方法（方法体 13 行 + javadoc）——它是「坐标 → 业主」的反查原语，唯一读者 `FarmlandGuard#inOwnRange` 随包消失后一并删除。
+- **补充**：数字面 152 − 2 = **150**，再加本版新增的 `CoreBound.java` 得 **151**（D-227、D-228）；其余冻结项一项不动（注册面 92、server config 175 键 / 60 组、client config 3 键、语言键 321 × 2、进度 16、转换配方 21、网络包 2、Mixin 0、`PROTOCOL_VERSION = "3"`）。否决「保留两个类以留回头路」（A-62 的否决项 ③）：那条否决的理由是「删了就没有回头路」，而本版连同字段声明一起删（D-254），恢复面已不由这两个文件承担；留 881 行不可达代码（881 = 225 + 555 的两个类 + 101 行连带清理）只让下一次 grep 把死代码当活代码。
 
 #### D-254 · 删除 `outpostCoreFarmlandBonus` 字段声明（取代 A-62）
 
@@ -444,17 +444,18 @@ E 系列的形状是 `E-<Phase>-<序>`（不是全局流水号），所以它的
 | 17 | `FarmstormTags.java:29` | 注释订正为「2 个成员」 | D-248 |
 | 18 | `FarmstormGameEvents` 的头注释与 `onServerTickPost` / `onServerStopping` 的 javadoc | 头注释改为按 `register()` 的 9 个 `addListener` 逐条穷举；两处 javadoc 去掉「F-198 补建 / 先补票后补绑定」的引用（行为零变化） | D-253 |
 | 19 | `FarmstormConfig` 的 `outpost_core` 段历史注释 | ASCII 的 `farmland` / `farmlandBonus` 改写为中文「耕地」/「每核上限」（行为零变化） | D-253、D-254 |
-| 20 | `OutpostCoreIndex` 的静态入口与 `count` 两处 javadoc | 去掉「F-156 的额度求和」「额度算式要用」的引用，改记「保留为公开只读查询 API」（行为零变化） | D-253、D-254 |
+| 20 | `OutpostCoreIndex` 的静态入口与 `count` 两处 javadoc | 去掉「F-156 的额度求和」的引用；`count` 记活调用链（`OutpostCoreBlock` 的放置上限 → `countOwned` → 本方法），不记「无调用者」（行为零变化） | D-253、D-254 |
 
-### 3.3 删除（3 项）
+### 3.3 删除（4 项）
 
 | # | 物件 | 类型 | 决策 |
 |---|---|---|---|
 | 1 | `farmland/FarmlandGuard.java`（225 行） | 类 | D-253 |
 | 2 | `farmland/FarmlandLedger.java`（555 行） | 类（Java 文件 152 − 2 = 150） | D-253 |
 | 3 | `FarmstormConfig.outpostCoreFarmlandBonus` 的字段声明 + 5 行注释 + 4 行被注释的 `.defineInRange` | 字段（server config 仍 175 键 / 60 组） | D-254 |
+| 4 | `outpost/OutpostCoreIndex#ownerOf` 整个方法（方法体 13 行 + javadoc） | 方法（失去唯一读者后删除） | D-253 |
 
-**为什么从 0 项变成 3 项**：v0.2.0 撤销耕地时这两个类被刻意留下（D-153、A-62），本版以裁定 #8 撤掉那个决定——`farmland` 包整包消失（225 + 555 = **780** 行），字段声明随两个读者一起删。数字面仍是一增一减：152 − 2 + 1 = **151**（D-227、D-228、D-253）。注册面 92、语言键 321 × 2、转换配方 21、网络包 2、Mixin 0 一项不减（D-227）。
+**为什么从 0 项变成 4 项**：v0.2.0 撤销耕地时这两个类被刻意留下（D-153、A-62），本版以裁定 #8 撤掉那个决定——`farmland` 包整包消失（225 + 555 = **780** 行），字段声明随两个读者一起删，`ownerOf` 随它唯一的读者一起删。合计删 **881** 行 = 780（两个整文件）+ 101（`FarmstormConfig` 11 + `FarmstormGameEvents` 72 + `OutpostCoreIndex` 18）。数字面仍是一增一减：152 − 2 + 1 = **151**（D-227、D-228、D-253）。注册面 92、语言键 321 × 2、转换配方 21、网络包 2、Mixin 0 一项不减（D-227）。
 
 ---
 
@@ -536,8 +537,8 @@ E 系列的形状是 `E-<Phase>-<序>`（不是全局流水号），所以它的
 | 8 | 四个文档下限的具体条目与编号 | 只给下限与归属文档 | 由 D-250 定 |
 | 9 | `FarmstormTags.java:29` 订正后的措辞 | 约束：指向 D-194 与标签产物、不写「裁定 #5」 | 由 D-248 定 |
 | 10 | `processing_block` 标签产物是否要重新 datagen | 成员未变，产物应不变 | 由 D-227 定；60 号确认 |
-| 11 | `outpost/OutpostCoreIndex#ownerOf`（`:191`）刚失去读者 | 唯一的调用者是 `FarmlandGuard#inOwnRange`，已随 `farmland` 包删除（D-253）；保留为公开只读查询 API。性质 = **本版删除的连带产物** | **下一版候选**：与其它孤儿公开 API 一起评估，本版不单独删 |
-| 12 | `outpost/OutpostCoreIndex#isOwnerOrAlly`（`:119`）有意留空 | 方法自己的 javadoc 写着「本方法**只有定义、没有调用者**，且必须保持这样」（A-42 / 31 号 F-189）。性质 = **按设计就应该没有调用者** | 一律不动；下一版评估孤儿 API 时**只考虑第 11 条那一种**（刚失去读者的），这一种不评估 |
+| 11 | `outpost/OutpostCoreIndex#ownerOf` **已随本版删除** | 它是「坐标 → 业主」的反查原语，唯一读者 `FarmlandGuard#inOwnRange` 随 `farmland` 包消失后全树 0 调用者 ⇒ 方法体与 javadoc 一并删除。性质 = **本版删除的连带产物**（删除事实挂在 D-253 的落地位置） | 已删除，不进下一版候选 |
+| 12 | `outpost/OutpostCoreIndex#isOwnerOrAlly`（`:119`）有意留空 | 方法自己的 javadoc 写着「本方法**只有定义、没有调用者**，且必须保持这样」（A-42 / 31 号 F-189）。性质 = **按设计就应该没有调用者** | 一律不动；下一版评估孤儿 API 时只考虑「刚失去读者」的那一种（本版那一条已直接删掉，见第 11 条），「按设计就该没有调用者」的这一种不评估 |
 | 13 | v0.2.0 的 A-62 及其论证不再反映现状 | 35 号 `:589`、36 号 `:330-331`、38 号 `:182-183`、39 号 `:242` / `:569` 记的是 v0.2.0 当时状态，**不追溯修改** | 读者以本文 **D-254** 与 §5.1 墓碑为准 |
 
 ---

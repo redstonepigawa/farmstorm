@@ -4,7 +4,7 @@
 >
 > 本文把 58 / 59 / 60 三份规格拆成 **17 个「一次可独立提交、可独立验证」的任务**：任务 **F-312 ~ F-327**（16 条）+ **F-328**（删 farmland 死代码，写作期已落地）、Phase **66 ~ 72**（F-328 归 66，不开新 Phase）、里程碑 **M62 ~ M68**（F-328 归 M62）、裁决 **A-102 ~ A-111**。
 >
-> 覆盖：动作面 **25 处**（表 A.1，25/25 = 58 号 §3 的 23 处 + F-328 的 2 行删除动作）、60 号 §8 的验收 **25 条**（表 A.2，25/25）、注册面 **92**（表 B）、config **175 + 3**（表 C）、语言键 **321 × 2**（表 D）、风险 **RT-83 ~ RT-91（9 条）**（表 E）、待验证 API **12 条**（表 F）。只引上游：不改 `docs/zh/52` ~ `docs/zh/60`、不改 `.work/v024-BRIEF.md`、不改 `tools/`；只新建本文件。唯一的 `src/` 例外是裁定 #8 的 F-328——它在本文写作期已落地（5 文件、866 行删除、19 行插入），本文只登记、不推动（A-111）。
+> 覆盖：动作面 **25 处**（表 A.1，25/25 = 58 号 §3 的 23 处 + F-328 的 2 行删除动作）、60 号 §8 的验收 **25 条**（表 A.2，25/25）、注册面 **92**（表 B）、config **175 + 3**（表 C）、语言键 **321 × 2**（表 D）、风险 **RT-83 ~ RT-91（9 条）**（表 E）、待验证 API **12 条**（表 F）。只引上游：不改 `docs/zh/52` ~ `docs/zh/60`、不改 `.work/v024-BRIEF.md`、不改 `tools/`；只新建本文件。唯一的 `src/` 例外是裁定 #8 的 F-328——它在本文写作期已落地（5 文件、881 行删除、19 行插入），本文只登记、不推动（A-111）。
 
 ---
 ## 0. 阅读约定
@@ -49,7 +49,7 @@
 
 ### 0.4 本版读数纪律（五条）
 
-- **行号一律 UTF-8 实读**：本文引用的行号逐处按 `read` 工具复核过——`CultivatorBlockEntity:44/66/84/94/104-110`、`CropConverterBlockEntity:40/71/89-92/118-120/129`、`OutpostCoreBlockEntity:604-608/619-643/851-855/866-873/887-889`、`AreaBlockEntities:32-33/39/43-44`、`BotanistTrade:38/41-51/60-82/91`、`TierTrade:37-38/41-47/49-58/79`、`BotanistEpicTrade:28/38-46/64`、`VillagerTradeEvents:44-47/55-57`、`CoreHudRenderer:40-44`、`FarmstormTags:29-30`、`CropConverterBlock:121-122`、`CultivatorBlock:117-118`、`OutpostCoreBlock:67/131-132`、`Farmstorm.java:180-183`、`verify_project.py:458-471/479-480/613-622`、`outpost/OutpostCoreIndex.java:189`（F-328 删掉的那行 javadoc）。
+- **行号一律 UTF-8 实读**：本文引用的行号逐处按 `read` 工具复核过——`CultivatorBlockEntity:44/66/84/94/104-110`、`CropConverterBlockEntity:40/71/89-92/118-120/129`、`OutpostCoreBlockEntity:604-608/619-643/851-855/866-873/887-889`、`AreaBlockEntities:32-33/39/43-44`、`BotanistTrade:38/41-51/60-82/91`、`TierTrade:37-38/41-47/49-58/79`、`BotanistEpicTrade:28/38-46/64`、`VillagerTradeEvents:44-47/55-57`、`CoreHudRenderer:40-44`、`FarmstormTags:29-30`、`CropConverterBlock:121-122`、`CultivatorBlock:117-118`、`OutpostCoreBlock:67/131-132`、`Farmstorm.java:180-183`、`verify_project.py:458-471/479-480/613-622`、`outpost/OutpostCoreIndex.java:189`（F-328 删掉的 `ownerOf` javadoc 首行；该方法现整块删除）。
 - **判据只用五类**：计数（文件数 / 键数 / 命中数）、日志行、`/data get` 读数、源码 grep 字符串、像素比对；感受类措辞一律不进断言。
 - **数字只做加减法**：每个数给算式（`152 − 2 + 1 = 151`、`92 − 0 + 0`、`9 × 0.5 + 5 × 1.5 + 3 × 3.0 = 21.0`）；文件数一律写「基线 − 本版删除 + 本版新增」，当前实点 150 只作读数值出现、不当算式基线；需要新数值的地方由上游给，本文不发明。
 - **「原版」与「本仓」分两棵树**：`net/minecraft/**` 在 `.scratch/p25a/src/`，本仓在 `src/main/java/com/dashpig/farmstorm/`；凡写「命中 0」一律指明搜的是本仓。
@@ -67,7 +67,7 @@
 | 4 | `TierTrade` 的 record 分量必须与 `of(...)` 与三档常量同一提交 | **F-321** | `:49-54` 走 `:56-58` 的 `of` 三参、而 record 要四参 ⇒ 编译不过 |
 | 5 | 核侧 `KIND_BY_BLOCK` 的取用必须与「删掉两次按类收集」同一提交 | **F-317** | 发现面按标签、kind 无来源 ⇒ 新成员取到 `null` 即 `continue`，静默不绑定（RT-86） |
 
-**F-328 不新增死命令**：两个死类与三处引用清零在同一个提交里完成（5 个文件、`866` 行删除、`19` 行插入），删完即编译通过，不存在「一半删一半留」的中间态。
+**F-328 不新增死命令**：两个死类、三处引用清零与 `ownerOf` 的整块删除在同一个任务里完成（5 个文件、`881` 行删除、`19` 行插入），删完即编译通过，不存在「一半删一半留」的中间态。
 
 ---
 ## 1. 任务总表（八列）
@@ -118,16 +118,17 @@
   1. 删 `src/main/java/com/dashpig/farmstorm/farmland/FarmlandGuard.java`（225 行）与 `farmland/FarmlandLedger.java`（555 行）**整文件**，空目录 `farmland/` 一并删除：`225 + 555 = 780` 行。
   2. `event/FarmstormGameEvents.java`（**D-253**）：2 个 import、17 行耕地注释（`// 裁定 #3…` 5 行 + 其余 12 行）、`onRightClickBlock` / `onFarmlandTrample` 两个死方法的整段 javadoc 与本体、4 个随删而变死的 import（`Component` / `TriState` / `PlayerInteractEvent` / `BlockEvent`），头注释改为按 `register()` 的 9 个 `addListener` 逐条穷举（该文件新增 `16` 行即此；三文件合计 `1 + 16 + 2 = 19`）。
   3. `config/FarmstormConfig.java`（**D-254**）：`outpostCoreFarmlandBonus` 字段声明 1 行、字段上方 4 行注释 + 定义处 1 行注释（合计 5 行）、4 行被注释的 `.defineInRange`。
-  4. `outpost/OutpostCoreIndex.java`（**D-253**）：`ownerOf` 的 javadoc 删掉指向 `FarmlandGuard#inOwnRange` 的那一行（`:189`）。
+  4. `outpost/OutpostCoreIndex.java`（**D-253**）：整个 `ownerOf` 方法删除（javadoc 3 行 + 方法体 13 行 = `3 + 13 = 16` 行）——它唯一的读者是 `FarmlandGuard#inOwnRange`，farmland 包删除后全树 0 调用者；同文件另有两处 javadoc 改写各 1 删 1 插（`count()` 的 `:182` 与静态入口的 `:90`），故该文件合计 `16 + 1 + 1 = 18` 删、`1 + 1 = 2` 插。`isOwnerOrAlly` 保留不动（它那条「只有定义、没有调用者、且必须保持这样」的规矩仍成立）。
   5. 保留不动：`datagen/ModLangProvider.java:39-40` 的两行历史记账注释（v0.1.1 F-192 / F-197 的沿革）。
-  文件与行数口径：2 删 + 3 改 = **5** 个文件；`git diff --stat -- src/` = 5 files changed、`19 insertions(+)`、`866 deletions(-)`。删行 `780 + 86 = 866`（780 = 两个整文件 `225 + 555`；86 = 三个改动文件的删行，`11 + 72 + 3 = 86`：`config/FarmstormConfig` 11（`10 + 1`，D-254 的 10 行物件 + 同段 ASCII 注释原行）、`event/FarmstormGameEvents` 72、`outpost/OutpostCoreIndex` 3（`1 + 2`，D-253 的 `ownerOf` 一行 + 两处 javadoc 改写））。插行 `1 + 16 + 2 = 19`（`config` 1 = ASCII 注释改写后的新行、`event` 16 = 头注释按 `register()` 的 9 个 `addListener` 逐条穷举重写、`outpost` 2 = 两处 javadoc 改写后的新行，58 号 §3.2 第 20 项）。净减 `866 − 19 = 847` 行。
+  文件与行数口径：2 删 + 3 改 = **5** 个文件；`git diff --stat -- src/` = 5 files changed、`19 insertions(+)`、`881 deletions(-)`。删行 `780 + 101 = 881`（780 = 两个整文件 `225 + 555`；101 = 三个改动文件的删行，`11 + 72 + 18 = 101`：`config/FarmstormConfig` 11（`10 + 1`，D-254 的 10 行物件 + 同段 ASCII 注释原行）、`event/FarmstormGameEvents` 72、`outpost/OutpostCoreIndex` 18（`16 + 1 + 1`，`ownerOf` 整块 16 行 + 两处 javadoc 改写各 1 行））。插行 `1 + 16 + 2 = 19`（`config` 1 = ASCII 注释改写后的新行、`event` 16 = 头注释按 `register()` 的 9 个 `addListener` 逐条穷举重写、`outpost` 2 = 两处 javadoc 改写后的新行，58 号 §3.2 第 20 项）。净减 `881 − 19 = 862` 行。
 - **验收断言**：
   1. `grep -rn "Farmland\|farmland" src/main/java` 命中恰 **2**（`ModLangProvider.java:39`、`:40`）；`grep -rn "outpostCoreFarmlandBonus" src/main/java` 命中 **0**。
   2. `(Get-ChildItem -Recurse src/main/java -Filter *.java).Count` 实点 **150**（`152 − 2 = 150`）；F-313 落地后终值 **151**（`152 − 2 + 1`）。
   3. `python -X utf8 tools\verify_project.py` 复跑 **FAIL 0 / WARN 1**，注册面 **92**、server config **175**、语言键 **321** 三段读数与删除前一字不差。
   4. `Test-Path src/main/java/com/dashpig/farmstorm/farmland` 为 `False`（空目录随两个类一并删除）。
+  5. `grep -rn "ownerOf" src/main/java` 命中 **0**（整块删除，不留空壳）；`v0.2.4 起无调用者` 在 `outpost/OutpostCoreIndex.java` 命中 **0**——`count()` 的活调用链是 `OutpostCoreBlock` 的放置上限经 `countOwned` 到本方法，它保留并改注释，不随 `ownerOf` 一起删。
 - **依赖**：无（已落地，写作期完成；无前驱，也无后继——没有任务读它删掉的符号）。
-- **回滚影响**：`git revert` 该笔即把两个死类与三处引用原样恢复，其余 16 个任务的读数一个不变；唯一要同步改的是 F-313 与 F-326 ~ F-327 的文件数读数——回滚后基线回到删除前的 152，终值随之整体后移 2（`152 − 2 + 1` 里的 −2 归零）。它单独占一个任务号的理由就是这一条：它是一笔可独立回滚的提交。
+- **回滚影响**：`git revert` 该任务的两笔改动（删两个死类与三处引用清零；补删 `ownerOf`）即把它们原样恢复，其余 16 个任务的读数一个不变；唯一要同步改的是 F-313 与 F-326 ~ F-327 的文件数读数——回滚后基线回到删除前的 152，终值随之整体后移 2（`152 − 2 + 1` 里的 −2 归零）。它单独占一个任务号的理由就是这一条：它的改动可独立回滚。
 
 ### Phase 67 · 绑定契约：接口与两个实现（F-313 ~ F-315）
 阶段目标：把「读缓存 / 写缓存 / 清缓存」三件事收敛成一个接口，并让两个方块实体都实现它。出口判据：`implements CoreBound` 在两个 `blockentity` 类各 1 处，转换器侧三个方法齐备、编译通过。
@@ -342,7 +343,7 @@
 | 24 | §3.3 删除项 1（58 号 D-253） | 删 `farmland/FarmlandGuard.java`（225 行，整文件） | F-328 |
 | 25 | §3.3 删除项 2（58 号 D-253） | 删 `farmland/FarmlandLedger.java`（555 行，整文件） | F-328 |
 
-**A.1 的行数核对**：**25 / 25** 有落点（新增 6 + 修改 17 + 删除 2 = 25），未覆盖 **0**；58 号 §3.3 原文的删除项仍是 **0**（只引上游、不改上游），表内第 24、25 两行是裁定 #8 补的删除动作，登记在 A-111。**表外动作 5 项**（不在 58 号 §3 的 23 处内，各有独立验收）：① `CropConverterBlockEntity.java:129` 的 `convertible` 由 `private` 提为 `public`（60 号 §4.4.3 的编译前提，归 F-314）；② `gradle.properties:11` 与两支 `.cmd` 的 5 处版本串（D-225，归 F-312）；③ `README.md` 增量段（D-225、D-251，归 F-327）；④ `OutpostCoreBlockEntity.java:859` 的注释与 `:867` 的日志串（同文件表外两行，A-108，归 F-317）；⑤ `event/FarmstormGameEvents.java` 与 `config/FarmstormConfig.java` 的 farmland 引用清零，加 `outpost/OutpostCoreIndex.java` 的 `ownerOf` javadoc 一行（`event/` 与 `outpost/` 记 58 号 D-253、`config/` 记 D-254；归 F-328，与表内第 24、25 行同一提交）。
+**A.1 的行数核对**：**25 / 25** 有落点（新增 6 + 修改 17 + 删除 2 = 25），未覆盖 **0**；58 号 §3.3 原文的删除项仍是 **0**（只引上游、不改上游），表内第 24、25 两行是裁定 #8 补的删除动作，登记在 A-111。**表外动作 5 项**（不在 58 号 §3 的 23 处内，各有独立验收）：① `CropConverterBlockEntity.java:129` 的 `convertible` 由 `private` 提为 `public`（60 号 §4.4.3 的编译前提，归 F-314）；② `gradle.properties:11` 与两支 `.cmd` 的 5 处版本串（D-225，归 F-312）；③ `README.md` 增量段（D-225、D-251，归 F-327）；④ `OutpostCoreBlockEntity.java:859` 的注释与 `:867` 的日志串（同文件表外两行，A-108，归 F-317）；⑤ `event/FarmstormGameEvents.java` 与 `config/FarmstormConfig.java` 的 farmland 引用清零，加 `outpost/OutpostCoreIndex.java` 整个 `ownerOf` 方法的删除（`event/` 与 `outpost/` 记 58 号 D-253、`config/` 记 D-254；归 F-328，与表内第 24、25 行同一任务）。
 
 **A.2 · 60 号 §8 的验收 25 条 → 任务**
 
@@ -518,8 +519,8 @@
 
 ### 4.10 A-111 · farmland 死代码删除已落地；A-62 由 58 号 **D-254** 取代
 - **结论**：`farmland/FarmlandGuard.java`（225 行）与 `farmland/FarmlandLedger.java`（555 行）连同三处悬挂引用一次删净，记为 **F-328**（L · 3.0 人日，**已落地**）。A-62 的原话是「字段声明保留，因为 `FarmlandGuard` / `FarmlandLedger` 两处 `.get()` 仍在」；前提由 **D-253** 取消（两个类已不存在），A-62 由 **D-254**（删 `FarmstormConfig` 的字段声明与 9 行相关注释）直接撤销。**本文补充，作者可否决**。
-- **依据**：裁定 #8（`.work/v024-BRIEF.md:141`；其「857 行删除、0 插入」是第一轮读数）；终值 `git diff --stat -- src/` = 5 files changed、`19 insertions(+)`、`866 deletions(-)`（`780 + 86 = 866`、`1 + 16 + 2 = 19`，第一轮之后类头注释按 `register()` 重写又加 19 行）；`grep -rn "Farmland\|farmland" src/main/java` 命中 **2**（只剩 `ModLangProvider.java:39-40` 两行历史记账注释）、`grep -rn "outpostCoreFarmlandBonus" src/main/java` 命中 **0**；Java 文件数实点 **150**（`152 − 2 = 150`）；`python -X utf8 tools\verify_project.py` 复跑 **FAIL 0 / WARN 1**，`92 / 175 / 321` 三段读数一字未变。
-- **编号归属**：按 58 号 `:379` 与 `:387` 的正文——**D-253** = 删两个类 + 连带清理 `event/FarmstormGameEvents`（2 import、17 行耕地注释、两个死方法与 4 个死 import、头注释按 `register()` 重写）与 `outpost/OutpostCoreIndex` 的 `ownerOf` javadoc；**D-254** = 删 `config/FarmstormConfig` 的字段声明 1 行 + 字段上方 4 行注释 + 定义处 1 行注释 + 4 行被注释的 `.defineInRange`（`1 + 4 + 1 + 4 = 10` 行），并取代 A-62。该文件的 git 读数是 11 删 / 1 插：`10 + 1 = 11`，多出的 1 删 1 插是同段 ASCII 注释的改写（58 号 §3.2 第 19 项）。三处连带改动不是同一条：`event/` 与 `outpost/` 记 D-253，`config/` 记 D-254；`152 − 2 + 1 = 151` 里的 −2 只挂 D-253（59 号 `:52`、`:140`、`:386` 同记）。
+- **依据**：裁定 #8（`.work/v024-BRIEF.md:141`；其「857 行删除、0 插入」是第一轮读数，此后类头注释按 `register()` 重写又加 19 行、再补删 `ownerOf`）；终值 `git diff --stat -- src/` = 5 files changed、`19 insertions(+)`、`881 deletions(-)`（`780 + 101 = 881`、`1 + 16 + 2 = 19`，净减 `881 − 19 = 862`）；`grep -rn "Farmland\|farmland" src/main/java` 命中 **2**（只剩 `ModLangProvider.java:39-40` 两行历史记账注释）、`grep -rn "outpostCoreFarmlandBonus" src/main/java` 命中 **0**；Java 文件数实点 **150**（`152 − 2 = 150`）；`python -X utf8 tools\verify_project.py` 复跑 **FAIL 0 / WARN 1**，`92 / 175 / 321` 三段读数一字未变。
+- **编号归属**：按 58 号 `:379` 与 `:387` 的正文——**D-253** = 删两个类 + 连带清理 `event/FarmstormGameEvents`（2 import、17 行耕地注释、两个死方法与 4 个死 import、头注释按 `register()` 重写）与 `outpost/OutpostCoreIndex` 整个 `ownerOf` 方法（javadoc 3 + 方法体 13 = 16 行）；**D-254** = 删 `config/FarmstormConfig` 的字段声明 1 行 + 字段上方 4 行注释 + 定义处 1 行注释 + 4 行被注释的 `.defineInRange`（`1 + 4 + 1 + 4 = 10` 行），并取代 A-62。该文件的 git 读数是 11 删 / 1 插：`10 + 1 = 11`，多出的 1 删 1 插是同段 ASCII 注释的改写（58 号 §3.2 第 19 项）。三处连带改动不是同一条：`event/` 与 `outpost/` 记 D-253，`config/` 记 D-254；`152 − 2 + 1 = 151` 里的 −2 只挂 D-253（59 号 `:52`、`:140`、`:386` 同记）。
 - **与 60 号的差异**：60 号 `:530` 把三处连带改动一并记作 D-254；按 58 号正文应拆成一行一条。本文按 58 号记，60 号不改（只引上游）。
 - **落地位置**：§2 的 F-328；表 A.1 的第 24、25 行与表外动作 ⑤；§1 的 F-328 行；§0.3 第 1 与第 4 条；表 C 第 2 行；§6 第 2 条。
 - **否决**：「照 A-62 保留字段声明」——两个读取方都不存在了，保留等于在 config 类里留一个无人读、也没有 `.define` 的孤儿字段；也否决「把删除摊到多个任务」——两个类互不引用，一次删完只有一个回滚点，摊开就多出两个半截状态。

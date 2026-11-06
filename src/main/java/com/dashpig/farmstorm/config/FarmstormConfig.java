@@ -225,11 +225,6 @@ public final class FarmstormConfig {
     /** D-183 / F-258：陷阱对敌对生物的伤害倍率（默认 3.0，值域 1.0 ~ 10.0）；只作用于 blast_carrot 与 zangief_cane。 */
     public static ModConfigSpec.DoubleValue trapDamageMultiplier;
 
-    // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
-    // 本字段的声明**保留**：FarmlandGuard / FarmlandLedger 两处 .get() 仍在，删声明等于改这两个类（A-62）。
-    // 注意：:909-912 的 .defineInRange 已注释 ⇒ 本字段运行期恒为 null；
-    // 恢复监听器（:75/:76）前必须先恢复定义，否则 FarmlandGuard.java:75 抛 NPE。
-    public static ModConfigSpec.IntValue outpostCoreFarmlandBonus;
     public static ModConfigSpec.IntValue outpostCoreMaxPerPlayer;
     public static ModConfigSpec.IntValue outpostCoreBoundaryParticleIntervalTicks;
     /** D-166：核心存储的格子数（54 = 6 × 9 双箱）。**与培养器名额 24 不是一个数**（裁定 #8）。 */
@@ -928,13 +923,8 @@ public final class FarmstormConfig {
                 .defineInRange("damageMultiplier", 3.0, 1.0, 10.0);
         b.pop();
 
-        // F-192 / D-139 / A-42：farmland 整组已删除（额度口径改为 farmlandBonus × 己方核数，不再有 base 项）。
+        // F-192 / D-139 / A-42：耕地整组已删除（额度口径改为「每核上限 × 己方核数」，不再有 base 项）。
         b.push("outpost_core");
-        // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
-        // outpostCoreFarmlandBonus = b.comment("每个据点核心增加的耕地上限；范围 0 ~ 1024。"
-                // + "本键同时是每核容量与队伍额度基数（额度 = 本键 × 己方核数，RT-33）")
-                // .translation(tr("outpost_core.farmlandBonus"))
-                // .defineInRange("farmlandBonus", 16, 0, 1024);
         outpostCoreMaxPerPlayer = b.comment("每玩家可放置的核心数；范围 1 ~ 64")
                 .translation(tr("outpost_core.maxPerPlayer"))
                 .defineInRange("maxPerPlayer", 4, 1, 64);

@@ -2,8 +2,6 @@ package com.dashpig.farmstorm.event;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.explosion.ExplosionQueue;
-import com.dashpig.farmstorm.farmland.FarmlandGuard;
-import com.dashpig.farmstorm.farmland.FarmlandLedger;
 import com.dashpig.farmstorm.network.CoreListBroadcaster;
 import com.dashpig.farmstorm.network.CultivatorLinkBroadcaster;
 import com.dashpig.farmstorm.outpost.CoreChunkTickets;
@@ -15,16 +13,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
@@ -33,8 +27,17 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * game 总线事件（TECH §2 / §4.10 / F-15 ~ F-17）。
- * 只做七件事：玩家心跳与临时附魔自愈、登录 / 登出的创造模式对账、爆炸批处理、爆炸免疫拦截、
- * 一次性启动闸（F-190 补建 / F-198 补票）、锄地拦截与写绑定（F-157 / F-194）、耕地踩踏保护（F-158）。
+ * 只做九件事，一条对应 {@link #register} 里的一行监听器注册，顺序同 {@code register}：
+ * ① {@code onPlayerTick}——每 20 tick 的临时附魔自愈与心跳日志；
+ * ② {@code onPlayerLoggedIn}——登录时对账，账本里还留着记录就立刻还原创造模式；
+ * ③ {@code onPlayerLoggedOut}——登出时还原创造模式，并清掉陷阱免疫与两路广播的登出记录；
+ * ④ {@code onPlayerChangedDimension}——换维度时请两路广播各重发一次（F-200 第 7 条）；
+ * ⑤ {@code onPlayerRespawn}——重生时同上（F-200 第 8 条）；
+ * ⑥ {@code onExplosionDetonate}——爆炸免疫方块拦截：从 {@code getAffectedBlocks()} 里摘掉它们（D-14 / RT-08）；
+ * ⑦ {@code onLevelTickPost}——爆炸队列的每 tick 结算点（{@code ExplosionQueue.drain}）；
+ * ⑧ {@code onServerTickPost}——一次性启动闸（{@code CoreChunkTickets.restoreAll}）加两路广播的每刻 tick；
+ * ⑨ {@code onServerStopping}——停服释放区块票并复位闸。
+ * F-157 / F-158 / F-194 的耕地相关监听器已在 v0.2.4 随耕地包一并删除。
  * 服务端 {@code /farmstorm} 指令树已在 F-197 整棵删除（D-140）；客户端 {@code /farmstorm hud} 是另一条注册，不在这里。
  * 不注册任何方块实体 tick（F-15 ③），也不在客户端进入任何判定路径（HC-03）。
  */
@@ -55,7 +58,7 @@ public final class FarmstormGameEvents {
      */
     private static final Map<UUID, GameType> CREATIVE_RESTORE = new ConcurrentHashMap<>();
 
-    /** F-190 / F-198 的一次性启动闸：补建与补票只在每个服务端实例的首个 tick 跑一次。 */
+    /** F-190 / F-198 的一次性启动闸：每个服务端实例的首个 tick 跑一次；v0.2.4 起闸内只剩 {@code CoreChunkTickets.restoreAll} 一件事。 */
     private static boolean startupDone;
 
     private FarmstormGameEvents() {}
@@ -73,10 +76,6 @@ public final class FarmstormGameEvents {
         gameBus.addListener(FarmstormGameEvents::onLevelTickPost);
         gameBus.addListener(FarmstormGameEvents::onServerTickPost);
         gameBus.addListener(FarmstormGameEvents::onServerStopping);
-        // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
-        // gameBus.addListener(FarmstormGameEvents::onRightClickBlock);
-        // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
-        // gameBus.addListener(FarmstormGameEvents::onFarmlandTrample);
     }
 
     /** 每 20 tick：临时附魔自愈（光环到期撤销也走这条）+ 可开关的心跳日志。 */
@@ -166,19 +165,17 @@ public final class FarmstormGameEvents {
     }
 
     /**
-     * 一次性启动闸（F-190 补建 + F-198 补票）：放在首个 {@code ServerTickEvent.Post} 而不是构造器里，
+     * 一次性启动闸（F-190 / F-198）：放在首个 {@code ServerTickEvent.Post} 而不是构造器里，
      * 因为构造器阶段 {@link MinecraftServer} 还没就绪。
      *
-     * <p>顺序照 F-198 要点 3：**先补票、后补绑定**——补建要用候选核的覆盖范围与空位，
-     * 先把票补上能让核所在的区块在补建那一刻已经处于 entity-ticking（与「先有核、后有田」的正常时序一致）。
+     * <p>v0.2.4 起闸内只剩 {@code CoreChunkTickets.restoreAll} 一件事——原「先补票、后补绑定」的
+     * 先后约束随耕地撤销一起失效（绑定与补建均已删），这里只保留补票本身。
      */
     private static void onServerTickPost(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
         if (!startupDone) {
             startupDone = true;
             CoreChunkTickets.restoreAll(server);
-            // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
-            // FarmlandLedger.get(server).backfill(server);
         }
         // F-200 / 30 号 §2.1.4 第 10 条：去抖 flush + 每 100 刻的指纹对账。**每刻都要走**，
         // 不能再让它挂在启动闸后面（闸只跑一次，那样包永远发不出去）。
@@ -187,7 +184,7 @@ public final class FarmstormGameEvents {
         CultivatorLinkBroadcaster.tick(server);
     }
 
-    /** 停服：票不落盘，显式释放一遍；闸复位，让同一个 JVM 里换存档 / 重开服时补建照常再跑一次。 */
+    /** 停服：票不落盘，显式释放一遍；闸复位，让同一个 JVM 里换存档 / 重开服时启动闸照常再跑一次。 */
     private static void onServerStopping(ServerStoppingEvent event) {
         CoreChunkTickets.releaseAll(event.getServer());
         startupDone = false;
@@ -240,57 +237,4 @@ public final class FarmstormGameEvents {
         return heartbeatLogging;
     }
 
-    /**
-     * 锄地拦截（F-157 / 24 号 §6.3）：顺序固定「先范围、后额度」，两种拒绝各发一条动作栏提示。
-     *
-     * <p>取消点选在 {@code RightClickBlock}：服务端在 {@code ServerPlayerGameMode#useItemOn} 抛本事件，
-     * 取消后该方法立刻返回，早于 {@code ItemStack#useOn}——改方块与 {@code hurtAndBreak} 都在那之后，
-     * 所以「取消之后既不产生耕地也不扣耐久」由调用顺序保证，不靠猜（反编译路径见证据 F-23B1 第 3 条）。
-     *
-     * <p>只有服务端判定（红线第 3 条）。客户端保留原版预测：服务端 {@code Level#playSound(Player, ...)}
-     * 把发声音的玩家本人排除在外，客户端若也不预测，成功锄地时锄头就没有音效。
-     */
-    // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
-    // private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        // if (!(event.getLevel() instanceof ServerLevel level) || !(event.getEntity() instanceof ServerPlayer player)) {
-            // return;
-        // }
-        // BlockPos pos = event.getPos();
-        // if (!FarmlandGuard.isTillAction(level, pos, event.getItemStack())) {
-            // return;
-        // }
-        // FarmlandLedger ledger = FarmlandLedger.of(level);
-        // FarmlandGuard.Decision decision = FarmlandGuard.check(level, player, pos);
-        // if (decision.verdict() == FarmlandGuard.Verdict.ALLOW && decision.core() != null) {
-            // // F-194：同一 tick 内写绑定 + 记账 + 放耕地——紧接着的下一次锄地读到的 used 已含这一块，
-            // // 而 /save-all 立刻就能在 NBT 里看到这条（30 号 §7 #16）。
-            // ledger.bind(player.getUUID(), decision.core(), pos);
-            // return;
-        // }
-        // event.setCanceled(true);
-        // // 1.21 用 TriState 取代了原先的 Event.Result：DENY 对应 TriState.FALSE（24 号 §6.3 的待验证 ⑥）
-        // event.setUseBlock(TriState.FALSE);
-        // player.displayClientMessage(decision.verdict() == FarmlandGuard.Verdict.NO_CORE
-                // ? Component.translatable(FarmlandGuard.MESSAGE_NO_CORE)
-                // : Component.translatable(FarmlandGuard.MESSAGE_QUOTA_FULL,
-                        // ledger.used(level, player), ledger.capacity(level, player)),
-                // true);
-    // }
-
-    /**
-     * 耕地踩踏保护（F-158 / D-120 第 3 项）：取消即不产生泥土。
-     *
-     * <p>这条事件可取消：{@code BlockEvent.FarmlandTrampleEvent} 实现 {@code ICancellableEvent}，
-     * 由 {@code CommonHooks#onFarmlandTrample} 在 {@code FarmBlock#fallOn} 的 {@code !level.isClientSide}
-     * 分支里抛出；取消后该处返回 false，{@code turnToDirt} 不再执行。因此不必走 TECH §6.4 的
-     * 「40 刻对账 + 恢复」兜底，也没有「踩坏的那一瞬闪一帧泥土」的代价。
-     *
-     * <p>失水退化不在这条链上（{@code FarmBlock#randomTick} 直接调 {@code turnToDirt}），范围内的耕地照常退化。
-     */
-    // 裁定 #3：v0.2.0 撤销耕地，勿恢复。
-    // private static void onFarmlandTrample(BlockEvent.FarmlandTrampleEvent event) {
-        // if (event.getLevel() instanceof ServerLevel level && FarmlandGuard.protectsFromTrample(level, event.getPos())) {
-            // event.setCanceled(true);
-        // }
-    // }
 }

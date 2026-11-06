@@ -87,7 +87,7 @@ public final class OutpostCoreIndex extends SavedData {
     /**
      * 该玩家名下**仍然有效**的核心数（D-122 第 1、4 项：按玩家计，不按队伍计）。
      *
-     * <p>静态入口的形态由 F-152 的放置上限与 F-156 的额度求和共用——两处手里都只有一个 {@link Player}。
+     * <p>静态入口的形态由 F-152 的放置上限决定（F-156 的额度求和已随耕地撤销一并删除）——调用方手里只有一个 {@link Player}。
      * 客户端没有索引（{@code getServer()} 为 null）返回 0：按 F-25 的既有口径「客户端只做预测，判定在服务端」。
      */
     public static int countOwned(Player player) {
@@ -179,14 +179,13 @@ public final class OutpostCoreIndex extends SavedData {
         return new ArrayList<>(this.byOwner.keySet());
     }
 
-    /** 该玩家名下仍然有效的核心数（F-189 把 {@code private} 改成公开只读重载：额度算式要用）。 */
+    /** 该玩家名下仍然有效的核心数（F-189 把 {@code private} 改成公开只读重载；v0.2.4 起无调用者，保留为公开只读查询 API）。 */
     public int count(MinecraftServer server, UUID owner) {
         return this.validated(server, owner).size();
     }
 
     /**
      * 某坐标的核主（按维度 + 坐标反查，不看区块在不在内存）；没有返回 {@code null}。
-     * 供 {@code FarmlandGuard#inOwnRange} 的实时己方查询用（F-195）。
      */
     @Nullable
     public UUID ownerOf(ResourceLocation dimension, BlockPos pos) {

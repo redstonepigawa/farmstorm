@@ -179,24 +179,9 @@ public final class OutpostCoreIndex extends SavedData {
         return new ArrayList<>(this.byOwner.keySet());
     }
 
-    /** 该玩家名下仍然有效的核心数（F-189 把 {@code private} 改成公开只读重载；v0.2.4 起无调用者，保留为公开只读查询 API）。 */
+    /** 该玩家名下仍然有效的核心数（F-189 把 {@code private} 改成公开只读重载；活调用链：{@code OutpostCoreBlock} 的放置上限经 {@link #countOwned} 到本方法）。 */
     public int count(MinecraftServer server, UUID owner) {
         return this.validated(server, owner).size();
-    }
-
-    /**
-     * 某坐标的核主（按维度 + 坐标反查，不看区块在不在内存）；没有返回 {@code null}。
-     */
-    @Nullable
-    public UUID ownerOf(ResourceLocation dimension, BlockPos pos) {
-        for (Map.Entry<UUID, List<Entry>> bucket : this.byOwner.entrySet()) {
-            for (Entry entry : bucket.getValue()) {
-                if (entry.dimension().equals(dimension) && entry.pos().equals(pos)) {
-                    return bucket.getKey();
-                }
-            }
-        }
-        return null;
     }
 
     /** 归属者名字；没有记录返回 {@code null}（离线反查队伍用）。 */

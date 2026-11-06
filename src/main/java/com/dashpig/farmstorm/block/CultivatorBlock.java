@@ -105,8 +105,9 @@ public class CultivatorBlock extends BaseEntityBlock {
     /**
      * 放入动作（F-235 / 36 号 §2.5.3）：没有菜单（D-160），右键直接把手上那**一个**放进槽里。
      *
-     * <p>顺序与四道闸：客户端先 {@code SUCCESS}（照 {@code CropConverterBlock} 的 HC-03 取舍，
-     * 「右键无反应」的定义是行为面无反应，不是动画面无反应）→ 服务端把范围 / 绑定 / 手持档 / 空槽
+     * <p>顺序与四道闸：客户端只看物品品类——手持输入物才 {@code SUCCESS}，否则 {@code PASS}
+     * （照 {@code CropConverterBlock} 的 HC-03 取舍；与服务端四闸无关，「右键无反应」的定义是行为面
+     * 无反应，不是动画面无反应）→ 服务端把范围 / 绑定 / 手持档 / 空槽
      * **合并成一次判定**，任一不过就 {@code PASS}（不消耗、不提示、不报错）→ 通过则 {@code split(1)} + {@code CONSUME}。
      *
      * <p>空手右键**不取出**（35 号 §12 B-11）：要取回只能拆方块（F-237 掉内部那一个）。
@@ -115,6 +116,10 @@ public class CultivatorBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hit) {
         if (level.isClientSide) {
+            if (!(level.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator)
+                    || !cultivator.admissible(player.getMainHandItem())) {
+                return InteractionResult.PASS;        // 不是输入物：让路，别掐断原版的本地放置音（D-243）
+            }
             return InteractionResult.SUCCESS;
         }
         if (!(level.getBlockEntity(pos) instanceof CultivatorBlockEntity cultivator)) {

@@ -109,7 +109,8 @@ public class CropConverterBlock extends BaseEntityBlock {
     /**
      * 放入动作（D-208 / 54 号 §4.1.3）：没有菜单，右键把手上那**一个**放进唯一的槽。
      *
-     * <p>顺序：客户端先 {@code SUCCESS}（「右键无反应」的定义是行为面无反应，不是动画面无反应）→
+     * <p>顺序：客户端只看物品品类——手持输入物才 {@code SUCCESS}，否则 {@code PASS}（与服务端四闸无关，
+     * 「右键无反应」的定义是行为面无反应，不是动画面无反应）→
      * 服务端四道闸（范围 / 绑定 / 手持 / 空槽）**合并成一次判定**，任一不过就 {@code PASS}
      * （不消耗、不提示、不报错）→ 通过则 {@code split(1)} + {@code CONSUME}。
      *
@@ -119,6 +120,10 @@ public class CropConverterBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hit) {
         if (level.isClientSide) {
+            if (!(level.getBlockEntity(pos) instanceof CropConverterBlockEntity converter)
+                    || !converter.convertible(player.getMainHandItem())) {
+                return InteractionResult.PASS;        // 不是输入物：让路，别掐断原版的本地放置音（D-243）
+            }
             return InteractionResult.SUCCESS;
         }
         if (!(level.getBlockEntity(pos) instanceof CropConverterBlockEntity converter)) {

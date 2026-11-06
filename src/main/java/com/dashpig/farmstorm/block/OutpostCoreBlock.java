@@ -15,6 +15,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -129,7 +130,9 @@ public class OutpostCoreBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hit) {
         if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
+            return player.getMainHandItem().getItem() instanceof BlockItem
+                    ? InteractionResult.PASS              // 手持方块：先按放置走，别掐断本地放置音（D-245）
+                    : InteractionResult.SUCCESS;
         }
         if (!(level.getBlockEntity(pos) instanceof OutpostCoreBlockEntity core) || !core.isAlly(player)) {
             return InteractionResult.PASS;

@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · **v0.2.4 文档已出**：四处修复待实现，`farmland` 死代码清理**已落地**（当前可玩版本仍是 **v0.2.3**；不发布 Release，Releases 页仍是 **v0.2.2**）
+Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · **v0.2.4 已实现**：四条需求（绑定统一 / 交易经验分级 / 浮窗底色透明度 / 放置音效）与 `farmland` 死代码清理全部落地（当前可玩版本是 **v0.2.4**；本轮不发布 Release，Releases 页仍是 **v0.2.2**）
 
 [下载](https://github.com/redstonepigawa/farmstorm/releases) · [文档索引](#文档) · [构建方法](#构建与调试)
 
@@ -29,15 +29,15 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 
 **Minecraft 1.21.1 + NeoForge 21.1.x + Java 21**。用 PCL / HMCL 建对应的版本即可（实测 NeoForge 21.1.265 也能跑）。
 
-**v0.2.3 与 v0.2.2 的环境要求完全相同**，不用换启动器、也不用换 Java；唯一要注意的是**网络协议串从 `2` 升到了 `3`**，所以客户端与服务端必须用同一版，混版会连不上。
+**v0.2.4 / v0.2.3 / v0.2.2 的环境要求完全相同**，不用换启动器、也不用换 Java；网络协议串**仍是 `3`**（v0.2.3 从 `2` 升上来，v0.2.4 未动），所以客户端与服务端必须用同一版，混版会连不上。
 
 ### 安装
 
 1. 用启动器建一个 1.21.1 + NeoForge 21.1.x 的实例。
-2. 打开实例的 `mods` 文件夹（没有就新建），把 `farmstorm-0.2.2+mc1.21.1.jar` 丢进去。从源码构建的 v0.2.3 产物是 `farmstorm-0.2.3+mc1.21.1.jar`，两者不能同时放。
+2. 打开实例的 `mods` 文件夹（没有就新建），把 `farmstorm-0.2.2+mc1.21.1.jar` 丢进去（Releases 页上仍是这一份）。自己构建的 v0.2.4 产物是 `farmstorm-0.2.4+mc1.21.1.jar`（v0.2.3 是 `farmstorm-0.2.3+mc1.21.1.jar`），**任两份不能同时放**。
 3. 启动。创造模式物品栏最后会多一个「农场风云」标签页。
 
-`farmstorm-<版本>+mc1.21.1-sources.jar`（v0.2.2 与 v0.2.3 各一份）是源码包，给 IDE 看实现用，**不要**放进 `mods`。
+`farmstorm-<版本>+mc1.21.1-sources.jar`（v0.2.2 / v0.2.3 / v0.2.4 各一份）是源码包，给 IDE 看实现用，**不要**放进 `mods`。
 
 ### 这个版本会生成哪些配置文件
 
@@ -46,7 +46,23 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 | `config/farmstorm-server.toml` | **175 键 / 60 组**（v0.2.3 删 3 加 2；v0.2.2 是 176 键；**v0.2.4 无变化**） | 服务端行为；首次起服自动生成 |
 | `config/farmstorm-client.toml` | **3 键**（`hud.enabled` / `hud.x` / `hud.y`） | 客户端浮窗开关与位置；**首次进游戏**才生成 |
 
-### 本版（v0.2.3，**已实现**；本轮不发布 Release）
+### 本版（v0.2.4，**已实现**；本轮不发布 Release）
+
+**四条需求 + 一次死代码清理：绑定走接口与标签、交易经验按级分档、浮窗更透、右键让路把放置音让回来。**
+
+- **R1 绑定统一**：新增 `CoreBound` 接口（只声明 `corePos()` / `setCore(BlockPos)` / `clearCore()` 三个方法），农作物转换器与培养器都实现它；核侧四处「按类成对 `instanceof`」改按接口调用，「哪些方块能被核绑」改由方块标签 `farmstorm:processing_block` 发现；方块 → 类型的映射只留一张表（`KIND_BY_BLOCK`）；拆核迁移的清理出口同时覆盖两个方块（转换器以前漏掉）。
+- **R2 交易经验分级**：五个常量只在 `VillagerTradeEvents` 定义一次（`XP_LEVEL_1` ~ `XP_LEVEL_5` = 2 / 5 / 10 / 15 / 30），三个交易类引用它；植物学家与农民的 1 ~ 5 级交易按级取值，**价格、数量、成交次数与 22 项顺序一项没动**。
+- **R3 核心浮窗背景**：内层底色 `0x80000000` → `0x4D000000`，不透明度从 50.2%（128 ÷ 255）降到 **30.2%**（77 ÷ 255）；边框、三种文字颜色、几何与版式、三个 client config 键都不动（面板截图取色仍要玩家在有客户端的机器上看一眼）。
+- **R4 放置音效**：三处右键（转换器 / 培养器 / 据点核心）的客户端判据从「无条件已消费」改成「只在手上是本机器认的物品时才接走」，其余情况返回 `PASS` 让原版放置流程继续——服务端四道闸一行未改，也不新增任何音效。
+- **死代码清理**：`farmland/FarmlandGuard` + `farmland/FarmlandLedger`（225 + 555 行）与 `farmland/` 目录整体删除，`FarmstormConfig` 的 `outpostCoreFarmlandBonus` 字段、`FarmstormGameEvents` 的耕地监听、`OutpostCoreIndex.ownerOf` 一并清零；存档里的 `farmstorm_farmland.dat` 仍不读不写不删。
+
+**本版的数字面**：v0.2.4 的 Java 源文件是 **151**（152 − 2 + 1：删掉两个死类、新增 `CoreBound.java`），这是本版唯一变化的数字；注册面 **92**、server config **175 键 / 60 组**、client config **3 键**、语言键 **321 × 2**、`configuration` 组 **178**、网络包 **2**、进度 **16**、转换配方 **21**、交易 listing **26** 全部停在 0.2.3 的值上，一项没动。
+
+**右键「无反应」不是坏了**：客户端只看物品品类，服务端还看范围 / 绑定 / 手持 / 空槽——所以手上拿的不是机器认的输入物、机器槽里已经有货、或者机器还没绑定时，右键看上去**无反应**。这是**已知影响**，不是缺陷，也不是回归；服务端那四道闸一行未改，本版只是让「这次右键会不会被接走」的客户端预测收窄。
+
+**跟大师级做生意，村民经验涨得明显快**：1 ~ 5 级分别给 2 / 5 / 10 / 15 / 30 点交易经验，大师级那一单一次 **30 点**，是 0.2.3 那 2 点的 **15 倍**（30 ÷ 2 = 15）。经验只影响村民的升级速度，价格与产出都不受影响。
+
+### 上一版：v0.2.3（**已实现**；本轮不发布 Release）
 
 **农业流水线闭环了：种原版 → 培养器增殖 → 转换器升级。**
 
@@ -291,9 +307,9 @@ python -X utf8 tools/verify_project.py
 
 长期有效的基础文档：[`00-DECISIONS`](docs/zh/00-DECISIONS.md)、[`01-DESIGN`](docs/zh/01-DESIGN.md)、[`02-TECH-SPEC`](docs/zh/02-TECH-SPEC.md)、[`07-PUBLISH`](docs/zh/07-PUBLISH.md)、[`08-DEV-GUIDE`](docs/zh/08-DEV-GUIDE.md)、[`09-IMPL-VS-PLAN`](docs/zh/09-IMPL-VS-PLAN.md)。
 
-### 现行文档（v0.2.4，**文档已出、代码未实现**）
+### 现行文档（v0.2.4，**已实现**）
 
-六份中文文档已写完，**代码尚未实现**（16 个任务 F-312 ~ F-327、7 个 Phase 66 ~ 72 全部待办）。本轮仍未出英译，`docs/en/` 停在 v0.2.1。
+六份中文文档已写完，**并已按文档实现**（16 个任务 F-312 ~ F-327 + F-328、7 个 Phase 66 ~ 72 全部落地；验收记录 `.work/v024-verify/acceptance.md`、签字 `.work/v024-verify/signoff.md`）。本轮仍未出英译，`docs/en/` 停在 v0.2.1。
 
 | 文件 | 内容 |
 |---|---|
@@ -391,12 +407,15 @@ python -X utf8 tools/verify_project.py
 
 v0.2.3 这一版的手边件是 [`.work/v023-BRIEF.md`](.work/v023-BRIEF.md) 与 [`.work/v023-verify/`](.work/v023-verify)：**32 条**技术验收（`acceptance.md`）+ **31 条**边界（`boundaries.md`）+ 签字（`signoff.md`，八项读数 / 19 项必改 / 不改清单 / 已知影响 / 口径外 3 类）。
 
+v0.2.4 的手边件是 [`.work/v024-BRIEF.md`](.work/v024-BRIEF.md) 与 [`.work/v024-verify/`](.work/v024-verify)：**25 条**技术验收（`acceptance.md`，通过 22 / 不通过 1 / 未验证 2）+ 签字（`signoff.md`：四条影响面 / D-252 三项 / 十项读数 / 九条风险 RT-83~RT-91 / 与文档不一致 10 条）。
+
 ---
 
 ## 版本历史
 
 | 版本 | 日期 | 一句话 |
 |---|---|---|
+| v0.2.4 | —（**已实现**，本轮不发布 Release） | 四条需求 + 死代码清理：绑定统一（`CoreBound` 三方法接口 + `processing_block` 标签发现 + `KIND_BY_BLOCK` 单一映射 + 清理出口覆盖两个方块）、交易经验按级分 2 / 5 / 10 / 15 / 30（大师级单次 30 点 = 15 倍）、浮窗底色 alpha 128 → 77（30.2%）、三处右键让路恢复原版放置音；删 `farmland` 两个死类（881 行），Java 文件 152 → 151，其余十项读数一项未变 |
 | v0.2.3 | —（**已实现**，本轮不发布 Release） | 五条需求全部落地：农作物转换器重做（铁砧硬度、右键放入、30 秒、产物进核心、红色连线、工作动画）、改良作物去种子（7 个种子物品全删）、培养器只收原版/平凡作物且「自身即种子」的一档给 4 个、平凡韭菜可种植、man瓜炮弹 300 刻寿命 + 进度文案；注册面 98 → 92 |
 | v0.2.2 | 2026-11-05 | 植物学家职业（22 项普通 + 1 项史诗，职业方块就是据点核心）、平凡韭菜、`processing_block` 标签与 24 名额、核心界面的 tooltip 与 1 px 错位两个 bug、放置上限 4 |
 | v0.2.1 | 2026-11-05 | 核心每 100 刻自动补绑培养器、核心储物 90 格悬停显示详情、震动豆与 Q弹 让生物停手（AI 原值落盘）、陷阱对敌对 ×3（`trap.damageMultiplier`） |
@@ -408,7 +427,7 @@ v0.2.3 这一版的手边件是 [`.work/v023-BRIEF.md`](.work/v023-BRIEF.md) 与
 | v0.0.2 | 2026-10-29 | 7 项新内容 + 三个客户端子系统（世界灰度、红色剪影、键鼠拦截） |
 | v0.0.1 | 2026-10-28 | 15 种作物、转换器、64 个注册对象 |
 
-## 数字快照（v0.2.3 源码树；发布件仍停在 v0.2.2）
+## 数字快照（v0.2.4 源码树；发布件仍停在 v0.2.2）
 
 | 项 | 值 |
 |---|---|
@@ -420,10 +439,10 @@ v0.2.3 这一版的手边件是 [`.work/v023-BRIEF.md`](.work/v023-BRIEF.md) 与
 | 改良作物档案 | 22（普通 11 / 稀有 7 / 史诗 4） |
 | 进度 / 转换配方 | 进度 **16** 条（18 −2：删 `seed_cycle` / `nether_star_toll`）；`farmstorm:converting` 配方 **21 条**（26 −6 +1） |
 | 方块贴图 / item 贴图 | `textures/block` **84 png + 5 mcmeta**（mcmeta **2 → 5**）；`textures/item` **22 png**（29 −7）；`textures/gui` **0** 文件 |
-| Java 源码文件 | **152**（154 −3 个 GUI 文件 −1 `SeedItem` +2 个新类） |
-| 验收 | **32 条技术 + 31 条边界 = 63 条**。技术侧：**通过 28** + **带未验证子项 4**（#24 #25 #31 #32）、**不通过 0**、整条未验证 **0**；边界侧：**成立 31**、**不成立 0**、带未验证子项 **2**（B-54 / B-57）。26 个任务（F-286~F-311）全部落地 |
-| 构建产物（本轮**不发布 Release**） | `farmstorm-0.2.3+mc1.21.1.jar` **1,142,338 B** / SHA256 `EB1A3B56D9C48AF288FFB7865AAD035CE21334E1577C12E7B06A1ABDA8E27DCF` |
-| 源码包 | `farmstorm-0.2.3+mc1.21.1-sources.jar` **1,082,655 B** / SHA256 `AED32140028FCA76FE5944DB00CE5271ECC695E697B82B3AFBED521BE67986B5` |
+| Java 源码文件 | **151**（152 − 2 + 1：删 `farmland/FarmlandGuard` 与 `FarmlandLedger` 两个死类、新增 `blockentity/CoreBound.java`；本版唯一变化的数字） |
+| 验收（v0.2.4） | **25 条**（60 号 §8）：**通过 22** + **不通过 1**（#22 判据假设未提交态，等价读数 **19 / 19** 通过，记为「字面不通过 / 等价判据通过」）+ **未验证 2**（#20 面板取色、#25 双客户端音频轨：没有图形客户端、也没有第二台机器）。逐条记录在 `.work/v024-verify/acceptance.md`，签字在 `.work/v024-verify/signoff.md`；16 个任务（F-312~F-327）+ F-328 全部落地。上一版是 32 条技术 + 31 条边界 = 63 条 |
+| 构建产物（本轮**不发布 Release**） | `farmstorm-0.2.4+mc1.21.1.jar` **1,125,593 B** / SHA256 `0D6B68EFFF745D84F78A51B21129C72A7D3EB0A536CA759AB09E416AEA3A021A`（上一版 v0.2.3 是 1,142,338 B） |
+| 源码包 | `farmstorm-0.2.4+mc1.21.1-sources.jar` **1,071,152 B** / SHA256 `971B0692438AF9EDC744E76ED73B73515F5B1EFEB63283022758D0B7436923F6`（上一版 v0.2.3 是 1,082,655 B） |
 | 上一版发布件（v0.2.2，仍是 Releases 页上的那一份） | `farmstorm-0.2.2+mc1.21.1.jar` **1,141,176 B** / SHA256 `99309B4AB84B4267D004EA389F8E00390BB9D3329579A77F7151C89FB08389E3`；源码包 **1,067,719 B** / `0712EE1F538019A08B9B56F778908C76BE577257D86C8E65F0718232598AC94F` |
 
 ---
@@ -483,11 +502,12 @@ v0.2.3 这一版的手边件是 [`.work/v023-BRIEF.md`](.work/v023-BRIEF.md) 与
 
 A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
-**v0.2.3 is implemented but not released** — no GitHub Release this round; **the current release stays v0.2.2** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`).
+**v0.2.4 is implemented but not released** — no GitHub Release this round; **the current release stays v0.2.2** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`).
 
 **v0.2.2** ships a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI fixes (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registered types *outside* that count), config stays **176** keys (two defaults change), language keys 338 → **340**. The v0.2.2 spec is **Chinese-only** (no English translation for this round).
 
-- **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.2.2+mc1.21.1.jar` into `mods/`; a local v0.2.3 build is `farmstorm-0.2.3+mc1.21.1.jar` (never ship both). The `-sources.jar` is for IDEs.
+- **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.2.2+mc1.21.1.jar` into `mods/`; a local v0.2.4 build is `farmstorm-0.2.4+mc1.21.1.jar` (v0.2.3: `farmstorm-0.2.3+mc1.21.1.jar`; never ship two). The `-sources.jar` is for IDEs.
+- **What's new in 0.2.4**: binding is unified behind the `CoreBound` interface and discovered via the `farmstorm:processing_block` block tag (one `KIND_BY_BLOCK` map, and the removal path now cleans up both blocks); villager trade XP is per level (2 / 5 / 10 / 15 / 30, so a master-level trade gives **30** XP = **15×** the old 2); the HUD panel background goes from alpha 128 to **77** (30.2%); and the three right-click handlers now return `PASS` unless the held item is an input, so vanilla's local place sound is no longer swallowed. The two dead `farmland` classes are gone (881 lines), so Java files drop 152 → **151** while the other ten baseline numbers stay put. Spec: `docs/zh/58`–`63`.
 - **v0.2.3 is implemented** (build it locally: `farmstorm-0.2.3+mc1.21.1.jar`) and **Chinese-only**: `docs/zh/52`–`57`. It reworks the converter into a crop converter (anvil hardness, right-click insert, 30 s, output auto-delivered to the bound core, red link, working animation), removes all 7 improved-crop seed items, flips the cultivator to accept only vanilla/plain crops (the 11 "self-seeding" inputs now yield **4** instead of 2), makes `plain_chives` plantable, gives the man-melon bullet a 300-tick lifetime, and renames one advancement description. Registry 98 → **92**, config 176 → **175**, language keys 340 → **321**, Java files 154 → **152**, advancements 18 → **16**, converting recipes 26 → **21**. Two player-visible consequences: epic crops are cheap now (the nether-star gate is gone and one converter makes one item per 30 s), and old saves lose the `farmstorm:converter` block plus the 7 seed items.
 - **What's new in 0.2.2**: the Botanist profession (job site = Outpost Core; 22 trades at level 1, one epic at level 5), the `plain_chives` plain crop, the `farmstorm:processing_block` tag with a shared 24-binding cap, the two Outpost Core UI fixes, and caps of 4 cores / 24 cultivators per core.
 - **What's new in 0.2.1**: cores auto-rebind unbound cultivators every 100 ticks while under 16, core storage shows item tooltips, the vibration bean and Q-Bounce suspend AI of non-player mobs (the original AI flag is persisted on the entity), and trap crops deal ×3 to hostile mobs (`trap.damageMultiplier`).
@@ -496,6 +516,6 @@ A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 - **Static check**: `python -X utf8 tools/verify_project.py` — must print `92 / 92`, `175 个配置键`, `共 321 键` **and** `FAIL 0` with exit code 0. `FAIL 0` alone is not enough (the tool once verified only 93 objects).
 - **Red line**: no Mixin. Custom packets are uncapped (2 in this version, both S2C read-only, protocol string `3`).
 - **Known limitations**: see the tables above (the Chinese section is authoritative). Link-line visuals and the HUD still need a human eye on a real client.
-- **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds translations. v0.2.0 spec: `docs/zh/34`–`39`; v0.2.1 spec: `docs/zh/40`–`45`; v0.2.2 spec: `docs/zh/46`–`51`; **v0.2.3 spec (current, implemented, Chinese only): `docs/zh/52`–`57`**.
+- **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds translations. v0.2.0 spec: `docs/zh/34`–`39`; v0.2.1 spec: `docs/zh/40`–`45`; v0.2.2 spec: `docs/zh/46`–`51`; **v0.2.4 spec (current, implemented, Chinese only): `docs/zh/58`–`63`**; v0.2.3 spec: `docs/zh/52`–`57`.
 
 Asset provenance and the non-commercial terms are above — **keep that section verbatim when redistributing**.

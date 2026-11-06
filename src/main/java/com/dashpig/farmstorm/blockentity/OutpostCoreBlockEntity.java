@@ -362,7 +362,7 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
     /**
      * 绑定列表（**返回副本**，调用方可以边遍历边改自己的集合）。
      *
-     * <p>只在这条低频路径上做一次惰性清理（36 号 §2.7 末段）：把「该格已不是培养器」的条目摘掉。
+     * <p>只在这条低频路径上做一次惰性清理（36 号 §2.7 末段）：把「该格已不是处理方块」的条目摘掉。
      * 区块用 {@code ServerChunkCache#getChunkNow} 取（只查已加载、不触发加载）；**取不到就保留该条**
      * ——读不到不等于方块没了。运行期每刻的可用性判定不做这个校验（每刻 × 24 条 × 核数，代价不成比例）。
      */
@@ -810,9 +810,9 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
      * <ol>
      *   <li><b>① 改绑</b>：找到「覆盖该培养器 ∧ 己方 ∧ 未满」的接替核（最近优先，平手键同 D-165）⇒
      *       写新核的 {@code Cultivators} + 重塑培养器的 {@code Core} 缓存。世界不动。</li>
-     *   <li><b>② 留原地、标记未绑定</b>：一个都没有，且区块在内存、该格仍是培养器 ⇒ 清 {@code Core} 键
+     *   <li><b>② 留原地、标记未绑定</b>：一个都没有，且区块在内存、该格仍是处理方块 ⇒ 清 {@code Core} 键
      *       （{@code Held} / {@code Progress} 原样保留）⇒ 它从此不可使用。<b>不变泥土、不掉落</b>。</li>
-     *   <li><b>③ 防御性跳过</b>：一个都没有，且区块取不到 **或** 该格已不是培养器 ⇒ 什么都不写，
+     *   <li><b>③ 防御性跳过</b>：一个都没有，且区块取不到 **或** 该格已不是处理方块 ⇒ 什么都不写，
      *       培养器 NBT 原值保留（不猜测、不删绑定）。</li>
      * </ol>
      *

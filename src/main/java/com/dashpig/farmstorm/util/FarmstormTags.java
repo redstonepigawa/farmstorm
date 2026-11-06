@@ -26,7 +26,7 @@ public final class FarmstormTags {
     /** 5 个部署方块，供 DataGen 与整合包作者批量处理。 */
     public static final TagKey<Block> DEPLOYED_CROPS = block("deployed_crops");
 
-    /** 据点核心「这一格还是不是可绑定的方块」的语义判据（D-194）：本版唯一成员是培养器，converter 不进（裁定 #5）。 */
+    /** 据点核心「这一格还是不是可绑定的方块」的语义判据（D-194）：2 个成员（农作物培养器 + 农作物转换器），成员由标签产物 {@code data/farmstorm/tags/block/processing_block.json} 生成。 */
     public static final TagKey<Block> PROCESSING_BLOCK = block("processing_block");
 
     /** 15 个改良作物物品（D-09：不具备原版用途）。 */

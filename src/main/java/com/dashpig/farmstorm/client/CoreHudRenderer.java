@@ -37,7 +37,7 @@ public final class CoreHudRenderer {
     /** 核心行上限：8 行核心（A-34）。 */
     public static final int MAX_CORE_LINES = 8;
 
-    private static final int COLOR_BACKGROUND = 0x80000000;
+    private static final int COLOR_BACKGROUND = 0x4D000000;
     private static final int COLOR_BORDER = 0xFF000000;
     private static final int COLOR_SELF = 0xFF55FF55;
     private static final int COLOR_ALLY = 0xFFFFFFFF;

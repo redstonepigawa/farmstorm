@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.20.1** · NeoForge **47.x**（测试于 47.1.106）· Java **17** · modid `farmstorm` · **v0.2.4（1.20.1 移植版）**
+Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · modid `farmstorm` · **v0.2.4（1.20.1 移植版）**
 
 [仓库（1.20.1 分支）](https://github.com/redstonepigawa/farmstorm/tree/1.20.1)
 
@@ -27,13 +27,15 @@ Minecraft **1.20.1** · NeoForge **47.x**（测试于 47.1.106）· Java **17** 
 
 ### 版本要求
 
-**Minecraft 1.20.1 + NeoForge 47.x + Java 17**。
+**Minecraft 1.20.1 + Forge 47.x 或 NeoForge 47.x + Java 17**。
+
+**同一个 jar 两个加载器通用**，不需要装两份：产物里没有 `net.neoforged.*` 引用，mod 类用两边都认的无参构造器，步高属性用两边都存在的字段名。实测环境：Forge 47.4.28 与 NeoForge 47.1.106。
 
 网络协议串是 **`1`**（1.21.1 版是 `3`），所以客户端与服务端必须用同一版，混版会连不上（会被明确拒绝，不会崩溃）。
 
 ### 安装
 
-1. 用启动器建一个 1.20.1 + NeoForge 47.x 的实例。
+1. 用启动器建一个 1.20.1 + Forge 47.x（或 NeoForge 47.x）的实例。
 2. 打开实例的 `mods` 文件夹（没有就新建），把 **`farmstorm-0.2.4+mc1.20.1.jar`** 丢进去。
 3. 启动。创造模式物品栏最后会多一个「农场风云」标签页。
 
@@ -147,6 +149,6 @@ A Minecraft 1.20.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
 **v0.2.4 port for Minecraft 1.20.1** (Java 17 · modid `farmstorm`). **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio clips listed in the asset-provenance section keep their own terms.
 
-- **Install**: build a 1.20.1 + NeoForge 47.x instance, drop `farmstorm-0.2.4+mc1.20.1.jar` into `mods/`. The 1.20.1 and 1.21.1 builds share the same modid and version, so **keep exactly one per instance** — pick the one matching your MC version.
+- **Install**: build a 1.20.1 instance on **either Forge 47.x or NeoForge 47.x** (one jar works on both), drop `farmstorm-0.2.4+mc1.20.1.jar` into `mods/`. The 1.20.1 and 1.21.1 builds share the same modid and version, so **keep exactly one per instance** — pick the one matching your MC version.
 - **Compatibility**: network protocol string is `1` (the 1.21.1 build uses `3`); mismatched client/server are rejected cleanly. **New worlds only** — no save migration from 1.21.1.
 - **Content**: 22 crops (12 thrown / 7 deployed / 3 edible; tiers 11 / 7 / 4), 3 machines (crop converter / cultivator / outpost core), 21 converting recipes, 16 advancements, 3 damage types, 4 mob effects.

@@ -33,7 +33,7 @@ import org.joml.Vector3f;
 public final class WildHunterAura {
     /**
      * #7：跨越高度目标。玩家的原始步高是 0.6（{@code Entity#maxUpStep} 字段，1.20.1 里
-     * {@code ForgeMod.STEP_HEIGHT} 的属性值**加**在它之上，见 {@link #applyStepHeight}）。
+     * {@code ForgeMod.STEP_HEIGHT_ADDITION} 的属性值**加**在它之上，见 {@link #applyStepHeight}）。
      */
     private static final double STEP_HEIGHT_TARGET = 1.5;
     /** #5：手持剑时**剑自身攻速值**的乘数（1.6 → 4.8）。 */
@@ -132,14 +132,23 @@ public final class WildHunterAura {
 
     /**
      * 1.20.1 没有 {@code Attributes.STEP_HEIGHT}，等价的既有属性是 Forge 的
-     * {@code ForgeMod.STEP_HEIGHT}：{@code IForgeEntity#getStepHeight()} 把它**加**在
+     * {@code ForgeMod.STEP_HEIGHT_ADDITION}：{@code IForgeEntity#getStepHeight()} 把它**加**在
      * {@code Entity#maxUpStep()} 之上（原版移动代码调用的正是 {@code getStepHeight()}），
      * 与 1.21.1 的内建 STEP_HEIGHT 一样是「绝对值口径、可被修饰器改、随属性包同步到客户端」。
      * <p>差别只有一处：它的基值是 0.0（玩家的 0.6 来自 {@code maxUpStep} 字段），
      * 所以 delta 要用「目标值 − 当前实际步高」而不是「目标值 − 属性基值」，结果仍是 1.5 格。
+     *
+     * <p><b>为什么用 {@code _ADDITION} 这个名字而不是 {@code ForgeMod.STEP_HEIGHT}</b>（跨加载器）：
+     * <ul>
+     *   <li>原版 Forge 47 <b>只有</b> {@code STEP_HEIGHT_ADDITION}，没有 {@code STEP_HEIGHT} —— 写后者会在
+     *       真实 Forge 实例里抛 {@code NoSuchFieldError}。</li>
+     *   <li>NeoForge 47 两个名字都有，且是<b>同一个对象</b>：{@code STEP_HEIGHT} 先注册 {@code step_height}，
+     *       紧接着 {@code STEP_HEIGHT_ADDITION = STEP_HEIGHT}（别名）。</li>
+     *   <li>两边的 {@code getStepHeight()} 各自读自己那份名字，但指向同一个注册项，所以用旧名两边等价。</li>
+     * </ul>
      */
     private static void applyStepHeight(ServerPlayer player) {
-        AttributeInstance step = player.getAttribute(ForgeMod.STEP_HEIGHT.get());
+        AttributeInstance step = player.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get());
         if (step == null) {
             return;
         }
@@ -243,7 +252,7 @@ public final class WildHunterAura {
     /** 失效即摘除两个临时修饰器（效果到期 / clear / 死亡 / 退出世界都由这里兜住）。 */
     public static void clear(ServerPlayer player) {
         LOOP_LAST_SENT.keySet().removeIf(pair -> pair.holder().equals(player.getUUID()));  // 效果结束就不再重发
-        AttributeInstance step = player.getAttribute(ForgeMod.STEP_HEIGHT.get());
+        AttributeInstance step = player.getAttribute(ForgeMod.STEP_HEIGHT_ADDITION.get());
         if (step != null) {
             step.removeModifier(STEP_ID);
         }

@@ -28,7 +28,6 @@ import java.util.List;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.common.MinecraftForge;
@@ -45,7 +44,15 @@ public final class Farmstorm {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final TeamResolver TEAMS = new ScoreboardTeamResolver();
 
-    public Farmstorm(IEventBus modBus, ModContainer container) {
+    /**
+     * 只收 {@code IEventBus} 一个参数。
+     *
+     * <p><b>不要加第二参 {@code ModContainer}</b>：NeoForge 47 认这个位置，原版 Forge 47 不认，
+     * 结果 FML 匹配不到构造函数、回退去找无参构造，直接抛
+     * {@code NoSuchMethodException: com.dashpig.farmstorm.Farmstorm.<init>()}（1.20.1-Forge_47.4.28 实测）。
+     * 配置注册走 {@code ModLoadingContext}，本来也不需要 container。
+     */
+    public Farmstorm(IEventBus modBus) {
         FarmstormItems.REGISTER.register(modBus);
         FarmstormBlocks.REGISTER.register(modBus);
         FarmstormBlockEntities.REGISTER.register(modBus);

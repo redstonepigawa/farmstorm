@@ -160,9 +160,12 @@ public final class TempEnchantHandler {
             return new ArrayList<>(0);
         }
         // 键下就是一个 ListTag（{@link TempEnchantRecord#LIST_CODEC} 的 NBT 编码形状），直接喂回 codec。
-        return TempEnchantRecord.LIST_CODEC.parse(NbtOps.INSTANCE, list)
+        // **必须再包一层 ArrayList**：codec 解出来的列表是 ImmutableList，
+        // 调用方 grant / revokeExpired 会就地 set / add，直接返回会抛
+        // UnsupportedOperationException: ImmutableList.set（真机游玩实测崩在 grant:58）。
+        return new ArrayList<>(TempEnchantRecord.LIST_CODEC.parse(NbtOps.INSTANCE, list)
                 .result()
-                .orElseGet(ArrayList::new);
+                .orElseGet(ArrayList::new));
     }
 
     /** 读附魔等级（1.20.1 的读点是 {@code EnchantmentHelper}，不是 {@code ItemStack}）。 */

@@ -1,0 +1,15 @@
+fix: v0.2.6 修末影龙剪影崩溃（ClassCastException）
+
+真机崩溃：吃狂野苹果开启狂野猎人效果后，附近有末影龙时客户端崩。
+
+  ClassCastException: EnderDragonRenderer cannot be cast to LivingEntityRenderer
+    at WildHunterOutline.onRenderGuiPre(WildHunterOutline.java:126)
+
+根因：剪影渲染把目标的渲染器强转成 LivingEntityRenderer，但并非所有 LivingEntity
+都这样渲染 —— 末影龙的 EnderDragonRenderer 直接继承 EntityRenderer。
+修法：加 instanceof 守卫，非标准渲染器的目标跳过（不画剪影）。
+
+1.21.1 主线 WildHunterOutline.java:113-114 是同一行同样的强转，同样会崩，
+已在 docs/zh/REPORT-0.2.5.md 第 6 节写明，需要主线一并修。
+
+同时 mod_version 0.2.5 -> 0.2.6，README 版本号同步。

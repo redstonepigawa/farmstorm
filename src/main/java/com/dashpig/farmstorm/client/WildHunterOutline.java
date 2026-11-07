@@ -122,11 +122,16 @@ public final class WildHunterOutline {
                 PoseStack poseStack = new PoseStack();
                 poseStack.translate(entity.getX() + offsetX, entity.getY() + offsetY, entity.getZ() + offsetZ);
                 poseStack.scale(OUTLINE_SCALE, OUTLINE_SCALE, OUTLINE_SCALE);
-                LivingEntityRenderer renderer =
-                        (LivingEntityRenderer) minecraft.getEntityRenderDispatcher().getRenderer(entity);
+                // **不要直接强转**：并非所有 LivingEntity 的渲染器都是 LivingEntityRenderer。
+                // 末影龙用的是 EnderDragonRenderer（直接继承 EntityRenderer），强转会抛
+                // ClassCastException: EnderDragonRenderer cannot be cast to LivingEntityRenderer
+                // （真机实测：吃狂野苹果开启效果、附近有末影龙时崩溃）。这类实体跳过，不画剪影。
+                if (!(minecraft.getEntityRenderDispatcher().getRenderer(entity) instanceof LivingEntityRenderer<?, ?> living)) {
+                    continue;
+                }
                 MultiBufferSource shell = shellSource(buffers);
                 float yaw = Mth.lerp(capturedPartialTick, entity.yRotO, entity.getYRot());
-                renderer.render(entity, yaw, capturedPartialTick, poseStack, shell, LightTexture.FULL_BRIGHT);
+                ((LivingEntityRenderer) living).render(entity, yaw, capturedPartialTick, poseStack, shell, LightTexture.FULL_BRIGHT);
             }
             buffers.endBatch();
         } finally {

@@ -147,3 +147,60 @@ return new ArrayList<>(stack.getOrDefault(FarmstormDataComponents.TEMPORARY_ENCH
 | 4 | README 更新版本号、双加载器说明、素材表新增 botanist 行 | 文档 |
 
 构建与发布链路（1.20.1 专用，1.21.1 不适用）：`build-1.20.1.cmd` → `remap-1.20.1.cmd` → `dist/` → GitHub Release。
+
+---
+
+## 6. v0.2.6 追加：末影龙剪影崩溃（**1.21.1 主线同样存在**）
+
+### 现象（真机游玩崩溃）
+
+```
+Description: Unexpected error
+java.lang.ClassCastException: class net.minecraft.client.renderer.entity.EnderDragonRenderer
+  cannot be cast to class net.minecraft.client.renderer.entity.LivingEntityRenderer
+    at com.dashpig.farmstorm.client.WildHunterOutline.onRenderGuiPre(WildHunterOutline.java:126)
+```
+
+触发条件：吃**狂野苹果** → 获得狂野猎人效果 → 红色剪影开始渲染 → 附近存在**末影龙**时崩溃。
+
+### 根因
+
+剪影的循环里直接强转：
+
+```java
+LivingEntityRenderer renderer =
+        (LivingEntityRenderer) minecraft.getEntityRenderDispatcher().getRenderer(entity);
+```
+
+**并非所有 `LivingEntity` 的渲染器都是 `LivingEntityRenderer`**。末影龙就是反例：`EnderDragonRenderer` 直接继承 `EntityRenderer`。
+对象本身仍是 `LivingEntity`（所以能进候选集），但强转必然失败。
+
+### 修法（v0.2.6）
+
+```java
+if (!(minecraft.getEntityRenderDispatcher().getRenderer(entity) instanceof LivingEntityRenderer<?, ?> living)) {
+    continue;   // 末影龙等非 LivingEntityRenderer 的目标跳过，不画剪影
+}
+((LivingEntityRenderer) living).render(entity, yaw, capturedPartialTick, poseStack, shell, LightTexture.FULL_BRIGHT);
+```
+
+### ⚠️ 1.21.1 侧需要同样修
+
+我核对过 1.21.1 主线 `src/main/java/com/dashpig/farmstorm/client/WildHunterOutline.java` 第 113~114 行，**是同一行同样的强转，同样会崩**。建议按上面的写法加 `instanceof` 守卫。
+
+同类候选（渲染器不是 `LivingEntityRenderer` 的 LivingEntity）：末影龙；若以后接了别的 mod 的非标准生物渲染器也可能踩到——用 `instanceof` 守卫一次覆盖。
+
+### 验收
+
+在末影龙附近吃狂野苹果（或直接 `/effect give` 给狂野猎人），剪影正常显示其他生物、不崩溃、末影龙不画剪影。
+
+---
+
+## 7. v0.2.6 变更清单
+
+| # | 改动 | 类型 |
+|---|---|---|
+| 1 | `WildHunterOutline` 剪影渲染加 `instanceof LivingEntityRenderer` 守卫 | 崩溃修复（**两端共有**） |
+| 2 | `mod_version` 0.2.5 → 0.2.6 | 版本 |
+
+产物：`farmstorm-0.2.6+mc1.20.1.jar` — 1,140,861 B — SHA256 `B395C8524A74F0CA59C4AB0E1EAA6BA6237DDA4D6A6E55D9ECBF0401DC6A7FE6`

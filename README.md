@@ -457,36 +457,27 @@ v0.2.4 的手边件是 [`.work/v024-BRIEF.md`](.work/v024-BRIEF.md) 与 [`.work/
 
 ---
 
-## 素材来源与非商业声明
+## 第三方素材声明
 
-本项目**不是全部原创**：下列素材取自第三方，**版权归各自权利人**，本项目不对其主张任何权利。
+本项目的**第三方素材只有三段音频**（下表），版权归各自权利人，本项目不对其主张任何权利；音频处理只做转码与截取，未改变内容本身。
 
-| 产物 | 来源 | 处理 |
-|---|---|---|
-| `sounds/wild_hunter_loop.ogg` | `Animals_from_3m04s.mp3`（作者指定取 3m04s 起的剪辑，47.14 s） | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz） |
-| `sounds/zangief_piledriver.ogg` | SF6 视频片段 `BV1qu411W7ha`（846–850 段） | 同上 |
-| `sounds/friend_chives.ogg` | `pengyoudejiu.mp3`（7.45 MB） | 转 mono / 64 kbps Ogg Vorbis，取前 10 秒 |
-| `textures/mob_effect/wild_hunter.png` | 作者提供的桌面 JPG | 居中裁切缩放为 18×18 |
-| `textures/mob_effect/q_bounce.png` | Steam 创意工坊 `431960/3796093604/preview.jpg` | 居中裁切缩放为 18×18 |
-| `textures/item/friend_chives.png`、`chive_seeds.png` | 作者提供的两张 QQ 图片 | 缩放为 16×16 |
-| `textures/block/friend_chives_stage0..3.png` | **本项目自绘占位**（洋红 `#D81E8A`） | 不是第三方素材 |
-| `textures/block/outpost_core_a_{top,side,bottom}.png` | 作者提供的 `outpost_core_all_textures/32x32/a_runic/` 三张 32×32 | 原样拷入 |
-| `textures/item/wild_apple.png`（v0.1.1） | 作者提供的 `wild_apple_64x64.png`（64×64 / 6,946 B） | 原图直用，不缩放、不取色 |
-| `textures/block/cultivator_a_{top,side,bottom}.png` + 两张静态首帧（v0.2.0） | 作者提供的 `cultivator_a_animation_pack`（37 PNG + 2 mcmeta） | 帧条原样拷入；静态首帧取 `editable_frames/{side,top}_00.png` |
+**除此之外的一切**——贴图（方块 / 物品 / 状态效果）、模型、blockstate 与 JSON 数据、语言文本、代码——**均为本项目自制**，适用根目录的 [MIT 许可证](./LICENSE)。
 
-### 使用条件（务必照此分发）
+| 产物 | 处理 |
+|---|---|
+| `sounds/wild_hunter_loop.ogg` | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz），47.14 s |
+| `sounds/zangief_piledriver.ogg` | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz） |
+| `sounds/friend_chives.ogg` | 转 mono / 64 kbps Ogg Vorbis，取前 10 秒 |
 
-1. **非商业**：不得将上述素材或其转换产物用于任何商业用途。
-2. **署名**：转载、二次分发本模组时，必须连同本表一并保留。
-3. **可移除**：若权利人提出异议，维护者会移除对应素材并发布替代版本。
+### 使用条件（**仅适用于上面三段音频**）
 
-### 关于原版贴图派生图
-
-`textures/item/*.png` 与 `textures/block/*.png` 里大部分是**从原版客户端 jar 读出来再变换**的派生图：受 **Minecraft EULA / Brand and Asset Guidelines** 约束，本项目不对其主张任何权利；仓库里只有变换后的小尺寸占位图，不含原版 jar 的原始文件。
+1. **非商业**：不得将这三段音频或其转换产物用于任何商业用途。
+2. **署名**：转载、二次分发本模组时，必须连同本节一并保留。
+3. **可移除**：若权利人提出异议，维护者会移除对应音频并发布替代版本（替换为 CC0 / 自录音源）。
 
 ### 已知风险（维护者注）
 
-本仓库目前是**私有**的，上述素材属非商业自用范围。**若将来转为公开仓库**，第三方音乐与游戏音效的再分发仍存在被投诉的可能。转公开前建议换成 CC0 / 原创音源，或保留本节的署名与非商业条款并接受随时撤下。
+三段音频**非商业自用**尚可，但**再分发**（尤其仓库转公开后）仍存在被投诉的可能；转公开前建议换成 CC0 / 原创音源，或保留本节的署名与非商业条款并接受随时撤下。本模组其余内容不受此限。
 
 > **发布 Release 时必须把这一节复制进 Release 说明**——jar 一旦分发就无法补正说明。
 
@@ -498,7 +489,7 @@ v0.2.4 的手边件是 [`.work/v024-BRIEF.md`](.work/v024-BRIEF.md) 与 [`.work/
 
 一句话：可以自由使用、复制、修改、合并、发布、再许可、销售本软件的副本，**唯一条件是保留版权声明与本许可声明**；软件按「原样」提供，不附带任何明示或默示担保。
 
-**范围**：MIT 只覆盖本项目的**代码与自有美术 / 文本**。上面「素材来源与非商业声明」一节列出的第三方素材（音效、贴图等）**不适用 MIT**，版权归各自权利人，仍按该节的使用条件分发；从原版客户端 jar 派生出的贴图受 **Minecraft EULA / Brand and Asset Guidelines** 约束。
+**范围**：MIT 覆盖本项目的**全部内容** —— 代码、贴图、模型、数据与文本。唯一例外是**三段第三方音频**（`wild_hunter_loop` / `zangief_piledriver` / `friend_chives`），它们**不适用 MIT**，版权归各自权利人，按上面「第三方素材声明」一节的使用条件分发。
 
 ---
 
@@ -523,4 +514,4 @@ A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 - **Known limitations**: see the tables above (the Chinese section is authoritative). Link-line visuals and the HUD still need a human eye on a real client.
 - **Docs**: Chinese originals in `docs/zh/` are authoritative; `docs/en/` holds translations. v0.2.0 spec: `docs/zh/34`–`39`; v0.2.1 spec: `docs/zh/40`–`45`; v0.2.2 spec: `docs/zh/46`–`51`; **v0.2.4 spec (current, implemented, Chinese only): `docs/zh/58`–`63`**; v0.2.3 spec: `docs/zh/52`–`57`.
 
-Asset provenance and the non-commercial terms are above — **keep that section verbatim when redistributing**.
+**License: MIT** for everything in this project except the three third-party audio files listed in the third-party notice above — **keep that notice when redistributing**.

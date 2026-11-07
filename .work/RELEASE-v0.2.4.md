@@ -81,25 +81,34 @@ farmstorm-0.2.4+mc1.21.1-sources.jar    1,071,152 B
 
 ---
 
-## 第三方素材声明（务必随 Release 一起保留）
+## 素材来源与非商业声明（务必随 Release 一起保留）
 
-本项目的**第三方素材只有三段音频**（下表），版权归各自权利人；音频处理只做转码与截取。
-
-**除此之外的一切**——贴图、模型、数据、文本、代码——**均为本项目自制**，适用 [MIT 许可证](https://github.com/redstonepigawa/farmstorm/blob/main/LICENSE)。
+本项目**不是全部原创**：下表里**只有三段音频**取自第三方（**版权归各自权利人**，本项目不对其主张任何权利）；**其余各行均为本项目自制**，适用 [MIT 许可证](https://github.com/redstonepigawa/farmstorm/blob/main/LICENSE)。
 
 | 产物 | 处理 |
 |---|---|
-| `sounds/wild_hunter_loop.ogg` | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz），47.14 s |
-| `sounds/zangief_piledriver.ogg` | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz） |
+| `sounds/wild_hunter_loop.ogg` | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz），47.14 s（源音频取 3m04s 起的剪辑） |
+| `sounds/zangief_piledriver.ogg` | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz），4 秒段 |
 | `sounds/friend_chives.ogg` | 转 mono / 64 kbps Ogg Vorbis，取前 10 秒 |
+| `textures/mob_effect/wild_hunter.png` | 本项目自制；居中裁切缩放为 18×18 |
+| `textures/mob_effect/q_bounce.png` | 本项目自制；居中裁切缩放为 18×18 |
+| `textures/item/friend_chives.png`、`chive_seeds.png` | 本项目自制；缩放为 16×16 |
+| `textures/block/friend_chives_stage0..3.png` | 本项目自绘占位（洋红 `#D81E8A`） |
+| `textures/block/outpost_core_a_{top,side,bottom}.png` | 本项目自制；原样拷入（32×32） |
+| `textures/item/wild_apple.png`（v0.1.1） | 本项目自制；原图直用，不缩放、不取色（64×64） |
+| `textures/block/cultivator_a_{top,side,bottom}.png` + 两张静态首帧（v0.2.0） | 本项目自制；帧条原样拷入，静态首帧取 `editable_frames/{side,top}_00.png` |
 
-### 使用条件（**仅适用于上面三段音频**）
+### 使用条件（务必照此分发）
 
-1. **非商业**：不得将这三段音频或其转换产物用于任何商业用途。
-2. **署名**：转载、二次分发本模组时，必须连同本节一并保留。
-3. **可移除**：若权利人提出异议，维护者会移除对应音频并发布替代版本。
+1. **非商业**：不得将上述素材或其转换产物用于任何商业用途。
+2. **署名**：转载、二次分发本模组时，必须连同本表一并保留。
+3. **可移除**：若权利人提出异议，维护者会移除对应素材并发布替代版本。
+
+### 关于原版贴图派生图
+
+`textures/item/*.png` 与 `textures/block/*.png` 里大部分是**从原版客户端 jar 读出来再变换**的派生图：受 **Minecraft EULA / Brand and Asset Guidelines** 约束，本项目不对其主张任何权利；仓库里只有变换后的小尺寸占位图，不含原版 jar 的原始文件。
 
 ### 已知风险（维护者注）
 
-三段音频**非商业自用**尚可，但**再分发**（尤其仓库转公开后）仍存在被投诉的可能；转公开前建议换成 CC0 / 原创音源，或保留本节的署名与非商业条款并接受随时撤下。本模组其余内容不受此限。
+本仓库目前是**私有**的，上述素材属非商业自用范围。**若将来转为公开仓库**，第三方音乐与游戏音效的再分发仍存在被投诉的可能。转公开前建议换成 CC0 / 原创音源，或保留本节的署名与非商业条款并接受随时撤下。
 

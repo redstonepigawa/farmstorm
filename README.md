@@ -470,9 +470,9 @@ v0.2.4 的手边件是 `.work/v024-BRIEF.md`（未入库）与 `.work/v024-verif
 | `sounds/friend_chives.ogg` | 转 mono / 64 kbps Ogg Vorbis，取前 10 秒 |
 | `textures/mob_effect/wild_hunter.png` | 本项目自制；居中裁切缩放为 18×18 |
 | `textures/mob_effect/q_bounce.png` | 本项目自制；居中裁切缩放为 18×18 |
-| `textures/item/friend_chives.png`、`chive_seeds.png` | 本项目自制；缩放为 16×16 |
+| `textures/item/friend_chives.png`、`plain_chives_seeds.png` | 本项目自制；缩放为 16×16 |
 | `textures/block/friend_chives_stage0..3.png` | 本项目自绘占位（洋红 `#D81E8A`） |
-| `textures/block/outpost_core_a_{top,side,bottom}.png` | 本项目自制；原样拷入（32×32） |
+| `textures/block/outpost_core_{top,side,bottom}.png` | 本项目自制；原样拷入（32×32） |
 | `textures/item/wild_apple.png`（v0.1.1） | 本项目自制；原图直用，不缩放、不取色（64×64） |
 | `textures/block/cultivator_a_{top,side,bottom}.png` + 两张静态首帧（v0.2.0） | 本项目自制；帧条原样拷入，静态首帧取 `editable_frames/{side,top}_00.png` |
 
@@ -500,7 +500,7 @@ v0.2.4 的手边件是 `.work/v024-BRIEF.md`（未入库）与 `.work/v024-verif
 
 一句话：可以自由使用、复制、修改、合并、发布、再许可、销售本软件的副本，**唯一条件是保留版权声明与本许可声明**；软件按「原样」提供，不附带任何明示或默示担保。
 
-**范围**：MIT 只覆盖本项目的**代码与自有美术 / 文本**。上面「素材来源与非商业声明」一节列出的第三方素材（音效、贴图等）**不适用 MIT**，版权归各自权利人，仍按该节的使用条件分发；从原版客户端 jar 派生出的贴图受 **Minecraft EULA / Brand and Asset Guidelines** 约束。
+**范围**：MIT 覆盖本项目的**代码与自有美术 / 文本**；「素材来源与非商业声明」一节里的**三段第三方音频不适用 MIT**，版权归各自权利人，按该节的使用条件分发；从原版客户端 jar 派生出的贴图受 **Minecraft EULA / Brand and Asset Guidelines** 约束。
 
 ---
 

@@ -1,0 +1,10 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:cocoa_beans"
+  },
+  "result": {
+    "count": 1,
+    "item": "farmstorm:vibration_bean"
+  }
+}

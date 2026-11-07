@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "farmstorm:block/outpost_core_bottom",
+    "side": "farmstorm:block/outpost_core_side",
+    "top": "farmstorm:block/outpost_core_top"
+  }
+}

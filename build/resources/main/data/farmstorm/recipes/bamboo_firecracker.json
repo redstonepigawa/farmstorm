@@ -1,0 +1,10 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:bamboo"
+  },
+  "result": {
+    "count": 1,
+    "item": "farmstorm:bamboo_firecracker"
+  }
+}

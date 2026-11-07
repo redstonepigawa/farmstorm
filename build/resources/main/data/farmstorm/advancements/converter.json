@@ -1,0 +1,34 @@
+{
+  "parent": "farmstorm:root",
+  "criteria": {
+    "placed_converter": {
+      "conditions": {
+        "location": [
+          {
+            "block": "farmstorm:crop_converter",
+            "condition": "minecraft:block_state_property"
+          }
+        ]
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.converter.description"
+    },
+    "icon": {
+      "count": 1,
+      "item": "farmstorm:crop_converter"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.converter.title"
+    }
+  },
+  "requirements": [
+    [
+      "placed_converter"
+    ]
+  ]
+}

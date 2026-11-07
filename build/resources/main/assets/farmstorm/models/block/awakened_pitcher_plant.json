@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/pitcher_crop_top_stage_4",
+  "render_type": "minecraft:cutout"
+}

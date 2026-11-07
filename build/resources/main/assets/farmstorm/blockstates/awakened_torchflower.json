@@ -1,0 +1,126 @@
+{
+  "variants": {
+    "face=ceiling,facing=east,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "x": 180,
+      "y": 90
+    },
+    "face=ceiling,facing=east,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "x": 180,
+      "y": 180
+    },
+    "face=ceiling,facing=north,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "x": 180
+    },
+    "face=ceiling,facing=north,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "x": 180,
+      "y": 90
+    },
+    "face=ceiling,facing=south,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "x": 180,
+      "y": 180
+    },
+    "face=ceiling,facing=south,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "x": 180,
+      "y": 270
+    },
+    "face=ceiling,facing=west,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "x": 180,
+      "y": 270
+    },
+    "face=ceiling,facing=west,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "x": 180
+    },
+    "face=floor,facing=east,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 90
+    },
+    "face=floor,facing=east,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 180
+    },
+    "face=floor,facing=north,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true
+    },
+    "face=floor,facing=north,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 90
+    },
+    "face=floor,facing=south,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 180
+    },
+    "face=floor,facing=south,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 270
+    },
+    "face=floor,facing=west,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 270
+    },
+    "face=floor,facing=west,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true
+    },
+    "face=wall,facing=east,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 90
+    },
+    "face=wall,facing=east,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 180
+    },
+    "face=wall,facing=north,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true
+    },
+    "face=wall,facing=north,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 90
+    },
+    "face=wall,facing=south,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 180
+    },
+    "face=wall,facing=south,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 270
+    },
+    "face=wall,facing=west,floating=false": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true,
+      "y": 270
+    },
+    "face=wall,facing=west,floating=true": {
+      "model": "farmstorm:block/awakened_torchflower",
+      "uvlock": true
+    }
+  }
+}

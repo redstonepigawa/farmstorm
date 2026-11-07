@@ -1,5 +1,4 @@
-# 构建与运行产物
-build/
+﻿# 鏋勫缓涓庤繍琛屼骇鐗?build/
 .gradle/
 run/
 run-*/
@@ -8,19 +7,19 @@ logs/
 *.log
 dist/
 
-# 探针临时文件
+# 鎺㈤拡涓存椂鏂囦欢
 probe/build/
 probe/.gradle/
 probe/run/
 probe/runs/
 
-# 本地验证 / 排查产物
+# 鏈湴楠岃瘉 / 鎺掓煡浜х墿
 .tmp/
-错误报告-*/
+閿欒鎶ュ憡-*/
 
-# 系统文件
+# 绯荤粺鏂囦欢
 Thumbs.db
 desktop.ini
-# ��ʱ���Ŀ¼ / �ύ��Ϣ�ļ�
-.tmp-*/
+# 临时解包目录 / 提交信息文件
+.tmp-*
 .tmp-msg.txt

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "working=false": {
+      "model": "farmstorm:block/cultivator"
+    },
+    "working=true": {
+      "model": "farmstorm:block/cultivator_working"
+    }
+  }
+}

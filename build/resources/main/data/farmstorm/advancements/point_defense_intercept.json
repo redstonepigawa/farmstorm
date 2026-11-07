@@ -1,0 +1,26 @@
+{
+  "parent": "farmstorm:first_deploy",
+  "criteria": {
+    "point_defense_intercept": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.point_defense_intercept.description"
+    },
+    "icon": {
+      "count": 1,
+      "item": "farmstorm:point_defense_fungus"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.point_defense_intercept.title"
+    }
+  },
+  "requirements": [
+    [
+      "point_defense_intercept"
+    ]
+  ]
+}

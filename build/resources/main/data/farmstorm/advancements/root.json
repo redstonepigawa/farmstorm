@@ -1,0 +1,48 @@
+{
+  "criteria": {
+    "has_modified_crop": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "farmstorm:puffed_wheat",
+              "farmstorm:blast_carrot",
+              "farmstorm:ubi_server",
+              "farmstorm:toxic_ubi_server",
+              "farmstorm:power_beet",
+              "farmstorm:melon_slice_bomb",
+              "farmstorm:melon_grenade",
+              "farmstorm:pumpkin_turret",
+              "farmstorm:awakened_torchflower",
+              "farmstorm:awakened_pitcher_plant",
+              "farmstorm:fang_trap_cactus",
+              "farmstorm:bamboo_firecracker",
+              "farmstorm:red_mushroom_puff",
+              "farmstorm:brown_mushroom_puff",
+              "farmstorm:lucky_berry"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:textures/block/hay_block_side.png",
+    "description": {
+      "translate": "advancements.farmstorm.root.description"
+    },
+    "icon": {
+      "item": "farmstorm:puffed_wheat"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_modified_crop"
+    ]
+  ]
+}

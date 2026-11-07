@@ -1,0 +1,10 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:cactus"
+  },
+  "result": {
+    "count": 1,
+    "item": "farmstorm:fang_trap_cactus"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "parent": "farmstorm:root",
+  "criteria": {
+    "first_throw": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.first_throw.description"
+    },
+    "icon": {
+      "count": 1,
+      "item": "farmstorm:ubi_server"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.first_throw.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_throw"
+    ]
+  ]
+}

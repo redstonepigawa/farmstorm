@@ -98,30 +98,36 @@ Minecraft **1.20.1** · NeoForge **47.x**（测试于 47.1.106）· Java **17** 
 
 ## 素材来源与非商业声明
 
-本项目**不是全部原创**。下列素材取自第三方，**版权归各自权利人**，本项目不对其主张任何权利。路径均相对 `assets/farmstorm/`。
+本项目**不是全部原创**：下表里**只有三段音频**取自第三方（**版权归各自权利人**，本项目不对其主张任何权利）；**其余各行均为本项目自制**，适用 [MIT 许可证](./LICENSE)。
 
-| 产物 | 来源 | 处理 |
-|---|---|---|
-| `sounds/wild_hunter_loop.ogg` | `Animals_from_3m04s.mp3`（取 3m04s 起的剪辑，47.14 s） | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz） |
-| `sounds/zangief_piledriver.ogg` | SF6 视频片段 `BV1qu411W7ha`（846–850 段） | 同上 |
-| `sounds/friend_chives.ogg` | `pengyoudejiu.mp3`（7.45 MB） | 转 mono / 64 kbps Ogg Vorbis，取前 10 秒 |
-| `textures/mob_effect/wild_hunter.png` | 作者提供的桌面 JPG | 居中裁切缩放为 18×18 |
-| `textures/mob_effect/q_bounce.png` | Steam 创意工坊 `431960/3796093604/preview.jpg` | 居中裁切缩放为 18×18 |
-| `textures/item/friend_chives.png`、`textures/item/plain_chives_seeds.png` | 作者提供的 QQ 图片 | 缩放为 16×16 |
-| `textures/block/friend_chives_stage0..3.png` | **本项目自绘占位**（洋红 `#D81E8A`） | 不是第三方素材 |
-| `textures/block/outpost_core_{top,side,bottom}.png` | 作者提供的 `outpost_core_all_textures/32x32/a_runic/` 三张 32×32 | 原样拷入 |
-| `textures/item/wild_apple.png` | 作者提供的 `wild_apple_64x64.png`（64×64 / 6,946 B） | 原图直用，不缩放、不取色 |
-| `textures/block/cultivator_a_{top,side,bottom}.png` + 两张静态首帧 + 2 个 mcmeta | 作者提供的 `cultivator_a_animation_pack`（37 PNG + 2 mcmeta） | 帧条原样拷入；静态首帧取 `editable_frames/{side,top}_00.png` |
+| 产物 | 处理 |
+|---|---|
+| `sounds/wild_hunter_loop.ogg` | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz），47.14 s（源音频取 3m04s 起的剪辑） |
+| `sounds/zangief_piledriver.ogg` | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz），4 秒段 |
+| `sounds/friend_chives.ogg` | 转 mono / 64 kbps Ogg Vorbis，取前 10 秒 |
+| `textures/mob_effect/wild_hunter.png` | 本项目自制；居中裁切缩放为 18×18 |
+| `textures/mob_effect/q_bounce.png` | 本项目自制；居中裁切缩放为 18×18 |
+| `textures/item/friend_chives.png`、`plain_chives_seeds.png` | 本项目自制；缩放为 16×16 |
+| `textures/block/friend_chives_stage0..3.png` | 本项目自绘占位（洋红 `#D81E8A`） |
+| `textures/block/outpost_core_{top,side,bottom}.png` | 本项目自制；原样拷入（32×32） |
+| `textures/item/wild_apple.png` | 本项目自制；原图直用，不缩放、不取色（64×64） |
+| `textures/block/cultivator_a_{top,side,bottom}.png` + 两张静态首帧 | 本项目自制；帧条原样拷入，静态首帧取 `editable_frames/{side,top}_00.png` |
 
 ### 使用条件（务必照此分发）
 
-1. **非商业**：不得将上述素材或其转换产物用于任何商业用途。
+1. **非商业**：不得将上述**三段音频**或其转换产物用于任何商业用途（表内其余自制贴图不受此限，按 MIT 分发）。
 2. **署名**：转载、二次分发本模组时，必须连同本表一并保留。
-3. **可移除**：若权利人提出异议，维护者会移除对应素材并发布替代版本。
+3. **可移除**：若**上述三段音频**的权利人提出异议，维护者会移除对应音频并发布替代版本（替换为 CC0 / 自录音源）。
 
 ### 关于原版贴图派生图
 
-`textures/item/*.png` 与 `textures/block/*.png` 里大部分是**从原版客户端 jar 读出来再变换**的派生图：受 **Minecraft EULA / Brand and Asset Guidelines** 约束，本项目不对其主张任何权利；仓库里只有变换后的小尺寸图，不含原版 jar 的原始文件。
+`textures/item/*.png` 与 `textures/block/*.png` 里大部分是**从原版客户端 jar 读出来再变换**的派生图：受 **Minecraft EULA / Brand and Asset Guidelines** 约束，本项目不对其主张任何权利；仓库里只有变换后的小尺寸占位图，不含原版 jar 的原始文件。
+
+### 已知风险（维护者注）
+
+本仓库现在是**公开**仓库。三段音频属非商业自用，但**再分发**（尤其被第三方镜像/整合包收录）仍存在被投诉的可能：若权利人提出异议，维护者会按上面的「可移除」条款替换为 CC0 / 自录音源。想彻底规避风险的话，也欢迎优先换成 CC0 音源。
+
+> **发布 Release 时必须把这一节复制进 Release 说明**——jar 一旦分发就无法补正说明。
 
 ---
 
@@ -131,7 +137,7 @@ Minecraft **1.20.1** · NeoForge **47.x**（测试于 47.1.106）· Java **17** 
 
 一句话：可以自由使用、复制、修改、合并、发布、再许可、销售本软件的副本，**唯一条件是保留版权声明与本许可声明**；软件按「原样」提供，不附带任何明示或默示担保。
 
-**范围**：MIT 只覆盖本项目的**代码与自有美术 / 文本**。上面「素材来源与非商业声明」一节列出的第三方素材（音效、贴图等）**不适用 MIT**，版权归各自权利人，仍按该节的使用条件分发；从原版客户端 jar 派生出的贴图受 **Minecraft EULA / Brand and Asset Guidelines** 约束。
+**范围**：MIT 覆盖本项目的**代码与自有美术 / 文本**；「素材来源与非商业声明」一节里的**三段第三方音频不适用 MIT**，版权归各自权利人，按该节的使用条件分发；从原版客户端 jar 派生出的贴图受 **Minecraft EULA / Brand and Asset Guidelines** 约束。
 
 ---
 
@@ -139,7 +145,7 @@ Minecraft **1.20.1** · NeoForge **47.x**（测试于 47.1.106）· Java **17** 
 
 A Minecraft 1.20.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
-**v0.2.4 port for Minecraft 1.20.1** (Java 17 · modid `farmstorm`). **License: MIT** (see `LICENSE`) — code and original assets only; the third-party audio/textures listed in the asset-provenance section keep their own terms.
+**v0.2.4 port for Minecraft 1.20.1** (Java 17 · modid `farmstorm`). **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio clips listed in the asset-provenance section keep their own terms.
 
 - **Install**: build a 1.20.1 + NeoForge 47.x instance, drop `farmstorm-0.2.4+mc1.20.1.jar` into `mods/`. The 1.20.1 and 1.21.1 builds share the same modid and version, so **keep exactly one per instance** — pick the one matching your MC version.
 - **Compatibility**: network protocol string is `1` (the 1.21.1 build uses `3`); mismatched client/server are rejected cleanly. **New worlds only** — no save migration from 1.21.1.

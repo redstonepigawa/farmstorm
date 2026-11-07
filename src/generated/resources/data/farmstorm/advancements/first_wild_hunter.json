@@ -1,0 +1,26 @@
+{
+  "parent": "farmstorm:root",
+  "criteria": {
+    "first_wild_hunter": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.first_wild_hunter.description"
+    },
+    "icon": {
+      "count": 1,
+      "item": "farmstorm:wild_apple"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.first_wild_hunter.title"
+    }
+  },
+  "requirements": [
+    [
+      "first_wild_hunter"
+    ]
+  ]
+}

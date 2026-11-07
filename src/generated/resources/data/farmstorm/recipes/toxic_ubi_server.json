@@ -1,0 +1,10 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:poisonous_potato"
+  },
+  "result": {
+    "count": 1,
+    "item": "farmstorm:toxic_ubi_server"
+  }
+}

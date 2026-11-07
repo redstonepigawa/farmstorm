@@ -1,0 +1,3 @@
+// 1.21.1	2026-11-02T00:40:41.3769296	Tags for minecraft:damage_type mod id farmstorm
+e786e332d854346ac6fb63c21233b76324fa65f0 data/minecraft/tags/damage_type/is_explosion.json
+3b87e05c00f060bd55558a1b691e21548190b6da data/minecraft/tags/damage_type/is_projectile.json

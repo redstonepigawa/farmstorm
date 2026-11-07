@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="probe1201"
+version="0.0.1"
+displayName="Probe 1201"
+description="NeoForge 1.20.1 port probe"
+
+# 1.20.1 loader rules: dependencies need mandatory=true (the newer
+# type="required" form is 1.20.2+), and NeoForge 47 still ships under the
+# mod id "forge" -- the rename to "neoforge" happened in 1.20.2.
+[[dependencies.probe1201]]
+modId="forge"
+mandatory=true
+versionRange="[47,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.probe1201]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.21)"
+ordering="NONE"
+side="BOTH"

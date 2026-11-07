@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "farmstorm:block/crop_converter_a_bottom",
+    "east": "farmstorm:block/crop_converter_a_side_still",
+    "north": "farmstorm:block/crop_converter_a_front_still",
+    "particle": "farmstorm:block/crop_converter_a_front_still",
+    "south": "farmstorm:block/crop_converter_a_side_still",
+    "up": "farmstorm:block/crop_converter_a_top_still",
+    "west": "farmstorm:block/crop_converter_a_side_still"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:sweet_berries"
+  },
+  "result": {
+    "count": 1,
+    "item": "farmstorm:lucky_berry"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "farmstorm:converting",
+  "input": {
+    "item": "minecraft:pitcher_plant"
+  },
+  "result": {
+    "count": 1,
+    "item": "farmstorm:awakened_pitcher_plant"
+  }
+}

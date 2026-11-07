@@ -1,0 +1,185 @@
+package com.dashpig.farmstorm.util;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.core.Holder;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+
+/**
+ * 临时附魔账本（TECH §4.10 / D-15 / D-41）。
+ *
+ * <p>状态全部落在物品 NBT 的 {@code FarmstormTempEnchants} 列表上（1.20.1 没有数据组件，按 02 号 §4.1 改 NBT），
+ * 绝不写玩家持久数据：
+ * 物品被丢弃 / 进箱子 / 死亡掉落时记录随物品走，取到手的下一次 {@link #tick(ServerPlayer)} 自愈（RT-03）。
+ * {@code expireAt} 用绝对 {@code gameTime}，因此不存在永不过期的挂起记录。
+ */
+public final class TempEnchantHandler {
+    /** 物品 NBT 键（docs/zh/02-TECH-1.20.1.md §4.1 约定的 {@code FarmstormTempEnchants}）。 */
+    public static final String TEMP_ENCHANTS_KEY = "FarmstormTempEnchants";
+
+    private TempEnchantHandler() {}
+
+    /**
+     * 授予临时附魔：记录原等级后按「取高不取低」写入，同一条附魔的临时记录只刷新到期时间，不压栈。
+     *
+     * @param player        受益玩家（只用来读 {@code gameTime}）
+     * @param stack         被授予的物品（通常是手持剑）
+     * @param enchantment   附魔
+     * @param level         授予等级
+     * @param durationTicks 持续刻数
+     */
+    public static void grant(ServerPlayer player, ItemStack stack, Holder<Enchantment> enchantment,
+                             int level, int durationTicks) {
+        if (stack.isEmpty() || level <= 0 || durationTicks <= 0) {
+            return;
+        }
+        long now = player.level().getGameTime();
+        // 关键：先把这条物品上**已过期但还没被 20 刻扫描器清掉**的记录还原掉，
+        // 否则下面的 previous 会读到「临时等级」（例如 1），新记录的 previous 也随之变成 1，
+        // 到期时还原成 1 → 附魔永久留下（作者报的「火焰附加不消失」）。
+        revokeExpired(stack, now);
+        long expireAt = now + durationTicks;
+        List<TempEnchantRecord> records = read(stack);
+        for (int index = 0; index < records.size(); index++) {
+            TempEnchantRecord record = records.get(index);
+            if (!record.sameEnchantment(enchantment) || record.expireAt() <= now) {
+                continue;
+            }
+            records.set(index, new TempEnchantRecord(enchantment, record.granted(), record.previous(), expireAt));
+            setLevel(stack, enchantment, Math.max(record.previous(), record.granted()));
+            write(stack, records);
+            return;
+        }
+        int previous = getLevel(stack, enchantment);
+        setLevel(stack, enchantment, Math.max(previous, level));
+        records.add(new TempEnchantRecord(enchantment, level, previous, expireAt));
+        write(stack, records);
+    }
+
+    /**
+     * 周期性自愈：手持 / 副手 / 护甲 / 背包全扫一遍，把过期的临时附魔还原掉。
+     * 由 {@code TickEvent.PlayerTickEvent} 每 20 tick 调一次，覆盖「物品进箱子后再取出」「切换手持」「下线重连」等所有路径。
+     */
+    public static void tick(ServerPlayer player) {
+        long now = player.level().getGameTime();
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            revokeExpired(inventory.getItem(slot), now);
+        }
+    }
+
+    /**
+     * 撤销一条物品上所有已到期的临时附魔；记录清空时整个组件被移除。
+     *
+     * @param stack 目标物品
+     * @param now   当前绝对 {@code gameTime}
+     */
+    public static void revokeExpired(ItemStack stack, long now) {
+        List<TempEnchantRecord> records = read(stack);
+        if (records.isEmpty()) {
+            return;
+        }
+        List<TempEnchantRecord> remaining = new ArrayList<>(records.size());
+        boolean expired = false;
+        for (TempEnchantRecord record : records) {
+            if (record.expireAt() > now) {
+                remaining.add(record);
+                continue;
+            }
+            expired = true;
+            restore(stack, record);
+        }
+        if (expired) {
+            write(stack, remaining);
+        }
+    }
+
+    /** 立刻撤销该物品上全部临时附魔（离开光环 / 换成别的手持物品时用）。 */
+    public static void revokeAll(ItemStack stack) {
+        List<TempEnchantRecord> records = read(stack);
+        if (records.isEmpty()) {
+            return;
+        }
+        for (TempEnchantRecord record : records) {
+            restore(stack, record);
+        }
+        write(stack, List.of());
+    }
+
+    /** 该物品上是否存在这条附魔的临时记录（不区分是否已到期——到期清理走 {@link #tick(ServerPlayer)}）。 */
+    public static boolean hasTemporary(ItemStack stack, Holder<Enchantment> enchantment) {
+        for (TempEnchantRecord record : read(stack)) {
+            if (record.sameEnchantment(enchantment)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 还原一条记录：只在「当前等级 == 授予等级」时动手（RT-03 不覆盖检查）。
+     * 玩家自己用铁砧升过级、或用砂轮洗掉了附魔，都只丢记录，不改玩家的真实附魔。
+     */
+    private static void restore(ItemStack stack, TempEnchantRecord record) {
+        Holder<Enchantment> enchantment = record.enchantment();
+        int current = getLevel(stack, enchantment);
+        if (current != record.granted()) {
+            return;
+        }
+        setLevel(stack, enchantment, record.previous());
+    }
+
+    /** 写账本：空列表移除整个 NBT 键（F-18 ②：{@code /data get} 里不应再有该键）。 */
+    private static void write(ItemStack stack, List<TempEnchantRecord> records) {
+        if (records.isEmpty()) {
+            stack.removeTagKey(TEMP_ENCHANTS_KEY);
+            return;
+        }
+        Tag encoded = TempEnchantRecord.LIST_CODEC.encodeStart(NbtOps.INSTANCE, List.copyOf(records))
+                .result()
+                .orElseThrow(() -> new IllegalStateException("临时附魔账本编码失败"));
+        stack.getOrCreateTag().put(TEMP_ENCHANTS_KEY, encoded);
+    }
+
+    private static List<TempEnchantRecord> read(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return new ArrayList<>(0);
+        }
+        CompoundTag root = stack.getTag();
+        if (root == null || !(root.get(TEMP_ENCHANTS_KEY) instanceof ListTag list)) {
+            return new ArrayList<>(0);
+        }
+        // 键下就是一个 ListTag（{@link TempEnchantRecord#LIST_CODEC} 的 NBT 编码形状），直接喂回 codec。
+        return TempEnchantRecord.LIST_CODEC.parse(NbtOps.INSTANCE, list)
+                .result()
+                .orElseGet(ArrayList::new);
+    }
+
+    /** 读附魔等级（1.20.1 的读点是 {@code EnchantmentHelper}，不是 {@code ItemStack}）。 */
+    private static int getLevel(ItemStack stack, Holder<Enchantment> enchantment) {
+        return EnchantmentHelper.getItemEnchantmentLevel(enchantment.value(), stack);
+    }
+
+    /** 把某条附魔的等级改成 {@code level}；{@code level <= 0} 时删掉这条附魔。 */
+    private static void setLevel(ItemStack stack, Holder<Enchantment> enchantment, int level) {
+        Map<Enchantment, Integer> enchantments = new LinkedHashMap<>(EnchantmentHelper.getEnchantments(stack));
+        if (level <= 0) {
+            enchantments.remove(enchantment.value());
+        } else {
+            enchantments.put(enchantment.value(), level);
+        }
+        EnchantmentHelper.setEnchantments(enchantments, stack);
+    }
+
+
+}

@@ -1,0 +1,27 @@
+{
+  "parent": "farmstorm:root",
+  "criteria": {
+    "lucky_jackpot": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.lucky_jackpot.description"
+    },
+    "hidden": true,
+    "icon": {
+      "count": 1,
+      "item": "farmstorm:lucky_berry"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.lucky_jackpot.title"
+    }
+  },
+  "requirements": [
+    [
+      "lucky_jackpot"
+    ]
+  ]
+}

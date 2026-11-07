@@ -1,0 +1,23 @@
+{
+  "wild_hunter_loop": {
+    "category": "player",
+    "subtitle": "subtitles.farmstorm.wild_hunter_loop",
+    "sounds": [
+      { "name": "farmstorm:wild_hunter_loop", "stream": false, "attenuation_distance": 32 }
+    ]
+  },
+  "zangief_piledriver": {
+    "category": "player",
+    "subtitle": "subtitles.farmstorm.zangief_piledriver",
+    "sounds": [
+      { "name": "farmstorm:zangief_piledriver", "attenuation_distance": 16 }
+    ]
+  },
+  "friend_chives": {
+    "category": "player",
+    "subtitle": "subtitles.farmstorm.friend_chives",
+    "sounds": [
+      { "name": "farmstorm:friend_chives", "stream": false }
+    ]
+  }
+}

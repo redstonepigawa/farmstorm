@@ -1,0 +1,23 @@
+# 构建与运行产物
+build/
+.gradle/
+run/
+run-*/
+runs/
+logs/
+*.log
+dist/
+
+# 探针临时文件
+probe/build/
+probe/.gradle/
+probe/run/
+probe/runs/
+
+# 本地验证 / 排查产物
+.tmp/
+错误报告-*/
+
+# 系统文件
+Thumbs.db
+desktop.ini

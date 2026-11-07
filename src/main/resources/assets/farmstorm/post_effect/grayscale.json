@@ -1,0 +1,21 @@
+{
+    "targets": {
+        "swap": {}
+    },
+    "passes": [
+        {
+            "program": "farmstorm:grayscale",
+            "inputs": [
+                { "sampler_name": "DiffuseSampler", "target": "minecraft:main" }
+            ],
+            "output": "swap"
+        },
+        {
+            "program": "minecraft:blit",
+            "inputs": [
+                { "sampler_name": "DiffuseSampler", "target": "swap" }
+            ],
+            "output": "minecraft:main"
+        }
+    ]
+}

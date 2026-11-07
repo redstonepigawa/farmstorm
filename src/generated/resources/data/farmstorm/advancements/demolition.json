@@ -1,0 +1,26 @@
+{
+  "parent": "farmstorm:first_throw",
+  "criteria": {
+    "demolition": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.farmstorm.demolition.description"
+    },
+    "icon": {
+      "count": 1,
+      "item": "farmstorm:bamboo_firecracker"
+    },
+    "title": {
+      "translate": "advancements.farmstorm.demolition.title"
+    }
+  },
+  "requirements": [
+    [
+      "demolition"
+    ]
+  ]
+}

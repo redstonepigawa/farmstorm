@@ -85,54 +85,12 @@
 
 ---
 
-## 第三方素材与许可
+## 许可
 
-本项目**不是全部原创**。下列素材取自第三方，**版权归各自权利人**，本项目不对其主张任何权利。路径均相对 `assets/farmstorm/`。
-
-| 产物 | 来源 | 处理 |
-|---|---|---|
-| `sounds/wild_hunter_loop.ogg` | `Animals_from_3m04s.mp3`（取 3m04s 起的剪辑，47.14 s） | 转 mono / 64 kbps Ogg Vorbis（保留 48 kHz） |
-| `sounds/zangief_piledriver.ogg` | SF6 视频片段 `BV1qu411W7ha`（846–850 段） | 同上 |
-| `sounds/friend_chives.ogg` | `pengyoudejiu.mp3`（7.45 MB） | 转 mono / 64 kbps Ogg Vorbis，取前 10 秒 |
-| `textures/mob_effect/wild_hunter.png` | 作者提供的桌面 JPG | 居中裁切缩放为 18×18 |
-| `textures/mob_effect/q_bounce.png` | Steam 创意工坊 `431960/3796093604/preview.jpg` | 居中裁切缩放为 18×18 |
-| `textures/item/friend_chives.png`、`textures/item/plain_chives_seeds.png` | 作者提供的 QQ 图片 | 缩放为 16×16 |
-| `textures/block/friend_chives_stage0..3.png` | **本项目自绘占位**（洋红 `#D81E8A`） | 不是第三方素材 |
-| `textures/block/outpost_core_{top,side,bottom}.png` | 作者提供的 `outpost_core_all_textures/32x32/a_runic/` 三张 32×32 | 原样拷入 |
-| `textures/item/wild_apple.png` | 作者提供的 `wild_apple_64x64.png`（64×64 / 6,946 B） | 原图直用，不缩放、不取色 |
-| `textures/block/cultivator_a_{top,side,bottom}.png` + 两张静态首帧 + 2 个 mcmeta | 作者提供的 `cultivator_a_animation_pack`（37 PNG + 2 mcmeta） | 帧条原样拷入；静态首帧取 `editable_frames/{side,top}_00.png` |
-
-### 使用条件（务必照此分发）
-
-1. **非商业**：不得将上述素材或其转换产物用于任何商业用途。
-2. **署名**：转载、二次分发本模组时，必须连同本表一并保留。
-3. **可移除**：若权利人提出异议，维护者会移除对应素材并发布替代版本。
-
-### 关于原版贴图派生图
-
-`textures/item/*.png` 与 `textures/block/*.png` 里大部分是**从原版客户端 jar 读出来再变换**的派生图：受 **Minecraft EULA / Brand and Asset Guidelines** 约束，本项目不对其主张任何权利；仓库里只有变换后的小尺寸图，不含原版 jar 的原始文件。
-
-### 已知风险
-
-本仓库目前是**私有**的，上述素材属非商业自用范围。**若将来转为公开仓库**，第三方音乐与游戏音效的再分发仍存在被投诉的可能。转公开前建议换成 CC0 / 原创音源，或保留本节的署名与非商业条款并接受随时撤下。
-
-> **发布 Release 时必须把这一节复制进 Release 说明**——jar 一旦分发就无法补正说明。
-
-### 第三方代码
-
-本模组**不内嵌任何第三方库**：唯一的编译与运行依赖是 NeoForge 提供的 Minecraft API（`net.neoforged:forge:1.20.1-47.1.106`），产物中不含 jar-in-jar 依赖。
-
-### 随包素材清单（1.20.1 版）
-
-| 类别 | 数量 | 说明 |
-|---|---|---|
-| 贴图 | 115 个 PNG | `block` 89 / `item` 22 / `misc` 2 / `mob_effect` 2 |
-| 音效 | 3 个 Ogg Vorbis | 见上方来源表 |
-| 语言 | 2 份 JSON | `en_us` / `zh_cn`，各 321 个键 |
-
-### 许可
-
-模组本体在 `META-INF/mods.toml` 中标注为 **All Rights Reserved**；第三方素材另受上述非商业条款约束。
+- **模组本体**：All Rights Reserved（见 `META-INF/mods.toml`）。
+- **随包素材**：贴图与音效**不得用于任何商业用途**；其版权归各自权利人，本项目不对其主张任何权利。
+- **可移除**：若相关权利人提出异议，维护者会移除对应素材并发布替代版本。
+- **第三方代码**：本模组不内嵌任何第三方库，运行依赖仅为 NeoForge 提供的 Minecraft API（`net.neoforged:forge:1.20.1-47.1.106`）。
 
 ---
 

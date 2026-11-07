@@ -241,21 +241,23 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 
 ### 前置
 
-- **JDK 21** —— 仓库自带一份（`.tools/jdk21`），不需要另装。
-- 本机到 `maven.neoforged.net` 的 TLS 被按 SNI 阻断，`.tools/gw.cmd` 会自己拉起本地镜像代理。**换一台正常机器**时按 `.tools/README.md` 删掉 java.base 补丁那两行即可。
+- **JDK 21** 与 **Gradle 8.10+**（仓库不含 wrapper，用本机的 `gradle` 即可）。
+- 首次构建要能访问 `maven.neoforged.net`（下 NeoForm 固件与 Minecraft 依赖）；版本固定在 `gradle.properties`：Minecraft **1.21.1** / NeoForge **21.1.213**。
 
 ### 四条命令
 
-```cmd
-cmd /c ""D:\project_farm\.tools\gw.cmd" build        :: 产出 build/libs/farmstorm-<版本>+mc1.21.1.jar
-cmd /c ""D:\project_farm\.tools\gw.cmd" runClient    :: 起开发客户端
-cmd /c ""D:\project_farm\.tools\gw.cmd" runServer    :: 起专用服务器（首次需 run/eula.txt）
-cmd /c ""D:\project_farm\.tools\gw.cmd" runData      :: 重新生成 src/generated/resources
+```bash
+gradle build        # 产物：build/libs/farmstorm-<版本>+mc1.21.1.jar
+gradle runClient    # 起开发客户端
+gradle runServer    # 起专用服务器（首次需 run/eula.txt，内容 eula=true）
+gradle runData      # 重新生成 src/generated/resources
 ```
 
-### 为什么必须走 gw.cmd
+### 关于作者本机的 `.tools/`
 
-`gw.cmd` 负责四件缺一不可的事：设 JDK 21 与 `GRADLE_USER_HOME` / `TEMP`、拉起 NeoForge 镜像代理、注入 java.base 补丁（本机 JDK 的 ACL 判定恒 false，会让 zipfs 变只读）、给 `runServer` 加 `run/` 目录锁。直接调 `gradle` 在本机必然失败；并行起服务端要给独立目录：`-PfsRunDir=run-xxx` + `FS_RUN_LOCK=run-xxx`（`run-*/` 已在 `.gitignore`）。
+作者开发机上用一套本地包装跑构建（固定 JDK、Gradle 发行版、NeoForge 镜像代理、java.base 补丁），用来绕开那台机器的 TLS 阻断与 ACL 异常。**这些文件不在仓库里**（`.tools/` 已 gitignore），普通开发机不需要它们，直接用上面的 `gradle` 命令即可。
+
+并行起多个服务端时需要各自独立的运行目录：`-PfsRunDir=run-xxx` + 环境变量 `FS_RUN_LOCK=run-xxx`（`run-*/` 已 gitignore）。
 
 ### 代码地图
 
@@ -403,11 +405,11 @@ python -X utf8 tools/verify_project.py
 
 ### 实施台账
 
-[`.work/PLAN.md`](.work/PLAN.md) 与 [`.work/V022-DISPATCH.md`](.work/V022-DISPATCH.md)；各波次的任务书 `.work/TASK-V022-W0*.md`；v0.2.2 的 **57 条**验收记录（30 技术 + 27 边界）与签字在 [`.work/v022-verify/`](.work/v022-verify)。上一版的 67 条在 [`.work/v021-verify/`](.work/v021-verify)。
+开发过程的任务书、验收与签字记录放在 `.work/` 下（**其中一部分未入库**，所以下面的路径不保证在 GitHub 上可点）：总计划 `.work/PLAN.md`、波次派单 `.work/V022-DISPATCH.md`、各波次任务书 `.work/TASK-V022-W0*.md`；v0.2.2 的 **57 条**验收（30 技术 + 27 边界）与签字在 `.work/v022-verify/`，上一版 67 条在 `.work/v021-verify/`。
 
-v0.2.3 这一版的手边件是 [`.work/v023-BRIEF.md`](.work/v023-BRIEF.md) 与 [`.work/v023-verify/`](.work/v023-verify)：**32 条**技术验收（`acceptance.md`）+ **31 条**边界（`boundaries.md`）+ 签字（`signoff.md`，八项读数 / 19 项必改 / 不改清单 / 已知影响 / 口径外 3 类）。
+v0.2.3 这一版的手边件是 `.work/v023-BRIEF.md` 与 `.work/v023-verify/`：**32 条**技术验收（`acceptance.md`）+ **31 条**边界（`boundaries.md`）+ 签字（`signoff.md`，八项读数 / 19 项必改 / 不改清单 / 已知影响 / 口径外 3 类）。
 
-v0.2.4 的手边件是 [`.work/v024-BRIEF.md`](.work/v024-BRIEF.md) 与 [`.work/v024-verify/`](.work/v024-verify)：**25 条**技术验收（`acceptance.md`，通过 22 / 不通过 1 / 未验证 2）+ 签字（`signoff.md`：四条影响面 / D-252 三项 / 十项读数 / 九条风险 RT-83~RT-91 / 与文档不一致 10 条）。
+v0.2.4 的手边件是 `.work/v024-BRIEF.md`（未入库）与 `.work/v024-verify/`：**25 条**技术验收（`acceptance.md`，通过 22 / 不通过 1 / 未验证 2）+ 签字（`signoff.md`：四条影响面 / D-252 三项 / 十项读数 / 九条风险 RT-83~RT-91 / 与文档不一致 10 条）。
 
 ---
 
@@ -486,7 +488,7 @@ v0.2.4 的手边件是 [`.work/v024-BRIEF.md`](.work/v024-BRIEF.md) 与 [`.work/
 
 ### 已知风险（维护者注）
 
-本仓库目前是**私有**的，上述素材属非商业自用范围。**若将来转为公开仓库**，第三方音乐与游戏音效的再分发仍存在被投诉的可能。转公开前建议换成 CC0 / 原创音源，或保留本节的署名与非商业条款并接受随时撤下。
+本仓库现在是**公开**仓库。三段音频属非商业自用，但**再分发**（尤其被第三方镜像/整合包收录）仍存在被投诉的可能：若权利人提出异议，维护者会按上面的「可移除」条款替换为 CC0 / 自录音源。想彻底规避风险的话，也欢迎优先换成 CC0 音源。
 
 > **发布 Release 时必须把这一节复制进 Release 说明**——jar 一旦分发就无法补正说明。
 
@@ -508,16 +510,16 @@ A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
 **v0.2.4 is the current release** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`); v0.2.3 and v0.2.2 are still on the Releases page. **License: MIT** (see `LICENSE`) — code and original assets only; the third-party audio/textures listed in the asset-provenance section keep their own terms.
 
-**v0.2.2** ships a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI fixes (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registered types *outside* that count), config stays **176** keys (two defaults change), language keys 338 → **340**. The v0.2.2 spec is **Chinese-only** (no English translation for this round).
+**v0.2.2** shipped a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI fixes (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registered types *outside* that count), config stays **176** keys (two defaults change), language keys 338 → **340**. The v0.2.2 spec is **Chinese-only** (no English translation for this round).
 
-- **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.2.2+mc1.21.1.jar` into `mods/`; a local v0.2.4 build is `farmstorm-0.2.4+mc1.21.1.jar` (v0.2.3: `farmstorm-0.2.3+mc1.21.1.jar`; never ship two). The `-sources.jar` is for IDEs.
+- **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases) — the **Latest** is `farmstorm-0.2.4+mc1.21.1.jar`; v0.2.3 and v0.2.2 are on the same page (never ship two versions at once). The `-sources.jar` is for IDEs.
 - **What's new in 0.2.4**: binding is unified behind the `CoreBound` interface and discovered via the `farmstorm:processing_block` block tag (one `KIND_BY_BLOCK` map, and the removal path now cleans up both blocks); villager trade XP is per level (2 / 5 / 10 / 15 / 30, so a master-level trade gives **30** XP = **15×** the old 2); the HUD panel background goes from alpha 128 to **77** (30.2%); and the three right-click handlers now return `PASS` unless the held item is an input, so vanilla's local place sound is no longer swallowed. The two dead `farmland` classes are gone (881 lines), so Java files drop 152 → **151** while the other ten baseline numbers stay put. Spec: `docs/zh/58`–`63`.
-- **v0.2.3 is implemented** (build it locally: `farmstorm-0.2.3+mc1.21.1.jar`) and **Chinese-only**: `docs/zh/52`–`57`. It reworks the converter into a crop converter (anvil hardness, right-click insert, 30 s, output auto-delivered to the bound core, red link, working animation), removes all 7 improved-crop seed items, flips the cultivator to accept only vanilla/plain crops (the 11 "self-seeding" inputs now yield **4** instead of 2), makes `plain_chives` plantable, gives the man-melon bullet a 300-tick lifetime, and renames one advancement description. Registry 98 → **92**, config 176 → **175**, language keys 340 → **321**, Java files 154 → **152**, advancements 18 → **16**, converting recipes 26 → **21**. Two player-visible consequences: epic crops are cheap now (the nether-star gate is gone and one converter makes one item per 30 s), and old saves lose the `farmstorm:converter` block plus the 7 seed items.
+- **v0.2.3** is released too (`farmstorm-0.2.3+mc1.21.1.jar`) and **Chinese-only**: `docs/zh/52`–`57`. It reworks the converter into a crop converter (anvil hardness, right-click insert, 30 s, output auto-delivered to the bound core, red link, working animation), removes all 7 improved-crop seed items, flips the cultivator to accept only vanilla/plain crops (the 11 "self-seeding" inputs now yield **4** instead of 2), makes `plain_chives` plantable, gives the man-melon bullet a 300-tick lifetime, and renames one advancement description. Registry 98 → **92**, config 176 → **175**, language keys 340 → **321**, Java files 154 → **152**, advancements 18 → **16**, converting recipes 26 → **21**. Two player-visible consequences: epic crops are cheap now (the nether-star gate is gone and one converter makes one item per 30 s), and old saves lose the `farmstorm:converter` block plus the 7 seed items.
 - **License**: MIT — see [`LICENSE`](LICENSE). Third-party assets (sounds, textures) are **not** MIT-licensed; see the provenance section.
 - **What's new in 0.2.2**: the Botanist profession (job site = Outpost Core; 22 trades at level 1, one epic at level 5), the `plain_chives` plain crop, the `farmstorm:processing_block` tag with a shared 24-binding cap, the two Outpost Core UI fixes, and caps of 4 cores / 24 cultivators per core.
 - **What's new in 0.2.1**: cores auto-rebind unbound cultivators every 100 ticks while under 16, core storage shows item tooltips, the vibration bean and Q-Bounce suspend AI of non-player mobs (the original AI flag is persisted on the entity), and trap crops deal ×3 to hostile mobs (`trap.damageMultiplier`).
 - **What's new in 0.2.0**: the outpost core became a 54-slot container; the new **cultivator** binds to the nearest own core (max 16 per core) and delivers every 600 ticks (2 items, plus 2 seeds when the crop has its own seed item); **farmer trades** at levels 1/3/5 are the only source of EPIC crops; in-world **link lines** connect a core to its cultivators. Crops are **no longer plantable**, the 0.1.1 farmland binding is **disabled** (both classes remain in the tree, unused), and the converter block is decorative.
-- **Build** (never call `gradle` directly): `cmd /c ""D:\project_farm\.tools\gw.cmd" build`.
+- **Build**: `gradle build` (Gradle 8.10+, JDK 21). No wrapper and no local toolchain ships in this repo; the author local `.tools/` wrapper is machine-specific and gitignored.
 - **Static check**: `python -X utf8 tools/verify_project.py` — must print `92 / 92`, `175 个配置键`, `共 321 键` **and** `FAIL 0` with exit code 0. `FAIL 0` alone is not enough (the tool once verified only 93 objects).
 - **Red line**: no Mixin. Custom packets are uncapped (2 in this version, both S2C read-only, protocol string `3`).
 - **Known limitations**: see the tables above (the Chinese section is authoritative). Link-line visuals and the HUD still need a human eye on a real client.

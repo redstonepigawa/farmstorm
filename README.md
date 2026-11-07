@@ -475,6 +475,7 @@ v0.2.4 的手边件是 `.work/v024-BRIEF.md`（未入库）与 `.work/v024-verif
 | `textures/block/outpost_core_{top,side,bottom}.png` | 本项目自制；原样拷入（32×32） |
 | `textures/item/wild_apple.png`（v0.1.1） | 本项目自制；原图直用，不缩放、不取色（64×64） |
 | `textures/block/cultivator_a_{top,side,bottom}.png` + 两张静态首帧（v0.2.0） | 本项目自制；帧条原样拷入，静态首帧取 `editable_frames/{side,top}_00.png` |
+| `textures/entity/villager/profession/botanist.png` + `.png.mcmeta`（v0.2.5） | 本项目自制；64×64 原版村民 UV 的透明职业叠加层（草帽由 mcmeta 的 `{"villager":{"hat":"full"}}` 打开，脸部与腿部保持透明） |
 
 ### 使用条件（务必照此分发）
 

@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-范围说明（非许可证正文）：本许可证只覆盖本仓库的代码与自有文本/美术。
-`README.md` 的「素材来源与非商业声明」一节列出的第三方素材（音效、贴图等）
-版权归各自权利人，不适用本许可证；从原版客户端 jar 派生的贴图受
-Minecraft EULA / Brand and Asset Guidelines 约束。

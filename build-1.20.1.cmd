@@ -49,6 +49,10 @@ if not defined FARMSTORM_PROBE set "FARMSTORM_PROBE=D:\project_farm1.20.1"
 set "PROBE=%FARMSTORM_PROBE%"
 set "LOG=D:\project_farm1.20.1\build-1.20.1.log"
 
+rem ---- guard: never build inside the 1.21.1 mainline (N-004) ----
+rem The trailing backslash matters: D:\project_farm1.20.1 must NOT match D:\project_farm\.
+if /i "%PROBE:~0,16%"=="D:\project_farm\" (echo [build-1.20.1] FATAL: %PROBE% is inside the 1.21.1 mainline; refusing to build there & exit /b 5)
+
 rem ---- preconditions, so a failure names the missing piece ----
 if not exist "%GRADLE_BIN%" (echo [build-1.20.1] FATAL: gradle not found & exit /b 2)
 if not exist "%INIT%" (echo [build-1.20.1] FATAL: init script not found & exit /b 2)

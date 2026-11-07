@@ -34,3 +34,24 @@ dsh-session-*.zip
 .work/screenshots/
 __pycache__/
 *.pyc
+
+# 本地从 jar 解包产生的残留（真正的资源在 src/main/resources 下，这里不该有东西）
+/META-INF/
+/assets/
+/com/
+/data/
+/pack.mcmeta
+
+# 本地跑服的其余产物（world / 崩溃报告 / 日志；run*/ 与 logs/ 已在上面）
+world/
+crash-reports/
+*.log
+
+# 操作系统与编辑器噪声
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# 其它本地临时产物
+node_modules/
+*.tmp

@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · **v0.2.4 已发布**：四条需求（绑定统一 / 交易经验分级 / 浮窗底色透明度 / 放置音效）与 `farmland` 死代码清理全部落地（当前可玩版本是 **v0.2.4**；本轮不发布 Release，Releases 页仍是 **v0.2.2**）
+Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · **v0.2.4 已发布**：四条需求（绑定统一 / 交易经验分级 / 浮窗底色透明度 / 放置音效）与 `farmland` 死代码清理全部落地（当前可玩版本是 **v0.2.4**；[Releases](https://github.com/redstonepigawa/farmstorm/releases) 页上的 **Latest** 就是它，v0.2.3 / v0.2.2 也在同一页）
 
 [下载](https://github.com/redstonepigawa/farmstorm/releases) · [文档索引](#文档) · [构建方法](#构建与调试)
 
@@ -46,7 +46,7 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 | `config/farmstorm-server.toml` | **175 键 / 60 组**（v0.2.3 删 3 加 2；v0.2.2 是 176 键；**v0.2.4 无变化**） | 服务端行为；首次起服自动生成 |
 | `config/farmstorm-client.toml` | **3 键**（`hud.enabled` / `hud.x` / `hud.y`） | 客户端浮窗开关与位置；**首次进游戏**才生成 |
 
-### 本版（v0.2.4，**已实现**；本轮不发布 Release）
+### 本版（v0.2.4，**已发布**）
 
 **四条需求 + 一次死代码清理：绑定走接口与标签、交易经验按级分档、浮窗更透、右键让路把放置音让回来。**
 

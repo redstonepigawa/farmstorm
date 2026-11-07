@@ -1,62 +1,106 @@
-# farmstorm 1.20.1（移植工作区）
+# Farmstorm
 
-> 本工作区与 1.21.1 主线 `D:/project_farm` **并存、互不干扰**。
-> 基线：1.21.1 的 **v0.2.4 已实现态**（151 个 Java 文件 / 注册面 92 / server config 175 / 语言键 321 × 2）。
+把原版作物改造成 PvP 道具的 Minecraft 模组 —— 种下去是庄稼，扔出去是杀器。
 
-## 目录
+---
 
-```
-D:/project_farm1.20.1/
-├── README.md                  ← 你在这里
-├── HANDOVER-1.20.1.md         ← 移植交接文档（含探针实测的 12 条事实与 65 符号搬运表）
-├── .gitignore
-├── docs/zh/                   ← 六件套（编号从 00，已写完：DECISIONS / DESIGN / TECH / TASKS / PROMPT-MAIN / PROMPT-TASKS）
-└── probe/                     ← 可编译的 1.20.1 骨架（NG7+作物方块+方块实体+SimpleChannel）
-```
+## 安装
 
-## 作者已拍板（移植期）
+**环境要求**
 
-| # | 决定 | 影响 |
+| 项 | 要求 |
+|---|---|
+| Minecraft | **1.20.1** |
+| 加载器 | NeoForge **47.x**（测试于 47.1.106） |
+| Java | **17** |
+
+**步骤**
+
+1. 安装对应版本的 NeoForge 47.x。
+2. 把 `farmstorm-0.2.4+mc1.20.1.jar` 放进实例的 `mods/` 目录。
+3. 启动游戏。
+
+**注意：同一 modid 的同名版本不能混放**
+
+本模组在 1.20.1 与 1.21.1 上共用同一个模组名与版本号（`farmstorm` / `0.2.4`），只靠产物名区分：
+
+- 1.20.1 用 `+mc1.20.1`
+- 1.21.1 用 `+mc1.21.1`
+
+**请按 MC 版本各放一份**。两份放进同一个 `mods/` 时加载器只会读到其中一份，表现为「装了两份却只有一份生效」。
+
+**联机**
+
+本版网络协议串是 **1**（1.21.1 版是 3）。两端串不一致时连接会被明确拒绝，不会崩溃。
+
+**存档**
+
+只支持**新建世界**。1.21.1 的世界用本版打不开，这是预期行为，不提供存档迁移。
+
+---
+
+## 功能
+
+### 22 种作物，三种用法
+
+22 种作物分投掷型 12 / 部署型 7 / 食用型 3，另有 2 种破障类。按品质分为**普通 11 / 稀有 7 / 史诗 4**。
+
+| 类型 | 用法 |
+|---|---|
+| **投掷型** | 手持右键投出，命中或落地后结算（爆炸、燃烧、烟雾、随机效果等） |
+| **部署型** | 放置成方块，成为常驻的炮台或陷阱 |
+| **食用型** | 吃下获得增益 |
+
+### 可部署的炮台与陷阱
+
+放置后会自行索敌或触发：
+
+- **南瓜炮台**（Pumpkin Turret）—— 半径内索敌开火，并可拦截飞行中的投掷物
+- **觉醒火把花 / 觉醒猪笼草**（Awakened Torchflower / Pitcher Plant）—— 范围光环
+- **仙人掌捕兽夹**（Fang Trap Cactus）—— 触发式尖牙陷阱
+- **爆破胡萝卜**（Blast Carrot）—— 落地爆炸
+- **桑吉尔蔗**（Zangief Cane）—— 打桩机：把目标抬起、倒转视角、再砸下去
+- **点防御菌**（Point Defense Fungus）—— 拦截来袭投掷物
+- **振动豆**（Vibration Bean）—— 感应触发
+
+### 三台机器
+
+| 方块 | 作用 |
+|---|---|
+| **作物转换器**（Crop Converter） | 把原版作物按配方转换成对应的 Farmstorm 道具，共 21 条单向转换配方，无额外成本 |
+| **培养器**（Cultivator） | 放入作物后持续产出 |
+| **据点核心**（Outpost Core） | 占地范围（3 × 3 区块），带储物空间，可绑定周围的培养器与转换器，并有归属 / 队伍判定 |
+
+### 战斗与状态
+
+- **狂野猎人**（Wild Hunter）—— 增益期间为视野内的敌方生物描出红色轮廓，并强化多项属性；HUD 显示剩余时间
+- **Q 弹**（Q-Bounce）—— 骑乘与位移强化
+- 3 种自定义伤害类型、4 种自定义状态效果
+- 16 条模组进度
+
+### 其他
+
+- 模组物品共 28 种、方块 28 种，统一挂在单独的创造模式标签页下
+- 配置项：服务端 175 项、客户端 3 项（HUD 开关与位置）
+
+---
+
+## 第三方素材与许可
+
+**许可**：All Rights Reserved（见 `META-INF/mods.toml`）。
+
+**第三方代码**：本模组**不内嵌任何第三方库**。唯一的编译与运行依赖是 NeoForge 提供的 Minecraft API（`net.neoforged:forge:1.20.1-47.1.106`），产物中不含 jar-in-jar 依赖。
+
+**随包分发的素材**（全部位于 `assets/farmstorm/`）：
+
+| 类别 | 数量 | 说明 |
 |---|---|---|
-| 1 | 协议串从 **`"1"`** 起 | 与 1.21.1 的 `"3"` 区分；混装直接拒绝，不崩 |
-| 2 | **数据组件那条线不砍**（完整移植 A 路线） | 临时附魔与 `ai_suspend` 都要在 1.20.1 保住语义（**实际两处都走 NBT**：物品 `FarmstormTempEnchants` / 实体持久 NBT `FarmstormAiSuspend`；未用 Capability），P3 按上限 12 人日 |
-| 3 | **存档不迁移** | 只支持新世界；1.21.1 世界打不开写进已知限制 |
-| 4 | 文档仍按**六件套**，编号**从 00 起** | `00-DECISIONS` / `01-DESIGN` / `02-TECH` / `03-TASKS` / `04-PROMPT-MAIN` / `05-PROMPT-TASKS`；`D`/`F`/`Phase`/`HC`/`N`/`RT`/`A` 各系列也从 001 重起，不与 1.21.1 续接 |
-| 5 | **模组版本号不改**（仍 `0.2.4`） | 两个平台靠产物名 `+mc1.20.1` / `+mc1.21.1` 区分；同实例只会加载其中一份，安装说明要写清「按 MC 版本各放一份」。`mods.toml` 的 MC 依赖范围分别是 `[1.20.1,1.21)` 与 `[1.21.1,1.22)` |
+| 贴图 | 115 个 PNG | 方块、物品、界面与状态图标，16×16 与界面贴图 |
+| 音效 | 3 个 Ogg Vorbis | `friend_chives.ogg`、`wild_hunter_loop.ogg`、`zangief_piledriver.ogg` |
+| 语言 | 2 份 JSON | `en_us` / `zh_cn`，各 321 个键 |
 
-## 工具链（不复制，复用主线）
+贴图与音效为项目自有素材，随本模组一同分发。若后续引入任何外部素材（音效采样、字体、第三方贴图等），应在本节补登记：**来源 / 作者 / 许可证**。
 
-构建必须用主线的工具链，**不要**在本工作区另建 Gradle/JDK：
+---
 
-```powershell
-$env:JAVA_HOME='D:/project_farm/.tools/jdk21'
-$env:GRADLE_USER_HOME='D:/project_farm/.tools/gradle-home'
-$env:TEMP='D:/project_farm/.tools/tmp'; $env:TMP=$env:TEMP
-$env:JAVA_TOOL_OPTIONS='-Duser.language=en -Duser.country=US -XX:ActiveProcessorCount=2'
-& 'D:/project_farm/.tools/gradle-8.10/bin/gradle.bat' --init-script 'D:/project_farm/.tools/init.gradle' -p <工作区目录> --no-watch-fs build
-```
-
-- 镜像代理：`node D:/project_farm/.tools/neoforge-proxy.mjs`（监听 `127.0.0.1:8899`，**构建期间必须常驻**）。
-- JDK 17：`%APPDATA%/.minecraft/runtime/java-runtime-beta`（完整 17.0.15，含 javac），写进 `org.gradle.java.installations.paths`（**逗号分隔**）。
-- java.base 补丁：`D:/project_farm/.tools/jdk-patch/classes`（本机 `Files.isWritable` 恒 false，必须 `--patch-module`）。这条要写进 `gradle.properties` 的 `org.gradle.jvmargs`，**不要**用 `JDK_JAVA_OPTIONS` 环境变量——后者会被 Gradle 的 toolchain 探测子进程继承，JDK 17 会被判成 Invalid。
-
-## 进度与下一步（按 HANDOVER 的 P0~P6）
-
-**已完成**
-
-1. **P0** ~~把 `probe/` 跑通 build，并解决 `runServer` 卡在 `DownloadAssets`~~ → 结论见 `P0-REPORT-1.20.1.md`；dev 环境另有两个坑已写进 02 号 §2（服端配置在 `world/serverconfig/forge-server.toml`、`advertiseDedicatedServerToLan=false`）。
-2. **六件套**：`docs/zh/00`~`05` 六份齐（D-001~D-014 / R1~R7 + B-01~B-12 / 25 条验收 + RT-001~RT-010 / F-001~F-021 + Phase 1~6 + A-001~A-006 / HC-001~HC-010 + N-001~N-008 + 10 条陷阱 / 6 个 Phase 共 32 条出口判据）。
-3. **Phase 1~3（构建链 / 命名空间搬迁 / 五个子系统）**：`net.neoforged.` 命中 0；`build` 出 `build/libs/farmstorm-0.2.4+mc1.20.1.jar`（1,129,491 B），SRG 重映射出 `-srg.jar` 与 `dist/…jar`（均 1,138,762 B）。实测读数：**151** 个 Java 文件 / **16,080** 行 / 注册面 **91（11 类）** / server config **175** / 语言键 **321 × 2** / 配方 **25**（21 条 `converting` + 4 条合成）/ 进度 **16** / 战利品表 **28** / damage_type **3** / `pack_format` **15**。
-
-**后续阶段**（判据见 `HANDOVER-1.20.1.md` §7~§8、03 号与 05 号）
-
-4. **Phase 4**：F-015 存档签名（`RegistryFriendlyByteBuf` 已 0，`RecipeInput` 还剩 1 处注释命中）+ F-016 行为回归（25 条验收 + 31 条边界）。
-5. **Phase 5**：F-017 文档回灌 / F-018 检查器 1.20.1 期望源（`verify_project.py` 目前仍是 92 口径）/ F-019 三份记录。
-6. **Phase 6**：F-020 打包（`remap-1.20.1.cmd` → `dist/`）与 F-021 签字。
-
-## 红线（沿用主线规矩）
-
-- Mixin **0**。
-- 不改 1.21.1 主线的任何东西（`D:/project_farm` 只读用它的工具链）。
-- 服务端侧不出现 `net.minecraft.client.*`；CLIENT 配置独立成 `farmstorm-client.toml`。
-- 客户端预测与服务端四道闸的分工不许混。
+*Farmstorm 0.2.4 · Minecraft 1.20.1 · NeoForge 47.x*

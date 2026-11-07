@@ -30,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.common.MinecraftForge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,14 +46,21 @@ public final class Farmstorm {
     public static final TeamResolver TEAMS = new ScoreboardTeamResolver();
 
     /**
-     * 只收 {@code IEventBus} 一个参数。
+     * <b>必须是无参构造器</b> —— 这是原版 Forge 47 与 NeoForge 47 唯一的交集。
      *
-     * <p><b>不要加第二参 {@code ModContainer}</b>：NeoForge 47 认这个位置，原版 Forge 47 不认，
-     * 结果 FML 匹配不到构造函数、回退去找无参构造，直接抛
-     * {@code NoSuchMethodException: com.dashpig.farmstorm.Farmstorm.<init>()}（1.20.1-Forge_47.4.28 实测）。
-     * 配置注册走 {@code ModLoadingContext}，本来也不需要 container。
+     * <p>两个加载器挑构造器的规则不一样（反编译 {@code FMLModContainer#constructMod()} 实测）：
+     * <ul>
+     *   <li><b>Forge 47.4.28</b>：先 {@code getDeclaredConstructor(FMLJavaModLoadingContext.class)}，
+     *       {@code NoSuchMethodException} 才回退 {@code getDeclaredConstructor()}。<b>不认 {@code IEventBus} 参数</b>。</li>
+     *   <li><b>NeoForge 47.2.2</b>：先 {@code getDeclaredConstructor()}（无参），失败后才走多参工厂，
+     *       支持 {@code IEventBus} / {@code ModContainer} / {@code FMLModContainer} / {@code Dist}。</li>
+     * </ul>
+     * 所以 {@code (IEventBus)} 只对 NeoForge 有效，装进 Forge 会抛
+     * {@code NoSuchMethodException: Farmstorm.<init>()}（1.20.1-Forge_47.4.28 实测）。
+     * 无参构造器两边都认，总线自己取：{@code FMLJavaModLoadingContext} 在两边 API 一致。
      */
-    public Farmstorm(IEventBus modBus) {
+    public Farmstorm() {
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         FarmstormItems.REGISTER.register(modBus);
         FarmstormBlocks.REGISTER.register(modBus);
         FarmstormBlockEntities.REGISTER.register(modBus);

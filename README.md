@@ -494,7 +494,11 @@ v0.2.4 的手边件是 [`.work/v024-BRIEF.md`](.work/v024-BRIEF.md) 与 [`.work/
 
 ## 许可 / License
 
-未定，由作者决定。
+本项目采用 **MIT 许可证** —— 全文见根目录 [`LICENSE`](LICENSE)（`Copyright (c) 2026 redstonepigawa`）。
+
+一句话：可以自由使用、复制、修改、合并、发布、再许可、销售本软件的副本，**唯一条件是保留版权声明与本许可声明**；软件按「原样」提供，不附带任何明示或默示担保。
+
+**范围**：MIT 只覆盖本项目的**代码与自有美术 / 文本**。上面「素材来源与非商业声明」一节列出的第三方素材（音效、贴图等）**不适用 MIT**，版权归各自权利人，仍按该节的使用条件分发；从原版客户端 jar 派生出的贴图受 **Minecraft EULA / Brand and Asset Guidelines** 约束。
 
 ---
 
@@ -502,13 +506,14 @@ v0.2.4 的手边件是 [`.work/v024-BRIEF.md`](.work/v024-BRIEF.md) 与 [`.work/
 
 A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
-**v0.2.4 is implemented but not released** — no GitHub Release this round; **the current release stays v0.2.2** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`).
+**v0.2.4 is the current release** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`); v0.2.3 and v0.2.2 are still on the Releases page. **License: MIT** (see `LICENSE`) — code and original assets only; the third-party audio/textures listed in the asset-provenance section keep their own terms.
 
 **v0.2.2** ships a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI fixes (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registered types *outside* that count), config stays **176** keys (two defaults change), language keys 338 → **340**. The v0.2.2 spec is **Chinese-only** (no English translation for this round).
 
 - **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases). Drop `farmstorm-0.2.2+mc1.21.1.jar` into `mods/`; a local v0.2.4 build is `farmstorm-0.2.4+mc1.21.1.jar` (v0.2.3: `farmstorm-0.2.3+mc1.21.1.jar`; never ship two). The `-sources.jar` is for IDEs.
 - **What's new in 0.2.4**: binding is unified behind the `CoreBound` interface and discovered via the `farmstorm:processing_block` block tag (one `KIND_BY_BLOCK` map, and the removal path now cleans up both blocks); villager trade XP is per level (2 / 5 / 10 / 15 / 30, so a master-level trade gives **30** XP = **15×** the old 2); the HUD panel background goes from alpha 128 to **77** (30.2%); and the three right-click handlers now return `PASS` unless the held item is an input, so vanilla's local place sound is no longer swallowed. The two dead `farmland` classes are gone (881 lines), so Java files drop 152 → **151** while the other ten baseline numbers stay put. Spec: `docs/zh/58`–`63`.
 - **v0.2.3 is implemented** (build it locally: `farmstorm-0.2.3+mc1.21.1.jar`) and **Chinese-only**: `docs/zh/52`–`57`. It reworks the converter into a crop converter (anvil hardness, right-click insert, 30 s, output auto-delivered to the bound core, red link, working animation), removes all 7 improved-crop seed items, flips the cultivator to accept only vanilla/plain crops (the 11 "self-seeding" inputs now yield **4** instead of 2), makes `plain_chives` plantable, gives the man-melon bullet a 300-tick lifetime, and renames one advancement description. Registry 98 → **92**, config 176 → **175**, language keys 340 → **321**, Java files 154 → **152**, advancements 18 → **16**, converting recipes 26 → **21**. Two player-visible consequences: epic crops are cheap now (the nether-star gate is gone and one converter makes one item per 30 s), and old saves lose the `farmstorm:converter` block plus the 7 seed items.
+- **License**: MIT — see [`LICENSE`](LICENSE). Third-party assets (sounds, textures) are **not** MIT-licensed; see the provenance section.
 - **What's new in 0.2.2**: the Botanist profession (job site = Outpost Core; 22 trades at level 1, one epic at level 5), the `plain_chives` plain crop, the `farmstorm:processing_block` tag with a shared 24-binding cap, the two Outpost Core UI fixes, and caps of 4 cores / 24 cultivators per core.
 - **What's new in 0.2.1**: cores auto-rebind unbound cultivators every 100 ticks while under 16, core storage shows item tooltips, the vibration bean and Q-Bounce suspend AI of non-player mobs (the original AI flag is persisted on the entity), and trap crops deal ×3 to hostile mobs (`trap.damageMultiplier`).
 - **What's new in 0.2.0**: the outpost core became a 54-slot container; the new **cultivator** binds to the nearest own core (max 16 per core) and delivers every 600 ticks (2 items, plus 2 seeds when the crop has its own seed item); **farmer trades** at levels 1/3/5 are the only source of EPIC crops; in-world **link lines** connect a core to its cultivators. Crops are **no longer plantable**, the 0.1.1 farmland binding is **disabled** (both classes remain in the tree, unused), and the converter block is decorative.

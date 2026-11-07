@@ -105,16 +105,20 @@ public final class WildHunterOutline {
         rendering = true;
         try {
             for (LivingEntity entity : targets) {
+                // 并非所有 LivingEntity 的渲染器都是 LivingEntityRenderer：末影龙就是 EnderDragonRenderer
+                //（直接继承 EntityRenderer）。以前这里直接强转，附近有末影龙时必崩（ClassCastException）。
+                // 用 instanceof 守卫一次覆盖所有非标准渲染器：跳过它们，不画剪影。
+                if (!(minecraft.getEntityRenderDispatcher().getRenderer(entity) instanceof LivingEntityRenderer<?, ?> living)) {
+                    continue;
+                }
                 // modelview 已经是相机旋转（capturedModelView），所以 PoseStack 只做世界平移。
                 // 之前这里还 mulPose(cameraRotation)，等于把旋转应用了两次 → 剪影画到错误位置。
                 PoseStack poseStack = new PoseStack();
                 poseStack.translate(entity.getX() - cameraPos.x, entity.getY() - cameraPos.y, entity.getZ() - cameraPos.z);
                 poseStack.scale(OUTLINE_SCALE, OUTLINE_SCALE, OUTLINE_SCALE);
-                LivingEntityRenderer renderer =
-                        (LivingEntityRenderer) minecraft.getEntityRenderDispatcher().getRenderer(entity);
                 MultiBufferSource shell = shellSource(buffers);
                 float yaw = Mth.lerp(capturedPartialTick, entity.yRotO, entity.getYRot());
-                renderer.render(entity, yaw, capturedPartialTick, poseStack, shell, LightTexture.FULL_BRIGHT);
+                renderOutline(living, entity, yaw, capturedPartialTick, poseStack, shell);
             }
             buffers.endBatch();
         } finally {
@@ -124,5 +128,17 @@ public final class WildHunterOutline {
             RenderSystem.enableBlend();
             rendering = false;
         }
+    }
+
+    /**
+     * 剪影只对 {@link LivingEntityRenderer} 成立（末影龙等不适用，已在调用侧跳过）；
+     * 通配符到具体类型的这一步无法免检，集中在这里并显式标注，避免散落在渲染循环里。
+     */
+    @SuppressWarnings("unchecked")
+    private static void renderOutline(LivingEntityRenderer<?, ?> renderer, LivingEntity entity,
+                                      float yaw, float partialTick, PoseStack poseStack,
+                                      MultiBufferSource shell) {
+        ((LivingEntityRenderer<LivingEntity, ?>) renderer)
+                .render(entity, yaw, partialTick, poseStack, shell, LightTexture.FULL_BRIGHT);
     }
 }

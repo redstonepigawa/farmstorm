@@ -72,6 +72,15 @@ farmstorm-0.2.4+mc1.21.1-sources.jar    1,071,152 B
 
 ---
 
+## 许可 / License
+
+本项目自 **2026-11-07** 起采用 **MIT 许可证**（根目录 [`LICENSE`](https://github.com/redstonepigawa/farmstorm/blob/main/LICENSE)，`Copyright (c) 2026 redstonepigawa`）。
+
+> ⚠️ **本 Release 的 jar 是改许可之前构建的**，其 `META-INF/neoforge.mods.toml` 里仍写着 `All Rights Reserved`；**请以仓库 `main` 分支的 `LICENSE` 与 README 许可段为准**，下一个版本起 jar 元数据会同步为 `MIT`。
+> 第三方素材（音效、贴图）**不适用 MIT**，版权归各自权利人，见下一节。
+
+---
+
 ## 素材来源与非商业声明（务必随 Release 一起保留）
 
 本项目**不是全部原创**：下列素材取自第三方，**版权归各自权利人**，本项目不对其主张任何权利。

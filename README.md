@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · **v0.2.6 已发布**：在 v0.2.4 的四条需求（绑定统一 / 交易经验分级 / 浮窗底色透明度 / 放置音效）、v0.2.5 的植物学家职业贴图之上，v0.2.6 修掉一个**客户端崩溃**——红色剪影对「渲染器不是 `LivingEntityRenderer` 的生物」（典型是**末影龙**）做无守卫强转会抛 `ClassCastException`（当前可玩版本是 **v0.2.6**；[Releases](https://github.com/redstonepigawa/farmstorm/releases) 页上的 **Latest** 就是它，v0.2.5 / v0.2.4 / v0.2.3 / v0.2.2 也在同一页）
+Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm` · **v0.2.7 已发布**：撤除部署数量上限（只留 5 刻冷却）、灰度改自持 `PostChain`（光影模组下也能灰）、莫洛托夫落点爆炸威力默认 0 → 1；叠加此前 v0.2.6 的末影龙剪影崩溃修复与 v0.2.5 的植物学家贴图（当前可玩版本是 **v0.2.7**；[Releases](https://github.com/redstonepigawa/farmstorm/releases) 页上的 **Latest** 就是它，v0.2.6 / v0.2.5 / v0.2.4 / v0.2.3 / v0.2.2 也在同一页）
 
 [下载](https://github.com/redstonepigawa/farmstorm/releases) · [文档索引](#文档) · [构建方法](#构建与调试)
 
@@ -29,24 +29,44 @@ Minecraft **1.21.1** · NeoForge **21.1.213** · Java **21** · modid `farmstorm
 
 **Minecraft 1.21.1 + NeoForge 21.1.x + Java 21**。用 PCL / HMCL 建对应的版本即可（实测 NeoForge 21.1.265 也能跑）。
 
-**v0.2.6 / v0.2.5 / v0.2.4 / v0.2.3 / v0.2.2 的环境要求完全相同**，不用换启动器、也不用换 Java；网络协议串**仍是 `3`**（v0.2.3 从 `2` 升上来，v0.2.4 ~ v0.2.6 都未动），所以客户端与服务端必须用同一版，混版会连不上。
+**v0.2.7 / v0.2.6 / v0.2.5 / v0.2.4 / v0.2.3 / v0.2.2 的环境要求完全相同**，不用换启动器、也不用换 Java；网络协议串**仍是 `3`**（v0.2.3 从 `2` 升上来，v0.2.4 ~ v0.2.7 都未动），所以客户端与服务端必须用同一版，混版会连不上。
 
 ### 安装
 
 1. 用启动器建一个 1.21.1 + NeoForge 21.1.x 的实例。
-2. 打开实例的 `mods` 文件夹（没有就新建），把 **`farmstorm-0.2.6+mc1.21.1.jar`** 丢进去（Releases 页上的 **Latest** 就是这一份；v0.2.5 / v0.2.4 / v0.2.3 / v0.2.2 的文件名只差版本号）。**任两份不能同时放**。
+2. 打开实例的 `mods` 文件夹（没有就新建），把 **`farmstorm-0.2.7+mc1.21.1.jar`** 丢进去（Releases 页上的 **Latest** 就是这一份；v0.2.6 / v0.2.5 / v0.2.4 / v0.2.3 / v0.2.2 的文件名只差版本号）。**任两份不能同时放**。
 3. 启动。创造模式物品栏最后会多一个「农场风云」标签页。
 
-`farmstorm-<版本>+mc1.21.1-sources.jar`（v0.2.2 ~ v0.2.6 各一份）是源码包，给 IDE 看实现用，**不要**放进 `mods`。
+`farmstorm-<版本>+mc1.21.1-sources.jar`（v0.2.2 ~ v0.2.7 各一份）是源码包，给 IDE 看实现用，**不要**放进 `mods`。
 
 ### 这个版本会生成哪些配置文件
 
 | 文件 | 内容 | 说明 |
 |---|---|---|
-| `config/farmstorm-server.toml` | **175 键 / 60 组**（v0.2.3 删 3 加 2；v0.2.2 是 176 键；**v0.2.4 ~ v0.2.6 均无变化**） | 服务端行为；首次起服自动生成 |
+| `config/farmstorm-server.toml` | **175 键 / 60 组**（v0.2.3 删 3 加 2；v0.2.2 是 176 键；**v0.2.4 ~ v0.2.7 键数均无变化**，v0.2.7 只改 `molotov.triggerExplosionPower` 的默认值） | 服务端行为；首次起服自动生成 |
 | `config/farmstorm-client.toml` | **3 键**（`hud.enabled` / `hud.x` / `hud.y`） | 客户端浮窗开关与位置；**首次进游戏**才生成 |
 
-### 本版（v0.2.6，**已发布**）
+### 本版（v0.2.7，**已发布**）
+
+三处改动，都不动存档格式；六组读数与协议串**一项未变**：
+
+**① 撤除部署数量上限（玩法）**
+- 原来放置部署物有三道闸：5 刻冷却 → **单玩家 32 个** → **单区块 8 个**。后两道已撤除，**只保留 5 刻冷却**（它挡的是「放 → 立刻拆 → 再放」的抖动，与数量无关）。
+- 陷阱的总量仍由 FIFO 名额兜底（每玩家 16 条，超出挤掉最先放的），与这道闸无关。
+- 判定仍然发生在扣物品之前：被拒绝时物品不消耗、不产生掉落。
+
+**② 灰度改自持 `PostChain`（渲染）**
+- 原来走 `GameRenderer#loadEffect`：光影模组（Oculus / Iris 之类）接管后处理后，我们装上去的链约 50 ms 就被外部清掉 —— 表现为「加载 ↔ 被外部关闭」每 ~100 ms 刷一次、画面从未灰过一帧。
+- 现在自己持有 `PostChain`，在 `AFTER_LEVEL`（地形/实体/粒子/天气都画完、GUI 还没开始）直接 `process()`，不再看别人的脸色；仍是「只灰世界、不灰 GUI」。
+- 附带：连续失败 20 次会本会话放弃并只留一条 error 日志，不会刷屏；退出世界时释放 GL 资源。
+
+**③ 莫洛托夫落点爆炸威力默认 0 → 1（数值）**
+- `molotov.triggerExplosionPower` 默认值改为 **1**。原来 0 时落点那次爆炸只当触发器：没有击退与伤害衰减半径，只剩放火/岩浆。
+- 方块破坏恒为 `NEVER_BREAK`（A-10），与威力无关 —— 改成 1 **不会**让莫洛托夫开始拆方块。
+
+版本号 `mod_version` 0.2.6 → **0.2.7**（产物 `farmstorm-0.2.7+mc1.21.1.jar`）。
+
+### 上一版：v0.2.6（**已发布**）
 
 **v0.2.6 是一次崩溃修复，零功能改动、零数值改动**：
 
@@ -326,9 +346,9 @@ python -X utf8 tools/verify_project.py
 
 长期有效的基础文档：[`00-DECISIONS`](docs/zh/00-DECISIONS.md)、[`01-DESIGN`](docs/zh/01-DESIGN.md)、[`02-TECH-SPEC`](docs/zh/02-TECH-SPEC.md)、[`07-PUBLISH`](docs/zh/07-PUBLISH.md)、[`08-DEV-GUIDE`](docs/zh/08-DEV-GUIDE.md)、[`09-IMPL-VS-PLAN`](docs/zh/09-IMPL-VS-PLAN.md)。
 
-### 现行文档（v0.2.4，**已实现**；v0.2.5 与 v0.2.6 无新文档）
+### 现行文档（v0.2.4，**已实现**；v0.2.5 ~ v0.2.7 无新文档）
 
-> v0.2.5 只是资源补齐（补 `botanist.png` + 草帽 mcmeta），v0.2.6 只是一条剪影崩溃修复；两次都**没有新决策、没有新任务**，因此不另出六件套；口径仍以 58~63 号为准。
+> v0.2.5 是资源补齐（`botanist.png` + 草帽 mcmeta），v0.2.6 是一条剪影崩溃修复，v0.2.7 是「撤部署上限 + 灰度改自持 + 火瓶默认值」；三次都**没有新决策、没有新任务**，因此不另出六件套；口径仍以 58~63 号为准。
 
 六份中文文档已写完，**并已按文档实现**（16 个任务 F-312 ~ F-327 + F-328、7 个 Phase 66 ~ 72 全部落地；验收记录 `.work/v024-verify/acceptance.md`、签字 `.work/v024-verify/signoff.md`）。本轮仍未出英译，`docs/en/` 停在 v0.2.1。
 
@@ -436,6 +456,7 @@ v0.2.4 的手边件是 `.work/v024-BRIEF.md`（未入库）与 `.work/v024-verif
 
 | 版本 | 日期 | 一句话 |
 |---|---|---|
+| v0.2.7 | 2026-11-08（**已发布**） | 三处改动：撤除单玩家 32 / 单区块 8 两道放置上限（只留 5 刻冷却，陷阱总量仍由 FIFO 兜底）、灰度改自持 `PostChain` 在 `AFTER_LEVEL` 直接 `process()`（光影模组不再把它清掉）、`molotov.triggerExplosionPower` 默认 0 → 1；六组读数与协议串均未变 |
 | v0.2.6 | 2026-11-07（**已发布**） | 崩溃修复：红色剪影加 `instanceof LivingEntityRenderer` 守卫，附近有**末影龙**时不再 `ClassCastException` 崩客户端；零功能 / 零数值改动，六组读数与协议串均未变 |
 | v0.2.5 | 2026-11-07（**已发布**） | 资源补齐：补植物学家职业贴图（`botanist.png` + 草帽 `.mcmeta`），修掉客户端缺少该贴图导致的紫黑格；零功能 / 零数值改动，六组读数与协议串均未变 |
 | v0.2.4 | 2026-11-07（**已发布**） | 四条需求 + 死代码清理：绑定统一（`CoreBound` 三方法接口 + `processing_block` 标签发现 + `KIND_BY_BLOCK` 单一映射 + 清理出口覆盖两个方块）、交易经验按级分 2 / 5 / 10 / 15 / 30（大师级单次 30 点 = 15 倍）、浮窗底色 alpha 128 → 77（30.2%）、三处右键让路恢复原版放置音；删 `farmland` 两个死类（881 行），Java 文件 152 → 151，其余十项读数一项未变 |
@@ -450,7 +471,7 @@ v0.2.4 的手边件是 `.work/v024-BRIEF.md`（未入库）与 `.work/v024-verif
 | v0.0.2 | 2026-10-29 | 7 项新内容 + 三个客户端子系统（世界灰度、红色剪影、键鼠拦截） |
 | v0.0.1 | 2026-10-28 | 15 种作物、转换器、64 个注册对象 |
 
-## 数字快照（v0.2.6 源码树与发布件）
+## 数字快照（v0.2.7 源码树与发布件）
 
 | 项 | 值 |
 |---|---|
@@ -464,8 +485,8 @@ v0.2.4 的手边件是 `.work/v024-BRIEF.md`（未入库）与 `.work/v024-verif
 | 方块贴图 / item 贴图 | `textures/block` **84 png + 5 mcmeta**（mcmeta **2 → 5**）；`textures/item` **22 png**（29 −7）；`textures/gui` **0** 文件 |
 | Java 源码文件 | **151**（152 − 2 + 1：删 `farmland/FarmlandGuard` 与 `FarmlandLedger` 两个死类、新增 `blockentity/CoreBound.java`；本版唯一变化的数字） |
 | 验收（v0.2.4） | **25 条**（60 号 §8）：**通过 22** + **不通过 1**（#22 判据假设未提交态，等价读数 **19 / 19** 通过，记为「字面不通过 / 等价判据通过」）+ **未验证 2**（#20 面板取色、#25 双客户端音频轨：没有图形客户端、也没有第二台机器）。逐条记录在 `.work/v024-verify/acceptance.md`，签字在 `.work/v024-verify/signoff.md`；16 个任务（F-312~F-327）+ F-328 全部落地。上一版是 32 条技术 + 31 条边界 = 63 条 |
-| 发布件（v0.2.6，Releases 页的 Latest） | `farmstorm-0.2.6+mc1.21.1.jar` **1,127,673 B** / SHA256 `53BA746F2179C89C1E6285D966DBA16C82A4C9CCA324FF9EFF0ACACBF19B1524`（上一版 v0.2.5 是 1,127,516 B） |
-| 源码包 | `farmstorm-0.2.6+mc1.21.1-sources.jar` **1,073,475 B** / SHA256 `D01B0FC88BFB88616A0DB1A2E29C1E07450EDFCA0CD0B47C1AA18B5D465DF5AE`（上一版 v0.2.5 是 1,073,086 B） |
+| 发布件（v0.2.7，Releases 页的 Latest） | `farmstorm-0.2.7+mc1.21.1.jar` **1,128,686 B** / SHA256 `482817FF37A20FD6B7E1ADB0213867A751352A3C4B89840E29DFD6612E6A6AFE`（上一版 v0.2.6 是 1,127,673 B） |
+| 源码包 | `farmstorm-0.2.7+mc1.21.1-sources.jar` **1,074,835 B** / SHA256 `5E4CFF2A1243354C8B90223C20B2CD99786D9DD488B4C6EFC98CE2A565E68BF0`（上一版 v0.2.6 是 1,073,475 B） |
 | 上一版发布件（v0.2.3） | `farmstorm-0.2.2+mc1.21.1.jar` **1,141,176 B** / SHA256 `99309B4AB84B4267D004EA389F8E00390BB9D3329579A77F7151C89FB08389E3`；源码包 **1,067,719 B** / `0712EE1F538019A08B9B56F778908C76BE577257D86C8E65F0718232598AC94F` |
 
 ---
@@ -530,12 +551,13 @@ v0.2.4 的手边件是 `.work/v024-BRIEF.md`（未入库）与 `.work/v024-verif
 
 A Minecraft 1.21.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
-**v0.2.6 is the current release** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`); v0.2.5, v0.2.4, v0.2.3 and v0.2.2 are still on the Releases page. **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio files listed in the asset-provenance section keep their own terms.
+**v0.2.7 is the current release** (Minecraft 1.21.1 · NeoForge 21.1.213 · Java 21 · modid `farmstorm`); v0.2.6, v0.2.5, v0.2.4, v0.2.3 and v0.2.2 are still on the Releases page. **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio files listed in the asset-provenance section keep their own terms.
 
 **v0.2.2** shipped a Botanist villager profession whose job site is the Outpost Core itself (22 normal trades at level 1 + 1 epic trade at level 5), a plain crop (`plain_chives`), a `farmstorm:processing_block` block tag with a shared 24-binding cap, and two Outpost Core UI fixes (missing tooltips, 1 px inventory offset) plus a placement cap of 4. Registry 97 → **98** (plus **3** registered types *outside* that count), config stays **176** keys (two defaults change), language keys 338 → **340**. The v0.2.2 spec is **Chinese-only** (no English translation for this round).
 
-- **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases) — the **Latest** is `farmstorm-0.2.6+mc1.21.1.jar`; v0.2.5 / v0.2.4 / v0.2.3 / v0.2.2 are on the same page (never ship two versions at once). The `-sources.jar` is for IDEs.
-- **What's new in 0.2.6**: a client crash fix and nothing else — the red silhouette hook cast every entity renderer to `LivingEntityRenderer`, but the **Ender Dragon** uses `EnderDragonRenderer` (a plain `EntityRenderer`), so having a dragon nearby threw `ClassCastException`. The hook now skips any renderer that is not a `LivingEntityRenderer`; all other silhouettes are unchanged, and every baseline number plus the protocol string (`3`) stays put.
+- **Download**: [Releases](https://github.com/redstonepigawa/farmstorm/releases) — the **Latest** is `farmstorm-0.2.7+mc1.21.1.jar`; v0.2.6 / v0.2.5 / v0.2.4 / v0.2.3 / v0.2.2 are on the same page (never ship two versions at once). The `-sources.jar` is for IDEs.
+- **What's new in 0.2.7**: the per-player (32) and per-chunk (8) deployment caps are gone — only the 5-tick cooldown remains (trap totals are still bound by the FIFO slot index); the grayscale pass now owns its `PostChain` and processes it at `AFTER_LEVEL` instead of going through `GameRenderer#loadEffect`, which shader mods (Oculus / Iris) kept clearing within ~50 ms; and `molotov.triggerExplosionPower` defaults to **1** instead of 0 (block breaking stays `NEVER_BREAK`). Every baseline number and the protocol string (`3`) are unchanged.
+- **What's new in 0.2.6**:
 - **What's new in 0.2.5**:
 - **What's new in 0.2.4**: binding is unified behind the `CoreBound` interface and discovered via the `farmstorm:processing_block` block tag (one `KIND_BY_BLOCK` map, and the removal path now cleans up both blocks); villager trade XP is per level (2 / 5 / 10 / 15 / 30, so a master-level trade gives **30** XP = **15×** the old 2); the HUD panel background goes from alpha 128 to **77** (30.2%); and the three right-click handlers now return `PASS` unless the held item is an input, so vanilla's local place sound is no longer swallowed. The two dead `farmland` classes are gone (881 lines), so Java files drop 152 → **151** while the other ten baseline numbers stay put. Spec: `docs/zh/58`–`63`.
 - **v0.2.3** is released too (`farmstorm-0.2.3+mc1.21.1.jar`) and **Chinese-only**: `docs/zh/52`–`57`. It reworks the converter into a crop converter (anvil hardness, right-click insert, 30 s, output auto-delivered to the bound core, red link, working animation), removes all 7 improved-crop seed items, flips the cultivator to accept only vanilla/plain crops (the 11 "self-seeding" inputs now yield **4** instead of 2), makes `plain_chives` plantable, gives the man-melon bullet a 300-tick lifetime, and renames one advancement description. Registry 98 → **92**, config 176 → **175**, language keys 340 → **321**, Java files 154 → **152**, advancements 18 → **16**, converting recipes 26 → **21**. Two player-visible consequences: epic crops are cheap now (the nether-star gate is gone and one converter makes one item per 30 s), and old saves lose the `farmstorm:converter` block plus the 7 seed items.

@@ -186,7 +186,7 @@
   "farmstorm.configuration.melon_slice_bomb.maxDamage": "伤害上限",
   "farmstorm.configuration.molotov.effectRadius": "落点球半径（格）",
   "farmstorm.configuration.molotov.fireChance": "每个候选方块被点火的概率（%）",
-  "farmstorm.configuration.molotov.triggerExplosionPower": "落点触发爆炸的威力（0 = 只当触发器）",
+  "farmstorm.configuration.molotov.triggerExplosionPower": "落点触发爆炸的威力（0 = 只当触发器；默认 1）",
   "farmstorm.configuration.outpost_core.boundaryParticleIntervalTicks": "边界粒子刷新间隔（刻，40 刻 = 2 秒）",
   "farmstorm.configuration.outpost_core.cultivatorCapacity": "一个核心最多绑定的培养器数量",
   "farmstorm.configuration.outpost_core.maxPerPlayer": "每玩家可放置的据点核心数",

@@ -773,9 +773,9 @@ public final class FarmstormConfig {
         molotovFireChance = b.comment("D-58：每格放火的概率（%）；余下的百分比自动放岩浆块，不设第二个键（A-01）")
                 .translation(tr("molotov.fireChance"))
                 .defineInRange("fireChance", 85.0, 0.0, 100.0);
-        molotovTriggerExplosionPower = b.comment("D-58：落点触发爆炸的威力；0 = 只当落点触发器（A-10：任何威力都不破坏方块）")
+        molotovTriggerExplosionPower = b.comment("D-58：落点触发爆炸的威力；0 = 只当落点触发器（A-10：任何威力都不破坏方块）。v0.2.7 起默认 1，与 1.20.1 分支同步")
                 .translation(tr("molotov.triggerExplosionPower"))
-                .defineInRange("triggerExplosionPower", 0, 0, 100);
+                .defineInRange("triggerExplosionPower", 1, 0, 100);
         b.pop();
 
         b.push("wild_apple");

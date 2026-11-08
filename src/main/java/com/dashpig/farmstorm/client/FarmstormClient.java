@@ -108,6 +108,7 @@ public final class FarmstormClient {
         if (level == null) {
             ClientCoreList.clear();
             ClientCultivatorLinks.clear();
+            GrayscalePass.reset();   // 退出世界时释放自持的 PostChain，避免把 GL 资源带过存档
             lastDimension = null;
         } else {
             // F-240 / D-169 补充：换维度清空（35 号 §12 B-38）。客户端不跨维度缓存。
@@ -160,9 +161,12 @@ public final class FarmstormClient {
      */
     @SubscribeEvent
     public static void onRenderStage(RenderLevelStageEvent event) {
+        // V-56 / V-57：世界灰度（AFTER_LEVEL，自持 PostChain）——必须排在 GUI 之前，
+        // 这样剪影（RenderGuiEvent.Pre 重画）与 HUD 不会被一起灰掉。
+        GrayscalePass.onRenderStage(event);
         WildHunterOutline.onRenderStage(event);
         // F-240：连线线框（AFTER_PARTICLES）。挂在这里而不是新建订阅点，是因为
-        // RenderLevelStageEvent 每阶段都发一次，两个消费者各自在体内判 stage 即可。
+        // RenderLevelStageEvent 每阶段都发一次，三个消费者各自在体内判 stage 即可。
         CultivatorLinkRenderer.onRenderStage(event);
     }
 

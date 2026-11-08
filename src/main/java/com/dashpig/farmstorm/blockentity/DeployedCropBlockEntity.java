@@ -47,8 +47,6 @@ public class DeployedCropBlockEntity extends BlockEntity {
 
     /** 安全阀（HC-13 / TECH §4.11.6）：服务器保护底线，不得调整、不得挪进 config。 */
     public static final int DEPLOY_COOLDOWN_TICKS = 5;
-    public static final int MAX_DEPLOYED_PER_CHUNK = 8;
-    public static final int MAX_DEPLOYED_PER_PLAYER = 32;
     public static final int MAX_EFFECTS_PER_TICK = 64;
 
     private static final String TAG_PLACED_GAME_TIME = "placedGameTime";
@@ -200,10 +198,15 @@ public class DeployedCropBlockEntity extends BlockEntity {
     }
 
     /**
-     * 放置闸门（TECH §8.3 / F-25）：冷却 → 单玩家上限 → 单区块上限。
-     * 判定发生在 BlockItem 扣物品之前，因此被拒绝时物品不消耗、不产生掉落。
+     * 放置闸门：**只剩 5 刻冷却**（v0.2.7 起，与 1.20.1 分支 v0.2.8 同步）。
      *
-     * @param player 放置者；为 null（发射器 / 结构生成）时只校验单区块上限
+     * <p>原实现是「冷却 → 单玩家 32 → 单区块 8」三道闸；后两道已按作者要求撤除，
+     * 炮台与陷阱想摆多少摆多少。冷却保留，它挡的是「放 → 立刻拆 → 再放」的抖动，与数量无关。
+     * 陷阱的总量仍由 {@link TrapFifoIndex} 的 FIFO 名额兜底，与这里无关。
+     *
+     * <p>判定发生在 BlockItem 扣物品之前，因此被拒绝时物品不消耗、不产生掉落。
+     *
+     * @param player 放置者；为 null（发射器 / 结构生成）时直接放行
      */
     public static boolean canDeploy(Level level, BlockPos pos, @Nullable Player player) {
         if (!(level instanceof ServerLevel server)) {
@@ -211,28 +214,11 @@ public class DeployedCropBlockEntity extends BlockEntity {
         }
         if (player != null) {
             DeployCounter counter = ledgerOf(server).get(player.getUUID());
-            if (counter != null) {
-                if (server.getGameTime() - counter.lastActionTick() < DEPLOY_COOLDOWN_TICKS) {
-                    return false;                                         // 「放 → 立刻拆 → 再放」被冷却挡住
-                }
-                if (counter.count() >= MAX_DEPLOYED_PER_PLAYER) {
-                    return false;
-                }
+            if (counter != null && server.getGameTime() - counter.lastActionTick() < DEPLOY_COOLDOWN_TICKS) {
+                return false;                                             // 「放 → 立刻拆 → 再放」被冷却挡住
             }
         }
-        return countDeployedInChunk(server, pos) < MAX_DEPLOYED_PER_CHUNK;
-    }
-
-    /** 单区块上限按实际方块数计算，不另记账：区块卸载 / 存档重读后依然准确。 */
-    private static int countDeployedInChunk(ServerLevel level, BlockPos pos) {
-        LevelChunk chunk = level.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
-        int count = 0;
-        for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-            if (blockEntity instanceof DeployedCropBlockEntity) {
-                count++;
-            }
-        }
-        return count;
+        return true;
     }
 
     private static Map<UUID, DeployCounter> ledgerOf(ServerLevel level) {

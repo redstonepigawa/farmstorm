@@ -66,7 +66,7 @@ public class VibrationBeanProjectile extends ThrownCropEntity {
         }
         if (!DeployedCropBlockEntity.canDeploy(level, landing, shooter)) {
             Farmstorm.LOGGER.info(String.format(Locale.ROOT,
-                    "震动豆 落点 %s 被部署闸门拒绝（单区块 8 个 / 单玩家 32 个 / 5 刻冷却），不放置",
+                    "震动豆 落点 %s 被部署闸门拒绝（5 刻冷却），不放置",
                     landing.toShortString()));
             return;
         }

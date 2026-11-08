@@ -270,3 +270,43 @@ private static DamageSource build(Level level, ResourceKey<DamageType> key, @Nul
 | 2 | `mod_version` 0.2.6 → 0.2.7 | 版本 |
 
 产物：`farmstorm-0.2.7+mc1.20.1.jar` — 1,141,065 B — SHA256 `B64EAE95797807B6E3E220204EE36538953A579E1E347BB940A66F578FC140E2`
+
+---
+
+## 10. v0.2.8 汇总（本轮四项）
+
+| # | 改动 | 1.21.1 要不要跟进 |
+|---|---|---|
+| 1 | 莫洛托夫落点爆炸 `reach <= 0` 时跳过击退（NaN 卡死生物） | **不用**——主线 `FarmstormExplosion` 第 171 行本来就有 `if (reach <= 0.0)` 守卫，这是 1.20.1 移植时重写击退逻辑丢掉的 |
+| 2 | `sweep` 改为遍历全部维度 + `EntityJoinLevelEvent` 兜底 | **建议自查**：若主线 `WildHunterAura.sweep` 也只传主世界，下界/末地会永久 `NoAI`（AI 全停且不受重力） |
+| 3 | 灰度改为自持 `PostChain`（`AFTER_LEVEL` 直接 `process()`） | **建议自查**：主线的 `GrayscalePass` 仍走 `GameRenderer#loadEffect`，在装有光影模组（Oculus/Iris）的整合包里可能同样活不过一帧 |
+| 4 | `molotov.triggerExplosionPower` 默认 0 → 1 | 玩法数值，作者决定；方块破坏恒 `NEVER_BREAK`，与威力无关 |
+| 5 | 炮台类作物取消放置数量上限（原单玩家 32 / 单区块 8） | **需要同步**，否则两版玩法不一致；冷却 5 刻保留 |
+
+### 第 1 项的证据（供对照）
+
+```
+double distance = Math.sqrt(entity.distanceToSqr(center)) / (double) reach;
+if (distance > 1.0) continue;          // NaN > 1.0 为 false → 拦不住
+```
+
+`reach = radius * 2`，而莫洛托夫原本传 `power = 0`：
+
+- 直接命中 → `0/0 = NaN` → `impact/dampened/knockback` 全部 NaN → `setDeltaMovement` 写入 NaN → 实体速度永久损坏
+- 落在脚边 → `正数/0 = Infinity` → 被 `> 1.0` 拦下 → 无事发生（所以「只有直接命中才出问题」）
+
+### 第 3 项的证据（实机日志，某整合包）
+
+```
+16:19:41.229  灰度 PostChain 加载 shaders/post/grayscale.json
+16:19:41.280  灰度 PostChain 被外部关闭
+…  整场 714 条，每 ~100ms 重装一次，画面从未灰过一帧
+```
+
+### 第 2 项的症状判别（给排查用）
+
+`NoAI` 的准确语义（1.20.1 源码）：`Mob.isEffectiveAi()` = `super && !isNoAi()`，为假时 `LivingEntity.aiStep` 跳过 `serverAiStep()`（感知 / 目标选择 / 寻路 / 移动控制全停），且 `travel()` 不施加重力。
+但**着火、受伤、被击退、状态效果照常**。
+判别命令：`/data get entity @e[type=!player,limit=1,sort=nearest] NoAI` —— 返回 `1b` 才是 AI 被剥夺；`0b` / 无此标签说明是别的机制（例如被方块卡住）。
+
+产物：`farmstorm-0.2.8+mc1.20.1.jar` — 1,143,539 B — SHA256 `976EABE5E849B6C8E83A55C885438026061D7B21AE436EF4E082D9A7407E6F80`

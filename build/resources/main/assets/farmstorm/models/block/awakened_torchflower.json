@@ -1,4 +1,0 @@
-{
-  "parent": "minecraft:block/torchflower",
-  "render_type": "minecraft:cutout"
-}

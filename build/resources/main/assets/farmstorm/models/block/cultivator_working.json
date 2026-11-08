@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/cube_bottom_top",
-  "textures": {
-    "bottom": "farmstorm:block/cultivator_a_bottom",
-    "side": "farmstorm:block/cultivator_a_side",
-    "top": "farmstorm:block/cultivator_a_top"
-  }
-}

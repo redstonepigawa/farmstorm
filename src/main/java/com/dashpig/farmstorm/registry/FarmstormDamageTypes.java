@@ -1,6 +1,7 @@
 package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.damagesource.DamageSource;
@@ -29,12 +30,12 @@ public final class FarmstormDamageTypes {
 
     /** 导弹伤害：击杀归属炮台所有者的部署者。 */
     public static DamageSource voidBolt(Level level, @Nullable Entity owner) {
-        return level.damageSources().source(VOID_BOLT, owner);
+        return build(level, VOID_BOLT, owner);
     }
 
     /** 作物爆炸伤害：击杀归属投掷者 / 部署者。 */
     public static DamageSource cropBlast(Level level, @Nullable Entity owner) {
-        return level.damageSources().source(CROP_BLAST, owner);
+        return build(level, CROP_BLAST, owner);
     }
 
     /**
@@ -47,7 +48,24 @@ public final class FarmstormDamageTypes {
         if (level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(ZANGIEF_SLAM).isEmpty()) {
             return null;
         }
-        return level.damageSources().source(ZANGIEF_SLAM, owner);
+        return build(level, ZANGIEF_SLAM, owner);
+    }
+
+    /**
+     * 构造 DamageSource。
+     *
+     * <p><b>不要用 {@code level.damageSources().source(key, entity)}</b>：那个重载在**原版**里不是 public，
+     * 只有 NeoForge 的 access transformer 会把它放宽成 public。用它在原版 Forge 上会抛
+     * {@code IllegalAccessError: ... tried to access private method DamageSources.m_269298_}（真机实测，
+     * 触发点是胡萝卜陷阱引爆）。这里改用 {@link DamageSource#DamageSource(Holder, Entity)} —— 该构造器
+     * 在 vanilla 里本身就是 public，两个加载器都通得过，语义与原重载完全一致
+     * （{@code DamageSources.source(key, entity)} 的实现就是同一行 {@code new DamageSource(holder, entity)}）。
+     */
+    private static DamageSource build(Level level, ResourceKey<DamageType> key, @Nullable Entity owner) {
+        Holder<DamageType> type = level.registryAccess()
+                .registryOrThrow(Registries.DAMAGE_TYPE)
+                .getHolderOrThrow(key);
+        return new DamageSource(type, owner);
     }
 
     private static ResourceKey<DamageType> key(String path) {

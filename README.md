@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · modid `farmstorm` · **v0.2.6（1.20.1 移植版）**
+Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · modid `farmstorm` · **v0.2.7（1.20.1 移植版）**
 
 [仓库（1.20.1 分支）](https://github.com/redstonepigawa/farmstorm/tree/1.20.1)
 
@@ -36,10 +36,10 @@ Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · 
 ### 安装
 
 1. 用启动器建一个 1.20.1 + Forge 47.x（或 NeoForge 47.x）的实例。
-2. 打开实例的 `mods` 文件夹（没有就新建），把 **`farmstorm-0.2.6+mc1.20.1.jar`** 丢进去。
+2. 打开实例的 `mods` 文件夹（没有就新建），把 **`farmstorm-0.2.7+mc1.20.1.jar`** 丢进去。
 3. 启动。创造模式物品栏最后会多一个「农场风云」标签页。
 
-**请按 MC 版本各放一份**：本模组在 1.20.1 与 1.21.1 上共用同一个 modid `farmstorm`，产物名只差 `+mc1.20.1` / `+mc1.21.1`（版本号当前是 1.20.1 = **0.2.6**、1.21.1 = **0.2.4**，两边独立演进）。同一实例里放两份只会有一份生效。
+**请按 MC 版本各放一份**：本模组在 1.20.1 与 1.21.1 上共用同一个 modid `farmstorm`，产物名只差 `+mc1.20.1` / `+mc1.21.1`（版本号当前是 1.20.1 = **0.2.7**、1.21.1 = **0.2.4**，两边独立演进）。同一实例里放两份只会有一份生效。
 
 源码直接看仓库的 `1.20.1` 分支即可（`src/main/java`），本版暂不产出 `-sources.jar`。
 
@@ -148,8 +148,8 @@ Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · 
 
 A Minecraft 1.20.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
-**v0.2.6 port for Minecraft 1.20.1** (Java 17 · modid `farmstorm`). **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio clips listed in the asset-provenance section keep their own terms.
+**v0.2.7 port for Minecraft 1.20.1** (Java 17 · modid `farmstorm`). **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio clips listed in the asset-provenance section keep their own terms.
 
-- **Install**: build a 1.20.1 instance on **either Forge 47.x or NeoForge 47.x** (one jar works on both), drop `farmstorm-0.2.6+mc1.20.1.jar` into `mods/`. The 1.20.1 and 1.21.1 builds share the same modid `farmstorm` (current versions: 1.20.1 = **0.2.5**, 1.21.1 = **0.2.4**, evolving independently), so **keep exactly one per instance** — pick the one matching your MC version.
+- **Install**: build a 1.20.1 instance on **either Forge 47.x or NeoForge 47.x** (one jar works on both), drop `farmstorm-0.2.7+mc1.20.1.jar` into `mods/`. The 1.20.1 and 1.21.1 builds share the same modid `farmstorm` (current versions: 1.20.1 = **0.2.5**, 1.21.1 = **0.2.4**, evolving independently), so **keep exactly one per instance** — pick the one matching your MC version.
 - **Compatibility**: network protocol string is `1` (the 1.21.1 build uses `3`); mismatched client/server are rejected cleanly. **New worlds only** — no save migration from 1.21.1.
 - **Content**: 22 crops (12 thrown / 7 deployed / 3 edible; tiers 11 / 7 / 4), 3 machines (crop converter / cultivator / outpost core), 21 converting recipes, 16 advancements, 3 damage types, 4 mob effects.

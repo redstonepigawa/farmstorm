@@ -204,3 +204,69 @@ if (!(minecraft.getEntityRenderDispatcher().getRenderer(entity) instanceof Livin
 | 2 | `mod_version` 0.2.5 → 0.2.6 | 版本 |
 
 产物：`farmstorm-0.2.6+mc1.20.1.jar` — 1,140,861 B — SHA256 `B395C8524A74F0CA59C4AB0E1EAA6BA6237DDA4D6A6E55D9ECBF0401DC6A7FE6`
+
+---
+
+## 8. v0.2.7：伤害来源的访问权限崩溃（**仅 1.20.1 双加载器场景**）
+
+### 现象（用户反馈，胡萝卜陷阱引爆时崩溃）
+
+```
+Description: Ticking block entity
+java.lang.IllegalAccessError: class com.dashpig.farmstorm.registry.FarmstormDamageTypes
+  tried to access private method
+  'DamageSource DamageSources.m_269298_(ResourceKey, Entity)'
+    at com.dashpig.farmstorm.registry.FarmstormDamageTypes.cropBlast(FarmstormDamageTypes.java:37)
+    at com.dashpig.farmstorm.behavior.impl.BlastCarrotTrap.trigger(BlastCarrotTrap.java:84)
+```
+
+### 根因：访问转换器（AT）差异
+
+代码调的是 `level.damageSources().source(KEY, owner)`。这个**两参重载在原版里不是 public**，靠 access transformer 放宽。
+
+我把两个加载器的 `META-INF/accesstransformer.cfg` 做了逐行差分，**只有 7 条差异，全部在 `world.damagesource`**：
+
+| 成员 | NeoForge 47.1.106 | Forge 47.4.28 |
+|---|---|---|
+| `DamageSources.m_269079_(ResourceKey)` | 放宽为 public | **没有** |
+| `DamageSources.m_269298_(ResourceKey, Entity)` | 放宽为 public | **没有** |
+| `DamageSources.m_268998_(ResourceKey, Entity, Entity)` | 放宽为 public | **没有** |
+| `DamageSources.f_268645_` | 放宽为 public | **没有** |
+| `CombatTracker.f_268553_ / m_19298_ / m_289215_` | 放宽为 public | **没有** |
+
+所以这段代码在 NeoForge 上编译通过、运行正常，在 Forge 上一跑就 `IllegalAccessError`。
+
+### 修法（v0.2.7）
+
+绕开 AT，直接用在 **vanilla 里本就是 public** 的 `DamageSource` 构造器（语义完全相同——原重载的实现就是这一行）：
+
+```java
+private static DamageSource build(Level level, ResourceKey<DamageType> key, @Nullable Entity owner) {
+    Holder<DamageType> type = level.registryAccess()
+            .registryOrThrow(Registries.DAMAGE_TYPE)
+            .getHolderOrThrow(key);
+    return new DamageSource(type, owner);
+}
+```
+
+三个伤害类型（`void_bolt` / `crop_blast` / `zangief_slam`）统一走这个 `build()`。
+
+### 同类风险已被扫描干净
+
+7 条 AT 差异里有 3 条属于 `CombatTracker`，项目里 **0 处引用**；剩余 `player.damageSources().playerAttack(player)` 不在差异表内（两边都公开）。**全项目再无依赖 NeoForge 放宽的调用。**
+
+### 1.21.1 侧：不需要改
+
+主线 `FarmstormDamageTypes` 第 32 / 37 / 50 行同样是 `damageSources().source(KEY, owner)`，但 1.21.1 只有 NeoForge 一个加载器，AT 由 NeoForge 提供 → 正常工作。
+这条**只是双加载器场景**（Forge 47 + NeoForge 47 共用一个 jar）才会踩到。
+
+---
+
+## 9. v0.2.7 变更清单
+
+| # | 改动 | 类型 |
+|---|---|---|
+| 1 | `FarmstormDamageTypes` 改用 `new DamageSource(Holder, Entity)` | 崩溃修复（**1.20.1 双加载器独有**） |
+| 2 | `mod_version` 0.2.6 → 0.2.7 | 版本 |
+
+产物：`farmstorm-0.2.7+mc1.20.1.jar` — 1,141,065 B — SHA256 `B64EAE95797807B6E3E220204EE36538953A579E1E347BB940A66F578FC140E2`

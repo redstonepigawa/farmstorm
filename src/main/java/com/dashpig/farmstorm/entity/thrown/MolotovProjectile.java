@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -119,12 +120,21 @@ public class MolotovProjectile extends ThrownCropEntity {
      *
      * <p>候选先整批裁完再写，不边裁边写：写入会把空气位变成实心方块（岩浆块），
      * 边裁边写会让同一发里的后几格读到被自己改过的世界，凭空多出一圈「叠上去」的候选。
+     *
+     * <p><b>生物身边的格子只放火、不放岩浆块</b>（{@link #blockedByEntity}）。岩浆块是**实心**方块，写进生物
+     * 所占的格子、或紧贴它身体的那几格，等于把它**卡死在方块里**：碰撞解算拒绝一切位移，但它自己的 AI 照常跑
+     * —— 目标选择、转视角、攻击都在动，就是位置不变，空中命中时还看着像悬空（真机实测就是这个症状）。
+     * 火没有碰撞箱，烧得到它但卡不住它，所以这类格子一律降级成火。
      */
     private void scatter(ServerLevel level, BlockPos center) {
         double radius = FarmstormConfig.molotovEffectRadius.get();
         double radiusSqr = radius * radius;
         int reach = (int) Math.ceil(radius);
+        // 球外再留 1 格余量：只取一次实体列表，逐候选做 AABB 相交判断，避免每格都查一遍世界。
+        List<Entity> occupants = level.getEntities((Entity) null,
+                new AABB(center).inflate(radius + 1.0), Entity::isAlive);
         List<BlockPos> candidates = new ArrayList<>();
+        int skippedOccupied = 0;
         for (int dx = -reach; dx <= reach; dx++) {
             for (int dy = -reach; dy <= reach; dy++) {
                 for (int dz = -reach; dz <= reach; dz++) {
@@ -146,8 +156,13 @@ public class MolotovProjectile extends ThrownCropEntity {
         RandomSource random = level.getRandom();
         int fire = 0;
         int magma = 0;
+        int downgraded = 0;
         for (BlockPos cell : candidates) {
             boolean isFire = random.nextFloat() * 100.0F < fireChance;
+            if (!isFire && blockedByEntity(occupants, cell.above())) {
+                isFire = true;              // 实心块会卡住生物 → 降级成火
+                downgraded++;
+            }
             BlockState state = isFire ? Blocks.FIRE.defaultBlockState() : Blocks.MAGMA_BLOCK.defaultBlockState();
             level.setBlock(cell.above(), state, WRITE_FLAGS);
             if (isFire) {
@@ -156,7 +171,27 @@ public class MolotovProjectile extends ThrownCropEntity {
                 magma++;
             }
         }
-        Farmstorm.LOGGER.info(String.format(Locale.ROOT, "莫洛托夫 候选 %d 火 %d 岩浆 %d",
-                candidates.size(), fire, magma));
+        Farmstorm.LOGGER.info(String.format(Locale.ROOT,
+                "莫洛托夫 候选 %d 火 %d 岩浆 %d 因生物降级 %d 场内实体 %d",
+                candidates.size(), fire, magma, downgraded, occupants.size()));
+    }
+
+    /**
+     * 该格是否贴着某个存活生物（会把实心方块写进它身体里、或紧贴它围住它）。
+     *
+     * <p>碰撞箱按 0.5 格横向、0.25 格纵向外扩再判相交：严格相交只能挡住「整格塞进身体」，
+     * 挡不住「紧贴身体围一圈」，而后者同样会让生物一步都走不了。
+     */
+    private static boolean blockedByEntity(List<Entity> entities, BlockPos pos) {
+        if (entities.isEmpty()) {
+            return false;
+        }
+        AABB box = new AABB(pos);
+        for (Entity entity : entities) {
+            if (entity.getBoundingBox().inflate(0.5D, 0.25D, 0.5D).intersects(box)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

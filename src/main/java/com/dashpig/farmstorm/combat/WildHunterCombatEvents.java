@@ -53,7 +53,16 @@ public final class WildHunterCombatEvents {
         if (event.phase != TickEvent.Phase.END) {
             return;
         }
-        WildHunterAura.sweep(event.getServer().overworld());
+        // 全维度扫描：只传主世界会让下界 / 末地被打中的生物永远停在 NoAI（不能移动 + 悬空）。
+        WildHunterAura.sweep(event.getServer());
+    }
+
+    /** 实体进入世界时补一次 AI 恢复（区块卸载导致的漏网，见 {@link WildHunterAura#restoreIfDue}）。 */
+    @SubscribeEvent
+    public static void onEntityJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof net.minecraft.world.entity.Mob mob) {
+            WildHunterAura.restoreIfDue(mob);
+        }
     }
 
     /** F-81 / D-74：killer 必须是持有效果的玩家本人；不设计数器。 */

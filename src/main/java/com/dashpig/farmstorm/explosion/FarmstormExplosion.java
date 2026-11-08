@@ -1,5 +1,6 @@
 package com.dashpig.farmstorm.explosion;
 
+import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.util.FarmstormAdvancements;
 import com.dashpig.farmstorm.util.Hostility;
@@ -210,6 +211,14 @@ public class FarmstormExplosion extends Explosion {
         List<Entity> entities = this.serverLevel.getEntities(this.getDirectSourceEntity(),
                 new AABB(minX, minY, minZ, maxX, maxY, maxZ));
         ForgeEventFactory.onExplosionDetonate(this.serverLevel, this, entities, (double) reach);
+        // **半径为 0 时直接不进击退循环**：莫洛托夫的 triggerExplosionPower 默认就是 0（这个爆炸只当落点触发器），
+        // 此时下面 distance = sqrt(dist) / reach 会退化成「0/0 = NaN」（中心正好落在生物身上）或「正数/0 = 无穷」。
+        // NaN 不被 distance > 1.0 拦住，会一路传到 impact/dampened/knockback，最后
+        // setDeltaMovement(原值 + NaN) 把速度写成 NaN —— 实体的碰撞与位置从此再也解算不出来：
+        // AI 照常跑（会转视角、会攻击），但一步都动不了，空中命中时还看着像悬空（真机实测）。
+        if (reach <= 0.0F) {
+            return;
+        }
         for (Entity entity : entities) {
             if (entity.ignoreExplosion()) {
                 continue;
@@ -238,6 +247,11 @@ public class FarmstormExplosion extends Explosion {
             dy *= dampened;
             dz *= dampened;
             Vec3 knockback = new Vec3(dx, dy, dz);
+            // 兜底：宁可这次不击退，也绝不把 NaN 写进实体速度（写进去就是永久卡死，无法自愈）。
+            if (!isFinite(knockback) || !isFinite(entity.getDeltaMovement())) {
+                Farmstorm.LOGGER.warn("爆炸击退计算出非有限值，已跳过 实体={} 击退={}", entity.getUUID(), knockback);
+                continue;
+            }
             entity.setDeltaMovement(entity.getDeltaMovement().add(knockback));
             if (entity instanceof Player player) {
                 if (!player.isSpectator() && (!player.isCreative() || !player.getAbilities().flying)) {
@@ -309,6 +323,11 @@ public class FarmstormExplosion extends Explosion {
      * 的自我排除（与原版 {@code Explosion#explode} 里 {@code Level#getEntities(source, ...)} 排除源实体的做法一致），
      * 按作者要求已删除。
      */
+    /** 击退向量三分量是否都是有限数（防 NaN / Infinity 污染实体速度）。 */
+    private static boolean isFinite(Vec3 vec) {
+        return Double.isFinite(vec.x) && Double.isFinite(vec.y) && Double.isFinite(vec.z);
+    }
+
     private void hurtCapped() {
         if (this.damageCap <= 0.0F) {
             return;

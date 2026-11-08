@@ -13,6 +13,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
@@ -102,11 +103,18 @@ public final class WildHunterAura {
         AI_RESTORE_AT.put(mob.getUUID(), now + AI_LOST_TICKS);
     }
 
-    /** 服务端每刻扫描到期项（不挂在某个玩家身上，掉线/换维度也不会漏恢复）。 */
-    public static void sweep(ServerLevel level) {
+    /**
+     * 服务端每刻扫描到期项（不挂在某个玩家身上，掉线/换维度也不会漏恢复）。
+     *
+     * <p><b>必须遍历全部维度</b>：被剥夺 AI 的生物可能在任何一个 {@link ServerLevel} 里，
+     * 而 {@code level.getEntity(uuid)} 只查**传入那一维**的已加载实体。早期实现只传了主世界，
+     * 结果在下界 / 末地被打中的生物永远等不到 {@code setNoAi(false)} —— 而 {@code Mob.serverAiStep}
+     * 在 {@code isNoAi()} 时直接返回，既不跑目标也不施加重力，表现就是「不能移动、悬空」（真机实测）。
+     */
+    public static void sweep(MinecraftServer server) {
         // #2：掉线的持有者 / 收件人都不该留在计时表里——收件人掉线后重连要能**立刻**再收到（而不是等满 900 刻）
         if (!LOOP_LAST_SENT.isEmpty()) {
-            var playerList = level.getServer().getPlayerList();
+            var playerList = server.getPlayerList();
             LOOP_LAST_SENT.keySet().removeIf(pair -> {
                 ServerPlayer holder = playerList.getPlayer(pair.holder());
                 ServerPlayer listener = playerList.getPlayer(pair.listener());
@@ -117,17 +125,37 @@ public final class WildHunterAura {
         if (AI_RESTORE_AT.isEmpty()) {
             return;
         }
-        long now = level.getGameTime();
+        long now = server.overworld().getGameTime();
         AI_RESTORE_AT.entrySet().removeIf(entry -> {
             if (entry.getValue() > now) {
                 return false;
             }
-            net.minecraft.world.entity.Entity entity = level.getEntity(entry.getKey());
-            if (entity instanceof Mob mob) {
-                mob.setNoAi(false);
+            for (ServerLevel level : server.getAllLevels()) {
+                if (level.getEntity(entry.getKey()) instanceof Mob mob) {
+                    mob.setNoAi(false);
+                    return true;
+                }
             }
+            // 实体不在任何已加载区块里：丢弃记录（与旧行为一致）。极窄窗口（AI_LOST_TICKS=2）内的
+            // 卸载会让它保持 NoAI，由 EntityJoinLevel 的 {@link #restoreIfDue} 兜底。
             return true;
         });
+    }
+
+    /**
+     * 实体刚进入世界时补一次恢复：覆盖「挂起期间区块被卸载、记录已过期」的漏网情况。
+     *
+     * @param mob 刚加载的生物
+     */
+    public static void restoreIfDue(Mob mob) {
+        if (!(mob.level() instanceof ServerLevel level)) {
+            return;
+        }
+        Long due = AI_RESTORE_AT.get(mob.getUUID());
+        if (due != null && due <= level.getGameTime()) {
+            mob.setNoAi(false);
+            AI_RESTORE_AT.remove(mob.getUUID());
+        }
     }
 
     /**

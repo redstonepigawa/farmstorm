@@ -139,6 +139,8 @@ public final class FarmstormClient {
         // F-240：换服 / 断线清连线表与维度记录（D-169 补充：不缓存上一次会话）。
         ClientCultivatorLinks.clear();
         lastDimension = null;
+        // F-82：灰度链是自持资源，断线时释放，避免把上一个世界的 GL 资源带过去。
+        GrayscalePass.reset();
     }
 
     /**
@@ -152,6 +154,8 @@ public final class FarmstormClient {
         // F-240：连线线框（AFTER_PARTICLES）。挂在这里而不是新建订阅点，是因为
         // RenderLevelStageEvent 每阶段都发一次，两个消费者各自在体内判 stage 即可。
         CultivatorLinkRenderer.onRenderStage(event);
+        // F-82：灰度改为自持 PostChain，在 AFTER_LEVEL 直接 process（不再依赖 GameRenderer 的后处理状态）。
+        GrayscalePass.onRenderStage(event);
     }
 
     @SubscribeEvent

@@ -13,6 +13,7 @@ import com.dashpig.farmstorm.registry.FarmstormCreativeTabs;
 import com.dashpig.farmstorm.registry.FarmstormDamageTypes;
 import com.dashpig.farmstorm.registry.FarmstormEntityTypes;
 import com.dashpig.farmstorm.registry.FarmstormItems;
+import com.dashpig.farmstorm.registry.FarmstormLootModifiers;
 import com.dashpig.farmstorm.registry.FarmstormMenus;
 import com.dashpig.farmstorm.registry.FarmstormMobEffects;
 import com.dashpig.farmstorm.registry.FarmstormPoiTypes;
@@ -77,6 +78,8 @@ public final class Farmstorm {
         // 1.20.1 没有 AttachmentType 注册表，改落实体持久 NBT（见 FarmstormAttachments），无需注册到总线。
         FarmstormPoiTypes.REGISTER.register(modBus);
         FarmstormVillagerProfessions.REGISTER.register(modBus);
+        // F-038 / D-047：全局战利品修饰器序列化器（1.20.1 没有方块掉落事件，干草块拦截改走 GLM）。
+        FarmstormLootModifiers.REGISTER.register(modBus);
 
         net.minecraftforge.fml.ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FarmstormConfig.SPEC);
         // F-201：CLIENT 3 键单独一份 config/farmstorm-client.toml。**不进** FarmstormConfig——

@@ -4,6 +4,7 @@ import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.entity.ThrownCropEntity;
 import com.dashpig.farmstorm.explosion.BlastRule;
 import com.dashpig.farmstorm.util.CropProfile;
+import com.dashpig.farmstorm.util.PuffedHayData;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -116,7 +117,12 @@ public class PuffedWheatProjectile extends ThrownCropEntity {
                     if (onlyAirAndFluid && !isAirOrFluid(current)) {
                         continue;
                     }
-                    level.setBlock(pos, hay, Block.UPDATE_ALL);
+                    boolean placed = level.setBlock(pos, hay, Block.UPDATE_ALL);
+                    // D-046：只登记真的写成功、且写的确实是原版干草块的那一格。压缩膨胀麦覆写 fillBlock()
+                    // 复用同一个 fillHay，漏掉 is(Blocks.HAY_BLOCK) 就会把 farmstorm:compressed_hay_block 也记进来（RT-017）。
+                    if (placed && hay.is(Blocks.HAY_BLOCK)) {
+                        PuffedHayData.get(level.getServer()).add(pos);
+                    }
                 }
             }
         }

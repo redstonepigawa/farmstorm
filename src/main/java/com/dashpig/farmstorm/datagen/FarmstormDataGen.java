@@ -54,5 +54,8 @@ public final class FarmstormDataGen {
         // 两份语言文件由同一张条目表按列写出，键集天然一致（TECH §7：216 口径见 ModLangProvider 类注释）
         generator.addProvider(event.includeClient(), new ModLangProvider(output, true));
         generator.addProvider(event.includeClient(), new ModLangProvider(output, false));
+
+        // F-039 / D-049：GLM 一次落两份数据文件（修饰器本体 + forge 命名空间的清单），不手写。
+        generator.addProvider(event.includeServer(), new ModGlobalLootModifierProvider(output));
     }
 }

@@ -28,6 +28,15 @@ runs {
         server()
         programArgument '--nogui'
     }
+    // Datagen run. Without --mod/--all NeoGradle's default data run starts the
+    // data generator with an empty mod list ("Initializing Data Gatherer for
+    // mods []"), which schedules zero providers and writes nothing.
+    data {
+        programArguments.addAll '--all',
+                '--mod', mod_id,
+                '--output', file('src/generated/resources').absolutePath,
+                '--existing', file('src/main/resources').absolutePath
+    }
 }
 
 dependencies {

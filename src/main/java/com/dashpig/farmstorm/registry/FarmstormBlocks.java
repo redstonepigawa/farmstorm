@@ -1,6 +1,7 @@
 package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.block.ControlTerminalBlock;
 import com.dashpig.farmstorm.block.CropConverterBlock;
 import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
@@ -104,6 +105,16 @@ public final class FarmstormBlocks {
     // ---- 1 个农作物培养器（F-224 / D-160）：属性逐项照原版铁砧七行，培养器无菜单 ----
     public static final RegistryObject<CultivatorBlock> CULTIVATOR = registerBlock("cultivator",
             CultivatorBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(5.0F, 1200.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.ANVIL)
+                    .pushReaction(PushReaction.BLOCK));
+
+    // ---- 1 个控制终端（F-024 / D-020 / D-021）：五个属性逐项照上面培养器那一组（铁砧七项），水平朝向由方块类声明 ----
+    public static final RegistryObject<ControlTerminalBlock> CONTROL_TERMINAL = registerBlock("control_terminal",
+            ControlTerminalBlock::new,
             BlockBehaviour.Properties.of()
                     .mapColor(MapColor.METAL)
                     .strength(5.0F, 1200.0F)

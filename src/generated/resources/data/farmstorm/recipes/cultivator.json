@@ -18,7 +18,7 @@
     "IGI"
   ],
   "result": {
-    "count": 1,
     "item": "farmstorm:cultivator"
-  }
+  },
+  "show_notification": true
 }

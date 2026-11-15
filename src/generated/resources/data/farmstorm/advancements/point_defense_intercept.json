@@ -10,10 +10,12 @@
     "description": {
       "translate": "advancements.farmstorm.point_defense_intercept.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:point_defense_fungus"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.point_defense_intercept.title"
     }
@@ -22,5 +24,6 @@
     [
       "point_defense_intercept"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

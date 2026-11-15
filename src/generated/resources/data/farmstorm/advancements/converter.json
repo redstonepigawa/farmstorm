@@ -18,10 +18,12 @@
     "description": {
       "translate": "advancements.farmstorm.converter.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:crop_converter"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.converter.title"
     }
@@ -30,5 +32,6 @@
     [
       "placed_converter"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

@@ -1,0 +1,23 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "farmstorm:block/control_terminal",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "farmstorm:block/control_terminal",
+      "uvlock": true
+    },
+    "facing=south": {
+      "model": "farmstorm:block/control_terminal",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=west": {
+      "model": "farmstorm:block/control_terminal",
+      "uvlock": true,
+      "y": 270
+    }
+  }
+}

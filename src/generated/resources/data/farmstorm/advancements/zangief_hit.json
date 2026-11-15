@@ -10,10 +10,12 @@
     "description": {
       "translate": "advancements.farmstorm.zangief_hit.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:zangief_cane"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.zangief_hit.title"
     }
@@ -22,5 +24,6 @@
     [
       "zangief_hit"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

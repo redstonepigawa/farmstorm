@@ -10,10 +10,12 @@
     "description": {
       "translate": "advancements.farmstorm.demolition.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:bamboo_firecracker"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.demolition.title"
     }
@@ -22,5 +24,6 @@
     [
       "demolition"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

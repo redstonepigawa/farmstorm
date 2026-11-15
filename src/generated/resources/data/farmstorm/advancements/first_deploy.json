@@ -62,10 +62,12 @@
     "description": {
       "translate": "advancements.farmstorm.first_deploy.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:blast_carrot"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.first_deploy.title"
     }
@@ -78,5 +80,6 @@
       "placed_awakened_pitcher_plant",
       "placed_fang_trap_cactus"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

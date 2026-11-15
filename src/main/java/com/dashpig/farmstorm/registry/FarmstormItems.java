@@ -108,6 +108,10 @@ public final class FarmstormItems {
     public static final RegistryObject<BlockItem> CULTIVATOR = registerItem("cultivator",
             properties -> new BlockItem(FarmstormBlocks.CULTIVATOR.get(), properties), otherProperties());
 
+    /** v0.3.0 的第 5 个方块物品（F-024 / D-020）：创造栏与 /give 是仅有的两个入口（配方归 F-040）。 */
+    public static final RegistryObject<BlockItem> CONTROL_TERMINAL = registerItem("control_terminal",
+            properties -> new BlockItem(FarmstormBlocks.CONTROL_TERMINAL.get(), properties), otherProperties());
+
     /**
      * v0.2.2 新增的 1 个平凡农作物（F-268 / D-193）：平凡韭菜，可食、饱食 2。
      * <p>它没有 {@link CropProfile} ⇒ 走不了 {@code cropItem}；食物属性也**不能**复用 {@code foodProperties}
@@ -145,6 +149,8 @@ public final class FarmstormItems {
         items.add(OUTPOST_CORE);
         // A-64：本版没有培养器配方，不进口袋就等于「谁都拿不到」。
         items.add(CULTIVATOR);
+        // F-024：控制终端同属「手写」这一档（不是作物，不在 CROP_ITEMS 里），漏了创造栏就没有它。
+        items.add(CONTROL_TERMINAL);
         // D-193：平凡韭菜不是作物（不在 CROP_ITEMS 里），必须手写进清单，否则创造栏看不到。
         items.add(PLAIN_CHIVES);
         // F-298：平凡韭菜种子同属「手写」这一档（不占 CROP_ITEMS），漏了它创造栏里就没有播种物。

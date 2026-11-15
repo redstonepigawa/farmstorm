@@ -10,10 +10,12 @@
     "description": {
       "translate": "advancements.farmstorm.first_conversion.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:power_beet"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.first_conversion.title"
     }
@@ -22,5 +24,6 @@
     [
       "first_conversion"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

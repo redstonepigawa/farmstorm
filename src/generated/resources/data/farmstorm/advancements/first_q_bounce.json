@@ -10,10 +10,12 @@
     "description": {
       "translate": "advancements.farmstorm.first_q_bounce.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:friend_chives"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.first_q_bounce.title"
     }
@@ -22,5 +24,6 @@
     [
       "first_q_bounce"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

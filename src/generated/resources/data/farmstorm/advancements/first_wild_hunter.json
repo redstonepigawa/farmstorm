@@ -10,10 +10,12 @@
     "description": {
       "translate": "advancements.farmstorm.first_wild_hunter.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:wild_apple"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.first_wild_hunter.title"
     }
@@ -22,5 +24,6 @@
     [
       "first_wild_hunter"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

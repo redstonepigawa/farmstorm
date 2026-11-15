@@ -10,10 +10,12 @@
     "description": {
       "translate": "advancements.farmstorm.vibration_bean_trigger.description"
     },
+    "frame": "task",
+    "hidden": false,
     "icon": {
-      "count": 1,
       "item": "farmstorm:vibration_bean"
     },
+    "show_toast": true,
     "title": {
       "translate": "advancements.farmstorm.vibration_bean_trigger.title"
     }
@@ -22,5 +24,6 @@
     [
       "vibration_bean_trigger"
     ]
-  ]
+  ],
+  "sends_telemetry_event": true
 }

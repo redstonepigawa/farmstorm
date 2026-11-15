@@ -1,6 +1,7 @@
 package com.dashpig.farmstorm.datagen;
 
 import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.block.ControlTerminalBlock;
 import com.dashpig.farmstorm.block.CropConverterBlock;
 import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
@@ -83,6 +84,10 @@ public final class ModBlockStateProvider extends BlockStateProvider {
                 outpostCoreStates(block);
             } else if (block instanceof CultivatorBlock) {
                 cultivatorStates(block);
+            } else if (block instanceof ControlTerminalBlock) {
+                // D-022：四个水平朝向各一个 variant；漏了这一支会落进下面的 simpleBlock 兜底，
+                // 4 个朝向里 3 个找不到模型（陷阱 38）。
+                controlTerminalStates(block);
             } else if ("compressed_hay_block".equals(registryPath(block))) {
                 compressedHayStates(block);
             } else {
@@ -255,6 +260,26 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         getVariantBuilder(block)
                 .partialState().with(CultivatorBlock.WORKING, false).modelForState().modelFile(idle).addModel()
                 .partialState().with(CultivatorBlock.WORKING, true).modelForState().modelFile(working).addModel();
+    }
+
+    /**
+     * 控制终端（F-025 / D-022 / D-023）：四张 {@code _a_} 贴图（front / side / top / bottom）走
+     * {@link #cubeSixFaces}，父模型 {@code minecraft:block/cube}；四个水平朝向各一个 variant ——
+     * {@code FACING} 只有四值，且**没有**工作态属性（动画由三面的 {@code .mcmeta} 自己播，代码侧 0 行）。
+     *
+     * <p><b>不能用 {@code simpleBlock(block, model)}</b>：它只生成 {@code ""} 单态，4 个朝向里 3 个
+     * 找不到模型（陷阱 38）。朝向走 {@link #facingRotationY}（north 0 / east 90 / south 180 / west 270），
+     * 不用 {@code Direction#toYRot()}（陷阱 37）。
+     */
+    private void controlTerminalStates(Block block) {
+        String name = registryPath(block);
+        BlockModelBuilder model = cubeSixFaces(name, name + "_a_front", name + "_a_side",
+                name + "_a_top", name + "_a_bottom");
+        getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(model)
+                .rotationY(facingRotationY(state.getValue(ControlTerminalBlock.FACING)))
+                .uvLock(true)
+                .build());
     }
 
     /**

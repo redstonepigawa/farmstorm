@@ -1,9 +1,12 @@
 package com.dashpig.farmstorm.blockentity;
 
+import com.dashpig.farmstorm.network.CultivatorLinkPayload.Link;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,6 +24,10 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <p><b>不自建绑定真相</b>（D-025）：{@code corePos} 只是引用缓存，三方法的语义与培养器同形
  * （核侧列表是唯一真相，写入顺序「先核后终端」）。绑定 / 解绑的写入点在 F-029，本类只落接口面。
+ *
+ * <p><b>投料循环</b>（F-033 / D-032 / D-033）：服务端每 20 刻（编译期常量，<b>不是 config 键</b>）按当前模式
+ * 对每台目标机器投 <b>1</b> 个；准入判据只借机器自己的 {@code canInsert}，本类<b>不建物品白名单、
+ * 也不判作物档</b>——数据包新增一条转换配方，培养模式自动多收一个投入物，与培养器同步。
  */
 public class ControlTerminalBlockEntity extends BlockEntity implements CoreBound {
     /** 模式的 NBT 键（F-026 / D-030）：{@code /data get block <终端坐标> Mode} 读的就是它，值是序列化名。 */
@@ -125,10 +132,87 @@ public class ControlTerminalBlockEntity extends BlockEntity implements CoreBound
     }
 
     /**
+     * 每 20 刻一轮的间隔（F-033 / D-032）：编译期常量，<b>不是 config 键</b>——与
+     * {@code OutpostCoreBlockEntity} 的 {@code REBIND_INTERVAL_TICKS} 同一体例，server config 仍是 175 个键。
+     */
+    private static final int FEED_INTERVAL_TICKS = 20;
+
+    /**
      * 服务端每刻入口（{@code ControlTerminalBlock#getTicker} 唯一调用点）。
      *
-     * <p>F-026 只把 ticker 接上，每 20 刻的投料循环是 F-033（间隔常量 20 写死、不是 config 键）。
+     * <p>九步按 08 号 §4.4 的顺序短路：客户端 / 非节拍刻 / {@code OFF} / 未绑定 / 核取不到 / 核侧不认 /
+     * 超 3 × 3 区块，任一不过就静默返回（不消费库存、不报错）；全过之后按 {@code cultivatorKinds} 挑出
+     * 本模式的目标机器，每台跑一次「投 1 个」。
      */
     public static void serverTick(Level level, BlockPos pos, BlockState state, ControlTerminalBlockEntity terminal) {
+        if (level.isClientSide) {
+            return;
+        }
+        if (level.getGameTime() % FEED_INTERVAL_TICKS != 0) {
+            return;                                     // 每 20 刻才跑一轮
+        }
+        Mode mode = terminal.mode();
+        if (mode == Mode.OFF) {
+            return;                                     // D-031：关闭态不投料、不消费核库存
+        }
+        BlockPos corePos = terminal.corePos();
+        if (corePos == null) {
+            return;                                     // 未绑定：引用缓存为空（D-025）
+        }
+        if (!(level.getBlockEntity(corePos) instanceof OutpostCoreBlockEntity core)) {
+            return;                                     // 区块不在内存 / 已不是核：取不到正好当闸用
+        }
+        if (!core.hasCultivator(pos)) {
+            return;                                     // 核侧名单是唯一真相（名额满时也在这条上退出）
+        }
+        if (!OutpostCoreBlockEntity.inRange(corePos, pos)) {
+            return;                                     // D-027：超 3 × 3 区块既不绑定也不投料
+        }
+        Link.Kind kind = mode == Mode.CULTIVATOR ? Link.Kind.CULTIVATOR : Link.Kind.CROP_CONVERTER;
+        List<BlockPos> machines = core.cultivators();            // 先取这条：这一步会清理两条平行列表
+        List<Link.Kind> kinds = core.cultivatorKinds();
+        int bound = Math.min(machines.size(), kinds.size());     // 同长同下标由核侧保证，这里只是防御
+        for (int index = 0; index < bound; index++) {
+            if (kinds.get(index) == kind) {
+                feedOne(level, core, machines.get(index), kind);
+            }
+        }
+    }
+
+    /**
+     * 一轮里对一台机器的「投 1 个」：类型必须与模式匹配 ⇒ 按槽序扫核的 54 格 ⇒ 第一格通过<b>机器自己的</b>
+     * 闸就投这一个，投完这一台本轮结束（{@code break}，不存在给同一台塞第二个的路径）。
+     *
+     * <p>准入判据只借不改（D-033）：培养器 {@code canInsert}（范围 ∧ 绑定 ∧ 手持档 ∧ 空槽）、
+     * 转换器 {@code canInsert}（范围 ∧ 绑定 ∧ 手持 ∧ 空槽）；这里既没有物品白名单，也不判作物档。
+     * 先移除恰好 1 个再放入，与右键那条路径同一顺序。
+     */
+    private static void feedOne(Level level, OutpostCoreBlockEntity core, BlockPos machinePos, Link.Kind kind) {
+        BlockEntity machine = level.getBlockEntity(machinePos);
+        CultivatorBlockEntity cultivator = machine instanceof CultivatorBlockEntity found ? found : null;
+        CropConverterBlockEntity converter = machine instanceof CropConverterBlockEntity found ? found : null;
+        // 类型必须与模式匹配：培养模式只认培养器、转换模式只认转换器，否则这台本轮跳过。
+        if (kind == Link.Kind.CULTIVATOR ? cultivator == null : converter == null) {
+            return;
+        }
+        for (int slot = 0; slot < OutpostCoreBlockEntity.SLOT_COUNT; slot++) {
+            ItemStack candidate = core.getItem(slot);
+            if (candidate.isEmpty()) {
+                continue;
+            }
+            boolean accepted = cultivator != null
+                    ? cultivator.canInsert(candidate)
+                    : converter.canInsert(candidate);
+            if (!accepted) {
+                continue;
+            }
+            ItemStack one = core.removeItem(slot, 1);
+            if (cultivator != null) {
+                cultivator.insert(one);
+            } else {
+                converter.insert(one);
+            }
+            break;
+        }
     }
 }

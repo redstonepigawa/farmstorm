@@ -9,7 +9,6 @@ import com.dashpig.farmstorm.network.CultivatorLinkBroadcaster;
 import com.dashpig.farmstorm.registry.FarmstormItems;
 import com.dashpig.farmstorm.registry.FarmstormRecipes;
 import com.dashpig.farmstorm.util.CropProfile;
-import com.dashpig.farmstorm.util.CropTier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +133,7 @@ public class CultivatorBlockEntity extends BlockEntity implements CoreBound {
     }
 
     /**
-     * 手持闸（D-218）：**只收转换配方的输入，且该配方输出的档案不是史诗档**。
+     * 手持闸（D-218）：**只收转换配方的输入**。
      *
      * <p>判据只有一个来源 —— {@code farmstorm:converting} 配方表的只读视图（{@link #outputProfileOf}）：
      * 这里不写物品白名单、也没有「17」这个常量，数据包新增一条转换配方，培养器自动多收一个投入物（HC-163）。
@@ -145,7 +144,7 @@ public class CultivatorBlockEntity extends BlockEntity implements CoreBound {
             return false;
         }
         CropProfile output = outputProfileOf(stack);
-        return output != null && output.tier() != CropTier.EPIC;
+        return output != null;
     }
 
     /** 四道闸合并成**一次**判定：范围 ∧ 绑定 ∧ 手持档 ∧ 空槽。任一不过 = 右键无反应（36 号 §2.5.3）。 */

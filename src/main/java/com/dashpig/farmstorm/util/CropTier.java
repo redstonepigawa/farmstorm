@@ -21,7 +21,7 @@ public enum CropTier implements StringRepresentable {
     COMMON(ChatFormatting.WHITE),
     /** 稀有：7 条= plan 的 4 条 + 访谈补的 3 条（D-149 补充）。 */
     RARE(ChatFormatting.BLUE),
-    /** 史诗：4 条，本版唯一的入口是农民交易（D-162 把它们挡在培养器外）。 */
+    /** 史诗：4 条（激活的火把花 / 激活的瓶子草 / 幸运浆果 / 狂野苹果）；v0.3.0 起经 D-042 放行，培养器不再按档位拒绝。 */
     EPIC(ChatFormatting.GOLD);
 
     private final ChatFormatting color;

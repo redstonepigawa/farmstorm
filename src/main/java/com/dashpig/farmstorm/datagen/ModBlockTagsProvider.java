@@ -49,8 +49,11 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
                 FarmstormBlocks.CROP_CONVERTER.get(),
                 FarmstormBlocks.CONTROL_TERMINAL.get());
 
+        // D-039 / F-034：三个处理方块都进这条（培养器此前不在任何 mineable/* 里，破坏时一律 0 掉落）。
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
+                FarmstormBlocks.CULTIVATOR.get(),
                 FarmstormBlocks.CROP_CONVERTER.get(),
+                FarmstormBlocks.CONTROL_TERMINAL.get(),
                 FarmstormBlocks.BLAST_CARROT.get(),
                 FarmstormBlocks.PUMPKIN_TURRET.get(),
                 FarmstormBlocks.AWAKENED_TORCHFLOWER.get(),
@@ -64,6 +67,13 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
                 // F-168 / D-119 第 2 项：据点核心「任意等级的镐都能挖出掉落物」——只进这一条，
                 // 下面三个 needs_*_tool 一个都不加；漏了这一条，木镐挖它要按 220 秒以上且什么都不掉。
                 FarmstormBlocks.OUTPOST_CORE.get());
+
+        // D-040 / F-034：三个处理方块石镐起才算正确工具——木镐能破坏但掉落 0
+        // （mineable/pickaxe 管挖速，本条管「算不算正确工具」；成员恰 3 个）。
+        tag(BlockTags.NEEDS_STONE_TOOL).add(
+                FarmstormBlocks.CULTIVATOR.get(),
+                FarmstormBlocks.CROP_CONVERTER.get(),
+                FarmstormBlocks.CONTROL_TERMINAL.get());
 
         // F-74 / D-57：钻石以下（木/石/铁镐）一律不生效——它进了 incorrect_for_* 的父标签，
         // 于是「有正确工具才掉」与「工具够不够」由 requiresCorrectToolForDrops + 这条标签共同决定。

@@ -1,7 +1,8 @@
-// 1.20.1	2026-11-15T17:48:58.6908837	Tags for minecraft:block mod id farmstorm
+// 1.20.1	2026-11-15T18:40:39.8371112	Tags for minecraft:block mod id farmstorm
 35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/farmstorm/tags/blocks/blast_proof.json
 6e5f86d9da5e2137c964a3ca17a8463af80d09bd data/farmstorm/tags/blocks/deployed_crops.json
 eec5b8a18ee96282a1d34f2a311738de2b091b23 data/farmstorm/tags/blocks/explosion_immune.json
 07fe0f40c74feca1b68edcb3224ca9ad24b4891b data/farmstorm/tags/blocks/processing_block.json
-785a8531eabc223219213e1271c157ffd044ed57 data/minecraft/tags/blocks/mineable/pickaxe.json
+757fc8c2788301a312badc7a10cd772cf64781f7 data/minecraft/tags/blocks/mineable/pickaxe.json
 597380c723d35851ed637d81945221065c39543a data/minecraft/tags/blocks/needs_diamond_tool.json
+07fe0f40c74feca1b68edcb3224ca9ad24b4891b data/minecraft/tags/blocks/needs_stone_tool.json

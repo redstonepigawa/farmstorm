@@ -2,6 +2,7 @@ package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.behavior.DeployedKind;
+import com.dashpig.farmstorm.blockentity.ControlTerminalBlockEntity;
 import com.dashpig.farmstorm.blockentity.CropConverterBlockEntity;
 import com.dashpig.farmstorm.blockentity.CultivatorBlockEntity;
 import com.dashpig.farmstorm.blockentity.DeployedCropBlockEntity;
@@ -12,8 +13,8 @@ import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 
 /**
- * 8 个 BlockEntityType（TECH §3.3）：v0.0.4 的 6 个 + v0.1.0 的 1 个据点核心（D-119）
- * + v0.2.0 的 1 个农作物培养器（D-160）。
+ * 9 个 BlockEntityType（TECH §3.3）：v0.0.4 的 6 个 + v0.1.0 的 1 个据点核心（D-119）
+ * + v0.2.0 的 1 个农作物培养器（D-160）+ v0.3.0 的 1 个控制终端（F-026）。
  * 部署物的 5 个类型都用同一个 DeployedCropBlockEntity 类，靠 BlockEntityType 区分（RT-04）。
  * v0.0.3 的两个新部署方块挂进既有 type 的合法方块集合，type 总数当时仍是 6（§2.2 注 3）。
  */
@@ -56,6 +57,11 @@ public final class FarmstormBlockEntities {
     public static final RegistryObject<BlockEntityType<CultivatorBlockEntity>> CULTIVATOR =
             REGISTER.register("cultivator", () -> BlockEntityType.Builder
                     .of(CultivatorBlockEntity::new, FarmstormBlocks.CULTIVATOR.get()).build(null));
+
+    /** v0.3.0 的第 9 个 type（F-026 / D-020）：单方块例，与 converter / 培养器同形。 */
+    public static final RegistryObject<BlockEntityType<ControlTerminalBlockEntity>> CONTROL_TERMINAL =
+            REGISTER.register("control_terminal", () -> BlockEntityType.Builder
+                    .of(ControlTerminalBlockEntity::new, FarmstormBlocks.CONTROL_TERMINAL.get()).build(null));
 
     private FarmstormBlockEntities() {}
 

@@ -21,15 +21,18 @@ import net.minecraftforge.network.simple.SimpleChannel;
  * <p><b>专用服务器为什么安全</b>：{@code ClientCoreList} / {@code ClientCultivatorLinks} 只出现在 lambda 体内，
  * 目标类在该 lambda 的合成方法被调用时才解析；而 CLIENTBOUND 的 handler 在服务端永不执行。
  *
- * <p><b>协议串</b>：仍沿用 {@value #PROTOCOL_VERSION}（1.21.1 的 F-302 值），本轮只做命名空间搬迁 + 能编译，
- * 版本串怎么对齐留给 F-011（docs/zh/04-PROMPT-MAIN-1.20.1.md 的 HC-003 要求改成 {@code "1"}）。
+ * <p><b>协议串</b>：{@value #PROTOCOL_VERSION}（D-037：v0.3.0 因 {@code Kind} 追加第三个线上码而升一位）。
  */
 public final class FarmstormNetwork {
     /**
      * 握手版本串：codec 一变必须跟着变（30 号 §2.1.2）。
-     * F-238：新增第二个 S2C 包 ⇒ 版本 1 → 2；F-302：{@code Link} 从 2 字段变 3 字段 ⇒ 版本 2 → 3。
+     *
+     * <p>1.20.1 的起点是 {@code "1"}——1.21.1 的 F-238 / F-302 那两次升位没有搬过来（字段结构本就不同：
+     * {@code SimpleChannel} + 手写 {@code FriendlyByteBuf}）。**v0.3.0 起为 {@code "2"}**（D-037）：
+     * {@code Kind} 从两个值变成三个值（追加 {@code TERMINAL(2)}，D-035）。跨版本的真正屏障仍是下面两个
+     * {@code acceptedVersions} 的精确匹配，握手阶段就拒掉。
      */
-    public static final String PROTOCOL_VERSION = "1";
+    public static final String PROTOCOL_VERSION = "2";
 
     /** 通道名；与 {@link Farmstorm#MOD_ID} 一起构成线上通道 id。 */
     private static final String CHANNEL_NAME = "main";

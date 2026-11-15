@@ -122,7 +122,9 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
      */
     private static final Map<Block, Link.Kind> KIND_BY_BLOCK = Map.of(
             FarmstormBlocks.CULTIVATOR.get(), Link.Kind.CULTIVATOR,
-            FarmstormBlocks.CROP_CONVERTER.get(), Link.Kind.CROP_CONVERTER);
+            FarmstormBlocks.CROP_CONVERTER.get(), Link.Kind.CROP_CONVERTER,
+            // v0.3.0 / D-024：控制终端与标签的第三个成员同改（漏这一条 ⇒ kindOf 走兜底、连线画成青色）
+            FarmstormBlocks.CONTROL_TERMINAL.get(), Link.Kind.TERMINAL);
 
     /** 两档衰减（23 号 §8.7）：矩形内的玩家每轮满点；矩形外扩 16 格的余量带每 4 轮 1 次；再远不发。 */
     private static final double RING_MARGIN = 16.0;

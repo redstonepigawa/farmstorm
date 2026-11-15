@@ -37,7 +37,8 @@ import org.joml.Vector3f;
  *
  * <p><b>颜色只由 payload 的 {@code kind} 字节决定</b>（F-304 / D-210 / 54 号 §5.4）：培养器沿用核心边界
  * 粒子的同一组数值（{@code OutpostCoreBlockEntity.java:84} 的
- * {@code DustParticleOptions(new Vector3f(0.30F, 0.85F, 0.90F), 1.0F)}），转换器用红色。
+ * {@code DustParticleOptions(new Vector3f(0.30F, 0.85F, 0.90F), 1.0F)}），转换器用红色，控制终端用绿色
+ * （v0.3.0 / D-036 / D-038）。
  *
  * <p><b>红线 3 / N-143</b>：本类**不碰** {@code level} / {@code BlockState} / 方块实体。连线常画在远端
  * 未加载区块上，按坐标反查机器类型要么触发区块加载、要么猜——猜错就是服务端侧的闪色。
@@ -59,6 +60,14 @@ public final class CultivatorLinkRenderer {
     private static final float CONVERTER_RED = 0.92F;
     private static final float CONVERTER_GREEN = 0.22F;
     private static final float CONVERTER_BLUE = 0.22F;
+
+    /**
+     * 控制终端：绿（D-036）。R 与 G 直接取青的那两个分量，只把 B 从 0.90 压到 0.30 —— 三组颜色的
+     * 饱和度一致，玩家在草地上不会把绿线看成青线；实际像素分量落在 {@code 0x4D / 0xD9 / 0x4D}（验收 #12）。
+     */
+    private static final float TERMINAL_RED = 0.30F;
+    private static final float TERMINAL_GREEN = 0.85F;
+    private static final float TERMINAL_BLUE = 0.30F;
 
     private static final float ALPHA = 1.0F;
 
@@ -105,6 +114,11 @@ public final class CultivatorLinkRenderer {
                 }
                 case CULTIVATOR -> {
                     // 保持默认的青色（D-210 第 4 条：三个分量一个字节都不许变）
+                }
+                case TERMINAL -> {
+                    red = TERMINAL_RED;
+                    green = TERMINAL_GREEN;
+                    blue = TERMINAL_BLUE;
                 }
             }
             LevelRenderer.renderLineBox(poseStack, consumer,

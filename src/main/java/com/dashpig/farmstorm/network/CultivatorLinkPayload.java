@@ -68,11 +68,15 @@ public record CultivatorLinkPayload(List<Link> links) {
 
         /**
          * 连线类型（F-302 / D-210 / 54 号 §5.1）：线上各占 **1 字节**，{@code CULTIVATOR = 0}、
-         * {@code CROP_CONVERTER = 1}。未知码按 {@link #CULTIVATOR} 解（前向兼容）。
+         * {@code CROP_CONVERTER = 1}、{@code TERMINAL = 2}（v0.3.0 / D-035）。未知码按 {@link #CULTIVATOR} 解（前向兼容）。
+         *
+         * <p><b>只追加、不重排</b>（D-035）：线上没有名字，只有数值，{@code byId} 按数值反查——重排会让旧客户端
+         * 把「培养器的线」画成「终端的线」。因此 {@code TERMINAL} 永远排在两个既有值之后。
          */
         public enum Kind {
             CULTIVATOR(0),
-            CROP_CONVERTER(1);
+            CROP_CONVERTER(1),
+            TERMINAL(2);
 
             private final int id;
 

@@ -41,10 +41,13 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
         // RT-09：给整合包作者的豁免口子，模组自己不填，空列表起步
         tag(FarmstormTags.BLAST_PROOF);
 
-        // D-208：可被据点核心绑定的方块，成员 2 = 培养器 + 农作物转换器（crop_converter）
+        // D-208 / D-024：可被据点核心绑定的方块，成员 3 = 培养器 + 农作物转换器（crop_converter）+ 控制终端。
+        // 标签只承担「发现」；「这台机器是哪一个类型」由 OutpostCoreBlockEntity 的 KIND_BY_BLOCK 单独决定，
+        // 两处必须同改——漏类型表会把终端当培养器，漏标签则 rebindNearby 的候选过滤扫不到它（D-024 的补充）。
         tag(FarmstormTags.PROCESSING_BLOCK).add(
                 FarmstormBlocks.CULTIVATOR.get(),
-                FarmstormBlocks.CROP_CONVERTER.get());
+                FarmstormBlocks.CROP_CONVERTER.get(),
+                FarmstormBlocks.CONTROL_TERMINAL.get());
 
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 FarmstormBlocks.CROP_CONVERTER.get(),

@@ -35,6 +35,8 @@ import net.minecraftforge.registries.RegistryObject;
  *
  * <p>F-301 补上培养器的 3 × 3 合成配方（D-220）：这结束了 0.2.0 起「培养器只能靠创造栏 / {@code /give}」的状态（A-64）。
  *
+ * <p>F-040 补上控制终端的 3 × 3 合成配方（D-029）：四角玻璃 + 四边铁锭 + 正中红石，图样与上面两条机器配方两两不同。
+ *
  * <p>JSON 由 serializer codec 落盘（R-03：不手写数据包 JSON），落盘只剩 {@code input} / {@code result}
  * 两个字段。
  */
@@ -49,6 +51,8 @@ public final class ModRecipeProvider extends RecipeProvider {
         converter(recipeOutput);
         // 培养器同理，0.2.2 之前只能创造栏 /give，补配方后第一次有生存途径（D-220 / A-64）
         cultivator(recipeOutput);
+        // 控制终端的获得途径（D-029）：图样与培养器、转换器三者两两不同
+        controlTerminal(recipeOutput);
         // 压缩膨胀麦是二级合成物，原料就是膨胀麦（D-67）：先给出获得途径，转换配方表照旧不动
         compressedPuffedWheat(recipeOutput);
         // 据点核心是工作台 3×3 配方（D-122 第 3 条）：没有获得途径就没有核心，第 2 个上限也就无从生效
@@ -124,6 +128,28 @@ public final class ModRecipeProvider extends RecipeProvider {
                 .pattern("IGI")
                 .unlockedBy("has_glass", has(Items.GLASS))
                 .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("cultivator"));
+    }
+
+    /**
+     * D-029：有序 3×3，四角 {@code minecraft:glass}、四边 {@code minecraft:iron_ingot}、正中一格
+     * {@code minecraft:redstone}，产出 1 个控制终端 —— 即 4 铁锭 + 4 玻璃 + 1 红石粉。
+     *
+     * <p>图样必须与两台机器**两两不同**：培养器是 {@code IGI} / {@code GRG} / {@code IGI}（{@link #cultivator}）、
+     * 转换器是 {@code III} / {@code GRG} / {@code III}（{@link #converter}）。两条 {@code crafting_shaped} 逐格同料
+     * 同图样时合成台只稳定命中其中一条，本条把四角与四边对调，材料总数不变。
+     *
+     * <p>同样剥掉配方解锁进度（{@link #recipeWithoutAdvancement}）：本 Provider 只产配方 JSON。
+     */
+    private static void controlTerminal(Consumer<FinishedRecipe> recipeOutput) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, FarmstormItems.CONTROL_TERMINAL.get())
+                .define('I', Items.IRON_INGOT)
+                .define('G', Items.GLASS)
+                .define('R', Items.REDSTONE)
+                .pattern("GIG")
+                .pattern("IRI")
+                .pattern("GIG")
+                .unlockedBy("has_iron_ingot", has(Items.IRON_INGOT))
+                .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("control_terminal"));
     }
 
     /**

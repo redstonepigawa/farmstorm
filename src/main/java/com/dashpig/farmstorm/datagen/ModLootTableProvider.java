@@ -32,8 +32,8 @@ import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
 /**
- * 27 张方块战利品表（TECH §6.7 + F-74 + F-168 + F-225）：15 张作物 + 8 张部署方块 + 1 张压缩干草块
- * + 1 张转换器 + 1 张据点核心 + 1 张农作物培养器。
+ * 29 张方块战利品表（TECH §6.7 + F-74 + F-168 + F-225 + F-041）：16 张作物 + 8 张部署方块 + 1 张压缩干草块
+ * + 1 张转换器 + 1 张据点核心 + 1 张农作物培养器 + 1 张控制终端。
  *
  * <p>作物表复用原版作物表的结构（成熟判定 + 数量区间 + 时运修正 + 爆炸衰减），只把 item 换成
  * 改良版的作物与播种物（DESIGN §3.2.4）；数量区间逐条照抄 TECH §6.7。
@@ -136,6 +136,10 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
 
         // ---- 1 张农作物培养器表：掉自身（F-225 / D-160；槽里的那一个由 CultivatorBlock#onRemove 负责，F-237）----
         this.add(FarmstormBlocks.CULTIVATOR.get(), this.createSingleItemTable(FarmstormBlocks.CULTIVATOR.get()));
+
+        // ---- 1 张控制终端表：掉自身（F-041；能否取出由 requiresCorrectToolForDrops + needs_stone_tool 决定）----
+        this.add(FarmstormBlocks.CONTROL_TERMINAL.get(),
+                this.createSingleItemTable(FarmstormBlocks.CONTROL_TERMINAL.get()));
     }
 
     /**
@@ -227,6 +231,8 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormBlocks.CROP_CONVERTER.get(),
                 FarmstormBlocks.CULTIVATOR.get(),
                 // F-297：平凡作物的那张表（漏登记 ⇒ BlockLootSubProvider 的 validate 报缺表）
-                FarmstormBlocks.PLAIN_CHIVES_CROP.get());
+                FarmstormBlocks.PLAIN_CHIVES_CROP.get(),
+                // F-041：控制终端（同上，漏登记 ⇒ validate 报缺表、runData 失败）
+                FarmstormBlocks.CONTROL_TERMINAL.get());
     }
 }

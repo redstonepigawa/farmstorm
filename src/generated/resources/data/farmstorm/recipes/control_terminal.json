@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "pattern": [
+    "GIG",
+    "IRI",
+    "GIG"
+  ],
+  "result": {
+    "item": "farmstorm:control_terminal"
+  },
+  "show_notification": true
+}

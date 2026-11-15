@@ -1,4 +1,4 @@
-// 1.20.1	2026-11-15T17:38:33.2308082	Loot Tables
+// 1.20.1	2026-11-15T19:06:18.5480567	Loot Tables
 2ff8545e3acd22fde63bda4ac1337af237025ad6 data/farmstorm/loot_tables/blocks/awakened_pitcher_plant.json
 63133033732ba63d14b8f24677d6d6c4fbe85ca7 data/farmstorm/loot_tables/blocks/awakened_pitcher_plant_crop.json
 c3e76900e54a56c81c884b802bfc1458c401ed43 data/farmstorm/loot_tables/blocks/awakened_torchflower.json
@@ -8,6 +8,7 @@ f6ff8b5c45efa66700d1dcdc8de21980d8798efc data/farmstorm/loot_tables/blocks/bambo
 5ae1b78a5b49b160022784ea3bb6dceb4ac60cb9 data/farmstorm/loot_tables/blocks/blast_carrot_crop.json
 36f0cbad1de8c9319367f32f530b9cd71b2a5409 data/farmstorm/loot_tables/blocks/brown_mushroom_puff_block.json
 d6e772bf4abcf5f3b9317916efec813e08011df9 data/farmstorm/loot_tables/blocks/compressed_hay_block.json
+ae5d60aa72153bb5cd5d71a7642d57a276a4de75 data/farmstorm/loot_tables/blocks/control_terminal.json
 d4d26c6b70c1d9b4723207114c2fe87abeaf4a7f data/farmstorm/loot_tables/blocks/crop_converter.json
 0be3c2300c8b5ccb9a2066d4b9e973dcdc8de37d data/farmstorm/loot_tables/blocks/cultivator.json
 5aefdbf4ba18301afd9a9485f34df685861ea2e5 data/farmstorm/loot_tables/blocks/fang_trap_cactus.json

@@ -172,8 +172,8 @@ public final class Farmstorm {
     }
 
     /**
-     * 注册对象自检（F-66 / F-103 / TECH §11 #2）：64 → 77 → 90 → 98 的那 12 类**当场数**（各 DeferredRegister 的条目数），
-     * 相加不等于 98、或任何一类的条目数与 36 号 §1.2 的 v0.2.0 列不符，就打 FAIL——不写死常量再自己跟自己比。
+     * 注册对象自检（F-66 / F-103 / TECH §11 #2）：64 → 77 → 90 → 96 的那 12 类**当场数**（各 DeferredRegister 的条目数），
+     * 相加不等于 96、或任何一类的条目数与 08 号 §1.1 的 v0.3.0 列不符，就打 FAIL——不写死常量再自己跟自己比。
      * 伤害类型是数据驱动（R-02：代码侧只有 ResourceKey、没有 DeferredRegister），
      * 因此这一类数的是 {@link FarmstormDamageTypes} 里声明的静态 ResourceKey 常量本身。
      */
@@ -189,23 +189,25 @@ public final class Farmstorm {
         int creativeTabs = FarmstormCreativeTabs.REGISTER.getEntries().size();
         int damageTypes = damageTypeCount();
         int menuTypes = FarmstormMenus.REGISTER.getEntries().size();
+        int globalLootModifierSerializers = FarmstormLootModifiers.REGISTER.getEntries().size();
         int total = items + blocks + blockEntities + entityTypes + mobEffects + soundEvents + recipeTypes
-                + recipeSerializers + creativeTabs + damageTypes + menuTypes;
-        // HC-002（docs/zh/04 §2）：1.20.1 没有 DataComponentType，注册面从 92/12 类降到 91/11 类。
-        boolean ok = total == 91
-                && items == 28 && blocks == 28 && blockEntities == 8 && entityTypes == 13
+                + recipeSerializers + creativeTabs + damageTypes + menuTypes + globalLootModifierSerializers;
+        // HC-002（docs/zh/04 §2）：1.20.1 没有 DataComponentType，注册面从 92/12 类降到 91/11 类；
+        // v0.3.0 加回 D-047 引入的 global_loot_modifier_serializers（0 → 1），于是重新是 12 类 96（D-052）。
+        boolean ok = total == 96
+                && items == 29 && blocks == 29 && blockEntities == 9 && entityTypes == 13
                 && mobEffects == 4 && soundEvents == 3 && recipeTypes == 1 && recipeSerializers == 1
-                && creativeTabs == 1 && damageTypes == 3 && menuTypes == 1;
+                && creativeTabs == 1 && damageTypes == 3 && menuTypes == 2 && globalLootModifierSerializers == 1;
         LOGGER.info("自检 注册对象 {} 个：items {} / blocks {} / block_entities {} / entity_types {} / mob_effects {} / "
                         + "sound_events {} / recipe_types {} / recipe_serializers {} / creative_tabs {} / damage_types {} / "
-                        + "menu_types {} → {}",
+                        + "menu_types {} / global_loot_modifier_serializers {} → {}",
                 total, items, blocks, blockEntities, entityTypes, mobEffects, soundEvents, recipeTypes,
-                recipeSerializers, creativeTabs, damageTypes, menuTypes, ok ? "OK" : "FAIL");
+                recipeSerializers, creativeTabs, damageTypes, menuTypes, globalLootModifierSerializers, ok ? "OK" : "FAIL");
     }
 
     /**
      * 数据驱动的伤害类型没有 DeferredRegister，只能把声明出来的 ResourceKey 逐个列出来数。
-     * <p>新增伤害类型时**必须**同时加进这个列表：总数 92 的断言会因此失败，不会静默漂移。
+     * <p>新增伤害类型时**必须**同时加进这个列表：总数 96 的断言会因此失败，不会静默漂移。
      * 不用反射，是因为 {@code getDeclaredFields()} 依赖字段形状，改名或换个同类型常量都会悄悄改变结果。
      */
     private static int damageTypeCount() {

@@ -2,7 +2,7 @@
 
 > 把原版农作物改造成 PvP 道具：**种在地里、扔出去、架在墙上、或者吃掉。**
 
-Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · modid `farmstorm` · **v0.2.8（1.20.1 移植版）**
+Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · modid `farmstorm` · **v0.3.0（1.20.1 移植版）**
 
 [仓库（1.20.1 分支）](https://github.com/redstonepigawa/farmstorm/tree/1.20.1)
 
@@ -31,15 +31,15 @@ Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · 
 
 **同一个 jar 两个加载器通用**，不需要装两份：产物里没有 `net.neoforged.*` 引用，mod 类用两边都认的无参构造器，步高属性用两边都存在的字段名。实测环境：Forge 47.4.28 与 NeoForge 47.1.106。
 
-网络协议串是 **`1`**（1.21.1 版是 `3`），所以客户端与服务端必须用同一版，混版会连不上（会被明确拒绝，不会崩溃）。
+网络协议串是 **`2`**（1.21.1 版是 `3`），所以客户端与服务端必须用同一版，混版会连不上（会被明确拒绝，不会崩溃）。
 
 ### 安装
 
 1. 用启动器建一个 1.20.1 + Forge 47.x（或 NeoForge 47.x）的实例。
-2. 打开实例的 `mods` 文件夹（没有就新建），把 **`farmstorm-0.2.8+mc1.20.1.jar`** 丢进去。
+2. 打开实例的 `mods` 文件夹（没有就新建），把 **`farmstorm-0.3.0+mc1.20.1.jar`** 丢进去。
 3. 启动。创造模式物品栏最后会多一个「农场风云」标签页。
 
-**请按 MC 版本各放一份**：本模组在 1.20.1 与 1.21.1 上共用同一个 modid `farmstorm`，产物名只差 `+mc1.20.1` / `+mc1.21.1`（版本号当前是 1.20.1 = **0.2.8**、1.21.1 = **0.2.4**，两边独立演进）。同一实例里放两份只会有一份生效。
+**请按 MC 版本各放一份**：本模组在 1.20.1 与 1.21.1 上共用同一个 modid `farmstorm`，产物名只差 `+mc1.20.1` / `+mc1.21.1`（版本号当前是 1.20.1 = **0.3.0**、1.21.1 = **0.2.4**，两边独立演进）。同一实例里放两份只会有一份生效。
 
 源码直接看仓库的 `1.20.1` 分支即可（`src/main/java`），本版暂不产出 `-sources.jar`。
 
@@ -76,13 +76,14 @@ Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · 
 - **点防御菌**（Point Defense Fungus）—— 拦截来袭投掷物
 - **振动豆**（Vibration Bean）—— 感应触发
 
-### 三台机器
+### 四台机器
 
 | 方块 | 作用 |
 |---|---|
 | **作物转换器**（Crop Converter） | 放入一个原版作物，30 秒后产出对应的改良作物，21 条单向转换配方，无额外成本 |
 | **培养器**（Cultivator） | 放入作物后持续产出 |
 | **据点核心**（Outpost Core） | 3 × 3 区块范围、储物空间、绑定周边机器、归属与队伍判定 |
+| **控制终端**（Control Terminal） | 绑定据点核心后每 20 刻向培养器或转换器投料（每台每轮 1 个）；空手右键开面板，培养 / 转换两个模式互斥、初始关闭 |
 
 ### 战斗与状态
 
@@ -93,7 +94,7 @@ Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · 
 
 ### 其他
 
-- 模组物品 28 种、方块 28 种，统一挂在单独的创造模式标签页下
+- 模组物品 29 种、方块 29 种，统一挂在单独的创造模式标签页下
 - 自定义网络包 2 个（`farmstorm:core_list` / `farmstorm:cultivator_link`），均为 S2C 只读，客户端不回包
 
 ---
@@ -148,8 +149,24 @@ Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · 
 
 A Minecraft 1.20.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
-**v0.2.8 port for Minecraft 1.20.1** (Java 17 · modid `farmstorm`). **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio clips listed in the asset-provenance section keep their own terms.
+**v0.3.0 port for Minecraft 1.20.1** (Java 17 · modid `farmstorm`). **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio clips listed in the asset-provenance section keep their own terms.
 
-- **Install**: build a 1.20.1 instance on **either Forge 47.x or NeoForge 47.x** (one jar works on both), drop `farmstorm-0.2.8+mc1.20.1.jar` into `mods/`. The 1.20.1 and 1.21.1 builds share the same modid `farmstorm` (current versions: 1.20.1 = **0.2.5**, 1.21.1 = **0.2.4**, evolving independently), so **keep exactly one per instance** — pick the one matching your MC version.
-- **Compatibility**: network protocol string is `1` (the 1.21.1 build uses `3`); mismatched client/server are rejected cleanly. **New worlds only** — no save migration from 1.21.1.
-- **Content**: 22 crops (12 thrown / 7 deployed / 3 edible; tiers 11 / 7 / 4), 3 machines (crop converter / cultivator / outpost core), 21 converting recipes, 16 advancements, 3 damage types, 4 mob effects.
+- **Install**: build a 1.20.1 instance on **either Forge 47.x or NeoForge 47.x** (one jar works on both), drop `farmstorm-0.3.0+mc1.20.1.jar` into `mods/`. The 1.20.1 and 1.21.1 builds share the same modid `farmstorm` (current versions: 1.20.1 = **0.3.0**, 1.21.1 = **0.2.4**, evolving independently), so **keep exactly one per instance** — pick the one matching your MC version.
+- **Compatibility**: network protocol string is `2` (the 1.21.1 build uses `3`); mismatched client/server are rejected cleanly. **New worlds only** — no save migration from 1.21.1.
+- **Content**: 22 crops (12 thrown / 7 deployed / 3 edible; tiers 11 / 7 / 4), 4 machines (crop converter / cultivator / outpost core / control terminal), 21 converting recipes, 16 advancements, 3 damage types, 4 mob effects.
+
+---
+
+## 文档索引与交付清单（v0.3.0）
+
+本版的规格与执行文档共六份，都在 `docs/zh/` 下，按编号顺序读；后四列是交付时的实读值（行数 / 字节 / SHA256）。
+
+| 文件 | 内容 | 行数 | 字节 | SHA256 |
+|---|---|---|---|---|
+| `06-DECISIONS-0.3.0-1.20.1.md` | 决策与裁决（D-015 ~ D-052），唯一真相源 | 617 | 61438 | `097ece6ddfb045618faa43a85be80f6e887f646b0880d8248bbd14ea3cc63d52` |
+| `07-DESIGN-0.3.0-1.20.1.md` | 设计规格 | 280 | 36983 | `0a8ec34a1e4be5b1d9ffc14796041e4e3ab3cb52af0b72b38fb1a2edadce824c` |
+| `08-TECH-0.3.0-1.20.1.md` | 技术规格与验收 #1 ~ #32 | 464 | 60792 | `79a578c764dacc5e375781fc2a23377c0a5698ae0decca82944cd4c5bbf2ece7` |
+| `09-TASKS-0.3.0-1.20.1.md` | 任务拆分（F-022 ~ F-045 / Phase 7 ~ 14） | 370 | 45550 | `cb93628bb7fb0dda18a541c94229e83d7fb55cb0178bb7ad474f625a0637c669` |
+| `10-PROMPT-MAIN-0.3.0-1.20.1.md` | 主调度提示词 | 259 | 44895 | `2dc1604ef0f9f24d2b9641576025e98002473db959d78345e4b9ed4c0a452e99` |
+| `11-PROMPT-TASKS-0.3.0-1.20.1.md` | 分阶段执行提示词（含出口判据 E-7-1 ~ E-14-7） | 319 | 54221 | `2178ab3ae7e83de517ecb309b169b6f0af563eeaaab7953a5f33dde4cdd40270` |
+

@@ -1,10 +1,11 @@
-// 1.20.1	2026-11-15T17:38:33.2328273	Recipes
+// 1.20.1	2026-11-15T19:06:18.5500944	Recipes
 17314fefab03c379a9353f332bcddf1b4684a912 data/farmstorm/recipes/awakened_pitcher_plant.json
 62ac35993bfbfdaa2fbb82ce8f35ff75808c37d8 data/farmstorm/recipes/awakened_torchflower.json
 49a9adee67eceef3da0e1d5295069ac602c722d2 data/farmstorm/recipes/bamboo_firecracker.json
 a624eab214fed9941fbc0a59d52a15e7f1f100ab data/farmstorm/recipes/blast_carrot.json
 39f0d0e509b342f2a5a694eed7f73c219c9eed3f data/farmstorm/recipes/brown_mushroom_puff.json
 5e3929f739029a22fda22db1ac1b86747d926130 data/farmstorm/recipes/compressed_puffed_wheat.json
+f50a77b446c4e34ac619f4cac5fb432e0eed778f data/farmstorm/recipes/control_terminal.json
 8300c82fccdf11c79a4aa4b1a5750d77bb08437d data/farmstorm/recipes/crop_converter.json
 0938f479ee96a9bf93d28a147e480d1334962835 data/farmstorm/recipes/cultivator.json
 015063041e9d5f947e12236954a39314a3495ab9 data/farmstorm/recipes/fang_trap_cactus.json

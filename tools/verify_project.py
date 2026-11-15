@@ -414,6 +414,7 @@ EXPECTED = {
         "cultivator",  # v0.2.0 的培养器方块物品（36-TECH §1.2）
         "plain_chives",  # v0.2.2 的平凡农作物（F-268 / D-193；非作物，没有 CropProfile）
         "plain_chives_seeds",  # v0.2.3 的平凡韭菜种子（F-298 / D-216：PlainSeedItem，可播种）
+        "control_terminal",  # v0.3.0 的控制终端方块物品（D-020）
     ],
     "blocks": [
         "puffed_wheat_crop", "blast_carrot_crop", "ubi_server_crop", "toxic_ubi_server_crop",
@@ -427,12 +428,14 @@ EXPECTED = {
         "outpost_core",  # v0.1.0 的据点核心方块（24-TECH §1.4 G1）
         "cultivator",  # v0.2.0 的培养器方块（36-TECH §1.2）
         "plain_chives_crop",  # v0.2.3 的平凡作物方块（F-297 / D-215：PlainCropBlock，age 0~3，不进 CropProfile）
+        "control_terminal",  # v0.3.0 的控制终端方块（D-020、D-021）
     ],
     "block_entity_type": [
         "blast_carrot", "pumpkin_turret", "awakened_torchflower",
         "awakened_pitcher_plant", "fang_trap_cactus", "crop_converter",  # v0.2.3 改名（D-206，F-287）
         "outpost_core",  # v0.1.0 新建的 BlockEntityType（24-TECH §2.2 注 1）
         "cultivator",  # v0.2.0 的培养器 BlockEntityType（36-TECH §1.2）
+        "control_terminal",  # v0.3.0 的控制终端 BlockEntityType（D-025：8 → 9）
     ],
     "entity_type": [
         "puffed_wheat", "ubi_server", "toxic_ubi_server", "melon_slice_bomb", "melon_grenade",
@@ -445,20 +448,24 @@ EXPECTED = {
     "recipe_serializer": ["converting"],
     "creative_mode_tab": ["main"],
     "damage_type": ["void_bolt", "crop_blast", "zangief_slam"],
-    "data_component_type": ["temporary_enchantments"],
+    # v0.3.0 按 D-052 换槽位：1.20.1 没有 DataComponentType 注册表，改数 D-047 引入的全局战利品修饰器
+    "global_loot_modifier_serializers": ["puffed_hay"],
     # v0.2.0 的核心存储菜单（36-TECH §1.2）；v0.2.3 的转换器菜单随 GUI 一起下线（D-205、F-289）
-    "menu_type": ["outpost_core"],
+    # v0.3.0 加控制面板菜单（D-034：1 → 2）
+    "menu_type": ["outpost_core", "control_terminal"],
 }
 
 # 36-TECH-0.2.0 §1.2 的 v0.2.0 列：12 类逐类小计，相加 97（基线 93 + 本版 4）。
 # v0.2.2 在这一列上再 +1 个物品（`plain_chives`，F-268 / D-193）⇒ 98。
 # v0.2.3 按 D-205 的逐类算式再改三类：items −7 +1（删 7 个播种物、加 `plain_chives_seeds`）、
 # blocks +1（`plain_chives_crop`）、menu_type −1（删 `converter`）⇒ 下面的 EXPECTED_COUNTS 相加 92。
+# v0.3.0 按 D-020 / D-025 / D-034 / D-047 / D-052 加四类各 +1（items / blocks / block_entity_type / menu_type），
+# 并把那一格 1.20.1 不存在、脚本凭空多数的槽位换成 `global_loot_modifier_serializers: 1` ⇒ 92 − 1 + 1 + 4 = 96。
 # ID 清单少一个、多一个都在这里露出来。
 EXPECTED_COUNTS = {
-    "items": 28,
-    "blocks": 28,
-    "block_entity_type": 8,
+    "items": 29,
+    "blocks": 29,
+    "block_entity_type": 9,
     "entity_type": 13,
     "mob_effect": 4,
     "sound_event": 3,
@@ -466,8 +473,8 @@ EXPECTED_COUNTS = {
     "recipe_serializer": 1,
     "creative_mode_tab": 1,
     "damage_type": 3,
-    "data_component_type": 1,
-    "menu_type": 1,
+    "global_loot_modifier_serializers": 1,
+    "menu_type": 2,
 }
 
 
@@ -606,7 +613,7 @@ def main() -> int:
     else:
         warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
 
-    # 分母从 EXPECTED_COUNTS 现算（12 项相加 = 92，D-205），不再写第二份总数。
+    # 分母从 EXPECTED_COUNTS 现算（12 项相加 = 96，D-052），不再写第二份总数。
     expected_total = sum(EXPECTED_COUNTS.values())
     print(f"== 2. {expected_total} 个注册 ID 逐字核对（全源码树） ==")
     total = 0
@@ -618,7 +625,7 @@ def main() -> int:
             ok(f"{group}: {len(ids)} 个 ID 齐全")
         expected = EXPECTED_COUNTS[group]
         if len(ids) != expected:
-            fail(f"{group}: 清单 {len(ids)} 个 ID，但 EXPECTED_COUNTS 的 v0.2.3 列（D-205）是 {expected} 个")
+            fail(f"{group}: 清单 {len(ids)} 个 ID，但 EXPECTED_COUNTS 的 v0.3.0 列（D-052）是 {expected} 个")
         total += len(ids)
     print(f"  已核 registry 对象: {total} / {expected_total}")
 

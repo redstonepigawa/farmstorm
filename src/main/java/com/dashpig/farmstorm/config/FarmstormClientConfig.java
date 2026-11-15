@@ -8,11 +8,11 @@ import net.minecraftforge.common.ForgeConfigSpec;
  * 客户端配置（D-144 第 3 条 / 30 号 §4.2）：**全项目第一份 {@code ModConfig.Type.CLIENT}**。
  *
  * <p>为什么不并进 {@link FarmstormConfig}：两份 spec 的加载侧与落盘位置都不同（{@code config/farmstorm-server.toml}
- * 对 {@code config/farmstorm-client.toml}）。混在一个类里会让既有 166 键的 {@code bake()} 语义变复杂，
- * 而且 server toml 会从 166 变成 169（30 号 §5.5 第 4 条）。本类只依赖 {@code ForgeConfigSpec}（公共类），
+ * 对 {@code config/farmstorm-client.toml}）。混在一个类里会让既有 175 个 server 键的 {@code bake()} 语义变复杂，
+ * 而且 server toml 会从 175 变成 178（30 号 §5.5 第 4 条）。本类只依赖 {@code ForgeConfigSpec}（公共类），
  * 因此 {@code Farmstorm} 构造器里引用它不会让专用服务器碰到任何 client-only 类型。
  *
- * <p>3 键都带 {@code translation}：与既有 166 个 server 键一致，否则客户端配置页会露出裸键名。
+ * <p>3 个 client 键都带 {@code translation}：与既有 175 个 server 键口径一致，否则客户端配置页会露出裸键名。
  * 值域只挡明显坏值——真正的边界在绘制与拖拽时按屏幕尺寸二次钳制（{@code CoreHudRenderer#clampOrigin}）。
  */
 public final class FarmstormClientConfig {

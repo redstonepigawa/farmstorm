@@ -325,7 +325,11 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         return id.getPath();
     }
 
-    /** 本模组注册的 26 个方块：15 作物 + 8 部署 + 1 转换器 + 1 普通方块（compressed_hay_block）+ 1 据点核心（outpost_core）。 */
+    /**
+     * 本模组注册的 29 个方块：16 个作物（15 个 CropProfile 作物 + 1 个平凡作物）+ 8 个部署 + 1 个转换器
+     * + 1 个普通方块（compressed_hay_block）+ 1 个据点核心（outpost_core）+ 1 个农作物培养器（cultivator）
+     * + 1 个控制终端（control_terminal）。
+     */
     private static List<Block> farmstormBlocks() {
         List<Block> blocks = new ArrayList<>();
         for (Block block : BuiltInRegistries.BLOCK) {

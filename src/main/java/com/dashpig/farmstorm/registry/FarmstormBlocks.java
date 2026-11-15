@@ -21,15 +21,17 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 /**
- * 27 个方块（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器）：
- * 15 个作物 + 8 个部署 + 1 个转换器 + 1 个压缩干草块 + 1 个据点核心 + 1 个农作物培养器。
+ * 29 个方块（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器、
+ * v0.2.3 按 D-215 加 1 个平凡作物方块、v0.3.0 按 D-020 加 1 个控制终端）：
+ * 16 个作物（15 个 CropProfile 作物 + 1 个平凡作物）+ 8 个部署 + 1 个转换器 + 1 个压缩干草块
+ * + 1 个据点核心 + 1 个农作物培养器 + 1 个控制终端。
  * 作物方块共用一个类且不注册 BlockItem（D-34 / T-01）。
  */
 public final class FarmstormBlocks {
     public static final DeferredRegister<Block> REGISTER =
             DeferredRegister.create(ForgeRegistries.BLOCKS, Farmstorm.MOD_ID);
 
-    // ---- 14 个作物方块 ----
+    // ---- 14 个作物方块（本段 14 条；连下面 v0.0.3 的 friend_chives 与平凡的 plain_chives 共 16 个作物方块）----
     public static final RegistryObject<FarmstormCropBlock> PUFFED_WHEAT_CROP = crop(CropProfile.PUFFED_WHEAT);
     public static final RegistryObject<FarmstormCropBlock> BLAST_CARROT_CROP = crop(CropProfile.BLAST_CARROT);
     public static final RegistryObject<FarmstormCropBlock> UBI_SERVER_CROP = crop(CropProfile.UBI_SERVER);

@@ -21,9 +21,11 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 /**
- * 34 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器、v0.2.2 按 D-193 加 1 个平凡韭菜）：
- * 22 个作物 + 7 个独立播种物 + 4 个方块物品（转换器 / 压缩干草块 / 据点核心 / 农作物培养器）
- * + 1 个平凡农作物（平凡韭菜：不是作物、没有 CropProfile）。
+ * 29 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器、
+ * v0.2.2 按 D-193 加 1 个平凡韭菜、v0.2.3 按 D-212 删 7 个独立播种物并按 D-216 加 1 个平凡韭菜种子、
+ * v0.3.0 按 D-020 加 1 个控制终端）：
+ * 22 个作物 + 5 个方块物品（转换器 / 压缩干草块 / 据点核心 / 农作物培养器 / 控制终端）
+ * + 1 个平凡农作物（平凡韭菜：不是作物、没有 CropProfile）+ 1 个平凡韭菜种子（可播种）。
  * 堆叠数按 D-16 分两档，实际数值来自 stack.*（§4.11.5）。
  */
 public final class FarmstormItems {
@@ -32,7 +34,7 @@ public final class FarmstormItems {
 
     private static final Map<String, RegistryObject<? extends Item>> CROP_ITEMS = new LinkedHashMap<>();
 
-    // ---- 15 个作物物品（顺序即 00-DECISIONS §4）----
+    // ---- 15 个作物物品（本段 15 条；连下面 v0.0.2 的 4 条与 v0.0.3 的 3 条共 22 个作物物品；顺序即 00-DECISIONS §4）----
     public static final RegistryObject<ThrowableCropItem> PUFFED_WHEAT = cropItem(CropProfile.PUFFED_WHEAT,
             properties -> new ThrowableCropItem(CropProfile.PUFFED_WHEAT, FarmstormEntityTypes.PUFFED_WHEAT::get, properties));
     public static final RegistryObject<DeployableCropItem> BLAST_CARROT = cropItem(CropProfile.BLAST_CARROT,

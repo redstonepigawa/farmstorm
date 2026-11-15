@@ -74,6 +74,15 @@ public class ControlTerminalBlockEntity extends BlockEntity implements CoreBound
         return this.mode;
     }
 
+    /** 写模式（F-030 / D-031 的唯一写入点：面板的 {@code clickMenuButton}）；落盘由 {@link #saveAdditional} 承担。 */
+    public void setMode(Mode mode) {
+        if (this.mode == mode) {
+            return;
+        }
+        this.mode = mode;
+        this.setChanged();
+    }
+
     /** 引用缓存只读视图；{@code null} = 未绑定。 */
     @Nullable
     @Override

@@ -27,10 +27,13 @@ public final class FarmstormClientSetup {
 
     private FarmstormClientSetup() {}
 
-    /** F-227 / D-166：54 格存储界面。漏掉这一行 ⇒ 打开界面时崩或黑屏（36 号 §2.6.3）。 */
+    /** F-227 / D-166 + F-031 / D-034：核心存储与终端面板两个界面。漏掉一行 ⇒ 打开界面时只有一条 warn、没有界面（36 号 §2.6.3、RT-014）。 */
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> MenuScreens.register(FarmstormMenus.OUTPOST_CORE.get(), OutpostCoreScreen::new));
+        event.enqueueWork(() -> {
+            MenuScreens.register(FarmstormMenus.OUTPOST_CORE.get(), OutpostCoreScreen::new);
+            MenuScreens.register(FarmstormMenus.CONTROL_TERMINAL.get(), ControlTerminalScreen::new);
+        });
     }
 
     /** 自定义配方类型 {@code farmstorm:converting} 的配方书分类（F-2xx）。 */

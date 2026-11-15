@@ -8,7 +8,7 @@ rem  Usage:
 rem    remap-1.20.1.cmd                       remap build\libs default jar
 rem    remap-1.20.1.cmd -Force                rebuild the mapping as well
 rem    remap-1.20.1.cmd -InputJar a.jar -OutputJar b.jar
-rem    remap-1.20.1.cmd -DistJar dist\farmstorm-0.2.4+mc1.20.1.jar
+rem    remap-1.20.1.cmd -DistJar dist\farmstorm-0.3.0+mc1.20.1.jar
 rem ============================================================
 setlocal
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0tools\remap-to-srg.ps1" %*

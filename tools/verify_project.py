@@ -97,6 +97,49 @@ def expected_config_keys(design: str) -> list[str]:
     return keys
 
 
+LEDGER_DOC = "02-TECH-1.20.1.md"
+
+
+def expected_config_keys_1201(path: Path) -> list[str]:
+    """从 02-TECH-1.20.1.md 的「### 2.1 服务端 config 175 键清单」一节读 175 个键。
+
+    这是 1.20.1 自己的期望源（F-018）：不再依赖主线 12 ~ 54 号文档即可核 §1。
+    解析失败 / 条数不是 175 一律带文件与行号抛出，不静默降级。
+    """
+    text = read(path)
+    head = re.search(r"^### 2\.1\b.*$", text, re.MULTILINE)
+    if not head:
+        raise ValueError(f"{path.name}：找不到「### 2.1」的键清单标题")
+    base_line = text[: head.start()].count("\n") + 1
+    tail = re.search(r"^#{2,3} \d", text[head.end():], re.MULTILINE)
+    body = text[head.start(): head.end() + tail.start()] if tail else text[head.start():]
+    keys = [line.strip() for line in body.splitlines()
+            if re.fullmatch(r"[a-z][a-z0-9_]*(?:\.[a-zA-Z0-9_]+)+", line.strip())]
+    if len(keys) != EXPECTED_CONFIG_KEY_COUNT:
+        raise ValueError(f"{path.name}:{base_line}：2.1 节解析出 {len(keys)} 个键，"
+                         f"文档口径是 {EXPECTED_CONFIG_KEY_COUNT} 个（标题或清单被改过？）")
+    if len(set(keys)) != len(keys):
+        dup = sorted({k for k in keys if keys.count(k) > 1})
+        raise ValueError(f"{path.name}:{base_line}：2.1 节有重复键 {dup}")
+    return keys
+
+
+EXPECTED_CONFIG_KEY_COUNT = 175
+
+
+def load_ledger(root: Path) -> tuple[bool, set[str]]:
+    path = root / "docs/zh" / LEDGER_DOC
+    if not path.exists():
+        return False, set()
+    try:
+        keys = expected_config_keys_1201(path)
+    except ValueError as exc:
+        fail(f"本仓键清单解析失败：{exc}")
+        return False, set()
+    print(f"  期望源: docs/zh/{LEDGER_DOC} 的 2.1 节键清单（{len(keys)} 键，1.20.1 口径）")
+    return True, set(keys)
+
+
 def expected_config_keys_v002(tech: str) -> list[str]:
     start = tech.index("### 8.1")
     end = tech.index("### 8.2")
@@ -493,6 +536,95 @@ EXPECTED_COUNTS = {
 }
 
 
+def derive_chain(root: Path) -> tuple[bool, set[str]]:
+    """按主线版本链文档现算期望键集（原口径）。文档不在就跳过，由本仓键清单兜底。"""
+    try:
+        design = read(doc_path(root, "01-DESIGN.md"))
+        tech = read(doc_path(root, "12-TECH-0.0.2.md"))
+        tech3 = read(doc_path(root, "18-TECH-0.0.3.md"))
+        tech4 = doc_path(root, "24-TECH-0.1.0.md")
+        tech5 = doc_path(root, "30-TECH-0.1.1.md")
+        tech6 = doc_path(root, "36-TECH-0.2.0.md")
+        tech7 = doc_path(root, "42-TECH-0.2.1.md")
+        tech54 = doc_path(root, "54-TECH-0.2.3.md")
+        base = expected_config_keys(design)
+        added = expected_config_keys_v002(tech)
+        added3 = expected_config_keys_v003(tech3)
+        if len(added3) != 19:
+            fail(f"18-TECH §8.1 解析出 {len(added3)} 行，文档口径是 19 行（表格格式变了？）")
+        # 两份 TECH 的行里各有若干行是「改既有默认值」——键名与前面的清单重名，不是新键。
+        # 因此期望集是四个清单的并集（集合去重），重复行数现算、不写死：
+        # v0.0.3 是 3 行（139 + 16 = 155），v0.1.0 再加 1 行（155 + 11 = 166）。
+        try:
+            added4, changed4 = expected_config_keys_v010(tech4)
+        except (ValueError, OSError) as exc:
+            fail(f"24-TECH §8.1 解析失败，期望键集无法现算：{exc}")
+            added4 = None
+        try:
+            added5, groups5 = expected_config_keys_v011(tech5)
+        except (ValueError, OSError) as exc:
+            fail(f"30-TECH §4.1 解析失败，期望键集无法现算：{exc}")
+            added5 = None
+        try:
+            added6, removed6 = expected_config_keys_v012(tech6)
+        except (ValueError, OSError) as exc:
+            fail(f"36-TECH §4.1.1 解析失败，期望键集无法现算：{exc}")
+            added6 = None
+        try:
+            added7, removed7 = expected_config_keys_v021(tech7)
+        except (ValueError, OSError) as exc:
+            fail(f"42-TECH §4.1.1 解析失败，期望键集无法现算：{exc}")
+            added7 = None
+        try:
+            added8, removed8 = expected_config_keys_v023(tech54)
+        except (ValueError, OSError) as exc:
+            fail(f"54-TECH §6.1/§6.2 解析失败，期望键集无法现算：{exc}")
+            added8 = None
+        if (added4 is None or added5 is None or added6 is None or added7 is None
+                or added8 is None):
+            exp_ok, exp = False, set()
+        else:
+            before6 = set(base) | set(added) | set(added3) | set(added4) | set(added5)
+            overlap = set(added3) & (set(base) | set(added))
+            overlap4 = set(added4) & (set(base) | set(added) | set(added3))
+            overlap5 = set(added5) & (set(base) | set(added) | set(added3) | set(added4))
+            overlap6 = set(added6) & before6
+            before7 = before6 | set(added6)
+            overlap7 = set(added7) & before7
+            before8 = before7 | set(added7)
+            overlap8 = set(added8) & before8
+            union = before8 | set(added8)
+            # 已删键在并集旁边扣一次（REMOVED_KEYS 的唯一用处），不散落到解析函数里；
+            # v0.2.0 的第 2 个删键由 36-TECH §4.1.1 现算（removed6）、v0.2.1 的第 3 个由
+            # 42-TECH §4.1.1 现算（removed7）、v0.2.3 的 3 个由 54-TECH §6.1 现算（removed8），
+            # 都不写死在这里。
+            gone = REMOVED_KEYS | set(removed6) | set(removed7) | set(removed8)
+            exp_ok, exp = True, union - gone
+            print(f"  30-TECH §4.1：{groups5} 组 / {len(added5)} 键"
+                  f"（v0.1.1 的 58 行数据表现算，其中 {len(overlap5)} 个键名已在前四份清单里）")
+            print(f"  36-TECH §4.1.1：{len(added6) + len(removed6)} 行（增 {len(added6)} / 删 {len(removed6)}；"
+                  f"v0.2.0 的 11 行数据表现算，其中 {len(overlap6)} 个键名与前面的清单重名）")
+            print(f"  42-TECH §4.1.1：{len(added7) + len(removed7)} 行（增 {len(added7)} / 删 {len(removed7)}；"
+                  f"v0.2.1 的 1 行数据表现算，其中 {len(overlap7)} 个键名与前面的清单重名）")
+            print(f"  54-TECH §6.1 / §6.2：{len(added8) + len(removed8)} 行"
+                  f"（增 {len(added8)} / 删 {len(removed8)}；v0.2.3 的 §6.1 一张表 + §6.2 一张表分别现算，"
+                  f"其中 {len(overlap8)} 个键名与前面的清单重名）")
+            print(f"  剔除已删键 {len(gone)} 个：{'、'.join(sorted(gone))}")
+            print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}"
+                  f" + 18-TECH §8.1 {len(added3)} 行"
+                  f" + 24-TECH §8.1 {len(added4) + len(changed4)} 行（新 {len(added4)} + 改 {len(changed4)}）"
+                  f" + 30-TECH §4.1 {len(added5)} 键 + 36-TECH §4.1.1 {len(added6)} 键"
+                  f" + 42-TECH §4.1.1 {len(added7)} 键 + 54-TECH §6.2 {len(added8)} 键"
+                  f"（§6.1 另删 {len(removed8)} 键）；其中 24 / 18 号另有"
+                  f" {len(overlap) + len(overlap4)} 行是改既有默认值、§4.1 另有 {len(overlap5)} 个键名与"
+                  f"前面的清单重名；按并集去重后 {len(union)}，再扣掉 {len(gone)} 个已删键 = {len(exp)}）")
+
+    except FileNotFoundError as exc:
+        print(f"  主线版本链不可用，跳过现算：{exc}")
+        return False, set()
+    return exp_ok, exp
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=str(Path(__file__).resolve().parent.parent))
@@ -502,86 +634,25 @@ def main() -> int:
     all_java = "\n".join(read(f) for f in java.rglob("*.java")) if java.exists() else ""
 
     print("== 1. config：文档键集 vs 生成的 toml ==")
-    design = read(doc_path(root, "01-DESIGN.md"))
-    tech = read(doc_path(root, "12-TECH-0.0.2.md"))
-    tech3 = read(doc_path(root, "18-TECH-0.0.3.md"))
-    tech4 = doc_path(root, "24-TECH-0.1.0.md")
-    tech5 = doc_path(root, "30-TECH-0.1.1.md")
-    tech6 = doc_path(root, "36-TECH-0.2.0.md")
-    tech7 = doc_path(root, "42-TECH-0.2.1.md")
-    tech54 = doc_path(root, "54-TECH-0.2.3.md")
-    base = expected_config_keys(design)
-    added = expected_config_keys_v002(tech)
-    added3 = expected_config_keys_v003(tech3)
-    if len(added3) != 19:
-        fail(f"18-TECH §8.1 解析出 {len(added3)} 行，文档口径是 19 行（表格格式变了？）")
-    # 两份 TECH 的行里各有若干行是「改既有默认值」——键名与前面的清单重名，不是新键。
-    # 因此期望集是四个清单的并集（集合去重），重复行数现算、不写死：
-    # v0.0.3 是 3 行（139 + 16 = 155），v0.1.0 再加 1 行（155 + 11 = 166）。
-    try:
-        added4, changed4 = expected_config_keys_v010(tech4)
-    except (ValueError, OSError) as exc:
-        fail(f"24-TECH §8.1 解析失败，期望键集无法现算：{exc}")
-        added4 = None
-    try:
-        added5, groups5 = expected_config_keys_v011(tech5)
-    except (ValueError, OSError) as exc:
-        fail(f"30-TECH §4.1 解析失败，期望键集无法现算：{exc}")
-        added5 = None
-    try:
-        added6, removed6 = expected_config_keys_v012(tech6)
-    except (ValueError, OSError) as exc:
-        fail(f"36-TECH §4.1.1 解析失败，期望键集无法现算：{exc}")
-        added6 = None
-    try:
-        added7, removed7 = expected_config_keys_v021(tech7)
-    except (ValueError, OSError) as exc:
-        fail(f"42-TECH §4.1.1 解析失败，期望键集无法现算：{exc}")
-        added7 = None
-    try:
-        added8, removed8 = expected_config_keys_v023(tech54)
-    except (ValueError, OSError) as exc:
-        fail(f"54-TECH §6.1/§6.2 解析失败，期望键集无法现算：{exc}")
-        added8 = None
-    if (added4 is None or added5 is None or added6 is None or added7 is None
-            or added8 is None):
-        exp_ok, exp = False, set()
-    else:
-        before6 = set(base) | set(added) | set(added3) | set(added4) | set(added5)
-        overlap = set(added3) & (set(base) | set(added))
-        overlap4 = set(added4) & (set(base) | set(added) | set(added3))
-        overlap5 = set(added5) & (set(base) | set(added) | set(added3) | set(added4))
-        overlap6 = set(added6) & before6
-        before7 = before6 | set(added6)
-        overlap7 = set(added7) & before7
-        before8 = before7 | set(added7)
-        overlap8 = set(added8) & before8
-        union = before8 | set(added8)
-        # 已删键在并集旁边扣一次（REMOVED_KEYS 的唯一用处），不散落到解析函数里；
-        # v0.2.0 的第 2 个删键由 36-TECH §4.1.1 现算（removed6）、v0.2.1 的第 3 个由
-        # 42-TECH §4.1.1 现算（removed7）、v0.2.3 的 3 个由 54-TECH §6.1 现算（removed8），
-        # 都不写死在这里。
-        gone = REMOVED_KEYS | set(removed6) | set(removed7) | set(removed8)
-        exp_ok, exp = True, union - gone
-        print(f"  30-TECH §4.1：{groups5} 组 / {len(added5)} 键"
-              f"（v0.1.1 的 58 行数据表现算，其中 {len(overlap5)} 个键名已在前四份清单里）")
-        print(f"  36-TECH §4.1.1：{len(added6) + len(removed6)} 行（增 {len(added6)} / 删 {len(removed6)}；"
-              f"v0.2.0 的 11 行数据表现算，其中 {len(overlap6)} 个键名与前面的清单重名）")
-        print(f"  42-TECH §4.1.1：{len(added7) + len(removed7)} 行（增 {len(added7)} / 删 {len(removed7)}；"
-              f"v0.2.1 的 1 行数据表现算，其中 {len(overlap7)} 个键名与前面的清单重名）")
-        print(f"  54-TECH §6.1 / §6.2：{len(added8) + len(removed8)} 行"
-              f"（增 {len(added8)} / 删 {len(removed8)}；v0.2.3 的 §6.1 一张表 + §6.2 一张表分别现算，"
-              f"其中 {len(overlap8)} 个键名与前面的清单重名）")
-        print(f"  剔除已删键 {len(gone)} 个：{'、'.join(sorted(gone))}")
-        print(f"  文档口径键数: {len(exp)}（01-DESIGN §3.8 {len(base)} + 12-TECH §8.1 {len(added)}"
-              f" + 18-TECH §8.1 {len(added3)} 行"
-              f" + 24-TECH §8.1 {len(added4) + len(changed4)} 行（新 {len(added4)} + 改 {len(changed4)}）"
-              f" + 30-TECH §4.1 {len(added5)} 键 + 36-TECH §4.1.1 {len(added6)} 键"
-              f" + 42-TECH §4.1.1 {len(added7)} 键 + 54-TECH §6.2 {len(added8)} 键"
-              f"（§6.1 另删 {len(removed8)} 键）；其中 24 / 18 号另有"
-              f" {len(overlap) + len(overlap4)} 行是改既有默认值、§4.1 另有 {len(overlap5)} 个键名与"
-              f"前面的清单重名；按并集去重后 {len(union)}，再扣掉 {len(gone)} 个已删键 = {len(exp)}）")
-    toml = root / "run/config/farmstorm-server.toml"
+    ledger_ok, ledger = load_ledger(root)
+    chain_ok, chain = derive_chain(root)
+    if ledger_ok and chain_ok:
+        if ledger != chain:
+            fail(f"本仓 2.1 节键清单与主线版本链不一致：仅本仓有 {sorted(ledger - chain)}；"
+                 f"仅主线有 {sorted(chain - ledger)}")
+        else:
+            print(f"  交叉核对: 主线版本链与本仓 2.1 节键清单一致（{len(ledger)} 键）")
+    elif not ledger_ok and not chain_ok:
+        fail("既没有 docs/zh/02-TECH-1.20.1.md 的 2.1 节键清单，也没有主线版本链文档：§1 无法核")
+    exp_ok = ledger_ok or chain_ok
+    exp = ledger if ledger_ok else chain
+    toml = next((p for p in (
+        root / "run/config/farmstorm-server.toml",
+        root / "runs/server/world/serverconfig/farmstorm-server.toml",
+        root / "runs/server/config/farmstorm-server.toml",
+    ) if p.exists()), root / "run/config/farmstorm-server.toml")
+    if toml.exists():
+        print(f"  生成 toml: {toml.relative_to(root)}")
     if not exp_ok:
         print("  生成 toml 键数: 跳过（期望集没算出来，见上面的 [FAIL]）")
     elif toml.exists():
@@ -626,7 +697,8 @@ def main() -> int:
         else:
             ok(f"{len(exp)} 个配置键与文档逐字一致（toml {len(got)} 键）")
     else:
-        warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
+        warn("farmstorm-server.toml 不存在（先跑一次 runServer）：已找 run/config/、"
+             "runs/server/world/serverconfig/、runs/server/config/ 三处")
 
     # 分母从 EXPECTED_COUNTS 现算（12 项相加 = 96，D-052），不再写第二份总数。
     expected_total = sum(EXPECTED_COUNTS.values())

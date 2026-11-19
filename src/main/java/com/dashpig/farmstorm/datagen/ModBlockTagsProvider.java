@@ -10,7 +10,8 @@ import net.minecraft.tags.BlockTags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 
 /**
- * 4 条 farmstorm 方块标签 + 2 条并入 minecraft 的挖掘标签（TECH §6.7；needs_diamond_tool 由 F-74 新建）。
+ * 4 条 farmstorm 方块标签 + 3 条并入 minecraft 的挖掘标签（TECH §6.7；needs_diamond_tool 由 F-74、
+ * needs_stone_tool 由 F-341 新建）。
  * 条目全部取自注册对象，不写字符串 ID。
  */
 public final class ModBlockTagsProvider extends BlockTagsProvider {
@@ -48,6 +49,8 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
                 FarmstormBlocks.CROP_CONVERTER.get(),
                 FarmstormBlocks.CONTROL_TERMINAL.get());
 
+        // D-278：挖速——进这条标签，镐按硬度加速；培养器与控制终端此前不在任何 mineable/* 里，
+        // v0.2.7 任何工具都挖不出掉落物，F-341 把两者补在末尾（既有 10 个成员不动）。
         tag(BlockTags.MINEABLE_WITH_PICKAXE).add(
                 FarmstormBlocks.CROP_CONVERTER.get(),
                 FarmstormBlocks.BLAST_CARROT.get(),
@@ -61,8 +64,18 @@ public final class ModBlockTagsProvider extends BlockTagsProvider {
                 // F-74：压缩干草块硬度 30，只有镐可挖
                 FarmstormBlocks.COMPRESSED_HAY_BLOCK.get(),
                 // F-168 / D-119 第 2 项：据点核心「任意等级的镐都能挖出掉落物」——只进这一条，
-                // 下面三个 needs_*_tool 一个都不加；漏了这一条，木镐挖它要按 220 秒以上且什么都不掉。
-                FarmstormBlocks.OUTPOST_CORE.get());
+                // 下面两条 needs_*_tool 一个都不加（needs_stone_tool 只给三个处理方块，
+                // needs_diamond_tool 只给压缩干草块）；漏了这一条，木镐挖它要按 220 秒以上且什么都不掉。
+                FarmstormBlocks.OUTPOST_CORE.get(),
+                FarmstormBlocks.CULTIVATOR.get(),
+                FarmstormBlocks.CONTROL_TERMINAL.get());
+
+        // D-279：算不算正确工具——原版按 needs_stone_tool 与 incorrect_for_* 分级判定这一级的镐
+        // 算不算正确工具，与上面只管挖速的 mineable/pickaxe 是两条独立的分工。
+        tag(BlockTags.NEEDS_STONE_TOOL).add(
+                FarmstormBlocks.CULTIVATOR.get(),
+                FarmstormBlocks.CROP_CONVERTER.get(),
+                FarmstormBlocks.CONTROL_TERMINAL.get());
 
         // F-74 / D-57：钻石以下（木/石/铁镐）一律不生效——它进了 incorrect_for_* 的父标签，
         // 于是「有正确工具才掉」与「工具够不够」由 requiresCorrectToolForDrops + 这条标签共同决定。

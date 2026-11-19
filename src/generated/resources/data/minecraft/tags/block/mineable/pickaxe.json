@@ -9,6 +9,8 @@
     "farmstorm:point_defense_fungus",
     "farmstorm:vibration_bean",
     "farmstorm:compressed_hay_block",
-    "farmstorm:outpost_core"
+    "farmstorm:outpost_core",
+    "farmstorm:cultivator",
+    "farmstorm:control_terminal"
   ]
 }

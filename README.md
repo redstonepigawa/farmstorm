@@ -36,7 +36,9 @@ Minecraft **1.20.1** · **Forge 47.x / NeoForge 47.x 通用** · Java **17** · 
 ### 安装
 
 1. 用启动器建一个 1.20.1 + Forge 47.x（或 NeoForge 47.x）的实例。
-2. 打开实例的 `mods` 文件夹（没有就新建），把 **`farmstorm-0.3.0+mc1.20.1.jar`** 丢进去。
+2. 打开实例的 `mods` 文件夹（没有就新建），把 **`dist/farmstorm-0.3.0+mc1.20.1.jar`** 丢进去（与 `build/libs/farmstorm-0.3.0+mc1.20.1-srg.jar` 逐字节相同，任取其一）。
+   > ⚠️ **别装 `build/libs/farmstorm-0.3.0+mc1.20.1.jar`**（不带 `-srg` 的那个）：它是开发产物，成员名仍是 Mojang 官方名，
+   > 真实实例加载会当场崩 `NoSuchMethodError: StringRepresentable.fromEnum`。两份产物同名同后缀、只差目录 —— **认 `dist/`**。
 3. 启动。创造模式物品栏最后会多一个「农场风云」标签页。
 
 **请按 MC 版本各放一份**：本模组在 1.20.1 与 1.21.1 上共用同一个 modid `farmstorm`，产物名只差 `+mc1.20.1` / `+mc1.21.1`（版本号当前是 1.20.1 = **0.3.0**、1.21.1 = **0.2.4**，两边独立演进）。同一实例里放两份只会有一份生效。
@@ -151,7 +153,7 @@ A Minecraft 1.20.1 NeoForge mod that turns vanilla crops into PvP gadgets.
 
 **v0.3.0 port for Minecraft 1.20.1** (Java 17 · modid `farmstorm`). **License: MIT** (see `LICENSE`) — code and original assets only; the three third-party audio clips listed in the asset-provenance section keep their own terms.
 
-- **Install**: build a 1.20.1 instance on **either Forge 47.x or NeoForge 47.x** (one jar works on both), drop `farmstorm-0.3.0+mc1.20.1.jar` into `mods/`. The 1.20.1 and 1.21.1 builds share the same modid `farmstorm` (current versions: 1.20.1 = **0.3.0**, 1.21.1 = **0.2.4**, evolving independently), so **keep exactly one per instance** — pick the one matching your MC version.
+- **Install**: build a 1.20.1 instance on **either Forge 47.x or NeoForge 47.x** (one jar works on both), drop **`dist/farmstorm-0.3.0+mc1.20.1.jar`** into `mods/` (byte-identical to `build/libs/farmstorm-0.3.0+mc1.20.1-srg.jar`). **Do not** use `build/libs/farmstorm-0.3.0+mc1.20.1.jar` (the one without `-srg`): it is the dev build, keeps Mojang official member names, and a real instance dies with `NoSuchMethodError: StringRepresentable.fromEnum`. The 1.20.1 and 1.21.1 builds share the same modid `farmstorm` (current versions: 1.20.1 = **0.3.0**, 1.21.1 = **0.2.4**, evolving independently), so **keep exactly one per instance** — pick the one matching your MC version.
 - **Compatibility**: network protocol string is `2` (the 1.21.1 build uses `3`); mismatched client/server are rejected cleanly. **New worlds only** — no save migration from 1.21.1.
 - **Content**: 22 crops (12 thrown / 7 deployed / 3 edible; tiers 11 / 7 / 4), 4 machines (crop converter / cultivator / outpost core / control terminal), 21 converting recipes, 16 advancements, 3 damage types, 4 mob effects.
 

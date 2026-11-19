@@ -63,6 +63,8 @@ public final class FarmstormClient {
     public static void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
         // F-227 / D-166：54 格存储界面。漏掉这一行 ⇒ 打开界面时崩或黑屏（36 号 §2.6.3）。
         event.register(FarmstormMenus.OUTPOST_CORE.get(), OutpostCoreScreen::new);
+        // F-338 / D-273：控制终端面板（0 槽，两按钮 + 一行状态）。
+        event.register(FarmstormMenus.CONTROL_TERMINAL.get(), ControlTerminalScreen::new);
     }
 
     /**

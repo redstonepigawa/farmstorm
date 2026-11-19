@@ -128,6 +128,16 @@ public class ControlTerminalBlock extends HorizontalDirectionalBlock implements 
         if (level.isClientSide) {
             return player.isSecondaryUseActive() ? InteractionResult.PASS : InteractionResult.SUCCESS;
         }
+        // 面板一开就把「绑定到底卡在哪一步」打出来：corePos 缺 / 核方块实体在不在 / 核认不认这一格。
+        // 玩家看到的永远是「未绑定」三个字，这三项才说明原因（选核没选中 vs 核没登记 vs 客户端没同步）。
+        if (level.getBlockEntity(pos) instanceof ControlTerminalBlockEntity terminal) {
+            BlockPos corePos = terminal.corePos();
+            OutpostCoreBlockEntity core = corePos != null
+                    && level.getBlockEntity(corePos) instanceof OutpostCoreBlockEntity found ? found : null;
+            Farmstorm.LOGGER.info("控制终端 {} 面板状态：Mode={} corePos={} 核方块实体在={} 核认这一格={}",
+                    pos.toShortString(), terminal.mode(), corePos, core != null,
+                    core != null && core.hasCultivator(pos));
+        }
         player.openMenu(this.getMenuProvider(state, level, pos));
         return InteractionResult.CONSUME;
     }

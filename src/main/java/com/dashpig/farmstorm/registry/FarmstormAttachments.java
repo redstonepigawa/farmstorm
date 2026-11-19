@@ -23,8 +23,8 @@ import net.minecraft.world.entity.Mob;
  *
  * @see <a href="file:///D:/project_farm1.20.1/docs/zh/02-TECH-1.20.1.md">02 号 §4.2</a>
  */
-// TODO(F-010): 若后续需要「多宿主并发写 + 版本协商」，把这里升级成 Capability（RegisterCapabilitiesEvent
-// + ICapabilitySerializable）；本轮只要求 compileJava 变绿，按 02 号 §4.2 的 NBT 等价口径落地。
+// 移植债（F-010，作者裁定登记到 v0.4，见 docs/zh/FOLLOWUP-0.4-1.20.1.md）：「多宿主并发写 + 版本协商」
+// 需要 Capability（RegisterCapabilitiesEvent + ICapabilitySerializable）；v0.3.0 仍按 02 号 §4.2 的 NBT 等价口径落地。
 public final class FarmstormAttachments {
 
     /** 实体持久 NBT 键（02 号 §4.2 约定的 {@code FarmstormAiSuspend}）。 */

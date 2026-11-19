@@ -80,14 +80,17 @@ public class BambooFirecrackerProjectile extends ThrownCropEntity {
     /**
      * 在自身水平 ±FIRECRACKER_SCATTER 内起一次爆炸（1.20.1 没有 {@code WindCharge}）。
      *
-     * <p>威力按原版风弹的 1.2 取，不破块、不起火（{@code ExplosionInteraction.NONE}），
-     * 与原版风弹「只推不拆」的口径一致。风弹那套击退修正与粒子在 1.20.1 不存在，见 TODO(F-012)。
+     * <p>威力取 {@link #EXPLOSION_POWER}（0.6）：原版风弹是 1.2，但它在 1.20.1 里伤害明显过高 ——
+     * 风弹本体另有一套击退修正而这里没有，所以按作者要求减半。不破块、不起火
+     * （{@code ExplosionInteraction.NONE}），与原版风弹「只推不拆」的口径一致。
+     * <p>仍缺的是击退修正与风弹粒子，见 §移植缺口（F-012）。
      */
-    // TODO(F-012): 1.20.1 无 WindCharge；当前用等价威力的无破块爆炸近似，击退修正与风弹粒子待补齐。
+    // 移植缺口（F-012）：1.20.1 无 WindCharge；这里用「减半威力的无破块爆炸」近似，
+    // 缺的是风弹那套击退修正与 gust 粒子（登记在 docs/zh/FOLLOWUP-0.4-1.20.1.md）。
     private void spawnWindCharge(ServerLevel level) {
         Vec3 origin = this.position();
         double x = origin.x + Mth.nextDouble(this.random, -FIRECRACKER_SCATTER, FIRECRACKER_SCATTER);
         double z = origin.z + Mth.nextDouble(this.random, -FIRECRACKER_SCATTER, FIRECRACKER_SCATTER);
-        level.explode(this, x, origin.y, z, 1.2F, Level.ExplosionInteraction.NONE);
+        level.explode(this, x, origin.y, z, EXPLOSION_POWER, Level.ExplosionInteraction.NONE);
     }
 }

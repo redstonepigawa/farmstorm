@@ -152,8 +152,8 @@ public final class InputLockHandler {
      * 视角：1.20.1 没有 {@code CalculatePlayerTurnEvent}（1.21 才加的），改挂在 {@link ViewportEvent.ComputeCameraAngles}
      * 上把相机角度钉回上一帧的读数——等价于「鼠标转了但镜头不跟」，即原口径的「灵敏度压到 0」。
      */
-    // TODO(F-013): 1.20.1 无 CalculatePlayerTurnEvent；当前用 ComputeCameraAngles 冻结角度近似，
-    // 若要真正拦在 MouseHandler 之前仍需 Mixin / 核心模组。
+    // 移植差异（F-013，作者已接受当前等价实现）：1.20.1 无 CalculatePlayerTurnEvent，
+    // 视角只能在渲染阶段钉回上一帧；真要拦在 MouseHandler 之前需要 Mixin 或核心模组（本项目 Mixin 0）。
     @SubscribeEvent
     public static void onTurn(ViewportEvent.ComputeCameraAngles event) {
         if (fullyLocked()) {

@@ -140,6 +140,9 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
 
         // ---- 1 张农作物培养器表：掉自身（F-225 / D-160；槽里的那一个由 CultivatorBlock#onRemove 负责，F-237）----
         this.add(FarmstormBlocks.CULTIVATOR.get(), this.createSingleItemTable(FarmstormBlocks.CULTIVATOR.get()));
+
+        // F-347 / D-259：控制终端掉自己（单物品表），与另外两个处理方块同形
+        this.add(FarmstormBlocks.CONTROL_TERMINAL.get(), this.createSingleItemTable(FarmstormBlocks.CONTROL_TERMINAL.get()));
     }
 
     /**
@@ -231,6 +234,7 @@ public final class ModLootTableProvider extends BlockLootSubProvider {
                 FarmstormBlocks.CROP_CONVERTER.get(),
                 FarmstormBlocks.CULTIVATOR.get(),
                 // F-297：平凡作物的那张表（漏登记 ⇒ BlockLootSubProvider 的 validate 报缺表）
-                FarmstormBlocks.PLAIN_CHIVES_CROP.get());
+                FarmstormBlocks.PLAIN_CHIVES_CROP.get(),
+                FarmstormBlocks.CONTROL_TERMINAL.get());
     }
 }

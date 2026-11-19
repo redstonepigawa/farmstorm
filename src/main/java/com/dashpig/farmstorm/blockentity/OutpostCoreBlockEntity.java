@@ -114,15 +114,18 @@ public class OutpostCoreBlockEntity extends BlockEntity implements Container {
      * 「方块 → {@code Link.Kind}」的单一映射（F-317 / D-235）：{@link CoreBound} 不承担类型（D-234）、
      * 标签只存方块 id（{@code util/FarmstormTags.java:30} 是 {@code TagKey<Block>}），于是 kind 只能查这张表。
      *
+     * <p>控制终端 → {@code Link.Kind.TERMINAL}（D-263）：标签只负责「被发现」，类型只由本表决定（N-177）。
+     *
      * <p>取值点取到 {@code null} 就 {@code continue}：**没登记进本表的新标签成员只被发现、不写 kind、
      * 不绑定**（58 号 §8 第 4 条的已知限制，RT-86）。新增标签成员时必须同时登记本表与
-     * {@code datagen/ModBlockTagsProvider.java:44-47}（两处同改，BRIEF §7 第 1 条）。
+     * {@code datagen/ModBlockTagsProvider} 的 {@code PROCESSING_BLOCK} 合并（两处同改，BRIEF §7 第 1 条）。
      *
      * <p>不复用方法名 {@code kindOf}：{@link #kindOf(BlockPos)} 是迁移取 kind，同名不同参会造出第二份真相。
      */
     private static final Map<Block, Link.Kind> KIND_BY_BLOCK = Map.of(
             FarmstormBlocks.CULTIVATOR.get(), Link.Kind.CULTIVATOR,
-            FarmstormBlocks.CROP_CONVERTER.get(), Link.Kind.CROP_CONVERTER);
+            FarmstormBlocks.CROP_CONVERTER.get(), Link.Kind.CROP_CONVERTER,
+            FarmstormBlocks.CONTROL_TERMINAL.get(), Link.Kind.TERMINAL);
 
     /** 两档衰减（23 号 §8.7）：矩形内的玩家每轮满点；矩形外扩 16 格的余量带每 4 轮 1 次；再远不发。 */
     private static final double RING_MARGIN = 16.0;

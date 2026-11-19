@@ -1,6 +1,7 @@
 {
   "values": [
     "farmstorm:cultivator",
-    "farmstorm:crop_converter"
+    "farmstorm:crop_converter",
+    "farmstorm:control_terminal"
   ]
 }

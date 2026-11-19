@@ -4,6 +4,7 @@ import com.dashpig.farmstorm.config.FarmstormConfig;
 import com.dashpig.farmstorm.entity.ThrownCropEntity;
 import com.dashpig.farmstorm.explosion.BlastRule;
 import com.dashpig.farmstorm.util.CropProfile;
+import com.dashpig.farmstorm.util.PuffedHayData;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -99,6 +100,10 @@ public class PuffedWheatProjectile extends ThrownCropEntity {
      *
      * <p>白名单由 {@code compressed.replaceOnlyAirAndFluid} 开关（默认 true）；关掉时回到 0.0.4 的行为，
      * 只剩抗性底线——这是验收里的对照实验。压缩膨胀麦只重写 {@link #fillBlock()}，共用这一份判定。
+     *
+     * <p>登记点：写成功且是原版干草块（D-285 / RT-93）。两道判据缺一不可——只有 {@code setBlock} 真的写进去
+     * 才登记（被上面两条 {@code continue} 跳过的格子一律不记）；只有写入的是 {@link Blocks#HAY_BLOCK} 才登记，
+     * 否则压缩膨胀麦复用的这一份循环会把压缩干草块也记成「该不掉落」。
      */
     @SuppressWarnings("deprecation")
     private void fillHay(ServerLevel level, BlockPos center, int edge) {
@@ -116,7 +121,9 @@ public class PuffedWheatProjectile extends ThrownCropEntity {
                     if (onlyAirAndFluid && !isAirOrFluid(current)) {
                         continue;
                     }
-                    level.setBlock(pos, hay, Block.UPDATE_ALL);
+                    if (level.setBlock(pos, hay, Block.UPDATE_ALL) && hay.is(Blocks.HAY_BLOCK)) {
+                        PuffedHayData.get(level.getServer()).add(pos);
+                    }
                 }
             }
         }

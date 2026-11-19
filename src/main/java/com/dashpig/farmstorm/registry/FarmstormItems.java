@@ -20,9 +20,10 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 34 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器、v0.2.2 按 D-193 加 1 个平凡韭菜）：
- * 22 个作物 + 7 个独立播种物 + 4 个方块物品（转换器 / 压缩干草块 / 据点核心 / 农作物培养器）
+ * 35 个物品（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器、v0.2.2 按 D-193 加 1 个平凡韭菜）：
+ * 22 个作物 + 7 个独立播种物 + 5 个方块物品（转换器 / 压缩干草块 / 据点核心 / 农作物培养器 / 控制终端）
  * + 1 个平凡农作物（平凡韭菜：不是作物、没有 CropProfile）。
+ * v0.3.0 按 D-259 加 1 个控制终端。
  * 堆叠数按 D-16 分两档，实际数值来自 stack.*（§4.11.5）。
  */
 public final class FarmstormItems {
@@ -127,6 +128,10 @@ public final class FarmstormItems {
     public static final DeferredItem<PlainSeedItem> PLAIN_CHIVES_SEEDS = REGISTER.registerItem("plain_chives_seeds",
             properties -> new PlainSeedItem(FarmstormBlocks.PLAIN_CHIVES_CROP.get(), properties), otherProperties());
 
+    /** v0.3.0 的第 5 个方块物品（F-331 / D-259）：控制终端的 BlockItem，创造栏与 /give 是两个入口。 */
+    public static final DeferredItem<BlockItem> CONTROL_TERMINAL = REGISTER.registerItem("control_terminal",
+            properties -> new BlockItem(FarmstormBlocks.CONTROL_TERMINAL.get(), properties), otherProperties());
+
     private FarmstormItems() {}
 
     /** 创造标签页内容：作物 → 播种物 → 工具方块（TECH §3.6）。 */
@@ -141,6 +146,8 @@ public final class FarmstormItems {
         items.add(PLAIN_CHIVES);
         // F-298：平凡韭菜种子同属「手写」这一档（不占 CROP_ITEMS），漏了它创造栏里就没有播种物。
         items.add(PLAIN_CHIVES_SEEDS);
+        // F-331：控制终端同属「手写」这一档（不占 CROP_ITEMS），漏了它创造栏里就没有这台机器。
+        items.add(CONTROL_TERMINAL);
         return items;
     }
 

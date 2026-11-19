@@ -1,6 +1,7 @@
 package com.dashpig.farmstorm.registry;
 
 import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.block.ControlTerminalBlock;
 import com.dashpig.farmstorm.block.CropConverterBlock;
 import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
@@ -18,8 +19,9 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * 27 个方块（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器）：
- * 15 个作物 + 8 个部署 + 1 个转换器 + 1 个压缩干草块 + 1 个据点核心 + 1 个农作物培养器。
+ * 29 个方块（TECH §2.2；v0.1.0 按 D-119 加 1 个据点核心、v0.2.0 按 D-160 加 1 个培养器）：
+ * 15 个作物 + 8 个部署 + 1 个转换器 + 1 个压缩干草块 + 1 个据点核心 + 1 个农作物培养器 + 1 个平凡作物 + 1 个控制终端。
+ * v0.3.0 按 D-259 加 1 个控制终端。
  * 作物方块共用一个类且不注册 BlockItem（D-34 / T-01）。
  */
 public final class FarmstormBlocks {
@@ -117,6 +119,17 @@ public final class FarmstormBlocks {
                     .noCollission()
                     .instabreak()
                     .sound(SoundType.CROP));
+
+    // ---- 1 个控制终端（F-331 / D-259）：属性五行逐项照农作物培养器（铁砧口径）----
+    /** 本版只落注册面：模式三态 / 投料 / 绑定分在 F-333 / F-336 / F-337（见 ControlTerminalBlock 类注释）。 */
+    public static final DeferredBlock<ControlTerminalBlock> CONTROL_TERMINAL = REGISTER.registerBlock("control_terminal",
+            ControlTerminalBlock::new,
+            BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(5.0F, 1200.0F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.ANVIL)
+                    .pushReaction(PushReaction.BLOCK));
 
     private FarmstormBlocks() {}
 

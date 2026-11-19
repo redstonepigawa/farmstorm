@@ -104,6 +104,8 @@ public final class ModLangProvider extends LanguageProvider {
         item(entries, "plain_chives", "平凡韭菜", "Plain Chives");
         // ---- v0.2.3 的 1 个新物品（F-298 / D-216 / 54 号 §7.2 第 2 行）：平凡韭菜种子，新类 PlainSeedItem 可播种 ----
         item(entries, "plain_chives_seeds", "平凡韭菜种子", "Plain Chives Seeds");
+        // ---- v0.3.0 的 1 个新物品（F-331 / D-259）：控制终端 ----
+        item(entries, "control_terminal", "控制终端", "Control Terminal");
         // ---- 20 个方块（TECH §3.2；作物方块与作物物品同名，前缀不同不冲突）----
         block(entries, "puffed_wheat_crop", "膨胀麦", "Puffed Wheat");
         block(entries, "blast_carrot_crop", "胡罗贝", "Blast Carrot");
@@ -138,6 +140,8 @@ public final class ModLangProvider extends LanguageProvider {
         block(entries, "cultivator", "农作物培养器", "Cultivator");
         // ---- v0.2.3 的 1 个新方块（F-297 / D-215 / 54 号 §7.2 第 1 行）：平凡作物，age 0~3、不进 CropProfile ----
         block(entries, "plain_chives_crop", "平凡韭菜", "Plain Chives");
+        // ---- v0.3.0 的 1 个新方块（F-331 / D-259）：控制终端 ----
+        block(entries, "control_terminal", "控制终端", "Control Terminal");
         // ---- 13 个实体类型（TECH §3.4）----
         entity(entries, "puffed_wheat", "膨胀麦", "Puffed Wheat");
         entity(entries, "ubi_server", "育碧服务器", "Ubi Server");

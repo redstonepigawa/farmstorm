@@ -17,10 +17,11 @@ r"""Farmstorm v0.1.1 静态验收器。
                    + docs/zh/54-TECH-0.2.3.md §6.1（v0.2.3 的 3 行删：`[converter]` 整组）/ §6.2（v0.2.3 的
                    2 行增：`crop_converter.processTicks` 与 `pumpkin_turret.bulletLifetimeTicks`，F-308）
                    ⇒ 176 − 3 + 2 = **175** 个键
-  - 92 个注册 ID  <- docs/zh/36-TECH-0.2.0.md §1.2 的 v0.2.0 列逐类小计（12 类，相加 97；
+  - 96 个注册 ID  <- docs/zh/36-TECH-0.2.0.md §1.2 的 v0.2.0 列逐类小计（12 类，相加 97；
                    基线 93 见 24-TECH-0.1.0.md §2.1，v0.2.0 +4）+ v0.2.2 的 1 个物品
                    （`plain_chives`，F-268 / D-193）+ v0.2.3 的 D-205 逐类算式（items −7 +1、blocks +1、
                    menu_type −1 ⇒ 98 → 92）
+                   + v0.3.0 的 D-289 四类 +1（items / blocks / block_entity_type / menu_type）⇒ 92 + 1 + 1 + 1 + 1 = 96
 
 用法：python -X utf8 tools/verify_project.py [--root <仓库根>]
 """
@@ -414,6 +415,7 @@ EXPECTED = {
         "cultivator",  # v0.2.0 的培养器方块物品（36-TECH §1.2）
         "plain_chives",  # v0.2.2 的平凡农作物（F-268 / D-193；非作物，没有 CropProfile）
         "plain_chives_seeds",  # v0.2.3 的平凡韭菜种子（F-298 / D-216：PlainSeedItem，可播种）
+        "control_terminal",  # v0.3.0 的控制终端方块物品（F-331 / D-259）
     ],
     "blocks": [
         "puffed_wheat_crop", "blast_carrot_crop", "ubi_server_crop", "toxic_ubi_server_crop",
@@ -427,12 +429,14 @@ EXPECTED = {
         "outpost_core",  # v0.1.0 的据点核心方块（24-TECH §1.4 G1）
         "cultivator",  # v0.2.0 的培养器方块（36-TECH §1.2）
         "plain_chives_crop",  # v0.2.3 的平凡作物方块（F-297 / D-215：PlainCropBlock，age 0~3，不进 CropProfile）
+        "control_terminal",  # v0.3.0 的控制终端方块（F-331 / D-259）
     ],
     "block_entity_type": [
         "blast_carrot", "pumpkin_turret", "awakened_torchflower",
         "awakened_pitcher_plant", "fang_trap_cactus", "crop_converter",  # v0.2.3 改名（D-206，F-287）
         "outpost_core",  # v0.1.0 新建的 BlockEntityType（24-TECH §2.2 注 1）
         "cultivator",  # v0.2.0 的培养器 BlockEntityType（36-TECH §1.2）
+        "control_terminal",  # v0.3.0 的终端 BlockEntityType（F-333 / D-264）
     ],
     "entity_type": [
         "puffed_wheat", "ubi_server", "toxic_ubi_server", "melon_slice_bomb", "melon_grenade",
@@ -446,19 +450,21 @@ EXPECTED = {
     "creative_mode_tab": ["main"],
     "damage_type": ["void_bolt", "crop_blast", "zangief_slam"],
     "data_component_type": ["temporary_enchantments"],
-    # v0.2.0 的核心存储菜单（36-TECH §1.2）；v0.2.3 的转换器菜单随 GUI 一起下线（D-205、F-289）
-    "menu_type": ["outpost_core"],
+    # v0.2.0 的核心存储菜单（36-TECH §1.2）；v0.2.3 的转换器菜单随 GUI 一起下线（D-205、F-289）；
+    # v0.3.0 的控制面板（D-273）
+    "menu_type": ["outpost_core", "control_terminal"],
 }
 
 # 36-TECH-0.2.0 §1.2 的 v0.2.0 列：12 类逐类小计，相加 97（基线 93 + 本版 4）。
 # v0.2.2 在这一列上再 +1 个物品（`plain_chives`，F-268 / D-193）⇒ 98。
 # v0.2.3 按 D-205 的逐类算式再改三类：items −7 +1（删 7 个播种物、加 `plain_chives_seeds`）、
-# blocks +1（`plain_chives_crop`）、menu_type −1（删 `converter`）⇒ 下面的 EXPECTED_COUNTS 相加 92。
+# blocks +1（`plain_chives_crop`）、menu_type −1（删 `converter`）。
+# v0.3.0 按 D-289 再加四类 +1（items / blocks / block_entity_type / menu_type）⇒ 92 + 1 + 1 + 1 + 1 = 96。
 # ID 清单少一个、多一个都在这里露出来。
 EXPECTED_COUNTS = {
-    "items": 28,
-    "blocks": 28,
-    "block_entity_type": 8,
+    "items": 29,
+    "blocks": 29,
+    "block_entity_type": 9,
     "entity_type": 13,
     "mob_effect": 4,
     "sound_event": 3,
@@ -467,7 +473,7 @@ EXPECTED_COUNTS = {
     "creative_mode_tab": 1,
     "damage_type": 3,
     "data_component_type": 1,
-    "menu_type": 1,
+    "menu_type": 2,
 }
 
 
@@ -606,7 +612,7 @@ def main() -> int:
     else:
         warn("run/config/farmstorm-server.toml 不存在（先跑一次 runServer）")
 
-    # 分母从 EXPECTED_COUNTS 现算（12 项相加 = 92，D-205），不再写第二份总数。
+    # 分母从 EXPECTED_COUNTS 现算（12 项相加 = 96：D-205 的 92 + D-289 的四类 +1），不再写第二份总数。
     expected_total = sum(EXPECTED_COUNTS.values())
     print(f"== 2. {expected_total} 个注册 ID 逐字核对（全源码树） ==")
     total = 0

@@ -63,12 +63,16 @@ public record CultivatorLinkPayload(List<Link> links) implements CustomPacketPay
     public record Link(BlockPos core, BlockPos cultivator, Kind kind) {
         /**
          * 连线类型（F-302 / D-210 / 54 号 §5.1）：线上各占 **1 字节**，{@code CULTIVATOR = 0}、
-         * {@code CROP_CONVERTER = 1}。未知码按 {@link #CULTIVATOR} 解——第三类机器的服务端连到旧客户端时，
-         * 画出来是既有的青色线，而不是崩或画错色（前向兼容）。
+         * {@code CROP_CONVERTER = 1}、{@code TERMINAL = 2}。未知码按 {@link #CULTIVATOR} 解——第三类机器的服务端
+         * 连到旧客户端时，画出来是既有的青色线，而不是崩或画错色（前向兼容）。
+         *
+         * <p><b>既有两值的线上码一个都不许改</b>（HC-191 / 红线 2 / D-274）：新值只能往后排。重排会让旧客户端
+         * 把培养器看成转换器，也会让存档里平行列表（{@code CultivatorKinds}，按 {@link #id()} 存 int）整体错位。
          */
         public enum Kind {
             CULTIVATOR(0),
-            CROP_CONVERTER(1);
+            CROP_CONVERTER(1),
+            TERMINAL(2);
 
             private final int id;
 

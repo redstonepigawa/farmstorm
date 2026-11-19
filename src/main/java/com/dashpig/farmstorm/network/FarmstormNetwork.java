@@ -25,8 +25,12 @@ public final class FarmstormNetwork {
      * （D-210 的强制连带项 / 54 号 §5.5 / A-99 / 死命令 5）。停在 2 会让 0.2.2 客户端**协商通过**
      * 之后按旧 codec 解新字节流，那是必崩的解码错误；升到 3 之后 {@code optional()} 让它拿不到这条通道，
      * 只是没有连线、不崩。
+     *
+     * v0.3.0：{@code Link.Kind} 多一枚举值（{@code TERMINAL = 2}）⇒ 3 → 4（D-274 / D-276）。
+     * 多加一个枚举值等于扩充线上码的取值域：拿 4 协商的客户端会认得 {@code 2}，而停在 3 的旧客户端只会
+     * 把它回落成 {@code CULTIVATOR} —— 协议串必须与取值域同步升，否则「谁认得 2」变成猜。
      */
-    public static final String PROTOCOL_VERSION = "3";
+    public static final String PROTOCOL_VERSION = "4";
 
     private FarmstormNetwork() {}
 

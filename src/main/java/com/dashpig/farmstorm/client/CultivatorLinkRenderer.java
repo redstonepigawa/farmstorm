@@ -57,6 +57,14 @@ public final class CultivatorLinkRenderer {
     private static final float CONVERTER_GREEN = 0.22F;
     private static final float CONVERTER_BLUE = 0.22F;
 
+    /**
+     * 控制终端：绿（F-334 / D-275）。D-275：R 与 G 取青的两个分量，只把 B 从 0.90 压到 0.30 —— 亮度与青一致，
+     * 三色并排时没有一条偏暗；也不与既有的红、青任一分量撞色。
+     */
+    private static final float TERMINAL_RED = 0.30F;
+    private static final float TERMINAL_GREEN = 0.85F;
+    private static final float TERMINAL_BLUE = 0.30F;
+
     private static final float ALPHA = 1.0F;
 
     /** 端点小框边长 0.25 格（36 号附录 A 第 9 项）：以格心为中心，各方向 ±0.125。 */
@@ -99,6 +107,11 @@ public final class CultivatorLinkRenderer {
                 }
                 case CULTIVATOR -> {
                     // 保持默认的青色（D-210 第 4 条：三个分量一个字节都不许变）
+                }
+                case TERMINAL -> {
+                    red = TERMINAL_RED;
+                    green = TERMINAL_GREEN;
+                    blue = TERMINAL_BLUE;
                 }
             }
             LevelRenderer.renderLineBox(poseStack, consumer,

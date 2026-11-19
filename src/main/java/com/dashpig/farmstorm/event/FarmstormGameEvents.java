@@ -7,6 +7,7 @@ import com.dashpig.farmstorm.network.CultivatorLinkBroadcaster;
 import com.dashpig.farmstorm.outpost.CoreChunkTickets;
 import com.dashpig.farmstorm.trap.TrapImmunity;
 import com.dashpig.farmstorm.util.FarmstormTags;
+import com.dashpig.farmstorm.util.PuffedHayData;
 import com.dashpig.farmstorm.util.TempEnchantHandler;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
@@ -27,7 +30,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 /**
  * game 总线事件（TECH §2 / §4.10 / F-15 ~ F-17）。
- * 只做九件事，一条对应 {@link #register} 里的一行监听器注册，顺序同 {@code register}：
+ * 只做十件事，一条对应 {@link #register} 里的一行监听器注册，顺序同 {@code register}：
  * ① {@code onPlayerTick}——每 20 tick 的临时附魔自愈与心跳日志；
  * ② {@code onPlayerLoggedIn}——登录时对账，账本里还留着记录就立刻还原创造模式；
  * ③ {@code onPlayerLoggedOut}——登出时还原创造模式，并清掉陷阱免疫与两路广播的登出记录；
@@ -36,7 +39,8 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
  * ⑥ {@code onExplosionDetonate}——爆炸免疫方块拦截：从 {@code getAffectedBlocks()} 里摘掉它们（D-14 / RT-08）；
  * ⑦ {@code onLevelTickPost}——爆炸队列的每 tick 结算点（{@code ExplosionQueue.drain}）；
  * ⑧ {@code onServerTickPost}——一次性启动闸（{@code CoreChunkTickets.restoreAll}）加两路广播的每刻 tick；
- * ⑨ {@code onServerStopping}——停服释放区块票并复位闸。
+ * ⑨ {@code onServerStopping}——停服释放区块票并复位闸；
+ * ⑩ 破坏事件：膨胀麦落点的干草块 0 掉落（F-345 / D-286）。
  * F-157 / F-158 / F-194 的耕地相关监听器已在 v0.2.4 随耕地包一并删除。
  * 服务端 {@code /farmstorm} 指令树已在 F-197 整棵删除（D-140）；客户端 {@code /farmstorm hud} 是另一条注册，不在这里。
  * 不注册任何方块实体 tick（F-15 ③），也不在客户端进入任何判定路径（HC-03）。
@@ -76,6 +80,7 @@ public final class FarmstormGameEvents {
         gameBus.addListener(FarmstormGameEvents::onLevelTickPost);
         gameBus.addListener(FarmstormGameEvents::onServerTickPost);
         gameBus.addListener(FarmstormGameEvents::onServerStopping);
+        gameBus.addListener(FarmstormGameEvents::onBlockDrops);
     }
 
     /** 每 20 tick：临时附魔自愈（光环到期撤销也走这条）+ 可开关的心跳日志。 */
@@ -188,6 +193,28 @@ public final class FarmstormGameEvents {
     private static void onServerStopping(ServerStoppingEvent event) {
         CoreChunkTickets.releaseAll(event.getServer());
         startupDone = false;
+    }
+
+    /**
+     * 膨胀麦落点的干草块被破坏时清空掉落（F-345 / D-286）。
+     *
+     * <p>判据两条必须同时成立：这一格确实是原版干草块（{@link Blocks#HAY_BLOCK}），且坐标在
+     * {@link PuffedHayData} 记录里。只判坐标会让「同一格换成别的方块再拆」也被清空（陷阱 30）。
+     *
+     * <p>只清 {@code getDrops()}，**不是**把事件取消掉：取消会连经验与 {@code spawnAfterBreak}
+     * 一起掐掉（D-286 的补充）。
+     */
+    private static void onBlockDrops(BlockDropsEvent event) {
+        if (!event.getState().is(Blocks.HAY_BLOCK)) {
+            return;
+        }
+        PuffedHayData data = PuffedHayData.get(event.getLevel().getServer());
+        BlockPos pos = event.getPos();
+        if (!data.contains(pos)) {
+            return;
+        }
+        event.getDrops().clear();
+        data.remove(pos);
     }
 
     /**

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "farmstorm:block/control_terminal_a_bottom",
+    "east": "farmstorm:block/control_terminal_a_side",
+    "north": "farmstorm:block/control_terminal_a_front",
+    "particle": "farmstorm:block/control_terminal_a_front",
+    "south": "farmstorm:block/control_terminal_a_side",
+    "up": "farmstorm:block/control_terminal_a_top",
+    "west": "farmstorm:block/control_terminal_a_side"
+  }
+}

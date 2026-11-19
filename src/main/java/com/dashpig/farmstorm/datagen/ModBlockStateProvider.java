@@ -1,6 +1,7 @@
 package com.dashpig.farmstorm.datagen;
 
 import com.dashpig.farmstorm.Farmstorm;
+import com.dashpig.farmstorm.block.ControlTerminalBlock;
 import com.dashpig.farmstorm.block.CropConverterBlock;
 import com.dashpig.farmstorm.block.CultivatorBlock;
 import com.dashpig.farmstorm.block.DeployedCropBlock;
@@ -83,6 +84,8 @@ public final class ModBlockStateProvider extends BlockStateProvider {
                 outpostCoreStates(block);
             } else if (block instanceof CultivatorBlock) {
                 cultivatorStates(block);
+            } else if (block instanceof ControlTerminalBlock) {
+                controlTerminalStates(block);
             } else if ("compressed_hay_block".equals(registryPath(block))) {
                 compressedHayStates(block);
             } else {
@@ -258,6 +261,25 @@ public final class ModBlockStateProvider extends BlockStateProvider {
     }
 
     /**
+     * 控制终端（F-332 / D-259）：只有 {@code facing} 一个属性，四个 variant 共用一个模型
+     * {@code models/block/control_terminal.json}（模型 id <b>不带</b> {@code _a}，只有贴图文件名带）。
+     *
+     * <p><b>不能用 {@code simpleBlock(block)}</b>：它只出 {@code ""} 单态，4 个朝向里 3 个找不到模型
+     * （N-173 / 陷阱 12）。朝向走 {@link #facingRotationY}，不用 {@code Direction#toYRot()}（差 180°，陷阱 20）。
+     * 三面动画由贴图自带的 mcmeta 自播，本版<b>没有</b> working 属性、不按状态切模型（N-171）。
+     */
+    private void controlTerminalStates(Block block) {
+        String name = registryPath(block);
+        BlockModelBuilder model = cubeSixFaces(name, name + "_a_front", name + "_a_side",
+                name + "_a_top", name + "_a_bottom");
+        getVariantBuilder(block).forAllStates(state -> ConfiguredModel.builder()
+                .modelFile(model)
+                .rotationY(facingRotationY(state.getValue(ControlTerminalBlock.FACING)))
+                .uvLock(true)
+                .build());
+    }
+
+    /**
      * 压缩麦方块（F-165 / D-107 第 1、2 项）：顶 / 侧 / 底三张不同，父模型 cube_bottom_top。
      * 侧贴图沿用原文件名，只有顶 / 底带 _top / _bottom 后缀 —— 与据点核心的 _side 命名不同，故单独一个方法。
      */
@@ -300,7 +322,10 @@ public final class ModBlockStateProvider extends BlockStateProvider {
         return id.getPath();
     }
 
-    /** 本模组注册的 26 个方块：15 作物 + 8 部署 + 1 转换器 + 1 普通方块（compressed_hay_block）+ 1 据点核心（outpost_core）。 */
+    /**
+     * 本模组注册的 29 个方块：15 作物 + 8 部署 + 1 转换器 + 1 压缩干草块（compressed_hay_block）+ 1 据点核心（outpost_core）
+     * + 1 农作物培养器（cultivator）+ 1 平凡作物（plain_chives）+ 1 控制终端（control_terminal）。
+     */
     private static List<Block> farmstormBlocks() {
         List<Block> blocks = new ArrayList<>();
         for (Block block : BuiltInRegistries.BLOCK) {

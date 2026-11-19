@@ -23,6 +23,8 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -41,7 +43,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * <p>模式三态在方块实体侧（F-333 已落）；放置绑定已落（F-336），终端**不写 {@code onRemove}**：
  * 它没有内部槽位、无需掉落，核侧名单由 {@link OutpostCoreBlockEntity#pruneCultivators} 惰性清理；
  * 三个解绑出口（接替核改绑 / 清 {@code Core} 留原地 / 区块未加载保留）全在核的
- * {@code settleOnRemoval} 里，与方块类无关。{@code getTicker}（投料循环）归 F-340；
+ * {@code settleOnRemoval} 里，与方块类无关。{@code getTicker}（投料循环）已落地（F-340）；
  * {@code getMenuProvider} / {@code useWithoutItem}（面板的开入口）已落地（F-337）。
  */
 public class ControlTerminalBlock extends BaseEntityBlock {
@@ -73,6 +75,20 @@ public class ControlTerminalBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new ControlTerminalBlockEntity(pos, state);
+    }
+
+    /** 服务端 ticker（F-340；与 {@code CultivatorBlock} 逐字同形）；客户端永不 tick（HC-03）。 */
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
+        if (level.isClientSide) {
+            return null;
+        }
+        return (tickLevel, pos, tickState, blockEntity) -> {
+            if (blockEntity instanceof ControlTerminalBlockEntity terminal) {
+                ControlTerminalBlockEntity.serverTick(tickLevel, pos, tickState, terminal);
+            }
+        };
     }
 
     /**

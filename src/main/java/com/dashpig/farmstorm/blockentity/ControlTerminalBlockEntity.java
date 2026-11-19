@@ -1,10 +1,13 @@
 package com.dashpig.farmstorm.blockentity;
 
+import com.dashpig.farmstorm.network.CultivatorLinkPayload.Link;
 import com.dashpig.farmstorm.registry.FarmstormBlockEntities;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -17,13 +20,25 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>{@code corePos} 是<b>引用缓存</b>，不构成第二份绑定真相（D-264 / D-165）：绑定关系的唯一真相
  * 在核侧列表，使用前要用核侧列表校验。
  *
- * <p>刻意<b>不 tick</b>（投料循环整段归 F-340），面板归 F-337。
+ * <p><b>服务端每 20 刻投料一轮</b>（F-340）：节拍是编译期常量 {@link #FEED_INTERVAL_TICKS}，<b>不是</b>
+ * 配置键（D-271）——本版 server config 仍是 175 键，投料间隔没有可调项。
+ *
+ * <p>三条纪律：① <b>准入只借机器自己的闸</b>（{@code CultivatorBlockEntity#canInsert} /
+ * {@code CropConverterBlockEntity#canInsert}，D-272），本类里<b>一个物品白名单都没有</b>，
+ * 数据包新增配方机器自动多收一个；② 模式 → {@link Link.Kind} 是<b>显式映射</b>
+ * ——两个枚举的序号并不同（{@code Mode.CULTIVATOR} 是 1，而 {@code Kind} 的 1 是
+ * {@code CROP_CONVERTER}），拿枚举序号当 kind 会把培养器写成转换器；③ <b>每台机器每轮最多 1 个</b>，
+ * 第一次投进就 {@code break}，剩下的格子留给下一轮（20 刻之后）。
+ *
+ * <p>客户端永不 tick，面板归 F-337。
  */
 public class ControlTerminalBlockEntity extends BlockEntity implements CoreBound {
     /** 模式的 NBT 键（D-269）：{@code String}，存可读名而不是枚举序号。 */
     private static final String TAG_MODE = "Mode";
     /** 绑定核坐标的 NBT 键（D-264）：{@code long}（{@link BlockPos#asLong()}）；**缺键 = 未绑定**。 */
     private static final String TAG_CORE = "Core";
+    /** 投料节拍（D-271）：编译期常量，**不是**配置键 —— server config 仍是 175 键。 */
+    private static final int FEED_INTERVAL_TICKS = 20;
 
     /**
      * 模式三态（D-269）：枚举序 0/1/2 与存盘名解耦——落盘写的是小写可读名而不是序号，
@@ -93,6 +108,92 @@ public class ControlTerminalBlockEntity extends BlockEntity implements CoreBound
     public void clearCore() {
         this.corePos = null;
         this.setChanged();
+    }
+
+    // ---- F-340 · 服务端每 20 刻投料一轮（D-271 / D-272）----
+
+    /**
+     * 服务端投料循环：每 {@link #FEED_INTERVAL_TICKS} 刻，把核库存里**机器自己肯收**的那一格投给
+     * 核侧名单上、kind 与本模式匹配的每一台机器（**每台每轮最多 1 个**）。
+     *
+     * <p>前七步全是**静默边界**：客户端、未到节拍、{@link Mode#OFF}、未绑定、核不在内存、核侧名单不认这台、
+     * 超出 3 × 3 区块范围 —— 任一成立就本轮什么都不做，不报错、不广播、不动库存。
+     *
+     * <p>第 6 步用 {@code hasCultivator} 而不是数一遍名单：「名额满」这件事由核侧名单兜住，
+     * 本类不认识 24（容量）也不认识 54（核库存），不去算满不满。
+     */
+    public static void serverTick(Level level, BlockPos pos, BlockState state, ControlTerminalBlockEntity terminal) {
+        if (level.isClientSide) {
+            return;
+        }
+        if (level.getGameTime() % FEED_INTERVAL_TICKS != 0) {
+            return;
+        }
+        if (terminal.mode() == Mode.OFF) {
+            return;
+        }
+        BlockPos corePos = terminal.corePos();
+        if (corePos == null) {
+            return;
+        }
+        if (!(level.getBlockEntity(corePos) instanceof OutpostCoreBlockEntity core)) {
+            return;
+        }
+        if (!core.hasCultivator(terminal.getBlockPos())) {
+            return;
+        }
+        if (!OutpostCoreBlockEntity.inRange(corePos, terminal.getBlockPos())) {
+            return;
+        }
+        // 显式映射：严禁用枚举序号当 Kind（两个枚举的序号不同）。
+        Link.Kind targetKind = terminal.mode() == Mode.CULTIVATOR
+                ? Link.Kind.CULTIVATOR
+                : Link.Kind.CROP_CONVERTER;
+        // 两条列表同长同下标：先取 cultivators()（会惰性清理），再取 kinds 快照，越界跳过而不是抛。
+        var machines = core.cultivators();
+        var kinds = core.cultivatorKinds();
+        int pairs = Math.min(machines.size(), kinds.size());
+        for (int index = 0; index < pairs; index++) {
+            if (kinds.get(index) != targetKind) {
+                continue;
+            }
+            feedOne(level, core, machines.get(index), terminal.mode());
+        }
+    }
+
+    /**
+     * 给<b>一台</b>机器投 1 个：类型对 → 按槽序扫核库存 → 机器自己的准入闸 → 取 1 个投进去 → 结束这一台。
+     *
+     * <p>准入判据只有机器的 {@code canInsert}（可用 ∧ 空槽 ∧ 准入，D-272）：本类不写物品白名单，
+     * 也不自己判空槽 —— 闸里已经先判槽空再查配方，短路顺序由机器保证。
+     *
+     * <p>扫满核库存（54 格）无一格通过就这台本轮不投，接着换下一台；投进一个立刻 {@code break}。
+     */
+    private static void feedOne(Level level, OutpostCoreBlockEntity core, BlockPos machinePos, Mode mode) {
+        BlockEntity blockEntity = level.getBlockEntity(machinePos);
+        CultivatorBlockEntity cultivator = blockEntity instanceof CultivatorBlockEntity found ? found : null;
+        CropConverterBlockEntity converter = blockEntity instanceof CropConverterBlockEntity found ? found : null;
+        // 类型必须与本模式匹配：培养器模式不碰转换器，反之亦然。
+        boolean matches = mode == Mode.CULTIVATOR ? cultivator != null : converter != null;
+        if (!matches) {
+            return;
+        }
+        for (int slot = 0; slot < core.getContainerSize(); slot++) {
+            ItemStack stack = core.getItem(slot);
+            boolean admitted = mode == Mode.CULTIVATOR
+                    ? cultivator.canInsert(stack)
+                    : converter.canInsert(stack);
+            if (!admitted) {
+                continue;
+            }
+            ItemStack one = core.removeItem(slot, 1);
+            if (mode == Mode.CULTIVATOR) {
+                cultivator.insert(one);
+            } else {
+                converter.insert(one);
+            }
+            break;
+        }
     }
 
     @Override

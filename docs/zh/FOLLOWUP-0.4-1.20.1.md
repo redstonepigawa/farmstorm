@@ -87,3 +87,24 @@ v0.3.0 期间 `runServer` 曾因**过期 classpath 缓存**起不来（详见 FU
 5. **检查器**：`python -X utf8 tools/verify_project.py`（本机 `python` 是 WindowsApps 占位 stub，
    用 DSH 自带的 3.x）。§1 的键清单已冻结在 `docs/zh/02-TECH-1.20.1.md` §2.1，本仓自洽；
    主线 `D:/project_farm/docs/zh` 存在时只做交叉核对。
+## FU-08 · 控制终端面板永远显示「未绑定」（v0.3.0 实测缺陷，**已修**）
+
+- **症状**（玩家实测）：终端与据点核心绑定成功后，右键打开的面板仍显示「未绑定」，两个模式按钮始终置灰。
+- **根因（两条，缺一不可）**：
+  1. **客户端读不到**：客户端菜单由 `MenuType` 的 `MenuSupplier` 构造，`ContainerLevelAccess` 是 `NULL`，
+     旧实现把 `ContainerData#get` 改成经 `access.evaluate` 现读 → 客户端恒返回 0。
+  2. **服务端发不出**：旧实现把 `ContainerData#set` 写成空实现；而原版同步链路是
+     `DataSlot#checkAndClearUpdateFlag`（服务端比对 `get` → 发包）→ 客户端收到后**用 `set` 回填**。
+     空实现把收到的值当场丢掉，于是两格永远是 0。
+  （08 号 §4.6 原文「两格的 `set` 都是空实现」就是这条缺陷的出处，已在同处加收口修正。）
+- **修法**：两格改成普通 `SimpleContainerData(2)`；`ControlTerminalMenu` 覆写 `broadcastChanges()`，
+  在 `super` 之前经 `access.evaluate` 把 `mode().ordinal()` 与「核侧是否认这一格」写进两格。
+  客户端那份 `access` 是 `NULL`，写格那一步在客户端自动跳过，只保留收到的值。**不新增网络包**（仍是 2 个）。
+- **配套日志**（`ControlTerminalBlock#setPlacedBy`，便于下次一眼分辨故障点）：
+  - `控制终端 <pos> 已绑定据点核心 <corePos>` —— 绑定成功；
+  - `控制终端 <pos> 未绑定：附近没有可用据点核心` —— `selectCore` 没选中（范围 / 归属 / 队伍）；
+  - `控制终端 <pos> 绑定失败：据点核心 <corePos> 名额已满或该格已登记` —— 核侧拒收。
+- **复核方式**：放一个终端 → 看 `logs/latest.log` 出现哪一行；再看面板状态行。
+  若日志是「已绑定」而面板仍显示「未绑定」，说明问题在屏幕侧（当前屏幕每帧读 `menu.bound()`，应已拿到同步值）。
+- **注意**：本轮只修了「状态到不了客户端」。若日志是「未绑定：附近没有可用据点核心」，
+  那是**另一个**问题（选核判据），需另开一条。

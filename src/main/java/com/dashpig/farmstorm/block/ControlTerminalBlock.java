@@ -1,5 +1,6 @@
 package com.dashpig.farmstorm.block;
 
+import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.blockentity.ControlTerminalBlockEntity;
 import com.dashpig.farmstorm.blockentity.OutpostCoreBlockEntity;
 import com.dashpig.farmstorm.menu.ControlTerminalMenu;
@@ -88,10 +89,17 @@ public class ControlTerminalBlock extends HorizontalDirectionalBlock implements 
         OutpostCoreBlockEntity core = OutpostCoreBlockEntity.selectCore(server, pos,
                 new TeamResolver.Owner(player.getUUID(), player.getScoreboardName()), null);
         if (core == null) {
-            return;                                   // 未绑定：不写 Core 键（缺键就是未绑定）
+            // 未绑定：不写 Core 键（缺键就是未绑定）。日志是为了让「面板显示未绑定」可区分是
+            // 「没选到核」还是「选到了但面板状态没同步」——这两种原因的修法完全不同。
+            Farmstorm.LOGGER.info("控制终端 {} 未绑定：附近没有可用据点核心", pos.toShortString());
+            return;
         }
         if (core.addCultivator(pos, Link.Kind.TERMINAL)) {
             terminal.setCore(core.getBlockPos());      // 先核侧、后终端侧
+            Farmstorm.LOGGER.info("控制终端 {} 已绑定据点核心 {}", pos.toShortString(), core.getBlockPos().toShortString());
+        } else {
+            Farmstorm.LOGGER.info("控制终端 {} 绑定失败：据点核心 {} 名额已满或该格已登记",
+                    pos.toShortString(), core.getBlockPos().toShortString());
         }
     }
 

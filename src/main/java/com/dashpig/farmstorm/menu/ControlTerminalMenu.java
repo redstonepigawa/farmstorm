@@ -5,7 +5,6 @@ import com.dashpig.farmstorm.blockentity.ControlTerminalBlockEntity.Mode;
 import com.dashpig.farmstorm.blockentity.OutpostCoreBlockEntity;
 import com.dashpig.farmstorm.registry.FarmstormBlocks;
 import com.dashpig.farmstorm.registry.FarmstormMenus;
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -22,9 +21,15 @@ import net.minecraft.world.item.ItemStack;
  * 两向搬运直接返回空表——0 槽菜单不会有 {@code QUICK_MOVE} 点击。不嵌核的 54 格，
  * 那等于第二个核存储界面（D-034 的否决项 7）。
  *
- * <p><b>状态走两格 {@code ContainerData}</b>（D-034）：格 0 是模式序号，格 1 是绑定状态。两格的
- * {@code get} 每次都经 {@link ContainerLevelAccess#evaluate} 现读终端方块实体（取不到返回 0 与 0），
- * {@code set} 是空实现——服务端是唯一真相，客户端不回写。这样不开第三个网络包。
+ * <p><b>状态走两格 {@code ContainerData}</b>（D-034）：格 0 是模式序号，格 1 是绑定状态。服务端每刻
+ * （{@link #broadcastChanges()}）把终端方块实体的真实状态写进这两格，再由原版的 {@code ContainerData}
+ * 同步链路推给客户端——不新增网络包。
+ *
+ * <p><b>为什么不能「只在客户端现读」</b>（v0.3.0 实测缺陷，已修）：客户端菜单是 {@code MenuType} 的
+ * {@code MenuSupplier} 造的，手里没有方块坐标，{@code access} 是 {@link ContainerLevelAccess#NULL}。
+ * 早期版本把 {@code get} 改成经 {@code access} 现读、把 {@code set} 改成空实现，结果是：
+ * 服务端算得再对也发不出去（原版用 {@code set} 回填收到的值，被空实现丢掉），客户端又只能读到 0 ——
+ * 于是**绑定成功的终端在面板上永远显示「未绑定」**，两个模式按钮也永远置灰。
  *
  * <p><b>构造必须带真实 {@code MenuType}</b>：{@code super(null, id)} 会让 {@link #getType()} 抛
  * {@code UnsupportedOperationException}（RT-015），而注册与开屏链路都要读它。
@@ -51,17 +56,7 @@ public class ControlTerminalMenu extends AbstractContainerMenu {
     public ControlTerminalMenu(int id, Inventory inventory, ContainerLevelAccess access) {
         super(FarmstormMenus.CONTROL_TERMINAL.get(), id);
         this.access = access;
-        this.data = new SimpleContainerData(DATA_COUNT) {
-            @Override
-            public int get(int index) {
-                return ControlTerminalMenu.this.readData(index);
-            }
-
-            /** 只往客户端推，不回写：服务端每刻现读，客户端读到的也是它自己那一份。 */
-            @Override
-            public void set(int index, int value) {
-            }
-        };
+        this.data = new SimpleContainerData(DATA_COUNT);
         this.addDataSlots(this.data);
     }
 
@@ -99,6 +94,27 @@ public class ControlTerminalMenu extends AbstractContainerMenu {
         return stillValid(this.access, player, FarmstormBlocks.CONTROL_TERMINAL.get());
     }
 
+    /**
+     * 每刻把服务端的真实状态写进两格，交给原版 {@code ContainerData} 同步链路推给客户端
+     * （{@code AbstractContainerMenu#broadcastChanges} → {@code DataSlot} → 原版数据包）。
+     * <p>客户端那份 {@code access} 是 {@link ContainerLevelAccess#NULL}，{@code evaluate} 直接返回默认值，
+     * 因此这里在客户端什么都不做，两格只保留服务端发来的值。
+     */
+    @Override
+    public void broadcastChanges() {
+        this.access.evaluate((level, pos) -> {
+            if (level.getBlockEntity(pos) instanceof ControlTerminalBlockEntity terminal) {
+                this.data.set(DATA_MODE, terminal.mode().ordinal());
+                this.data.set(DATA_BOUND, isBound(terminal) ? 1 : 0);
+            } else {
+                this.data.set(DATA_MODE, Mode.OFF.ordinal());
+                this.data.set(DATA_BOUND, 0);
+            }
+            return null;
+        }, null);
+        super.broadcastChanges();
+    }
+
     /** 当前模式（屏幕读这一格决定哪个按钮带选中框）。 */
     public Mode mode() {
         Mode[] modes = Mode.values();
@@ -109,25 +125,6 @@ public class ControlTerminalMenu extends AbstractContainerMenu {
     /** 绑定状态（屏幕读这一格决定两个按钮是否可点）。 */
     public boolean bound() {
         return this.data.get(DATA_BOUND) != 0;
-    }
-
-    /** 现读一格：取不到终端方块实体时两格都给 0（模式 {@code OFF}、未绑定）。 */
-    private int readData(int index) {
-        ControlTerminalBlockEntity terminal = this.terminal();
-        if (terminal == null) {
-            return 0;
-        }
-        return switch (index) {
-            case DATA_MODE -> terminal.mode().ordinal();
-            case DATA_BOUND -> isBound(terminal) ? 1 : 0;
-            default -> 0;
-        };
-    }
-
-    @Nullable
-    private ControlTerminalBlockEntity terminal() {
-        return this.access.evaluate((level, pos) ->
-                level.getBlockEntity(pos) instanceof ControlTerminalBlockEntity terminal ? terminal : null, null);
     }
 
     /** 绑定判据只有一条：核侧那条列表里有这一格（D-025：核侧是唯一真相，终端只有引用缓存）。 */

@@ -7,13 +7,14 @@ import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
 /**
- * 语言文件（TECH §7）：zh_cn 与 en_us 各 **321** 键（v0.2.3 口径，54 号 §7.5）。
+ * 语言文件（TECH §7）：zh_cn 与 en_us 各 **328** 键（v0.3.0 口径，64 号 D-258）。
  *
  * <p>键集完全一致由构造方式保证：两种语言都从同一张 {@link #ENTRIES} 表按列写盘，
- * 不存在「两份键各自维护」的可能。**条目构成（v0.2.3 / 54 号 §7.5 的按组复核，改表时必须同步本段）**：
- * **28** `item.` + **28** `block.` + **32** `advancements.` + **178** `farmstorm.configuration.`（= 175 server + 3 client）
- * + **13** `entity.farmstorm.` + **42** 其余（4 effect + 3 subtitles + 6 death + 20 tooltip + 1 villager + 1 gui
- * + 1 container + 1 itemGroup + 2 key + 3 command）= **321**（28 + 28 + 32 + 178 + 13 + 42）。
+ * 不存在「两份键各自维护」的可能。**条目构成（v0.3.0 / 64 号 D-258 的按组复核，改表时必须同步本段）**：
+ * **29** `item.` + **29** `block.` + **32** `advancements.` + **178** `farmstorm.configuration.`（= 175 server + 3 client）
+ * + **13** `entity.farmstorm.` + **47** 其余（4 effect + 3 subtitles + 6 death + 20 tooltip + 1 villager + 5 gui
+ * + 2 container + 1 itemGroup + 2 key + 3 command）= **328**（29 + 29 + 32 + 178 + 13 + 47）；
+ * 「其余 47」的逐项算式：4 + 3 + 6 + 20 + 1 + 5 + 2 + 1 + 2 + 3 = 47。
  *
  * <p>v0.1.1 的 Phase 30 加的正是那 **9** 条：3 条 {@code farmstorm.configuration.hud.*}（CLIENT config）、
  * 2 条 {@code key.farmstorm.core_hud.*}（键位描述）、1 条 {@code gui.farmstorm.core_hud.self}（「自己」标识）、
@@ -38,6 +39,8 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
  * v0.1.1 的 F-182 再加 **1** 条（{@code pumpkin_turret.bulletSpeed}，29 号 D-129），到 **316** 键。
  * v0.1.1 的 F-192 / F-197 再 **−2**：{@code farmstorm.configuration.farmland.limitPerPlayer} 随
  * {@code farmland} 整组删除、指令反馈键随整棵服务端指令树删除，到 **314** 键。
+ * v0.2.3 收到 321（54 号 §7.5 口径；v0.2.4 ~ v0.2.7 维持 321 不变），
+ * v0.3.0 的 F 系列再加 7 条（item 1 / block 1 / container 1 / gui 4），到 328 键。
  *
  * <p>中文名逐字照抄 plan0.0.1.txt（含全角标点）；英文名按 DEC C-10：注册 ID 的 Title Case。
  * 166 个 server config 键的路径与 {@code run/config/farmstorm-server.toml} 的段/键逐段对应，
@@ -177,6 +180,12 @@ public final class ModLangProvider extends LanguageProvider {
         plain(entries, "itemGroup.farmstorm.main", "农场风云", "Farmstorm");
         // ---- v0.2.0 的 1 条新 container 键（F-227 / D-166 / 36 号 §4.3.2 #3）----
         plain(entries, "container.farmstorm.outpost_core", "据点核心", "Outpost Core");
+        // ---- v0.3.0 的 1 条 container + 4 条 gui 键（F-339 / D-258）：面板标题 + 两条模式标签 + 两条状态行 ----
+        plain(entries, "container.farmstorm.control_terminal", "控制终端", "Control Terminal");
+        plain(entries, "gui.farmstorm.control_terminal.mode.cultivator", "培养模式", "Cultivate");
+        plain(entries, "gui.farmstorm.control_terminal.mode.converter", "转换模式", "Convert");
+        plain(entries, "gui.farmstorm.control_terminal.status.bound", "已绑定", "Bound");
+        plain(entries, "gui.farmstorm.control_terminal.status.unbound", "未绑定", "Not Bound");
         plain(entries, "tooltip.farmstorm.deployed_by", "部署者：%s", "Deployed by: %s");
         plain(entries, "tooltip.farmstorm.attached_face", "附着面：%s", "Attached face: %s");
         plain(entries, "tooltip.farmstorm.floating", "悬空", "Floating");

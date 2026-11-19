@@ -108,3 +108,21 @@ v0.3.0 期间 `runServer` 曾因**过期 classpath 缓存**起不来（详见 FU
   若日志是「已绑定」而面板仍显示「未绑定」，说明问题在屏幕侧（当前屏幕每帧读 `menu.bound()`，应已拿到同步值）。
 - **注意**：本轮只修了「状态到不了客户端」。若日志是「未绑定：附近没有可用据点核心」，
   那是**另一个**问题（选核判据），需另开一条。
+### FU-08 补记（2026-11-19 晚，同一缺陷的第二个坑）
+
+修「状态到不了客户端」时又踩了一个**自己在 `broadcastChanges()` 里引入的崩溃**，一起记下来：
+
+- **现象**：右键终端 → 面板仍显示「未绑定」，且 `latest.log` 里出现
+  `Failed to handle packet ServerboundUseItemOnPacket, suppressing error` +
+  `java.lang.NullPointerException` → `Optional.of` → `ContainerLevelAccess$2.m_6721_`：
+  `ControlTerminalMenu.m_38946_(ControlTerminalMenu.java:105)`。
+- **原因**：`ContainerLevelAccess.create(level, pos)` 的 `evaluate` 内部是 **`Optional.of(...)`**（不是
+  `ofNullable`），所以传给它的 lambda **绝不能返回 null**。修法里那个写两格状态的 lambda 写成 `return null;`
+  就在 `openMenu → addSlotListener → broadcastChanges` 时当场炸，服务端菜单没建起来，客户端两格仍是 0。
+- **正确写法**：lambda 返回一个非 null 的哑值（现用 `Boolean.TRUE`）；
+  或改成 `access.evaluate(fn)` 的单参形态 + `ifPresent`。
+- **判据**：全仓 `access.evaluate(...)` 只有三处（`OutpostCoreMenu:95` 返回 core/fallback、
+  `ControlTerminalMenu:78` 返回 boolean、`ControlTerminalMenu:105` 现返回 `Boolean.TRUE`），都非 null。
+- **日志取证**（玩家实测，1.20.1-Forge 47.4.28）：
+  `控制终端 -8, 56, 49 面板状态：Mode=OFF corePos=BlockPos{x=-11, y=56, z=49} 核方块实体在=true 核认这一格=true`
+  —— 这一行同时证明**绑定链路完全正常**，问题只在面板显示层。

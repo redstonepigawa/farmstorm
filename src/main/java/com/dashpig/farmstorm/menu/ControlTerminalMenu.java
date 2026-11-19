@@ -110,7 +110,10 @@ public class ControlTerminalMenu extends AbstractContainerMenu {
                 this.data.set(DATA_MODE, Mode.OFF.ordinal());
                 this.data.set(DATA_BOUND, 0);
             }
-            return null;
+            // 必须返回非 null：ContainerLevelAccess.create(...) 的 evaluate 用的是 Optional.of(...)，
+            // 返回 null 会当场抛 NullPointerException（实测：openMenu 里 addSlotListener → broadcastChanges
+            // 直接炸，面板拿不到服务端菜单，于是即使绑定成功也永远显示「未绑定」）。
+            return Boolean.TRUE;
         }, null);
         super.broadcastChanges();
     }

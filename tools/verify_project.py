@@ -64,6 +64,21 @@ def read(p: Path) -> str:
     return p.read_text(encoding="utf-8")
 
 
+# 1.20.1 移植工作区只带 00 ~ 11 号文档，主线（1.21.1）的 12 / 18 / 24 / 30 / 36 / 42 / 54 号不在本仓。
+# config 键集要按那些文档现算，所以缺哪份就回退到主线 docs/zh 读（作者口径：允许读 D:/project_farm）。
+DOC_FALLBACK_DIR = Path("D:/project_farm/docs/zh")
+
+
+def doc_path(root: Path, name: str) -> Path:
+    local = root / "docs/zh" / name
+    if local.exists():
+        return local
+    fallback = DOC_FALLBACK_DIR / name
+    if fallback.exists():
+        return fallback
+    raise FileNotFoundError(f"文档缺失：{local}（回退 {fallback} 也不存在）")
+
+
 def expected_config_keys(design: str) -> list[str]:
     start = design.index("#### 3.8.1")
     end = design.index("#### 3.8.6")
@@ -487,14 +502,14 @@ def main() -> int:
     all_java = "\n".join(read(f) for f in java.rglob("*.java")) if java.exists() else ""
 
     print("== 1. config：文档键集 vs 生成的 toml ==")
-    design = read(root / "docs/zh/01-DESIGN.md")
-    tech = read(root / "docs/zh/12-TECH-0.0.2.md")
-    tech3 = read(root / "docs/zh/18-TECH-0.0.3.md")
-    tech4 = root / "docs/zh/24-TECH-0.1.0.md"
-    tech5 = root / "docs/zh/30-TECH-0.1.1.md"
-    tech6 = root / "docs/zh/36-TECH-0.2.0.md"
-    tech7 = root / "docs/zh/42-TECH-0.2.1.md"
-    tech54 = root / "docs/zh/54-TECH-0.2.3.md"
+    design = read(doc_path(root, "01-DESIGN.md"))
+    tech = read(doc_path(root, "12-TECH-0.0.2.md"))
+    tech3 = read(doc_path(root, "18-TECH-0.0.3.md"))
+    tech4 = doc_path(root, "24-TECH-0.1.0.md")
+    tech5 = doc_path(root, "30-TECH-0.1.1.md")
+    tech6 = doc_path(root, "36-TECH-0.2.0.md")
+    tech7 = doc_path(root, "42-TECH-0.2.1.md")
+    tech54 = doc_path(root, "54-TECH-0.2.3.md")
     base = expected_config_keys(design)
     added = expected_config_keys_v002(tech)
     added3 = expected_config_keys_v003(tech3)

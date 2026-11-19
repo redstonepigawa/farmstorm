@@ -2,14 +2,21 @@ package com.dashpig.farmstorm.block;
 
 import com.dashpig.farmstorm.blockentity.ControlTerminalBlockEntity;
 import com.dashpig.farmstorm.blockentity.OutpostCoreBlockEntity;
+import com.dashpig.farmstorm.menu.ControlTerminalMenu;
 import com.dashpig.farmstorm.network.CultivatorLinkPayload.Link;
 import com.dashpig.farmstorm.team.TeamResolver;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -21,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * 控制终端方块（v0.3.0 按 D-259 新增）：注册面与方块实体创建面。
@@ -33,8 +41,8 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
  * <p>模式三态在方块实体侧（F-333 已落）；放置绑定已落（F-336），终端**不写 {@code onRemove}**：
  * 它没有内部槽位、无需掉落，核侧名单由 {@link OutpostCoreBlockEntity#pruneCultivators} 惰性清理；
  * 三个解绑出口（接替核改绑 / 清 {@code Core} 留原地 / 区块未加载保留）全在核的
- * {@code settleOnRemoval} 里，与方块类无关。{@code getTicker}（投料循环）归 F-340，
- * {@code getMenuProvider} / {@code useWithoutItem} 归 F-337。
+ * {@code settleOnRemoval} 里，与方块类无关。{@code getTicker}（投料循环）归 F-340；
+ * {@code getMenuProvider} / {@code useWithoutItem}（面板的开入口）已落地（F-337）。
  */
 public class ControlTerminalBlock extends BaseEntityBlock {
     /** 水平四向朝向（blockstate 的 y 旋转靠它）；默认值 north 由属性自身给出。 */
@@ -96,5 +104,43 @@ public class ControlTerminalBlock extends BaseEntityBlock {
         if (core.addCultivator(pos, Link.Kind.TERMINAL)) {  // 核侧先写成功
             terminal.setCore(core.getBlockPos());          // 再写终端侧缓存（顺序不可换）
         }
+    }
+
+    /**
+     * 控制终端面板的菜单（F-337 / D-273）：照 {@code OutpostCoreBlock#getMenuProvider} 的形态，
+     * {@code access} 指向终端自己那一格，两格数据由菜单在服务端读出（{@link ControlTerminalMenu#broadcastChanges}）。
+     * 标题键 {@code container.farmstorm.control_terminal}——本任务先写字面 key，语言键归 F-339。
+     */
+    @Nullable
+    @Override
+    protected MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
+        return new SimpleMenuProvider(
+                (id, inventory, player) -> new ControlTerminalMenu(id, inventory, ContainerLevelAccess.create(level, pos)),
+                Component.translatable("container.farmstorm.control_terminal"));
+    }
+
+    /**
+     * 右键开面板（F-337 / D-267 / 裁定 #14）：**不判归属、不判绑定、不判距离**，右键始终打开。
+     *
+     * <p>归属与绑定都在面板里体现（两格数据 + 按钮的可用性），不在开面板这一下挡住玩家；
+     * 距离由菜单每次 tick 的 {@code stillValid} 承担（原版 4.0 距离缓冲）。
+     *
+     * <p>客户端只返回预测结果（HC-03）：手持方块返回 {@link InteractionResult#PASS}，把放置手感交回原版
+     * （D-245 的先例，同 {@code OutpostCoreBlock}）；否则 {@code SUCCESS}。服务端开菜单后返回 {@code CONSUME}。
+     */
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
+                                               BlockHitResult hit) {
+        if (level.isClientSide) {
+            return player.getMainHandItem().getItem() instanceof BlockItem
+                    ? InteractionResult.PASS
+                    : InteractionResult.SUCCESS;
+        }
+        MenuProvider provider = this.getMenuProvider(state, level, pos);
+        if (provider == null) {
+            return InteractionResult.PASS;
+        }
+        player.openMenu(provider);
+        return InteractionResult.CONSUME;
     }
 }

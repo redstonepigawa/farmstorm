@@ -1,5 +1,6 @@
 package com.dashpig.farmstorm.block;
 
+import com.dashpig.farmstorm.Farmstorm;
 import com.dashpig.farmstorm.blockentity.ControlTerminalBlockEntity;
 import com.dashpig.farmstorm.blockentity.OutpostCoreBlockEntity;
 import com.dashpig.farmstorm.menu.ControlTerminalMenu;
@@ -18,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -71,6 +73,13 @@ public class ControlTerminalBlock extends BaseEntityBlock {
         builder.add(FACING);
     }
 
+    /** 放置时正面朝玩家：取水平方向的反向（照 1.20.1 同名方法与 {@code CropConverterBlock} 的手感）。 */
+    @Nullable
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return this.defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
+    }
+
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
@@ -115,10 +124,17 @@ public class ControlTerminalBlock extends BaseEntityBlock {
         OutpostCoreBlockEntity core = OutpostCoreBlockEntity.selectCore(server, pos,
                 new TeamResolver.Owner(player.getUUID(), player.getScoreboardName()), null);
         if (core == null) {
-            return;                                        // 未绑定：不写 Core 键（缺键就是未绑定）
+            // 未绑定：不写 Core 键（缺键就是未绑定）。日志让「面板显示未绑定」可区分是
+            // 「没选到核」还是「选到了但面板状态没同步」——这两种原因的修法完全不同。
+            Farmstorm.LOGGER.info("控制终端 {} 未绑定：附近没有可用据点核心", pos.toShortString());
+            return;
         }
         if (core.addCultivator(pos, Link.Kind.TERMINAL)) {  // 核侧先写成功
             terminal.setCore(core.getBlockPos());          // 再写终端侧缓存（顺序不可换）
+            Farmstorm.LOGGER.info("控制终端 {} 已绑定据点核心 {}", pos.toShortString(), core.getBlockPos().toShortString());
+        } else {
+            Farmstorm.LOGGER.info("控制终端 {} 绑定失败：据点核心 {} 名额已满或该格已登记",
+                    pos.toShortString(), core.getBlockPos().toShortString());
         }
     }
 
@@ -141,13 +157,17 @@ public class ControlTerminalBlock extends BaseEntityBlock {
      * <p>归属与绑定都在面板里体现（两格数据 + 按钮的可用性），不在开面板这一下挡住玩家；
      * 距离由菜单每次 tick 的 {@code stillValid} 承担（原版 4.0 距离缓冲）。
      *
-     * <p>客户端只返回预测结果（HC-03）：手持方块返回 {@link InteractionResult#PASS}，把放置手感交回原版
-     * （D-245 的先例，同 {@code OutpostCoreBlock}）；否则 {@code SUCCESS}。服务端开菜单后返回 {@code CONSUME}。
+     * <p>客户端只返回预测结果（HC-03）：<b>潜行</b>或手持方块都返回 {@link InteractionResult#PASS}，把放置
+     * 手感交回原版（D-245 的先例，同 {@code OutpostCoreBlock}）；否则 {@code SUCCESS}。服务端开菜单后返回
+     * {@code CONSUME}，并在开之前打一条绑定诊断（见方法内的 INFO）。
      */
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hit) {
         if (level.isClientSide) {
+            if (player.isSecondaryUseActive()) {
+                return InteractionResult.PASS;             // 潜行：把手感交回原版，能贴着终端摆方块
+            }
             return player.getMainHandItem().getItem() instanceof BlockItem
                     ? InteractionResult.PASS
                     : InteractionResult.SUCCESS;
@@ -155,6 +175,16 @@ public class ControlTerminalBlock extends BaseEntityBlock {
         MenuProvider provider = this.getMenuProvider(state, level, pos);
         if (provider == null) {
             return InteractionResult.PASS;
+        }
+        // 面板一开就把「绑定到底卡在哪一步」打出来：corePos 缺 / 核方块实体在不在 / 核认不认这一格。
+        // 玩家看到的永远是「未绑定」三个字，这三项才说明原因（选核没选中 vs 核没登记 vs 客户端没同步）。
+        if (level.getBlockEntity(pos) instanceof ControlTerminalBlockEntity terminal) {
+            BlockPos corePos = terminal.corePos();
+            OutpostCoreBlockEntity core = corePos != null
+                    && level.getBlockEntity(corePos) instanceof OutpostCoreBlockEntity found ? found : null;
+            Farmstorm.LOGGER.info("控制终端 {} 面板状态：Mode={} corePos={} 核方块实体在={} 核认这一格={}",
+                    pos.toShortString(), terminal.mode(), corePos, core != null,
+                    core != null && core.hasCultivator(pos));
         }
         player.openMenu(provider);
         return InteractionResult.CONSUME;

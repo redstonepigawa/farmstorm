@@ -21,7 +21,8 @@ import net.minecraft.world.level.Level;
  * （裁定 Q1=A，覆盖 66 号 §4.6 / 68 号陷阱 14 的旧写法）：菜单自己持两格数据，服务端每次广播前
  * 先把值读出来写进去，再由原版链路发包——<b>不新增网络包，也不覆写 {@code ContainerData#get/set}</b>。
  * 客户端那份 {@code access} 是 {@link ContainerLevelAccess#NULL}，{@code evaluate} 直接返回兜底值，
- * 所以客户端一次都不会去碰方块实体；{@code mode()} / {@code bound()} 只读这两格数据，客户端安全。
+ * 所以客户端一次都不会去碰方块实体；{@code mode()}（返回枚举，越界回落 {@code OFF}）/ {@code bound()}
+ * 只读这两格数据，客户端安全。
  *
  * <p>两格语义：格 0 = 模式序号（{@link Mode#ordinal()}：OFF 0 / CULTIVATOR 1 / CONVERTER 2），
  * 格 1 = 绑定状态（1 = 已认定绑定，0 = 未绑定）。「绑定」不是读终端自己的 {@code Core} 缓存键，
@@ -56,9 +57,19 @@ public class ControlTerminalMenu extends AbstractContainerMenu {
         this.addDataSlots(this.data);
     }
 
-    /** 模式序号（{@link Mode#ordinal()}）；客户端可读。 */
-    public int mode() {
-        return this.data.get(DATA_MODE);
+    /**
+     * 当前模式（枚举）；客户端可读。
+     *
+     * <p>{@code data} 里存的仍是 {@link Mode#ordinal()}，这里做<b>边界安全</b>映射：格里的原始值
+     * 本该落在 {@code 0..Mode.values().length - 1}，万一不是（旧存档 / 未来的枚举增删），
+     * 回落 {@link Mode#OFF} 而不是抛 {@code ArrayIndexOutOfBoundsException} 把界面拖崩。
+     */
+    public Mode mode() {
+        int raw = this.data.get(DATA_MODE);
+        if (raw < 0 || raw >= Mode.values().length) {
+            return Mode.OFF;
+        }
+        return Mode.values()[raw];
     }
 
     /** 是否已认定绑定；客户端可读。 */

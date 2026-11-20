@@ -247,6 +247,9 @@
 
 - **目标**：给终端一条与培养器、转换器都不同的 3×3 配方。
 - **交付物**：`datagen/ModRecipeProvider.java`（图样 `GIG` / `IRI` / `GIG`，`G` = glass、`I` = iron_ingot、`R` = redstone，照 `cultivator` 方法并剥掉解锁进度）。
+
+> **〔v0.3.0 实施期变更 · 作者 2026-11-20 追改〕**
+> 现口径（C22）：配方图样由作者于 2026-11-20 改定为 **`IGI` / `IRI` / `IQI`** —— 左右两列都是 `iron_ingot`，中列自上而下 `glass` / `redstone` / `nether_quartz`，即 **6 铁锭 + 1 玻璃 + 1 红石粉 + 1 下界石英**，产出仍 1 个；与培养器 `IGI`/`GRG`/`IGI`、转换器 `III`/`GRG`/`III` 仍两两不同。实现见 `datagen/ModRecipeProvider.java` 的 `controlTerminal(...)`；本条其余论述（剥掉解锁进度、20 条算式、三者两两不同）全部不变。
 - **验收断言**：配方 JSON 从 **25 → 26**；按 `GIG`/`IRI`/`GIG` 摆 → 出 **1** 个控制终端；按 `IGI`/`GRG`/`IGI` 摆 → 仍出 **1** 个农作物培养器（两条不串）。
 - **依赖**：F-331。
 - **回滚影响**：无。

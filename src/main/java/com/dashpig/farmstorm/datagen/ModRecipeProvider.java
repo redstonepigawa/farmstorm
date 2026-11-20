@@ -55,7 +55,7 @@ public final class ModRecipeProvider extends RecipeProvider {
         compressedPuffedWheat(recipeOutput);
         // 据点核心是工作台 3×3 配方（D-122 第 3 条）：没有获得途径就没有核心，第 2 个上限也就无从生效
         outpostCore(recipeOutput);
-        // 控制终端是工作台 3×3 配方（D-268）：四角玻璃、四边铁锭、正中红石，图样与培养器逐格不同
+        // 控制终端是工作台 3×3 配方（D-268，图样按作者 2026-11-20 的改动）：六铁锭 + 一玻璃 + 一红石 + 一下界石英
         controlTerminal(recipeOutput);
         // 1-8：作物本体（单向：原版 → 改良）
         oneWay(recipeOutput, "puffed_wheat", Items.WHEAT, FarmstormItems.PUFFED_WHEAT);
@@ -131,11 +131,12 @@ public final class ModRecipeProvider extends RecipeProvider {
     }
 
     /**
-     * D-268 / F-346：有序 3 × 3，四角 {@code minecraft:glass}、四边 {@code minecraft:iron_ingot}、
-     * 正中一格 {@code minecraft:redstone}，产出 1 个控制终端 —— 即 4 玻璃 + 4 铁锭 + 1 红石粉。
+     * D-268 / F-346：有序 3 × 3 —— 左列与右列都是 {@code minecraft:iron_ingot}，中列自上而下是
+     * {@code minecraft:glass} / {@code minecraft:redstone} / {@code minecraft:nether_quartz}，
+     * 产出 1 个控制终端 —— 即 6 铁锭 + 1 玻璃 + 1 红石粉 + 1 下界石英。
      *
-     * <p>图样必须与既有两台机器逐格不同：培养器 {@code IGI} / {@code GRG} / {@code IGI}，
-     * 转换器 {@code III} / {@code GRG} / {@code III}，本条 {@code GIG} / {@code IRI} / {@code GIG} ——
+     * <p>图样 {@code IGI} / {@code IRI} / {@code IQI}（作者 2026-11-20 改定）必须与既有两台机器逐格不同：
+     * 培养器 {@code IGI} / {@code GRG} / {@code IGI}，转换器 {@code III} / {@code GRG} / {@code III} ——
      * 三者两两不同。同料同图样的两条 {@code crafting_shaped} 共存时，合成台只会稳定命中其中一条（D-268）。
      *
      * <p>同样剥掉配方解锁进度（{@link #recipeWithoutAdvancement}）：本 Provider 只产配方 JSON，
@@ -146,9 +147,10 @@ public final class ModRecipeProvider extends RecipeProvider {
                 .define('G', Items.GLASS)
                 .define('I', Items.IRON_INGOT)
                 .define('R', Items.REDSTONE)
-                .pattern("GIG")
+                .define('Q', Items.QUARTZ)
+                .pattern("IGI")
                 .pattern("IRI")
-                .pattern("GIG")
+                .pattern("IQI")
                 .unlockedBy("has_glass", has(Items.GLASS))
                 .save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("control_terminal"));
     }

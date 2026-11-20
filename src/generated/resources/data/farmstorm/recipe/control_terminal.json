@@ -8,14 +8,17 @@
     "I": {
       "item": "minecraft:iron_ingot"
     },
+    "Q": {
+      "item": "minecraft:quartz"
+    },
     "R": {
       "item": "minecraft:redstone"
     }
   },
   "pattern": [
-    "GIG",
+    "IGI",
     "IRI",
-    "GIG"
+    "IQI"
   ],
   "result": {
     "count": 1,

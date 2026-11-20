@@ -122,6 +122,10 @@
 | 下 | `G`（玻璃） | `I`（铁锭） | `G`（玻璃） |
 
 - 即 `.pattern("GIG").pattern("IRI").pattern("GIG")`。
+
+> **〔v0.3.0 实施期变更 · 作者 2026-11-20 追改〕**
+> ~~原文：`.pattern("GIG").pattern("IRI").pattern("GIG")`~~
+> 现口径（C22）：`.pattern("IGI").pattern("IRI").pattern("IQI")`，并多一个 `.define('Q', Items.QUARTZ)`（下界石英）；材料 6 铁锭 + 1 玻璃 + 1 红石 + 1 石英，产出 1 个不变。
 - 材料总数与培养器相同（4 铁 + 4 玻璃 + 1 红石），但**图样必须与培养器的 `IGI` / `GRG` / `IGI` 不同**：两条 shaped 配方逐格相同只会稳定命中一条，做出培养器之后就再也做不出终端（D-268 的定稿理由）。旧稿的「四角铁、四边玻璃」正是因为与培养器逐格相同而被否决。
 - 解锁与保存：`.unlockedBy("has_glass", has(Items.GLASS))` + `.save(recipeWithoutAdvancement(recipeOutput), Farmstorm.id("control_terminal"))`——配方解锁进度被剥掉（`:176-193`），因此合成配方 4 + 1 = 5 而进度仍是 16（§1.2）。
 

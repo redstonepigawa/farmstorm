@@ -217,6 +217,10 @@
 
 - **编号**：D-268
 - **结论**：给控制终端一条有序 3×3 配方——**四角 `minecraft:glass`、四边 `minecraft:iron_ingot`、正中 `minecraft:redstone`**（图样 `GIG` / `IRI` / `GIG`），产出 1 个，并剥掉配方解锁进度。
+
+> **〔v0.3.0 实施期变更 · 作者 2026-11-20 追改 · 依据实机试配方**〕**
+> ~~原文：「四角 `minecraft:glass`、四边 `minecraft:iron_ingot`、正中 `minecraft:redstone`（图样 `GIG` / `IRI` / `GIG`）」~~
+> 现口径（C22）：配方图样由作者于 2026-11-20 改定为 **`IGI` / `IRI` / `IQI`** —— 左右两列都是 `iron_ingot`，中列自上而下 `glass` / `redstone` / `nether_quartz`，即 **6 铁锭 + 1 玻璃 + 1 红石粉 + 1 下界石英**，产出仍 1 个；与培养器 `IGI`/`GRG`/`IGI`、转换器 `III`/`GRG`/`III` 仍两两不同。实现见 `datagen/ModRecipeProvider.java` 的 `controlTerminal(...)`；本条其余论述（剥掉解锁进度、20 条算式、三者两两不同）全部不变。
 - **依据**：裁定 #8；`datagen/ModRecipeProvider.java:119-129`（培养器的 4 铁 4 玻璃 1 红石）与 `:97-107`（转换器的 6 铁 2 玻璃 1 红石）；`:176-193` 的 `recipeWithoutAdvancement`。
 - **落地位置**：`datagen/ModRecipeProvider.java`。
 - **补充**：**不能与培养器同图样**——培养器是 `IGI` / `GRG` / `IGI`（四角铁、四边玻璃），同料同图样的两条 `crafting_shaped` 共存时合成台只稳定命中其中一条。本条的 `GIG` / `IRI` / `GIG` 把四角与四边对调，材料总数不变（4 铁 + 4 玻璃 + 1 红石），与培养器、转换器（`III` / `GRG` / `III`）三者两两不同。**本文补充，作者可否决**：另一条路是换成 4 铁 + 4 玻璃 + 1 石英，但那要多一条「石英是屏幕」的设定，plan 没给。

@@ -455,6 +455,10 @@
 ### 81.4 出口判据
 
 1. **E-81-1 配方 JSON 26 与图样**：怎么验：数 `src\generated\resources\data\farmstorm\recipe` 的文件数与 `Select-String -Path src\main\java\com\dashpig\farmstorm\datagen\ModRecipeProvider.java -Pattern pattern`。通过的样子：**26** 个 JSON（21 + 5）；`GIG` / `IRI` / `GIG` 三个 pattern 各命中 **1**，产物是控制终端、数量 **1**。
+
+> **〔v0.3.0 实施期变更 · 作者 2026-11-20 追改〕**
+> ~~原文：`GIG` / `IRI` / `GIG` 三个 pattern 各命中 1~~
+> 现口径（C22）：`IGI` / `IRI` / `IQI` 三个 pattern 各命中 1（`IGI` 在文件里另有一处属培养器的 pattern 用法，故按「控制终端方法体内的三行」计）；配方 JSON 仍 **26**、产物仍控制终端 × 1。E-81-2 的对照也改成「按 `IGI/IRI/IQI` 摆出终端、按 `IGI/GRG/IGI` 摆出培养器」。
 2. **E-81-2 两条配方不串**：怎么验：按两种图样各合成一次。通过的样子：`GIG` / `IRI` / `GIG` 摆出 **1** 个控制终端；`IGI` / `GRG` / `IGI` 摆出 **1** 个农作物培养器；两次产物互不串。
 3. **E-81-3 进度仍 16（负向）**：怎么验：数 `src\generated\resources\data\farmstorm\advancement`。通过的样子：**16** 个 JSON（16 + 0 = **16**）——合成配方的解锁进度被 `recipeWithoutAdvancement` 剥掉。
 4. **E-81-4 战利品表 29 与掉落**：怎么验：数 `src\generated\resources\data\farmstorm\loot_table\blocks`，再用石镐挖一台控制终端。通过的样子：**29** 张（28 + 1）；掉落 **1** 个控制终端物品。
